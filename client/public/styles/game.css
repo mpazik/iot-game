@@ -1,0 +1,862 @@
+/*@import url("http://fonts.googleapis.com/css?family=Open+Sans:400,600");*/
+@import url("icon.css");
+
+.error {
+    color: #ff0700;
+}
+
+.highlight {
+    color: #f7d104;
+}
+
+button,
+.button {
+    background: linear-gradient(to bottom, #041561 5%, #03114f 100%);
+    color: #f7d104;
+    letter-spacing: 1px;
+    font-weight: bold;
+    padding: 5px 10px;
+    box-shadow: inset 0 1px 0 0 #41557d;
+    border: #f7d104 solid 1px;
+    border-radius: 3px;
+}
+
+select {
+    background: linear-gradient(to bottom, #041561 5%, #03114f 100%);
+    color: #f7d104;
+    box-shadow: inset 0 1px 0 0 #41557d;
+    border: #f7d104 solid 1px;
+    border-radius: 3px;
+    height: 26px;
+    font-weight: bold;
+}
+
+h1.app_state {
+    text-align: center;
+    margin-top: 10%;
+    font-size: 30pt;
+}
+
+button:hover,
+.button:hover {
+    color: #FFF;
+    border-color: #AAA;
+}
+
+#windows {
+    display: none;
+}
+
+.ui-widget {
+    font-size: 14px;
+    color: #aaa;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    border: #777777 solid 1px;
+}
+
+.ui-widget .ui-dialog-title-bar {
+    padding: 5px;
+    color: #f7d104;
+    letter-spacing: 1px;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    border-bottom: #777777 solid 1px;
+}
+
+.ui-widget .ui-dialog-title-bar .ui-dialog-title {
+    margin-left: 5px;
+}
+
+.ui-widget .ui-button {
+    background: linear-gradient(to bottom, #041561 5%, #03114f 100%);
+    color: #f7d104;
+    letter-spacing: 1px;
+    font-weight: bold;
+    padding: 5px 10px;
+    box-shadow: inset 0 1px 0 0 #41557d;
+}
+
+.ui-widget .ui-button .ui-state-hover {
+    border-color: #f7d104;
+    color: #f7d104;
+}
+
+.ui-widget .ui-button .ui-state-active {
+    color: #aaa;
+    border-color: #eee;
+}
+
+.ui-widget .ui-state-default {
+    border: #777 solid 1px;
+}
+
+.ui-widget .ui-state-hover {
+    color: #eee;
+    border-color: #eee;
+}
+
+.ui-widget .ui-state-active {
+    border-color: #f7d104;
+    color: #f7d104;
+}
+
+.ui-widget .ui-state-focus,
+.ui-widget .ui-button:focus {
+    outline: none;
+}
+
+.ui-widget .ui-dialog-title-bar-close {
+    width: 20px;
+    height: 20px;
+    float: right;
+    padding: 0;
+}
+
+.ui-widget .ui-accordion .ui-accordion-header {
+    padding: 4px 4px 4px 16px;
+    border-left: none;
+    border-right: none;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.ui-widget .ui-accordion .ui-accordion-content {
+    display: block;
+    padding: 0;
+}
+
+.ui-widget .ui-accordion ul {
+    list-style: none;
+    margin: 0;
+    padding: 0 5px 7px;
+}
+
+.ui-widget .ui-accordion li {
+    padding: 7px 4px 0;
+    cursor: pointer;
+    border-bottom: #777 solid 1px;
+}
+
+.ui-widget .ui-accordion li:hover {
+    color: #eee;
+    border-color: #eee;
+}
+
+.ui-widget .ui-accordion li.active {
+    border-color: #f7d104;
+    color: #f7d104;
+}
+
+.form-window {
+    display: none;
+    width: 320px;
+    margin: 100px auto;
+    padding: 30px;
+    color: #f7d104;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    border: #777777 solid 1px;
+}
+
+.form-window h2 {
+    color: #f7d104;
+    font-size: 28px;
+    margin-top: 0;
+}
+
+.form-window .field {
+    margin: 30px 0;
+}
+
+.form-window label {
+    font-size: 20px;
+    display: block;
+}
+
+.form-window input {
+    font-size: 20px;
+    display: block;
+    width: 316px;
+}
+
+.form-window button {
+    padding: 5px 20px;
+    font-size: 16px;
+}
+
+.form-window .a_button {
+    margin-top: 2px;
+    float: right;
+    font-size: 14px;
+}
+
+#trade .trade_item,
+#trade .trade_skill {
+    clear: both;
+    margin-bottom: 10px;
+    height: 50px;
+    color: #fff;
+    font-size: 18px;
+}
+
+#trade .trade_item > div,
+#trade .trade_skill > div {
+    float: left;
+}
+
+#trade .trade_name {
+    margin: 10px 0 10px 10px;
+    width: 130px;
+}
+
+#trade .trade_skill .trade_name {
+    margin: 0 0 0 10px;
+}
+
+#trade .trade_skill .trade_name :nth-child(2) {
+    color: #aaa;
+    font-size: 14px;
+}
+
+#trade .trade_price {
+    font-weight: bold;
+    margin: 11px;
+    width: 30px;
+    color: #f7d104;
+}
+
+#trade .trade_buy {
+    margin: 7px;
+}
+
+#skill {
+    padding: 0;
+}
+
+#skill #skill_list {
+    width: 200px;
+    height: 100%;
+    float: left;
+    overflow-y: auto;
+    border-right: 1px solid #777;
+    border-radius: 5px 0 0 5px;
+    background: none;
+}
+
+#skill #skill_list h3:first-child {
+    margin-top: 10px;
+}
+
+#skill #skill_recipe {
+    margin: 10px 0 0 20px;
+    float: left;
+    width: 370px;
+}
+
+#skill #skill_recipe a {
+    display: block;
+    margin: 2px 0;
+}
+
+#skill #skill_recipe .value {
+    padding-left: 5px;
+}
+
+#skill #skill_cost .hp {
+    color: #d10d0d;
+}
+
+#skill #skill_cost .sp {
+    color: #d4d405;
+}
+
+#skill #skill_cost .ep {
+    color: #1580c7;
+}
+
+#skill #skill_title {
+    width: 100%;
+    float: left;
+    margin-bottom: 10px;
+}
+
+#skill #skill_title #skill_recipe_icon {
+    float: left;
+    margin-right: 5px;
+}
+
+#skill #skill_title #skill_recipe_title {
+    margin: 2px 0;
+    font-size: 18px;
+    color: #fff;
+}
+
+#skill #skill_title #skill_rank {
+    padding-right: 30px;
+}
+
+#skill #skill_title #skill_rank span {
+    padding-left: 5px;
+}
+
+#skill #skill_exp {
+    height: 20px;
+    clear: both;
+}
+
+#skill #skill_exp .bar_text {
+    font-size: 14px;
+    line-height: 20px;
+}
+
+#skill #skill_exp .bar_progress {
+    width: 100%;
+    background: #07b900;
+    box-shadow: none;
+}
+
+#skill #skill_recipe_doit {
+    bottom: 10px;
+    right: 10px;
+    position: absolute;
+}
+
+#skill #skill_recipe_description h4 {
+    clear: both;
+}
+
+#skill #skill_recipe_description .icon-name {
+    margin: 0 8px 10px 0;
+}
+
+#inventory #money {
+    float: right;
+    margin: 10px 1px 0 0;
+}
+
+#inventory #money_icon {
+    border: #777 solid 1px;
+    border-radius: 3px;
+    width: 32px;
+    height: 32px;
+    background-position: 160px 64px !important;
+    background-size: 320px;
+    float: left;
+    margin-right: 5px;
+}
+
+#inventory #money_amount {
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 3px;
+    width: 90px;
+    padding: 5px 10px;
+    font-size: 18px;
+    color: #fff;
+    float: left;
+}
+
+#character #character_head {
+    margin-left: 100px;
+}
+
+#character #stats {
+    clear: both;
+    padding: 15px 6px 0 6px;
+}
+
+#character #stats > div {
+    padding: 5px;
+    width: 45%;
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 3px;
+}
+
+#character #stats > div > div {
+    color: #fff;
+    padding: 2px;
+}
+
+#character #stats #first_column {
+    float: left;
+}
+
+#character #stats #second_column {
+    float: right;
+}
+
+#character #stats .value {
+    color: #f7d104;
+    float: right;
+    font-weight: bold;
+}
+
+#help h3 {
+    margin: 0;
+}
+
+#help p {
+    margin: 3px 0 0 0;
+}
+
+#help .block {
+    float: left;
+    width: 100%;
+    margin-top: 12px;
+}
+
+#help .mouse_button {
+    background: url("../images/help.png") no-repeat;
+    width: 21px;
+    height: 30px;
+    float: left;
+    margin: 5px 10px 0 0;
+}
+
+#help #mouse_right_button {
+    background-position: -21px 0;
+}
+
+#help .key {
+    margin: 4px 0;
+    float: left;
+    width: 100%;
+}
+
+#help .key_frame {
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 3px;
+    float: left;
+    width: 26px;
+    font-size: 14px;
+    text-align: center;
+    padding: 6px 0;
+    margin-right: 5px;
+}
+
+#help #dont_show_again {
+    float: right;
+}
+
+#instances select {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    border: #777777 solid 1px;
+    color: #f7d104;
+    margin-bottom: 15px;
+}
+
+#instances option {
+    font-size: 14px !important;
+    padding: 5px;
+}
+
+.bar {
+    background: rgba(0, 0, 0, 0.3);
+    position: relative;
+    box-shadow: inset 0 2px 10px 0 #000;
+    border: #777 solid 1px;
+    border-radius: 5px;
+}
+
+.bar .bar_progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    box-shadow: inset 0 2px 10px 0 rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.bar .bar_text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-shadow: 0 1px 3px #000;
+    font-size: 10px;
+    line-height: 11px;
+    color: #fff;
+    text-align: center;
+}
+
+.targeting {
+    cursor: pointer;
+}
+
+#interface {
+    color: #ddd;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+#loading {
+    width: 100%;
+    height: 100%;
+}
+
+#centerBottom {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+}
+
+#centerBottom > div {
+    position: relative;
+    left: -50%;
+}
+
+#context_menu {
+    position: absolute;
+    top: 300px;
+    left: 500px;
+}
+
+#context_menu div {
+    position: absolute;
+    display: none;
+    width: 120px;
+    padding: 8px 0;
+    left: -60px;
+    top: -12.5px;
+    color: #f7d104;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 5px;
+}
+
+#context_menu div:hover {
+    color: #fff;
+    border: 1px solid #fff;
+}
+
+#context_menu #context_menu_name:hover {
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 5px;
+    color: #f7d104;
+}
+
+#context_menu #cm-0 {
+    left: -127px;
+    top: -52px;
+}
+
+#context_menu #cm-1 {
+    left: 8px;
+    top: -52px;
+}
+
+#context_menu #cm-2 {
+    left: 75px;
+}
+
+#context_menu #cm-3 {
+    left: 8px;
+    top: 28px;
+}
+
+#context_menu #cm-4 {
+    left: -127px;
+    top: 28px;
+}
+
+#context_menu #cm-5 {
+    left: -195px;
+}
+
+.notification {
+    font-size: 44px;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 30%;
+    color: #f7d104;
+    text-shadow: 0 0 4px #fff;
+}
+
+#server_message {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 30%;
+    font-weight: bold;
+    color: #c20101;
+    text-shadow: 0 0 4px #ff8287;
+    z-index: 200;
+    font-size: 24px;
+}
+
+#game_play_info {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 30%;
+    font-weight: bold;
+    color: #c20101;
+    text-shadow: 0 0 4px #ff8287;
+    z-index: 200;
+}
+
+#game_play_info #title {
+    display: none;
+    font-size: 24px;
+}
+
+#game_play_info #description {
+    display: none;
+    font-size: 16px;
+}
+
+@keyframes progressBarDown {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0;
+    }
+}
+
+#progressBar {
+    margin: 0 auto;
+    width: 300px;
+    height: 20px;
+    top: -120px;
+    background: rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 2px 10px 0 rgba(0, 0, 0, 0.5);
+}
+
+#progressBar .bar_progress {
+    height: 100%;
+    background: rgba(0, 40, 255, 0.3);
+    animation: progressBarDown linear;
+}
+
+#profiling {
+    width: 290px;
+    top: 1px;
+    right: 1px;
+    padding: 2px;
+    position: absolute;
+    color: #f7d104;
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 5px;
+}
+
+#profiling div {
+    float: left;
+    width: 90px;
+    margin: 3px;
+}
+
+#death_screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    text-align: center;
+    padding-top: 10%;
+}
+
+html,
+body,
+canvas {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+html {
+    overflow: hidden;
+    background: #156c99;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.49);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #fff;
+    font-weight: bold;
+}
+
+h4 {
+    margin: 10px 0 2px;
+}
+
+a {
+    color: #f7d104;
+}
+
+a:hover {
+    color: #fff;
+}
+
+div {
+    margin: 0;
+    padding: 0;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+.window {
+    border: 1px solid #777;
+    border-radius: 5px;
+    width: 400px;
+    height: 200px;
+    background: rgba(0, 0, 0, 0.7);
+    margin-top: 20%;
+    padding: 20px;
+}
+
+#game {
+    width: 100%;
+    height: 100%;
+}
+
+#game canvas {
+    width: 100%;
+    height: 100%;
+    background: #156c99;
+}
+
+#middle-bar {
+    position: absolute;
+    bottom: 1px;
+}
+
+#middle-bar #skill-bar {
+    float: left;
+    margin-right: 10px;
+}
+
+#middle-bar #menu-bar {
+    float: left;
+}
+
+#middle-bar #point-bars > div {
+    width: 49%;
+    height: 12px;
+    float: left;
+    margin-bottom: 2px;
+}
+
+#middle-bar #point-bars > div:nth-child(odd) {
+    margin-right: 1%;
+}
+
+#middle-bar #health_bar .bar_progress {
+    width: 100%;
+    background-color: #d10d0d;
+}
+
+#middle-bar #food_bar .bar_progress {
+    width: 100%;
+    background-color: #963702;
+}
+
+#middle-bar #stamina_bar .bar_progress {
+    width: 100%;
+    background-color: #d4d405;
+    box-shadow: inset 0 2px 10px 0 rgba(255, 255, 255, 0.4);
+}
+
+#middle-bar #energy_bar .bar_progress {
+    width: 100%;
+    background-color: #1580c7;
+}
+
+#middle-bar #sb-main_hand {
+    margin-right: 10px;
+}
+
+#middle-top-bar {
+    top: 0;
+    position: absolute;
+    left: 50%;
+}
+
+#middle-top-bar-content {
+    top: 0;
+    transform: translate(-50%);
+}
+
+#chat {
+    position: absolute;
+    width: 400px;
+    left: 1px;
+    bottom: 1px;
+    color: #fff;
+    font-size: 12px;
+}
+
+#chat .system {
+    color: #f7d104;
+}
+
+#chat .say {
+    color: #fff;
+}
+
+#chat .whisper {
+    color: #f56eff;
+}
+
+#chat #chat_messages {
+    display: none;
+    width: 100%;
+    height: 200px;
+    padding: 5px;
+    margin: 0;
+    list-style: none;
+    overflow-y: scroll;
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 5px;
+}
+
+#chat #chat_messages li {
+    margin: 5px 2px;
+}
+
+#chat #chat_textfield {
+    color: #fff;
+    width: 100%;
+    height: 20px;
+    margin-top: 6px;
+    padding: 0 5px;
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 5px;
+}
+
+.center {
+    text-align: center;
+}

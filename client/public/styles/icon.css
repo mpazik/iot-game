@@ -1,0 +1,104 @@
+.icon {
+    position: relative;
+    text-align: right;
+    width: 48px;
+    height: 48px;
+    font-size: 14px;
+    line-height: 14px;
+    text-shadow: -1px 1px 2px #000000;
+    color: #777;
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 3px;
+    float:  left;
+}
+
+.icon.disabled {
+    opacity: 0.4;
+}
+
+.icon-sys {
+    background-image: url("../images/system-icons.png") !important;
+    border: #eee solid 1px !important;
+}
+
+.icon:hover,
+.icon-sys:hover {
+    border-color: #CCC !important;
+    cursor: pointer;
+}
+
+.icon.active {
+    border: #CCC solid 1px;
+    box-shadow: 0 0 10px #fff;
+}
+
+.icon.none:hover,
+.icon.disabled:hover {
+    border-color: #777 !important;
+}
+
+.icon > div:hover {
+    cursor: pointer;
+}
+
+.icon-name {
+    float: left;
+    border: 1px solid #333;
+    width: 170px;
+    padding: 2px;
+    margin: 5px;
+    font-size: 14px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 3px;
+}
+
+.icon-name .icon,
+.icon-name .icon-socket {
+    float: left;
+    margin-right: 6px;
+}
+
+.icon-name .icon div,
+.icon-name .icon-socket div {
+    background: none;
+}
+
+.sys-inventory {
+    background-position: 0 0 !important;
+}
+
+.sys-skill {
+    background-position: -48px 0 !important;
+}
+
+.sys-character {
+    background-position: -96px 0 !important;
+}
+
+.sys-settings {
+    background-position: -144px 0 !important;
+}
+
+.sys-help {
+    background-position: -196px 0 !important;
+}
+
+.key-bind {
+    margin: 2px;
+}
+.quantity {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    color: #fff;
+}
+#moving-icon {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    z-index: 1000;
+    pointer-events: none;
+    display: none;
+}

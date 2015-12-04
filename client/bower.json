@@ -1,0 +1,21 @@
+{
+  "name": "client",
+  "version": "0.0.0",
+  "homepage": "https://github.com/mpazik/dzida-online",
+  "authors": [
+    "Marek Pazik <poczta@marekpazik.pl>"
+  ],
+  "directory" : "public/components",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "pixi.js": "pixi#~3.0.7",
+    "requirejs": "~2.1.20",
+    "requirejs-react-jsx": "~0.14.2"
+  }
+}

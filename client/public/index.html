@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dzida online!</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="styles/game.css">
+    <link rel="shortcut icon" type="image/png" href="images/favicon-experiment.ico">
+    <script data-main="src/main.js" src="components/requirejs/require.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<!--<script type="text/javascript">-->
+    <!--var socket;-->
+    <!--if (!window.WebSocket) {-->
+        <!--window.WebSocket = window.MozWebSocket;-->
+    <!--}-->
+    <!--if (window.WebSocket) {-->
+        <!--socket = new WebSocket("ws://localhost:7001/websocket/test/dupa?param=2342");-->
+        <!--socket.onmessage = function (event) {-->
+            <!--var ta = document.getElementById('responseText');-->
+            <!--ta.value = ta.value + '\n' + event.data-->
+        <!--};-->
+        <!--socket.onopen = function (event) {-->
+            <!--var ta = document.getElementById('responseText');-->
+            <!--ta.value = "Web Socket opened!";-->
+        <!--};-->
+        <!--socket.onclose = function (event) {-->
+            <!--var ta = document.getElementById('responseText');-->
+            <!--ta.value = ta.value + "Web Socket closed";-->
+        <!--};-->
+    <!--} else {-->
+        <!--alert("Your browser does not support Web Socket.");-->
+    <!--}-->
+
+    <!--function send(message) {-->
+        <!--if (!window.WebSocket) {-->
+            <!--return;-->
+        <!--}-->
+        <!--if (socket.readyState == WebSocket.OPEN) {-->
+            <!--socket.send(message);-->
+        <!--} else {-->
+            <!--alert("The socket is not open.");-->
+        <!--}-->
+    <!--}-->
+<!--</script>-->
+<!--<form onsubmit="return false;">-->
+    <!--<input type="text" name="message" value="Hello, World!">-->
+    <!--<input type="button" value="Send Web Socket Data" onclick="send(this.form.message.value)">-->
+    <!--<h3>Output</h3>-->
+    <!--<textarea id="responseText" style="width:500px;height:300px;"></textarea>-->
+<!--</form>-->
+
+
+<!--</body>-->
+</html>
