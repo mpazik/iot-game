@@ -31,14 +31,34 @@ define(function (require, exports, module) {
     function StatePublisher(value, callback) {
         this._value = value;
         this.listeners = [];
-        const newPublish = function (event) {
-            this._value = event;
-            publish.call(this, event);
+        this.stateListeners = [];
+        const newPublish = function (state) {
+            this._value = state;
+            publish.call(this, state);
+            var givenStateListeners = this.stateListeners[state];
+            if (givenStateListeners && givenStateListeners.length > 0) {
+                givenStateListeners.forEach(function (listener) {
+                    return listener(state);
+                });
+            }
         }.bind(this);
         callback(newPublish);
     }
 
     StatePublisher.prototype = StreamPublisher.prototype;
+    StatePublisher.subscribe = function (type, listener) {
+        if (!this.stateListeners[type]) {
+            this.stateListeners[type] = [];
+        }
+        this.stateListeners[type].push(listener);
+    };
+    StatePublisher.unsubscribe = function (type, listener) {
+        if (!this.stateListeners[type]) return;
+        var index = this.stateListeners[type].indexOf(listener);
+        this.stateListeners[type].splice(index, 1);
+    };
+
+
     Object.defineProperty(StatePublisher.prototype, "value", {
         get: function () {
             return this._value;
