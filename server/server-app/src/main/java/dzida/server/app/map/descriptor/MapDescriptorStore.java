@@ -10,15 +10,15 @@ import java.util.Optional;
 
 public class MapDescriptorStore {
 
-    Map<String, MapDescriptor> descriptors = ImmutableMap.of(
-            "eden", new Scenario("eden", ImmutableList.of()),
-            "small-island", new Scenario("small-island", ImmutableList.of(
-                    new Scenario.Spawn(new Position(19, 10), Npc.Fighter),
-                    new Scenario.Spawn(new Position(19, 14), Npc.Archer)
+    Map<String, Scenario> descriptors = ImmutableMap.of(
+            "eden", new OpenWorld("eden"),
+            "small-island", new Survival("small-island", ImmutableList.of(
+                    new Survival.Spawn(new Position(19, 10), Npc.Fighter),
+                    new Survival.Spawn(new Position(19, 14), Npc.Archer)
             ))
     );
 
-    public Optional<MapDescriptor> getDescriptor(String name) {
+    public Optional<Scenario> getDescriptor(String name) {
         return Optional.ofNullable(descriptors.get(name));
     }
 }

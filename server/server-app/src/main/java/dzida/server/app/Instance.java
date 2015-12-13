@@ -1,8 +1,8 @@
 package dzida.server.app;
 
 import com.google.common.collect.Lists;
-import dzida.server.app.map.descriptor.MapDescriptor;
 import dzida.server.app.map.descriptor.Scenario;
+import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
 import dzida.server.core.CharacterId;
@@ -52,10 +52,10 @@ class Instance {
 
     private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
 
-    public Instance(MapDescriptor mapDescriptor, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter) {
+    public Instance(Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter) {
         this.playerService = playerService;
-        instanceKey = mapDescriptor.getMapName();
-        WorldState worldState = new WorldStateStore().loadMap(mapDescriptor.getMapName());
+        instanceKey = scenario.getMapName();
+        WorldState worldState = new WorldStateStore().loadMap(scenario.getMapName());
         Map<Integer, Skill> skills = new SkillStore().loadSkills();
         positionStore = new PositionStoreImpl(worldState.getSpawnPoint());
 
@@ -82,15 +82,15 @@ class Instance {
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         aiService = new AiService(npcBehaviour);
 
-        if (mapDescriptor instanceof Scenario) {
-            Scenario scenario = (Scenario) mapDescriptor;
-            initNpcs(scenario.getSpawns());
+        if (scenario instanceof Survival) {
+            Survival survival = (Survival) scenario;
+            initNpcs(survival.getSpawns());
         }
 
         scheduler.schedulePeriodically(this::aiTick, 500, 500);
     }
 
-    private void initNpcs(List<Scenario.Spawn> spawns) {
+    private void initNpcs(List<Survival.Spawn> spawns) {
         spawns.stream().forEach(spawn -> addNpc(spawn.getPosition(), spawn.getBotType()));
     }
 

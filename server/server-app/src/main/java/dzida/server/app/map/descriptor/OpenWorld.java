@@ -1,9 +1,9 @@
 package dzida.server.app.map.descriptor;
 
-public class StedyMap implements MapDescriptor {
+public class OpenWorld implements Scenario {
     private final String mapName;
 
-    public StedyMap(String mapName) {
+    public OpenWorld(String mapName) {
         this.mapName = mapName;
     }
 
