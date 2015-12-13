@@ -13,6 +13,7 @@ define(function (require, exports, module) {
     const stage = new Pixi.Container();
     stage.addChild(container);
     const renderer = Pixi.autoDetectRenderer(width, height);
+    renderer.backgroundColor = 0x156c99;
 
     function resize() {
         width = window.innerWidth;
@@ -33,6 +34,10 @@ define(function (require, exports, module) {
 
     module.exports = {
         init: function (element) {
+            element.appendChild(renderer.view);
+            resize();
+        },
+        initWorld: function () {
             WorldRender.init();
             container.addChild(WorldRender.tilesLayer);
             container.addChild(WorldRender.eventLayer);
@@ -49,11 +54,9 @@ define(function (require, exports, module) {
             container.addChild(Projectiles.layer);
 
             //container.addChild(GameMap.gameHoveringObjectLayer)
-            element.appendChild(renderer.view);
-            resize();
             MainLoop.start();
         },
-        clean: function () {
+        cleanWorld: function () {
             MainLoop.stop();
             container.removeChildren();
         }

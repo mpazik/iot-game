@@ -38,7 +38,7 @@ define(function (require, exports, module) {
             var givenStateListeners = this.stateListeners[state];
             if (givenStateListeners && givenStateListeners.length > 0) {
                 givenStateListeners.forEach(function (listener) {
-                    return listener(state);
+                    return listener();
                 });
             }
         }.bind(this);
@@ -46,13 +46,13 @@ define(function (require, exports, module) {
     }
 
     StatePublisher.prototype = StreamPublisher.prototype;
-    StatePublisher.subscribe = function (type, listener) {
+    StatePublisher.prototype.subscribeState = function (type, listener) {
         if (!this.stateListeners[type]) {
             this.stateListeners[type] = [];
         }
         this.stateListeners[type].push(listener);
     };
-    StatePublisher.unsubscribe = function (type, listener) {
+    StatePublisher.prototype.unsubscribeState = function (type, listener) {
         if (!this.stateListeners[type]) return;
         var index = this.stateListeners[type].indexOf(listener);
         this.stateListeners[type].splice(index, 1);

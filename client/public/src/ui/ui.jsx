@@ -1,5 +1,4 @@
 define(function (require) {
-    const React = require('lib/react');
     const Profiling = require('jsx!./profiling');
     const ActionBar = require('jsx!./action-bar');
     const CooldownBar = require('jsx!./cooldown-bar');
@@ -123,7 +122,7 @@ define(function (require) {
 
         componentDidMount: function () {
             document.addEventListener('keydown', this._onKeyDown);
-            //document.addEventListener('mousedown', this._onMouseDown);
+            document.addEventListener('mousedown', this._onMouseDown);
             document.onclick = this._onMouseDown;
             Messages.messageToShowState.subscribe(this._serverMessageUpdate);
             MainPlayer.playerLiveState.subscribe(this._playerLiveUpdate);

@@ -25,12 +25,10 @@ define(function (require, exports, module) {
     const MessagesIds = require('../common/packet/messages').ids;
     const MainPlayer = require('../store/main-player');
     const network = new Network();
-
-    var address = 'ws://localhost:7001';
-    const nick = 'test' + Math.round(Math.random() * 100);
+    var userNick;
 
     function addNickToUrl(url) {
-        return url + "/?nick=" + nick;
+        return url + "/?nick=" + userNick;
     }
 
     var setState = null;
@@ -61,8 +59,7 @@ define(function (require, exports, module) {
             switch (networkState) {
                 case Network.State.DISCONNECTED:
                     network.state.unsubscribe(listener);
-                    address = data.address;
-                    connect();
+                    connect(data.address);
                     break;
             }
         };
@@ -90,30 +87,23 @@ define(function (require, exports, module) {
         network.sendCommands([new Commands.UseSkill(data.skillId, data.characterId)]);
     }
 
-    function start() {
-        loadGameAssets().then(() => {
-            connect();
-        });
-
-    }
-
-    function connect() {
+    function connect(address) {
         network.connect(addNickToUrl(address));
     }
 
     function disconnect() {
         network.disconnect();
-        Render.clean();
+        Render.cleanWorld();
     }
 
     function loadGameAssets() {
-        setState("loading game assets");
-        return ResourcesStore.load();
+        setState("loading-game-assets");
+        ResourcesStore.load().then(() => setState("ready-to-connect"));
     }
 
     function showGame() {
         setState('running');
-        Render.init(document.getElementById('game'));
+        Render.initWorld();
     }
 
     function error() {
@@ -126,9 +116,11 @@ define(function (require, exports, module) {
 
     module.exports = {
         state: statePublisher,
-        start: start,
-        reconnect: function () {
-            connect(address)
-        }
+        init: function (nick, gameElement) {
+            userNick = nick;
+            loadGameAssets();
+            Render.init(gameElement);
+        },
+        connect: connect
     };
 });

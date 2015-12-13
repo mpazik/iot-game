@@ -581,18 +581,6 @@ button:hover,
     text-shadow: 0 0 4px #fff;
 }
 
-#server_message {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    top: 30%;
-    font-weight: bold;
-    color: #c20101;
-    text-shadow: 0 0 4px #ff8287;
-    z-index: 200;
-    font-size: 24px;
-}
-
 #game_play_info {
     position: absolute;
     width: 100%;
@@ -614,56 +602,7 @@ button:hover,
     font-size: 16px;
 }
 
-@keyframes progressBarDown {
-    from {
-        width: 100%;
-    }
-    to {
-        width: 0;
-    }
-}
 
-#progressBar {
-    margin: 0 auto;
-    width: 300px;
-    height: 20px;
-    top: -120px;
-    background: rgba(0, 0, 0, 0.1);
-    box-shadow: inset 0 2px 10px 0 rgba(0, 0, 0, 0.5);
-}
-
-#progressBar .bar_progress {
-    height: 100%;
-    background: rgba(0, 40, 255, 0.3);
-    animation: progressBarDown linear;
-}
-
-#profiling {
-    width: 290px;
-    top: 1px;
-    right: 1px;
-    padding: 2px;
-    position: absolute;
-    color: #f7d104;
-    background: rgba(0, 0, 0, 0.7);
-    border: #777 solid 1px;
-    border-radius: 5px;
-}
-
-#profiling div {
-    float: left;
-    width: 90px;
-    margin: 3px;
-}
-
-#death_screen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    text-align: center;
-    padding-top: 10%;
-}
 
 html,
 body,
@@ -697,34 +636,6 @@ body {
     background: rgba(255, 255, 255, 0.49);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    color: #fff;
-    font-weight: bold;
-}
-
-h4 {
-    margin: 10px 0 2px;
-}
-
-a {
-    color: #f7d104;
-}
-
-a:hover {
-    color: #fff;
-}
-
-div {
-    margin: 0;
-    padding: 0;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-}
 
 .window {
     border: 1px solid #777;
@@ -745,67 +656,6 @@ div {
     width: 100%;
     height: 100%;
     background: #156c99;
-}
-
-#middle-bar {
-    position: absolute;
-    bottom: 1px;
-}
-
-#middle-bar #skill-bar {
-    float: left;
-    margin-right: 10px;
-}
-
-#middle-bar #menu-bar {
-    float: left;
-}
-
-#middle-bar #point-bars > div {
-    width: 49%;
-    height: 12px;
-    float: left;
-    margin-bottom: 2px;
-}
-
-#middle-bar #point-bars > div:nth-child(odd) {
-    margin-right: 1%;
-}
-
-#middle-bar #health_bar .bar_progress {
-    width: 100%;
-    background-color: #d10d0d;
-}
-
-#middle-bar #food_bar .bar_progress {
-    width: 100%;
-    background-color: #963702;
-}
-
-#middle-bar #stamina_bar .bar_progress {
-    width: 100%;
-    background-color: #d4d405;
-    box-shadow: inset 0 2px 10px 0 rgba(255, 255, 255, 0.4);
-}
-
-#middle-bar #energy_bar .bar_progress {
-    width: 100%;
-    background-color: #1580c7;
-}
-
-#middle-bar #sb-main_hand {
-    margin-right: 10px;
-}
-
-#middle-top-bar {
-    top: 0;
-    position: absolute;
-    left: 50%;
-}
-
-#middle-top-bar-content {
-    top: 0;
-    transform: translate(-50%);
 }
 
 #chat {

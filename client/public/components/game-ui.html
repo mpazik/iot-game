@@ -1,0 +1,141 @@
+<link rel="import" href="profiling-window.html">
+<link rel="import" href="skill-bar.html">
+<link rel="stylesheet" href="../styles/ui.css">
+<link rel="stylesheet" href="../styles/icon.css">
+<script src="../lib/requirejs/require.js"></script>
+<template id="game-ui">
+    <style>
+        profiling-window {
+            top: 1px;
+            right: 1px;
+        }
+    </style>
+    <profiling-window fps="0" rft="0" ping="0" x="0" y="0"></profiling-window>
+    <div id="center-bottom">
+        <div id="cooldown-bar">
+            <div class="progress-bar"></div>
+        </div>
+    </div>
+    <span id="server-message"></span>
+    <div id="death-screen">
+        <h1>Your character died.</h1>
+        <h3>They will respawn in <span id="death-screen-time-to-respawn"></span></h3>
+    </div>
+    <div id="middle-top-bar">
+        <div id="middle-top-bar-content"></div>
+    </div>
+    <div id="middle-bar">
+        <div id="action-bar">
+
+        </div>
+    </div>
+</template>
+<script>
+    (function (doc) {
+
+        function countLeft(width) {
+            const windowWidth = window.innerWidth;
+            return windowWidth / 2 - width / 2;
+        }
+
+        require(['src/store/main-player', 'components/middle-top-bar', 'src/store/cooldown-bar', 'src/store/server-messages'],
+                function (MainPlayer, middleTopBar, CooldownBar, Messages) {
+            document.registerElement('game-ui', {
+                prototype: Object.create(HTMLElement.prototype, {
+                    createdCallback: {
+                        value: function () {
+                            var main = doc.querySelector('#game-ui');
+                            var mainElement = document.importNode(main.content, true);
+                            this.appendChild(mainElement);
+                            this.profilingWindow = this.getElementsByTagName('profiling-window')[0];
+                        }
+                    },
+                    init: {
+                        value: function (game) {
+                            const ui = this;
+                            game.addEventListener('update-profile-stats', function (event) {
+                                const data = event.detail;
+                                ui.profilingWindow.setAttribute('fps', data.fps);
+                                ui.profilingWindow.setAttribute('rft', data.rft);
+                                ui.profilingWindow.setAttribute('ping', data.ping);
+                                ui.profilingWindow.setAttribute('x', data.x);
+                                ui.profilingWindow.setAttribute('y', data.y);
+                            });
+
+                            const skillBar = document.createElement("skill-bar");
+                            this.querySelector('#action-bar').appendChild(skillBar);
+                        }
+                    },
+                    attachedCallback: {
+                        value: function () {
+                            middleTopBar.init();
+                            this._handleResize();
+                            document.addEventListener('resize', this._handleResize);
+                            MainPlayer.playerLiveState.subscribe(this._playerLiveUpdate);
+                            CooldownBar.playerCooldown.subscribe(this._updateCooldown);
+                            Messages.messageToShowState.subscribe(this._serverMessageUpdate);
+                            document.getElementById('cooldown-bar').style.display = 'none';
+                            document.getElementById('death-screen').style.display = 'none';
+                        }
+                    },
+                    detachedCallback: {
+                        value: function () {
+                            document.removeEventListener('resize', this._handleResize);
+                            MainPlayer.playerLiveState.unsubscribe(this._playerLiveUpdate);
+                            CooldownBar.playerCooldown.unsubscribe(this._updateCooldown);
+                            Messages.messageToShowState.unsubscribe(this._serverMessageUpdate);
+                        }
+                    },
+                    _handleResize: {
+                        value: function () {
+                            const middleBar = document.getElementById('middle-bar');
+                            middleBar.style.left = countLeft(middleBar.offsetWidth) + 'px';
+
+                            const middleTopBar = document.getElementById('middle-top-bar');
+                            middleTopBar.style.left = countLeft(middleTopBar.offsetWidth) + 'px';
+                        }
+                    },
+                    _playerLiveUpdate: {
+                        value: function (live) {
+                            document.getElementById('death-screen').style.display = live ? 'none' : 'block';
+                            if (!live) {
+                                const timeToRespawnSpan =  document.getElementById('death-screen-time-to-respawn');
+                                var timeToRespawn = 4;
+                                function countDown() {
+                                    if (timeToRespawn > 0) {
+                                        setTimeout(countDown, 1000);
+                                    }
+                                    timeToRespawnSpan.innerText = timeToRespawn;
+                                    timeToRespawn -= 1;
+                                }
+                                countDown();
+
+                            }
+                        }
+                    },
+                    _updateCooldown: {
+                        value: function (state) {
+                            const cooldownBar = document.getElementById('cooldown-bar');
+                            if (state) {
+                                cooldownBar.style.display = 'block';
+                                const progressBar = document.querySelector('#cooldown-bar .progress-bar');
+                                progressBar.style.animationDuration = state.cooldown + 'ms';
+                            }else {
+                                cooldownBar.style.display = 'none';
+                            }
+                        }
+                    },
+                    _serverMessageUpdate: {
+                        value: function (message) {
+                            var serverMessage = document.getElementById('server-message');
+                            serverMessage.style.display = message ? 'block' : 'none';
+                            if (message) {
+                                serverMessage.innerText = message ;
+                            }
+                        }
+                    }
+                })
+            });
+        });
+    })(document.currentScript.ownerDocument);
+</script>

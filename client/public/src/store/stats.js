@@ -14,7 +14,7 @@ define(function (require, exports, module) {
 
     MainLoop.updateStatsStream.subscribe(function (loopStats) {
         var rft = Math.round(loopStats.renderingFrameTime * 1000) / 1000;
-        publishStats({fps: loopStats.fps, rft: rft, ping: 0, position: MainPlayer.position});
+        publishStats({fps: loopStats.fps, rft: rft, ping: 0, x: MainPlayer.position.x, y: MainPlayer.position.y});
     });
 
     module.exports = {

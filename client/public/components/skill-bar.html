@@ -1,0 +1,70 @@
+<link rel="import" href="action-socket.html">
+<script src="../lib/requirejs/require.js"></script>
+<script>
+    require(['src/store/action-bar', 'src/store/skill', 'src/component/dispatcher'], function (ActionBarStore, SkillStore, Dispatcher) {
+        const keyBinds = ['Q', 'W', 'E', 'R', '1', '2', '3', '4', '5'];
+
+        document.registerElement('skill-bar', {
+            prototype: Object.create(HTMLElement.prototype, {
+                createdCallback: {
+                    value: function () {
+                        this.classList.add('icon-socket-set');
+
+                        const skills = ActionBarStore.skills.map(function (id) {
+                            return SkillStore.skill(id);
+                        });
+                        this.activeSkill = ActionBarStore.activeState.value;
+                        const skillBar = this;
+                        skills.forEach(function (skill, index) {
+                            var socket = document.createElement('action-socket');
+                            if (skill) {
+                                socket.setAttribute('icon', skill.icon);
+                                socket.setAttribute('key', skill.id);
+
+                                if (index === skillBar.activeSkill) {
+                                    socket.setAttribute('active');
+                                }
+
+                                socket.addEventListener('action-triggered', function (event) {
+                                    const skill = SkillStore.skill(event.detail.key);
+                                    Dispatcher.userEventStream.publish({
+                                        type: 'skill-triggered',
+                                        skill: skill
+                                    });
+                                });
+                            }
+                            socket.setAttribute('keyBind', keyBinds[index]);
+                            skillBar.appendChild(socket);
+                        });
+                    }
+                },
+                attachedCallback: {
+                    value: function () {
+                        ActionBarStore.activeState.subscribe(this._updateActive.bind(this));
+                    }
+                },
+                attributeChangedCallback: {
+                    value: function (attrName, oldVal, newVal) {
+                    }
+                },
+                detachedCallback: {
+                    value: function () {
+                        ActionBarStore.activeState.unsubscribe(this._updateActive.bind(this));
+                    }
+                },
+                _updateActive: {
+                    value: function (active) {
+                        const sockets = this.getElementsByTagName('action-socket');
+                        if (this.activeSkill) {
+                            sockets[this.activeSkill].removeAttribute('active');
+                        }
+                        if (active) {
+                            this.activeSkill = active;
+                            sockets[active].setAttribute('active', 'active');
+                        }
+                    }
+                }
+            })
+        });
+    });
+</script>

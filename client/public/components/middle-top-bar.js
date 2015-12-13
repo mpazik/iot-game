@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const Dispatcher = require('../component/dispatcher');
+    const Dispatcher = require('../src/component/dispatcher');
 
     const id = 'middle-top-bar-content';
     var parent;
@@ -18,13 +18,14 @@ define(function (require, exports, module) {
     const joinBattleWindow = (() => {
         const element = document.createElement('div');
         element.innerHTML = `<select id="join-battle-select">
-            <option value="small-island">Small Island - Survival</option>
-        </select>`;
+    <option value="small-island">Small Island - Survival</option>
+</select>`;
         element.id = 'join-battle-window';
         element.className = 'window';
         element.onclick = function (event) {
             event.stopPropagation();
         };
+
         const button = document.createElement('button');
         button.id = 'join-battle-button';
         button.innerHTML = 'Join!';
@@ -57,10 +58,13 @@ define(function (require, exports, module) {
                 return joinBattleButton;
             case 'window':
                 var listener = event => {
-                    if (event.target.id != 'join-battle-window') {
-                        closeWindow();
-                        Dispatcher.userEventStream.unsubscribe('left-click', listener);
+                    if (event.target.id == 'join-battle-window' ||
+                        event.target.id == 'join-battle-select' ||
+                        event.target.id == 'join-battle-button') {
+                        return;
                     }
+                    closeWindow();
+                    Dispatcher.userEventStream.unsubscribe('left-click', listener);
                 };
                 Dispatcher.userEventStream.subscribe('left-click', listener);
                 return joinBattleWindow;

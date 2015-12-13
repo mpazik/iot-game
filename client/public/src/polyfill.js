@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+(function () {
     function polyfill(prototype, name, func) {
         if (!prototype[name]) {
             Object.defineProperty(prototype, name, {
@@ -168,4 +168,4 @@ define(function (require, exports, module) {
             callable(entry[1], entry[0])
         }
     };
-});
+})();

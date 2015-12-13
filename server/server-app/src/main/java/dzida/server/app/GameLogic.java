@@ -18,7 +18,7 @@ import java.util.Optional;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class GameLogic {
-    private static final int SPAWN_TIME = 1000;
+    private static final int SPAWN_TIME = 4000;
 
     private final Scheduler scheduler;
     private final PositionService positionService;

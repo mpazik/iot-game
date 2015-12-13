@@ -1,0 +1,72 @@
+<template id="action-socket">
+    <div>
+        <div class="key-bind"></div>
+    </div>
+</template>
+
+<script>
+    (function (doc) {
+        function onCharacterDown(character, func) {
+            return function (event) {
+                const eventCharacter = String.fromCharCode(event.keyCode);
+                if (eventCharacter == character) {
+                    func.call(this);
+                }
+            };
+        }
+
+        document.registerElement('action-socket', {
+            prototype: Object.create(HTMLElement.prototype, {
+                createdCallback: {
+                    value: function () {
+                        var main = doc.getElementById('action-socket');
+                        var mainElement = document.importNode(main.content, true);
+                        this.appendChild(mainElement);
+                        this.classList.add('icon');
+                    }
+                },
+                attachedCallback: {
+                    value: function () {
+                        this.classList.add(this.getAttribute('icon'));
+
+                        const active = this.getAttribute('active');
+                        if (this.getAttribute('active')) {
+                            this.classList.add('active');
+                        }
+
+                        const key = this.getAttribute('key');
+                        function action () {
+                            this.dispatchEvent(new CustomEvent('action-triggered', {detail: {key: key}}))
+                        }
+                        this.addEventListener('click', action);
+
+                        const keyBind = this.getAttribute('keyBind');
+                        if (keyBind) {
+                            this.keyListener = onCharacterDown(keyBind, action);
+                            this.getElementsByClassName('key-bind')[0].innerText = keyBind;
+                            document.addEventListener('keydown', this.keyListener.bind(this));
+                        }
+                    }
+                },
+                attributeChangedCallback: {
+                    value: function (attrName, oldVal, newVal) {
+                        if (attrName == 'active') {
+                            if (newVal) {
+                                this.classList.add('active');
+                            } else {
+                                this.classList.remove('active');
+                            }
+                        }
+                    }
+                },
+                detachedCallback: {
+                    value: function () {
+                        if (this.keyListener) {
+                            document.removeEventListener('keydown', this.keyListener);
+                        }
+                    }
+                }
+            })
+        });
+    })(document.currentScript.ownerDocument);
+</script>

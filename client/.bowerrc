@@ -1,5 +1,5 @@
 {
-  "directory": "public/components",
+  "directory": "public/lib",
   "analytics": true,
   "timeout": 120000
 }
