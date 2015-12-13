@@ -8,12 +8,14 @@ import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionService;
+import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 import dzida.server.core.skill.SkillService;
 import dzida.server.core.world.WorldService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class GameEventDispatcher {
@@ -24,12 +26,19 @@ public class GameEventDispatcher {
     private final CharacterService characterService;
     private final WorldService worldService;
     private final SkillService skillService;
+    private final Optional<SurvivalScenario> survivalScenario;
 
-    public GameEventDispatcher(PositionService positionService, CharacterService characterService, WorldService worldService, SkillService skillService) {
+    public GameEventDispatcher(
+            PositionService positionService,
+            CharacterService characterService,
+            WorldService worldService,
+            SkillService skillService,
+            Optional<SurvivalScenario> survivalScenario) {
         this.positionService = positionService;
         this.characterService = characterService;
         this.worldService = worldService;
         this.skillService = skillService;
+        this.survivalScenario = survivalScenario;
     }
 
     public void registerCharacter(Character character, Consumer<GameEvent> send) {
@@ -40,7 +49,7 @@ public class GameEventDispatcher {
 
     // I do not think that this should be here.
     public void sendInitialPacket(CharacterId characterId, PlayerId playerId) {
-        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState()));
+        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), survivalScenario.orElse(null)));
     }
 
     private Map<String, Object> getState() {
@@ -63,7 +72,6 @@ public class GameEventDispatcher {
             characterService.processEvent(gameEvent);
             positionService.processEvent(gameEvent);
             skillService.processEvent(gameEvent);
-
             eventPublisher.notify(gameEvent);
         });
     }
@@ -80,11 +88,13 @@ public class GameEventDispatcher {
         private final CharacterId characterId;
         private final PlayerId playerId;
         private final Map<String, Object> state;
+        private final SurvivalScenario scenario;
 
-        public InitialMessage(CharacterId characterId, PlayerId playerId, Map<String, Object> state) {
+        public InitialMessage(CharacterId characterId, PlayerId playerId, Map<String, Object> state, SurvivalScenario scenario) {
             this.characterId = characterId;
             this.playerId = playerId;
             this.state = state;
+            this.scenario = scenario;
         }
 
         public CharacterId getCharacterId() {
@@ -97,6 +107,10 @@ public class GameEventDispatcher {
 
         public Map<String, Object> getState() {
             return state;
+        }
+
+        public SurvivalScenario getScenario() {
+            return scenario;
         }
 
         @Override

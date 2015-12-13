@@ -30,7 +30,7 @@ public final class WebSocketServer {
 
         for (String instance : Configuration.getInitialInstances()) {
             container.startInstance(instance, (port) -> {
-            });
+            }, null);
         }
 
         container.shutdownGracefully();

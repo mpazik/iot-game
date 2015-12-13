@@ -16,7 +16,7 @@ public class InstanceFactory {
         this.arbiter = arbiter;
     }
 
-    public Optional<Instance> createInstance(String mapName, EventLoop eventLoop) {
-        return mapDescriptorStore.getDescriptor(mapName).map(mapDescriptor -> new Instance(mapDescriptor, eventLoop, playerService, arbiter));
+    public Optional<Instance> createInstance(String mapName, EventLoop eventLoop, Integer difficultyLevel) {
+        return mapDescriptorStore.getDescriptor(mapName, difficultyLevel).map(mapDescriptor -> new Instance(mapDescriptor, eventLoop, playerService, arbiter));
     }
 }

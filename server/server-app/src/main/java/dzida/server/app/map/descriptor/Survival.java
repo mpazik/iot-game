@@ -8,10 +8,12 @@ import java.util.List;
 public class Survival implements Scenario {
     private final String mapName;
     private final List<Spawn> spawns;
+    private final int difficultyLevel;
 
-    public Survival(String mapName, List<Spawn> spawns) {
+    public Survival(String mapName, int difficultyLevel, List<Spawn> spawns) {
         this.mapName = mapName;
         this.spawns = spawns;
+        this.difficultyLevel = difficultyLevel;
     }
 
     public List<Spawn> getSpawns() {
@@ -23,9 +25,12 @@ public class Survival implements Scenario {
         return mapName;
     }
 
+    public int getDifficultyLevel() {
+        return difficultyLevel;
+    }
+
     @Value
     public static class Spawn {
         private final Position position;
-        private final int botType;
     }
 }

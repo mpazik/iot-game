@@ -8,7 +8,7 @@ public class Arbiter {
         this.container = container;
     }
 
-    void startInstance(String instanceType, Container.StartInstanceCallback startInstanceCallback) {
-        container.startInstance(instanceType, startInstanceCallback);
+    void startInstance(String instanceType, Container.StartInstanceCallback startInstanceCallback, Integer difficultyLevel) {
+        container.startInstance(instanceType, startInstanceCallback, difficultyLevel);
     }
 }

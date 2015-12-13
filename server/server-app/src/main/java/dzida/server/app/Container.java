@@ -34,10 +34,10 @@ class Container {
         this.address = address;
     }
 
-    public void startInstance(String instanceType, StartInstanceCallback callback) {
+    public void startInstance(String instanceType, StartInstanceCallback callback, Integer difficultyLevel) {
         EventLoopGroup workerGroup = new NioEventLoopGroup(1);
         EventLoop eventLoop = workerGroup.next();
-        Optional<Instance> instance = instanceFactory.createInstance(instanceType, eventLoop);
+        Optional<Instance> instance = instanceFactory.createInstance(instanceType, eventLoop, difficultyLevel);
         if (!instance.isPresent()) {
             System.err.println("map descriptor is not valid: " + instanceType);
             return;

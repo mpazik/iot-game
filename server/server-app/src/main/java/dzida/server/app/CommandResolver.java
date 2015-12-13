@@ -18,8 +18,10 @@ import lombok.Value;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class CommandResolver {
@@ -64,8 +66,8 @@ public class CommandResolver {
     public List<GameEvent> dispatchPacket(CharacterId characterId, String payload, Consumer<GameEvent> send) {
         try {
             JsonArray messages = new Gson().fromJson(payload, JsonArray.class);
-            Iterable<JsonElement> iterable = messages::iterator;
-            return StreamSupport.stream(iterable.spliterator(), false).flatMap(element -> {
+            Stream<JsonElement> stream = StreamSupport.stream(((Iterable<JsonElement>) messages::iterator).spliterator(), false);
+            return stream.flatMap(element -> {
                 JsonArray message = element.getAsJsonArray();
                 int type = message.get(0).getAsNumber().intValue();
                 JsonElement data = message.get(1);
@@ -97,7 +99,9 @@ public class CommandResolver {
                 return Collections.emptyList();
             case JoinBattle:
                 String map = data.getAsJsonObject().get("map").getAsString();
-                arbiter.startInstance(map, address -> send.accept(new JoinToInstance(address.toString())));
+                JsonElement difficultyLevelJson = data.getAsJsonObject().get("difficultyLevel");
+                int difficultyLevel = Optional.ofNullable(difficultyLevelJson).map(JsonElement::getAsInt).orElse(1);
+                arbiter.startInstance(map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
                 return Collections.emptyList();
             default:
                 return Collections.emptyList();
