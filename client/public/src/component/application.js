@@ -70,9 +70,7 @@ define(function (require, exports, module) {
         if (live) {
             Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillCommand);
-            Dispatcher.userEventStream.subscribe('join-battle', (map) => {
-                network.sendCommands([new Commands.JoinBattle(map)])
-            });
+            Dispatcher.userEventStream.subscribe('join-battle', sendJoinBattle);
         } else {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillCommand);
@@ -87,6 +85,10 @@ define(function (require, exports, module) {
         network.sendCommands([new Commands.UseSkill(data.skillId, data.characterId)]);
     }
 
+    function sendJoinBattle(map) {
+        network.sendCommands([new Commands.JoinBattle(map)]);
+    }
+
     function connect(address) {
         network.connect(addNickToUrl(address));
     }
@@ -94,6 +96,9 @@ define(function (require, exports, module) {
     function disconnect() {
         network.disconnect();
         Render.cleanWorld();
+        Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
+        Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillCommand);
+        Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
     }
 
     function loadGameAssets() {

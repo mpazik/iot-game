@@ -42,9 +42,9 @@
 
                         const keyBind = this.getAttribute('keyBind');
                         if (keyBind) {
-                            this.keyListener = onCharacterDown(keyBind, action);
+                            this.keyListener = onCharacterDown(keyBind, action).bind(this);
                             this.getElementsByClassName('key-bind')[0].innerText = keyBind;
-                            document.addEventListener('keydown', this.keyListener.bind(this));
+                            document.addEventListener('keydown', this.keyListener);
                         }
                     }
                 },
