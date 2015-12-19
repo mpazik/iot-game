@@ -1,7 +1,7 @@
 package dzida.server.app;
 
 import com.google.common.collect.ImmutableMap;
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

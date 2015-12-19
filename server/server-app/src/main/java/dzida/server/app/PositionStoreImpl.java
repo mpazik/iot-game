@@ -1,6 +1,6 @@
 package dzida.server.app;
 
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.position.PositionStore;
 import dzida.server.core.position.model.Position;
 

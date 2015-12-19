@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;

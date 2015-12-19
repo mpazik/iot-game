@@ -1,6 +1,5 @@
 package dzida.server.core.character;
 
-import dzida.server.core.CharacterId;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
@@ -41,9 +40,7 @@ class CharacterServiceImpl implements CharacterService {
         whenTypeOf(gameEvent).is(CharacterSpawned.class).then(event -> {
             Character character = event.getCharacter();
             state.put(character.getId(), character);
-        }).is(CharacterDied.class).then(event -> {
-            state.remove(event.getCharacterId());
-        });
+        }).is(CharacterDied.class).then(event -> state.remove(event.getCharacterId()));
     }
 
     @Override

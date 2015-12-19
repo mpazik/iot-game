@@ -1,8 +1,8 @@
 package dzida.server.app;
 
 import com.google.common.collect.ImmutableMap;
-import dzida.server.core.CharacterId;
-import dzida.server.core.PlayerId;
+import dzida.server.core.character.CharacterId;
+import dzida.server.core.player.PlayerId;
 import dzida.server.core.basic.Publisher;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;

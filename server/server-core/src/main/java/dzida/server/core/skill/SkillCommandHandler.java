@@ -1,6 +1,6 @@
 package dzida.server.core.skill;
 
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.event.GameEvent;

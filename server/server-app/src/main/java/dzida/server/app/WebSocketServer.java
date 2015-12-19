@@ -1,6 +1,6 @@
 package dzida.server.app;
 
-import dzida.server.core.PlayerId;
+import dzida.server.core.player.PlayerId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;

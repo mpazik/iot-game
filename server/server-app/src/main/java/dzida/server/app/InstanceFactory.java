@@ -1,7 +1,7 @@
 package dzida.server.app;
 
 import dzida.server.app.map.descriptor.MapDescriptorStore;
-import dzida.server.core.PlayerService;
+import dzida.server.core.player.PlayerService;
 import io.netty.channel.EventLoop;
 
 import java.util.Optional;

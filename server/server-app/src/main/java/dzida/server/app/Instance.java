@@ -5,9 +5,9 @@ import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
-import dzida.server.core.CharacterId;
-import dzida.server.core.PlayerId;
-import dzida.server.core.PlayerService;
+import dzida.server.core.character.CharacterId;
+import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.PlayerService;
 import dzida.server.core.Scheduler;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
@@ -50,6 +50,7 @@ class Instance {
     private final Map<ChannelId, List<Object>> messagesToSend = new HashMap<>();
 
     private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
+    private final GameLogic gameLogic;
 
     public Instance(Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter) {
         this.playerService = playerService;
@@ -80,9 +81,13 @@ class Instance {
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
 
-        GameLogic gameLogic = new GameLogic(scheduler, gameEventDispatcher, positionService, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver);
+        this.gameLogic = new GameLogic(scheduler, gameEventDispatcher, positionService, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver);
+    }
+
+    public void start() {
         gameEventDispatcher.getEventPublisherBeforeChanges().subscribe(gameLogic::processEventBeforeChanges);
 
+        gameLogic.start();
     }
 
     private Optional<SurvivalScenario> createSurvivalScenario(Scenario scenario) {

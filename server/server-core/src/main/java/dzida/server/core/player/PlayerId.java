@@ -1,4 +1,4 @@
-package dzida.server.core;
+package dzida.server.core.player;
 
 public final class PlayerId {
     private final int id;

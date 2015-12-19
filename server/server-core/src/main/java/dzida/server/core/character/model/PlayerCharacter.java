@@ -1,7 +1,7 @@
 package dzida.server.core.character.model;
 
-import dzida.server.core.CharacterId;
-import dzida.server.core.PlayerId;
+import dzida.server.core.character.CharacterId;
+import dzida.server.core.player.PlayerId;
 
 public class PlayerCharacter implements Character {
     private final CharacterId id;

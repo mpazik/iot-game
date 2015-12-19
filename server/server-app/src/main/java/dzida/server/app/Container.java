@@ -1,7 +1,7 @@
 package dzida.server.app;
 
-import dzida.server.core.PlayerId;
-import dzida.server.core.PlayerService;
+import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.PlayerService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -42,6 +42,7 @@ class Container {
             System.err.println("map descriptor is not valid: " + instanceType);
             return;
         }
+        instance.get().start();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
