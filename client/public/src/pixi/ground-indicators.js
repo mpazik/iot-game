@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
     const Pixi = require('lib/pixi');
-    const TileSize = require('../component/configuration').tileSize;
+    const TileSize = require('configuration').tileSize;
     const Targeting = require('../component/targeting');
     const MainPlayer = require('../store/main-player');
     const Skills = require('../common/model/skills');

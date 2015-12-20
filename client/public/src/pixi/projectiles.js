@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
     const Pixi = require('lib/pixi');
-    const TileSize = require('../component/configuration').tileSize;
+    const TileSize = require('configuration').tileSize;
     const SkillStore = require('../store/skill');
     const Point = require('../unit/point');
     const Dispatcher = require('../component/dispatcher');
@@ -25,6 +25,7 @@ define(function (require, exports, module) {
                 layer.removeChild(animation.projectile);
                 return true;
             }
+            //noinspection JSPrimitiveTypeWrapperUsage
             animation.position = Point.interpolate(movedDistanceRatio, animation.position, targetPosition);
             animation.projectile.position.x = animation.position.x * TileSize;
             animation.projectile.position.y = animation.position.y * TileSize;

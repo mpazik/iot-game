@@ -6,7 +6,7 @@ define(function (require, exports, module) {
     const SkillStore = require('../store/skill');
     const Point = require('../unit/point');
     const CharacterModel = require('./model/character');
-    const TileSize = require('../component/configuration').tileSize;
+    const TileSize = require('configuration').tileSize;
     const Targeting = require('../component/targeting');
     const Skills = require('../common/model/skills');
     const Timer = require('../component/timer');

@@ -23,8 +23,14 @@
 
     (function (doc) {
         require.config({
+            shim: {
+                'configuration': {
+                    exports: 'Configuration'
+                }
+            },
             paths: {
-                "lib/pixi": "lib/pixi.js/bin/pixi"
+                "lib/pixi": "lib/pixi.js/bin/pixi",
+                "configuration": "src/configuration"
             }
         });
 
@@ -69,6 +75,7 @@
                         });
                         App.init(user, gameRender);
                         App.state.subscribe(function (state) {
+                            //noinspection JSClosureCompilerSyntax
                             game.dispatchEvent(new Event(state));
                         });
 
