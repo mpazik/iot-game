@@ -28,12 +28,14 @@ var GAME_UI;
         const uiFragmentsElement = gameUiElement.getElementsByClassName("ui-fragments")[0];
         const currentKeyBinds = new Map();
         const activeUiFragments = [];
+        const activeUiFragmentElements = new Map();
         var currentWindow = null;
+        var uiState = {};
 
         gameUiElement.addEventListener('ui-state-updated', (event) => updateState(event.detail));
         document.addEventListener('keydown', keyListener);
         defaultWindowKeyBinds.set(KeyCodes.ESC, showUi);
-        updateUiFragmentDisplay();
+        renderUiFragments();
         showUi();
 
         function keyListener(event) {
@@ -90,31 +92,65 @@ var GAME_UI;
             }
         }
 
-        function displayUiFragment(key) {
-            const uiFragment = uiFragmentsRegister.get(key);
+        function createUiFragmentElement(uiFragment) {
             const uiFragmentInstance = document.createElement(uiFragment.tagName);
-
             if (uiFragment.location === 'center') {
                 const centerWrapper = document.createElement('div');
                 centerWrapper.classList.add('center');
                 centerWrapper.appendChild(uiFragmentInstance);
-                uiFragmentsElement.appendChild(centerWrapper);
+                return centerWrapper
             } else {
-                // put directly to the ui element
-                uiFragmentsElement.appendChild(uiFragmentInstance);
+                return uiFragmentInstance
             }
-            activeUiFragments.push(key);
         }
 
-        function updateUiFragmentDisplay() {
-            const uiFragmentsToDisplay = [...uiFragmentsRegister.keys()].filter((fragment, key) => {
-                return !activeUiFragments.includes(key)
+        function displayUiFragment(fragmentKey) {
+            if (activeUiFragmentElements.has(fragmentKey)){
+                // ui fragment already displayed.
+                return;
+            }
+
+            const uiFragment = uiFragmentsRegister.get(fragmentKey);
+            const uiFragmentElement = createUiFragmentElement(uiFragment);
+
+            uiFragmentsElement.appendChild(uiFragmentElement);
+            activeUiFragmentElements.set(fragmentKey, uiFragmentElement);
+            activeUiFragments.push(fragmentKey);
+        }
+
+        function shouldDisplayUiFragment(fragmentKey) {
+            const requirements = uiFragmentsRegister.get(fragmentKey).requirements;
+            if (!requirements) return true;
+
+            return Object.keys(requirements).every(key => {
+                const requiredValue = requirements[key];
+                return uiState[key] === requiredValue;
+            });
+        }
+
+        function hideNotDisplayedUiFragments() {
+            const removedUiFragments = [...activeUiFragmentElements.keys()].filter(key => {
+                return !activeUiFragments.includes(key);
+            });
+            removedUiFragments.forEach(fragmentKey => {
+                const element = activeUiFragmentElements.get(fragmentKey);
+                uiFragmentsElement.removeChild(element);
+                activeUiFragmentElements.delete(fragmentKey)
+            });
+        }
+
+        function renderUiFragments() {
+            activeUiFragments.clear();
+            const uiFragmentsToDisplay = [...uiFragmentsRegister.keys()].filter((key) => {
+                return shouldDisplayUiFragment(key)
             });
             uiFragmentsToDisplay.forEach(displayUiFragment);
+            hideNotDisplayedUiFragments();
         }
 
         function updateState(state) {
-            console.log(state);
+            uiState = state;
+            renderUiFragments();
         }
 
         return {
@@ -131,7 +167,7 @@ var GAME_UI;
                 if (!currentWindow) {
                     setUiKeyBindings();
                 }
-                updateUiFragmentDisplay();
+                renderUiFragments();
             },
             showWindow: showWindow
         }

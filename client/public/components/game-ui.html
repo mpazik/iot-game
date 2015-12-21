@@ -88,8 +88,16 @@
                                         cancelable: true
                                     }));
 
-                                    const state = UiStateStore.state.value;
-                                    this._stateUpdated(state);
+                                    function updateState(state) {
+                                        //noinspection JSPotentiallyInvalidUsageOfThis
+                                        this.dispatchEvent(new CustomEvent("ui-state-updated", {
+                                            bubbles: false,
+                                            cancelable: false,
+                                            detail: state
+                                        }));
+                                    }
+                                    this._stateUpdated = updateState.bind(this);
+                                    this._stateUpdated(UiStateStore.state.value);
                                     UiStateStore.state.subscribe(this._stateUpdated)
                                 }
                             },
@@ -147,15 +155,6 @@
                                     if (message) {
                                         serverMessage.innerText = message;
                                     }
-                                }
-                            },
-                            _stateUpdated: {
-                                value: function (newState) {
-                                    this.dispatchEvent(new CustomEvent("ui-state-updated", {
-                                        bubbles: false,
-                                        cancelable: false,
-                                        detail: newState
-                                    }));
                                 }
                             }
                         })
