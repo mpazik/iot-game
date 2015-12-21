@@ -30,6 +30,7 @@ var GAME_UI;
         const activeUiFragments = [];
         var currentWindow = null;
 
+        gameUiElement.addEventListener('ui-state-updated', (event) => updateState(event.detail));
         document.addEventListener('keydown', keyListener);
         defaultWindowKeyBinds.set(KeyCodes.ESC, showUi);
         updateUiFragmentDisplay();
@@ -103,7 +104,6 @@ var GAME_UI;
                 uiFragmentsElement.appendChild(uiFragmentInstance);
             }
             activeUiFragments.push(key);
-
         }
 
         function updateUiFragmentDisplay() {
@@ -111,6 +111,10 @@ var GAME_UI;
                 return !activeUiFragments.includes(key)
             });
             uiFragmentsToDisplay.forEach(displayUiFragment);
+        }
+
+        function updateState(state) {
+            console.log(state);
         }
 
         return {

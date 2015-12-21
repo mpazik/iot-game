@@ -45,8 +45,8 @@
             return windowWidth / 2 - width / 2;
         }
 
-        require(['src/store/main-player', 'src/store/cooldown-bar', 'src/store/server-messages'],
-                function (MainPlayer, CooldownBar, Messages) {
+        require(['src/store/main-player', 'src/store/cooldown-bar', 'src/store/server-messages', 'src/store/ui-state'],
+                function (MainPlayer, CooldownBar, Messages, UiStateStore) {
                     document.registerElement('game-ui', {
                         prototype: Object.create(HTMLElement.prototype, {
                             createdCallback: {
@@ -82,10 +82,15 @@
                                     Messages.messageToShowState.subscribe(this._serverMessageUpdate);
                                     document.getElementById('cooldown-bar').style.display = 'none';
                                     document.getElementById('death-screen').style.display = 'none';
+
                                     this.dispatchEvent(new CustomEvent("game-ui attached", {
                                         bubbles: true,
                                         cancelable: true
                                     }));
+
+                                    const state = UiStateStore.state.value;
+                                    this._stateUpdated(state);
+                                    UiStateStore.state.subscribe(this._stateUpdated)
                                 }
                             },
                             detachedCallback: {
@@ -94,6 +99,7 @@
                                     MainPlayer.playerLiveState.unsubscribe(this._playerLiveUpdate);
                                     CooldownBar.playerCooldown.unsubscribe(this._updateCooldown);
                                     Messages.messageToShowState.unsubscribe(this._serverMessageUpdate);
+                                    UiStateStore.state.unsubscribe(this._stateUpdated);
                                 }
                             },
                             _handleResize: {
@@ -141,6 +147,15 @@
                                     if (message) {
                                         serverMessage.innerText = message;
                                     }
+                                }
+                            },
+                            _stateUpdated: {
+                                value: function (newState) {
+                                    this.dispatchEvent(new CustomEvent("ui-state-updated", {
+                                        bubbles: false,
+                                        cancelable: false,
+                                        detail: newState
+                                    }));
                                 }
                             }
                         })
