@@ -15,28 +15,28 @@ define(function (require, exports, module) {
         return element;
     })();
 
-    const joinBattleWindow = (() => {
-        const element = document.createElement('div');
-        element.innerHTML = `<select id="join-battle-select">
-    <option value="small-island">Small Island - Survival</option>
-</select>`;
-        element.id = 'join-battle-window';
-        element.className = 'window';
-        element.onclick = function (event) {
-            event.stopPropagation();
-        };
-
-        const button = document.createElement('button');
-        button.id = 'join-battle-button';
-        button.innerHTML = 'Join!';
-        button.onclick = function () {
-            const map = document.getElementById('join-battle-select').value;
-            Dispatcher.userEventStream.publish('join-battle', map);
-            setState({type: 'joining'})
-        };
-        element.appendChild(button);
-        return element;
-    })();
+//    const joinBattleWindow = (() => {
+//        const element = document.createElement('div');
+//        element.innerHTML = `<select id="join-battle-select">
+//    <option value="small-island">Small Island - Survival</option>
+//</select>`;
+//        element.id = 'join-battle-window';
+//        element.className = 'window';
+//        element.onclick = function (event) {
+//            event.stopPropagation();
+//        };
+//
+//        const button = document.createElement('button');
+//        button.id = 'join-battle-button';
+//        button.innerHTML = 'Join!';
+//        button.onclick = function () {
+//            const map = document.getElementById('join-battle-select').value;
+//            Dispatcher.userEventStream.publish('join-battle', map);
+//            setState({type: 'joining'})
+//        };
+//        element.appendChild(button);
+//        return element;
+//    })();
 
     const joining = (() => {
         const element = document.createElement('span');
@@ -45,7 +45,8 @@ define(function (require, exports, module) {
     })();
 
     function selectBattle() {
-        setState({type: 'window'})
+        //setState({type: 'window'})
+        GAME_UI.showWindow("join-battle-window");
     }
 
     function closeWindow() {
@@ -56,18 +57,18 @@ define(function (require, exports, module) {
         switch (state.type) {
             case 'normal':
                 return joinBattleButton;
-            case 'window':
-                var listener = event => {
-                    if (event.target.id == 'join-battle-window' ||
-                        event.target.id == 'join-battle-select' ||
-                        event.target.id == 'join-battle-button') {
-                        return;
-                    }
-                    closeWindow();
-                    Dispatcher.userEventStream.unsubscribe('left-click', listener);
-                };
-                Dispatcher.userEventStream.subscribe('left-click', listener);
-                return joinBattleWindow;
+            //case 'window':
+                //var listener = event => {
+                //    if (event.target.id == 'join-battle-window' ||
+                //        event.target.id == 'join-battle-select' ||
+                //        event.target.id == 'join-battle-button') {
+                //        return;
+                //    }
+                //    closeWindow();
+                //    Dispatcher.userEventStream.unsubscribe('left-click', listener);
+                //};
+                //Dispatcher.userEventStream.subscribe('left-click', listener);
+                //return joinBattleWindow;
             case 'joining':
                 return joining;
         }

@@ -1,0 +1,26 @@
+<script>
+    (function () {
+        document.registerElement('debug-window', {
+            prototype: Object.create(HTMLElement.prototype, {
+                createdCallback: {
+                    value: function () {
+                    }
+                },
+                attachedCallback: {
+                    value: function () {
+                    }
+                },
+                attributeChangedCallback: {
+                    value: function (attrName, oldVal, newVal) {
+                    }
+                },
+                detachedCallback: {
+                    value: function () {
+                    }
+                }
+            })
+        });
+
+        GAME_UI.registerWindow('debug-window', {});
+    })();
+</script>

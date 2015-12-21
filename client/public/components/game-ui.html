@@ -1,5 +1,7 @@
 <link rel="import" href="profiling-window.html">
 <link rel="import" href="skill-bar.html">
+<link rel="import" href="join-battle-window.html">
+<link rel="import" href="../extra/extra.html">
 <link rel="stylesheet" href="../styles/ui.css">
 <link rel="stylesheet" href="../styles/icon.css">
 <script src="../lib/requirejs/require.js"></script>
@@ -28,6 +30,10 @@
         <div id="action-bar">
 
         </div>
+    </div>
+    <div id="center">
+        <div id="window" class="area">
+    </div>
     </div>
 </template>
 <script>
@@ -76,6 +82,10 @@
                             Messages.messageToShowState.subscribe(this._serverMessageUpdate);
                             document.getElementById('cooldown-bar').style.display = 'none';
                             document.getElementById('death-screen').style.display = 'none';
+                            this.dispatchEvent(new CustomEvent("game-ui attached", {
+                                bubbles: true,
+                                cancelable: true
+                            }));
                         }
                     },
                     detachedCallback: {
@@ -93,6 +103,9 @@
 
                             const middleTopBar = document.getElementById('middle-top-bar');
                             middleTopBar.style.left = countLeft(middleTopBar.offsetWidth) + 'px';
+
+                            const window = document.getElementById('window');
+                            window.style.left = window.innerWidth/2 + 'px';
                         }
                     },
                     _playerLiveUpdate: {

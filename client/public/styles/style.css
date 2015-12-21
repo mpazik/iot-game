@@ -14,12 +14,7 @@ div {
     -webkit-user-select: none;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     color: #fff;
     font-weight: bold;
 }
@@ -36,7 +31,7 @@ a:hover {
     color: #fff;
 }
 
-.window {
+.area {
     position: absolute;
     color: #f7d104;
     background: rgba(0, 0, 0, 0.7);

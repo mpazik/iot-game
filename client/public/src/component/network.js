@@ -68,7 +68,6 @@ define(function (require, exports, module) {
     };
     Network.prototype.sendCommands = function (commands) {
         var data = PacketSerialization.serialize(commands);
-        console.debug("-> ", data);
         this.socket.send(data);
     };
     Network.prototype.disconnect = function () {
