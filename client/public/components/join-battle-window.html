@@ -30,7 +30,10 @@
             });
         });
         GAME_UI.registerWindow("join-battle-window", {
-            activateKeyBind: "J"
+            activateKeyBind: "J",
+            requirements: {
+                playerAlive: true
+            }
         });
     })(document.currentScript.ownerDocument);
 </script>

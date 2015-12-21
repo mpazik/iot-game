@@ -29,14 +29,14 @@ var GAME_UI;
         const currentKeyBinds = new Map();
         const activeUiFragments = [];
         const activeUiFragmentElements = new Map();
-        var currentWindow = null;
+        var activeWindow = null;
         var uiState = {};
 
         gameUiElement.addEventListener('ui-state-updated', (event) => updateState(event.detail));
         document.addEventListener('keydown', keyListener);
-        defaultWindowKeyBinds.set(KeyCodes.ESC, showUi);
+        defaultWindowKeyBinds.set(KeyCodes.ESC, hideWindow);
         renderUiFragments();
-        showUi();
+        hideWindow();
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -47,17 +47,17 @@ var GAME_UI;
 
         function cleanWindow() {
             windowElement.style.display = 'none';
-            currentWindow = null;
+            activeWindow = null;
             windowElement.innerHTML = '';
         }
 
-        function showUi() {
+        function hideWindow() {
             cleanWindow();
             setUiKeyBindings();
         }
 
         function showWindow(key) {
-            if (currentWindow) {
+            if (activeWindow) {
                 cleanWindow();
             }
             const window = windowRegister.get(key);
@@ -65,7 +65,7 @@ var GAME_UI;
                 throw `window ${key} does not exists`;
             }
 
-            currentWindow = key;
+            activeWindow = key;
             setWindowKeyBindings(window);
 
             const windowInstance = document.createElement(window.tagName);
@@ -88,7 +88,7 @@ var GAME_UI;
                 });
             }
             if (window.activateKeyBind) {
-                currentKeyBinds.set(getCharCode(window.activateKeyBind), showUi);
+                currentKeyBinds.set(getCharCode(window.activateKeyBind), hideWindow);
             }
         }
 
@@ -118,16 +118,15 @@ var GAME_UI;
             activeUiFragments.push(fragmentKey);
         }
 
-        function shouldDisplayUiFragment(fragmentKey) {
-            const requirements = uiFragmentsRegister.get(fragmentKey).requirements;
+        function shouldDisplay(requirements) {
             if (!requirements) return true;
-
+            
             return Object.keys(requirements).every(key => {
                 const requiredValue = requirements[key];
                 return uiState[key] === requiredValue;
             });
         }
-
+        
         function hideNotDisplayedUiFragments() {
             const removedUiFragments = [...activeUiFragmentElements.keys()].filter(key => {
                 return !activeUiFragments.includes(key);
@@ -142,29 +141,40 @@ var GAME_UI;
         function renderUiFragments() {
             activeUiFragments.clear();
             const uiFragmentsToDisplay = [...uiFragmentsRegister.keys()].filter((key) => {
-                return shouldDisplayUiFragment(key)
+                const requirements = uiFragmentsRegister.get(key).requirements;
+                return shouldDisplay(requirements)
             });
             uiFragmentsToDisplay.forEach(displayUiFragment);
             hideNotDisplayedUiFragments();
+        }
+        
+        function renderWindow() {
+            if (activeWindow == null) return;
+
+            const window = windowRegister.get(activeWindow);
+            if (!shouldDisplay(window.requirements)) {
+                hideWindow();
+            }
         }
 
         function updateState(state) {
             uiState = state;
             renderUiFragments();
+            renderWindow();
         }
 
         return {
             refreshUiAfterRegisteringWindow: () => {
                 // window registration might have registered uiKeyBinds or defaultWindowKeyBinds, that's why we need to refresh keyBindings.
-                if (currentWindow) {
-                    setWindowKeyBindings(windowRegister.get(currentWindow))
+                if (activeWindow) {
+                    setWindowKeyBindings(windowRegister.get(activeWindow))
                 } else {
                     setUiKeyBindings();
                 }
             },
             refreshUiAfterRegisteringUiFragment: () => {
                 // window registration might have registered uiKeyBinds, that's why we need to refresh keyBindings.
-                if (!currentWindow) {
+                if (!activeWindow) {
                     setUiKeyBindings();
                 }
                 renderUiFragments();
