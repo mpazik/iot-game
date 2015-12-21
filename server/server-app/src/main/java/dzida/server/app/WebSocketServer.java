@@ -25,6 +25,9 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public final class WebSocketServer {
 
     public static void main(String[] args) throws IOException {
+        if (Configuration.isDevMode()) {
+            System.out.println("Server runs in DEV MODE!");
+        }
         int startPort = Configuration.getFirstInstancePort();
         Container container = new Container(startPort, Configuration.getContainerAddress());
 

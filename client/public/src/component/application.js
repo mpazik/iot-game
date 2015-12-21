@@ -126,6 +126,9 @@ define(function (require, exports, module) {
             loadGameAssets();
             Render.init(gameElement);
         },
-        connect: connect
+        connect: connect,
+        sendCommands: function(commands) {
+            network.sendCommands(commands)
+        }
     };
 });

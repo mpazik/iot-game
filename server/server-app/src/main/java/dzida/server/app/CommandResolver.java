@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
-import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterCommandHandler;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
@@ -34,6 +34,7 @@ public class CommandResolver {
     private static final int Ping = 4;
     private static final int PlayingPlayer = 5;
     private static final int TimeSync = 6;
+    private static final int Backdoor = 8;
 
     private final Gson serializer = Serializer.getSerializer();
     private final PositionCommandHandler positionCommandHandler;
@@ -41,6 +42,7 @@ public class CommandResolver {
     private final SkillCommandHandler skillCommandHandler;
     private final CharacterCommandHandler characterCommandHandler;
     private final Arbiter arbiter;
+    private final BackdoorCommandResolver backdoorCommandResolver;
 
     public CommandResolver(
             PositionCommandHandler positionCommandHandler,
@@ -53,6 +55,12 @@ public class CommandResolver {
         this.skillCommandHandler = skillCommandHandler;
         this.characterCommandHandler = characterCommandHandler;
         this.arbiter = arbiter;
+
+        if (Configuration.isDevMode()) {
+            backdoorCommandResolver = new BackdoorCommandResolver(serializer);
+        } else {
+            backdoorCommandResolver = BackdoorCommandResolver.NoOpResolver;
+        }
     }
 
     public List<GameEvent> createCharacter(Character character) {
@@ -103,6 +111,8 @@ public class CommandResolver {
                 int difficultyLevel = Optional.ofNullable(difficultyLevelJson).map(JsonElement::getAsInt).orElse(1);
                 arbiter.startInstance(map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
                 return Collections.emptyList();
+            case Backdoor:
+                return backdoorCommandResolver.resolveCommand(characterId, data, send);
             default:
                 return Collections.emptyList();
         }

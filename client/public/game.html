@@ -26,11 +26,15 @@
             shim: {
                 'configuration': {
                     exports: 'Configuration'
+                },
+                'game-ui': {
+                    exports: 'GAME_UI'
                 }
             },
             paths: {
                 "lib/pixi": "lib/pixi.js/bin/pixi",
-                "configuration": "src/configuration"
+                "configuration": "src/configuration",
+                "game-ui": "components/game-ui"
             }
         });
 

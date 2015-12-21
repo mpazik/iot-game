@@ -1,26 +1,38 @@
+<script src="../lib/requirejs/require.js"></script>
+<template id="debug-window">
+    <button id="kill-character"><b>K</b> - kill character</button>
+</template>
 <script>
-    (function () {
-        document.registerElement('debug-window', {
-            prototype: Object.create(HTMLElement.prototype, {
-                createdCallback: {
-                    value: function () {
-                    }
-                },
-                attachedCallback: {
-                    value: function () {
-                    }
-                },
-                attributeChangedCallback: {
-                    value: function (attrName, oldVal, newVal) {
-                    }
-                },
-                detachedCallback: {
-                    value: function () {
-                    }
-                }
-            })
-        });
+    (function (doc) {
+        require(['game-ui', 'src/component/application', 'src/common/packet/backdoor-commands'], function (GameUi, Application, Commands) {
+            function killCharacter() {
+                Application.sendCommands([Commands.killCharacter()]);
+            }
 
-        GAME_UI.registerWindow('debug-window', {});
-    })();
+            document.registerElement('debug-window', {
+                prototype: Object.create(HTMLElement.prototype, {
+                    createdCallback: {
+                        value: function () {
+                            var main = doc.getElementById("debug-window");
+                            var mainElement = document.importNode(main.content, true);
+                            this.appendChild(mainElement);
+                        }
+                    },
+                    attachedCallback: {
+                        value: function () {
+                            document.getElementById("kill-character").addEventListener("click", killCharacter);
+                        }
+                    }
+                })
+            });
+
+            GAME_UI.registerWindow("debug-window", {
+                activateKeyBind: "D",
+                keyBinds: {
+                    "K": killCharacter
+                }
+
+            });
+        });
+    })(document.currentScript.ownerDocument);
 </script>
