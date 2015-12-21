@@ -9,6 +9,7 @@ var GAME_UI;
 
     var gameUi;
     const windowRegister = new Map();
+    const uiFragmentsRegister = new Map();
     const uiKeyBinds = new Map();
     const defaultWindowKeyBinds = new Map();
 
@@ -23,12 +24,15 @@ var GAME_UI;
     }
 
     function initUi(gameUiElement) {
-        const windowElement = document.getElementById("window");
+        const windowElement = gameUiElement.getElementsByClassName("window")[0];
+        const uiFragmentsElement = gameUiElement.getElementsByClassName("ui-fragments")[0];
         const currentKeyBinds = new Map();
+        const activeUiFragments = [];
         var currentWindow = null;
 
         document.addEventListener('keydown', keyListener);
         defaultWindowKeyBinds.set(KeyCodes.ESC, showUi);
+        updateUiFragmentDisplay();
         showUi();
 
         function keyListener(event) {
@@ -85,11 +89,45 @@ var GAME_UI;
             }
         }
 
+        function displayUiFragment(key) {
+            const uiFragment = uiFragmentsRegister.get(key);
+            const uiFragmentInstance = document.createElement(uiFragment.tagName);
+
+            if (uiFragment.location === 'center') {
+                const centerWrapper = document.createElement('div');
+                centerWrapper.classList.add('center');
+                centerWrapper.appendChild(uiFragmentInstance);
+                uiFragmentsElement.appendChild(centerWrapper);
+            } else {
+                // put directly to the ui element
+                uiFragmentsElement.appendChild(uiFragmentInstance);
+            }
+            activeUiFragments.push(key);
+
+        }
+
+        function updateUiFragmentDisplay() {
+            const uiFragmentsToDisplay = [...uiFragmentsRegister.keys()].filter((fragment, key) => {
+                return !activeUiFragments.includes(key)
+            });
+            uiFragmentsToDisplay.forEach(displayUiFragment);
+        }
+
         return {
             refreshUiAfterRegisteringWindow: () => {
-                if (currentWindow == null) {
-                    setUiKeyBindings()
+                // window registration might have registered uiKeyBinds or defaultWindowKeyBinds, that's why we need to refresh keyBindings.
+                if (currentWindow) {
+                    setWindowKeyBindings(windowRegister.get(currentWindow))
+                } else {
+                    setUiKeyBindings();
                 }
+            },
+            refreshUiAfterRegisteringUiFragment: () => {
+                // window registration might have registered uiKeyBinds, that's why we need to refresh keyBindings.
+                if (!currentWindow) {
+                    setUiKeyBindings();
+                }
+                updateUiFragmentDisplay();
             },
             showWindow: showWindow
         }
@@ -118,10 +156,12 @@ var GAME_UI;
             if (typeof params == 'undefined') {
                 params = {};
             }
-            windowRegister.set(key, params);
             if (!params.tagName || !(params.tagName instanceof "string")) {
                 params.tagName = key
             }
+
+            windowRegister.set(key, params);
+
             if (params.activateKeyBind) {
                 var showWindow = createActivateWindowAction(key);
                 uiKeyBinds.set(getCharCode(params.activateKeyBind), showWindow);
@@ -129,6 +169,20 @@ var GAME_UI;
             }
             if (gameUi) {
                 gameUi.refreshUiAfterRegisteringWindow();
+            }
+        },
+        registerUiFragment: function (key, params) {
+            if (typeof params == 'undefined') {
+                params = {};
+            }
+            if (!params.tagName || !(params.tagName instanceof "string")) {
+                params.tagName = key
+            }
+
+            uiFragmentsRegister.set(key, params);
+
+            if (gameUi) {
+                gameUi.refreshUiAfterRegisteringUiFragment();
             }
         },
         showWindow

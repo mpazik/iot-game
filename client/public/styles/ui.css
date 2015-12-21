@@ -15,21 +15,24 @@ profiling-window div > span {
     padding-left: 2px;
 }
 
-#center {
+.center {
     left: 50%;
     position: absolute;
     top: 0;
 }
 
-#window {
+.center > * {
     position: relative;
-    top: 90px;
     left: -50%;
+}
+
+game-ui .window {
+    top: 90px;
     /* top: 0; */
     padding: 20px;
  }
 
-#window > * {
+game-ui .window > * {
     padding: 10px;
 }
 

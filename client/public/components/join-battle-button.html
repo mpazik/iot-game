@@ -1,36 +1,29 @@
 <script src="../lib/requirejs/require.js"></script>
-<template id="join-battle-window">
-    <select>
-        <option value="small-island">Small Island - Survival</option>
-    </select>
-    <button>Join!</button>
+<template id="join-battle-button">
+    <button>Join Battle!</button>
 </template>
 <script>
     (function (doc) {
-        require(['src/component/dispatcher'], function (Dispatcher) {
-            document.registerElement('join-battle-window', {
+            document.registerElement('join-battle-button', {
                 prototype: Object.create(HTMLElement.prototype, {
                     createdCallback: {
                         value: function () {
-                            var main = doc.getElementById("join-battle-window");
+                            var main = doc.getElementById("join-battle-button");
                             var mainElement = document.importNode(main.content, true);
                             this.appendChild(mainElement);
                         }
                     },
                     attachedCallback: {
                         value: function () {
-                            const select = this.getElementsByTagName('select')[0];
                             this.getElementsByTagName("button")[0].onclick = function () {
-                                const map = select.value;
-                                Dispatcher.userEventStream.publish('join-battle', map);
+                                GAME_UI.showWindow("join-battle-window");
                             };
                         }
                     }
                 })
             });
-        });
-        GAME_UI.registerWindow("join-battle-window", {
-            activateKeyBind: "J"
+        GAME_UI.registerUiFragment("join-battle-button", {
+            location: 'center'
         });
     })(document.currentScript.ownerDocument);
 </script>
