@@ -10,6 +10,7 @@ var GAME_UI;
     var gameUi;
     const windowRegister = new Map();
     const uiKeyBinds = new Map();
+    const defaultWindowKeyBinds = new Map();
 
     function getCharCode(key) {
         if (typeof key == "string" && key.length == 1) {
@@ -25,8 +26,10 @@ var GAME_UI;
         const windowElement = document.getElementById("window");
         const currentKeyBinds = new Map();
         var currentWindow = null;
+
         document.addEventListener('keydown', keyListener);
-        hideWindow();
+        defaultWindowKeyBinds.set(KeyCodes.ESC, showUi);
+        showUi();
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -35,29 +38,29 @@ var GAME_UI;
             }
         }
 
-        function hideWindow() {
+        function cleanWindow() {
             windowElement.style.display = 'none';
             currentWindow = null;
-            setUiKeyBindings();
             windowElement.innerHTML = '';
+        }
+
+        function showUi() {
+            cleanWindow();
+            setUiKeyBindings();
         }
 
         function showWindow(key) {
             if (currentWindow) {
-                hideWindow();
+                cleanWindow();
             }
             const window = windowRegister.get(key);
             if (!window) {
                 throw `window ${key} does not exists`;
             }
+
             currentWindow = key;
-            currentKeyBinds.clear();
-            if (window.keyBinds) {
-                Object.forEach(window.keyBinds, function (binding, key) {
-                    currentKeyBinds.set(getCharCode(key), binding)
-                });
-            }
-            currentKeyBinds.set(KeyCodes.ESC, hideWindow);
+            setWindowKeyBindings(window);
+
             const windowInstance = document.createElement(window.tagName);
             windowElement.appendChild(windowInstance);
             windowElement.style.display = 'block';
@@ -66,6 +69,20 @@ var GAME_UI;
         function setUiKeyBindings() {
             currentKeyBinds.clear();
             uiKeyBinds.forEach((binding, key) => currentKeyBinds.set(key, binding));
+        }
+
+        function setWindowKeyBindings(window) {
+            currentKeyBinds.clear();
+            defaultWindowKeyBinds.forEach((binding, key) => currentKeyBinds.set(key, binding));
+
+            if (window.keyBinds) {
+                Object.forEach(window.keyBinds, function (binding, key) {
+                    currentKeyBinds.set(getCharCode(key), binding)
+                });
+            }
+            if (window.activateKeyBind) {
+                currentKeyBinds.set(getCharCode(window.activateKeyBind), showUi);
+            }
         }
 
         return {
@@ -105,9 +122,10 @@ var GAME_UI;
             if (!params.tagName || !(params.tagName instanceof "string")) {
                 params.tagName = key
             }
-            var activateKeyBind = params.activateKeyBind;
-            if (activateKeyBind) {
-                uiKeyBinds.set(getCharCode(activateKeyBind), createActivateWindowAction(key));
+            if (params.activateKeyBind) {
+                var showWindow = createActivateWindowAction(key);
+                uiKeyBinds.set(getCharCode(params.activateKeyBind), showWindow);
+                defaultWindowKeyBinds.set(getCharCode(params.activateKeyBind), showWindow);
             }
             if (gameUi) {
                 gameUi.refreshUiAfterRegisteringWindow();

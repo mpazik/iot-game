@@ -4,7 +4,8 @@
 </template>
 <script>
     (function (doc) {
-        require(['game-ui', 'src/component/application', 'src/common/packet/backdoor-commands'], function (GameUi, Application, Commands) {
+        const GameUi = GAME_UI;
+        require(['src/component/application', 'src/common/packet/backdoor-commands'], function (Application, Commands) {
             function killCharacter() {
                 Application.sendCommands([Commands.killCharacter()]);
             }
@@ -26,7 +27,7 @@
                 })
             });
 
-            GAME_UI.registerWindow("debug-window", {
+            GameUi.registerWindow("debug-window", {
                 activateKeyBind: "D",
                 keyBinds: {
                     "K": killCharacter
