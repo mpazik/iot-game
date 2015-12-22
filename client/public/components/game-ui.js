@@ -66,18 +66,18 @@ define([], function () {
             });
 
             if (activeWindow != null) {
-                const window = windowRegister.get(activeWindow);
+                const uiWindow = windowRegister.get(activeWindow);
                 //noinspection AmdModulesDependencies
                 currentKeyBinds.set(KEY_CODES.ESC, hideWindow);
-                if (window.keyBinds) {
-                    window.keyBinds.forEach(function (entry) {
+                if (uiWindow.keyBinds) {
+                    uiWindow.keyBinds.forEach(function (entry) {
                         const key = entry[0];
                         const binding = entry[1];
                         currentKeyBinds.set(key, activeWindowElement[binding].bind(activeWindowElement))
                     });
                 }
-                if (window.activateKeyBind) {
-                    currentKeyBinds.set(window.activateKeyBind, hideWindow);
+                if (uiWindow.activateKeyBind) {
+                    currentKeyBinds.set(uiWindow.activateKeyBind, hideWindow);
                 }
             }
         }
@@ -139,10 +139,19 @@ define([], function () {
         }
 
         function renderWindow() {
+            const autoDisplayWindow = windowRegister.filterValues(uiWindow => uiWindow.autoDisplay == true && shouldDisplay(uiWindow.requirements));
+            if (autoDisplayWindow.length > 1) {
+                throw "can not display two auto displayable windows at the same time";
+            }
+            if (autoDisplayWindow[0]) {
+                showWindow(autoDisplayWindow[0].key);
+                return
+            }
+
             if (activeWindow == null) return;
 
-            const window = windowRegister.get(activeWindow);
-            if (!shouldDisplay(window.requirements)) {
+            const uiWindow = windowRegister.get(activeWindow);
+            if (!shouldDisplay(uiWindow.requirements)) {
                 hideWindow();
             }
         }
@@ -158,6 +167,8 @@ define([], function () {
                 if (typeof params == 'undefined') {
                     params = {};
                 }
+                params.key = key;
+
                 if (!params.tagName) {
                     params.tagName = key
                 }
