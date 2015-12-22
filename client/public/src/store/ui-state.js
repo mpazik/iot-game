@@ -6,6 +6,7 @@ define(function (require, exports, module) {
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
         playerRespawnTimeState: MainPlayerStore.playerRespawnTimeState,
+        playerData: MainPlayerStore.playerData,
         scenarioType: new Publisher.StatePublisher(null, (push) => {
             ScenarioStore.data.subscribe(scenario => {
                push(scenario.type);

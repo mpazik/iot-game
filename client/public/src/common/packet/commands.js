@@ -24,8 +24,9 @@ define(function (require, exports, module) {
             TimeSync: function (clientTime) {
                 this.clientTime = clientTime;
             },
-            JoinBattle: function (map) {
+            JoinBattle: function (map, difficultyLevel) {
                 this.map = map;
+                this.difficultyLevel = difficultyLevel
             },
             Backdoor: function (type, data) {
                 this.type = type;
