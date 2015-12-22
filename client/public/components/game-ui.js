@@ -1,16 +1,8 @@
-var GAME_UI;
-
-
-(function () {
+define([], function () {
     const KeyCodes = {
         ESC: 27,
         ENTER: 13
     };
-
-    var gameUi;
-    const windowRegister = new Map();
-    const uiFragmentsRegister = new Map();
-    const windowActivateKeyBinds = new Map();
 
     function getCharCode(key) {
         if (typeof key == "string" && key.length == 1) {
@@ -23,19 +15,25 @@ var GAME_UI;
     }
 
     function initUi(gameUiElement) {
+        const windowRegister = new Map();
+        const uiFragmentsRegister = new Map();
+        const windowActivateKeyBinds = new Map();
+
         const windowElement = gameUiElement.getElementsByClassName("window")[0];
         const uiFragmentsElement = gameUiElement.getElementsByClassName("ui-fragments")[0];
+
         const currentKeyBinds = new Map();
+
         const activeUiFragments = [];
         const activeUiFragmentElements = new Map();
+
         var activeWindow = null;
         var activeWindowElement = null;
+
         var uiState = {};
 
         windowElement.style.display = 'none';
-        gameUiElement.addEventListener('ui-state-updated', (event) => updateState(event.detail));
         document.addEventListener('keydown', keyListener);
-        renderUiFragments();
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -161,69 +159,42 @@ var GAME_UI;
             }
         }
 
-        function updateState(state) {
-            uiState = state;
-            renderUiFragments();
-            renderWindow();
-            setKeyBindings();
-        }
-
         return {
-            refreshUiAfterRegisteringWindow: () => {
-                // window registration might have registered uiKeyBinds or windowActivateKeyBinds, that's why we need to refresh keyBindings.
+            registerWindow: function (key, params) {
+                if (typeof params == 'undefined') {
+                    params = {};
+                }
+                if (!params.tagName || !(params.tagName instanceof "string")) {
+                    params.tagName = key
+                }
+
+                windowRegister.set(key, params);
+
+                if (params.activateKeyBind) {
+                    windowActivateKeyBinds.set(getCharCode(params.activateKeyBind), key);
+                }
+            },
+            registerUiFragment: function (key, params) {
+                if (typeof params == 'undefined') {
+                    params = {};
+                }
+                if (!params.tagName || !(params.tagName instanceof "string")) {
+                    params.tagName = key
+                }
+
+                uiFragmentsRegister.set(key, params);
+            },
+            updateState: function (state) {
+                uiState = state;
+                renderUiFragments();
+                renderWindow();
                 setKeyBindings();
             },
-            refreshUiAfterRegisteringUiFragment: () => {
-                // window registration might have registered uiKeyBinds, that's why we need to refresh keyBindings.
-                setKeyBindings();
-            },
-            showWindow: showWindow
+            showWindow
         }
     }
 
-    window.addEventListener("game-ui attached", (event) => {
-        gameUi = initUi(event.srcElement);
-        console.log("Game UI Initialized");
-    });
-
-    function showWindow(windowKey) {
-        if (gameUi) {
-            gameUi.showWindow(windowKey);
-        }
-    }
-
-    GAME_UI = {
-        registerWindow: function (key, params) {
-            if (typeof params == 'undefined') {
-                params = {};
-            }
-            if (!params.tagName || !(params.tagName instanceof "string")) {
-                params.tagName = key
-            }
-
-            windowRegister.set(key, params);
-
-            if (params.activateKeyBind) {
-                windowActivateKeyBinds.set(getCharCode(params.activateKeyBind), key);
-            }
-            if (gameUi) {
-                gameUi.refreshUiAfterRegisteringWindow();
-            }
-        },
-        registerUiFragment: function (key, params) {
-            if (typeof params == 'undefined') {
-                params = {};
-            }
-            if (!params.tagName || !(params.tagName instanceof "string")) {
-                params.tagName = key
-            }
-
-            uiFragmentsRegister.set(key, params);
-
-            if (gameUi) {
-                gameUi.refreshUiAfterRegisteringUiFragment();
-            }
-        },
-        showWindow
-    }
-})();
+    return {
+        create: initUi
+    };
+});

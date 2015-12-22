@@ -46,20 +46,9 @@
             return windowWidth / 2 - width / 2;
         }
 
-        Object.keys(UiElements).forEach(function(elementKey) {
-            const element = UiElements[elementKey].prototype;
-            if (element.type == 'fragment') {
-                GAME_UI.registerUiFragment(elementKey, element.properties);
-            } else if (element.type == 'window') {
-                GAME_UI.registerWindow(elementKey, element.properties);
-            } else {
-                throw `Ui element ${elementKey} has undefined type`;
-            }
-        });
+        require(['components/game-ui', 'src/store/cooldown-bar', 'src/store/server-messages'],
+                function (GameUi, CooldownBar, Messages) {
 
-
-        require(['src/store/cooldown-bar', 'src/store/server-messages'],
-                function (CooldownBar, Messages) {
                     document.registerElement('game-ui', {
                         prototype: Object.create(HTMLElement.prototype, {
                             createdCallback: {
@@ -68,6 +57,19 @@
                                     var mainElement = document.importNode(main.content, true);
                                     this.appendChild(mainElement);
                                     this.profilingWindow = this.getElementsByTagName('profiling-window')[0];
+
+                                    const gameUi = GameUi.create(this);
+                                    this.gameUi = gameUi;
+                                    Object.keys(UiElements).forEach(function(elementKey) {
+                                        const element = UiElements[elementKey].prototype;
+                                        if (element.type == 'fragment') {
+                                            gameUi.registerUiFragment(elementKey, element.properties);
+                                        } else if (element.type == 'window') {
+                                            gameUi.registerWindow(elementKey, element.properties);
+                                        } else {
+                                            throw `Ui element ${elementKey} has undefined type`;
+                                        }
+                                    });
                                 }
                             },
                             init: {
@@ -96,20 +98,11 @@
                                     document.getElementById('cooldown-bar').style.display = 'none';
                                     document.getElementById('death-screen').style.display = 'none';
 
-                                    this.dispatchEvent(new CustomEvent("game-ui attached", {
-                                        bubbles: true,
-                                        cancelable: true
-                                    }));
-
+                                    const gameUi = this.gameUi;
                                     function updateState(playerAlive) {
-                                        //noinspection JSPotentiallyInvalidUsageOfThis
-                                        this.dispatchEvent(new CustomEvent("ui-state-updated", {
-                                            bubbles: false,
-                                            cancelable: false,
-                                            detail: {
-                                                playerAlive: playerAlive
-                                            }
-                                        }));
+                                        gameUi.updateState({
+                                            playerAlive: playerAlive
+                                        })
                                     }
                                     this._stateUpdated = updateState.bind(this);
                                     this._stateUpdated(this.game.uiState.playerAlive.value);
@@ -126,7 +119,7 @@
                             },
                             showWindow: {
                                 value: function(windowKey) {
-                                    GAME_UI.showWindow(windowKey)
+                                    this.gameUi.showWindow(windowKey)
                                 }
                             },
                             _handleResize: {
