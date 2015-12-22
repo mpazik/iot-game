@@ -26,7 +26,12 @@ define(function (require, exports, module) {
             },
             JoinBattle: function (map) {
                 this.map = map;
-            }
+            },
+            Backdoor: function (type, data) {
+                this.type = type;
+                this.data = data;
+            },
+            GoToHome: function () {}
         },
         ids: {
             LogIn: 0,
@@ -36,7 +41,9 @@ define(function (require, exports, module) {
             Ping: 4,
             PlayingPlayer: 5,
             TimeSync: 6,
-            JoinBattle: 7
+            JoinBattle: 7,
+            Backdoor: 8,
+            GoToHome: 9
         },
         forId: []
     };

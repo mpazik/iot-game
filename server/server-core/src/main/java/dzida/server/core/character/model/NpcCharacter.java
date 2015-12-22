@@ -1,6 +1,6 @@
 package dzida.server.core.character.model;
 
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 
 public class NpcCharacter implements Character {
     private final CharacterId id;

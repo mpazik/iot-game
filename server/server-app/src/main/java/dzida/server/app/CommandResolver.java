@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
-import dzida.server.core.CharacterId;
 import dzida.server.core.character.CharacterCommandHandler;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
@@ -18,8 +18,11 @@ import lombok.Value;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class CommandResolver {
@@ -27,11 +30,13 @@ public class CommandResolver {
     private static final int Move = 2;
     private static final int UseSkill = 3;
     private static final int JoinBattle = 7;
+    private static final int GoToHome = 9;
 
     // requests
     private static final int Ping = 4;
     private static final int PlayingPlayer = 5;
     private static final int TimeSync = 6;
+    private static final int Backdoor = 8;
 
     private final Gson serializer = Serializer.getSerializer();
     private final PositionCommandHandler positionCommandHandler;
@@ -39,6 +44,7 @@ public class CommandResolver {
     private final SkillCommandHandler skillCommandHandler;
     private final CharacterCommandHandler characterCommandHandler;
     private final Arbiter arbiter;
+    private final BackdoorCommandResolver backdoorCommandResolver;
 
     public CommandResolver(
             PositionCommandHandler positionCommandHandler,
@@ -51,6 +57,12 @@ public class CommandResolver {
         this.skillCommandHandler = skillCommandHandler;
         this.characterCommandHandler = characterCommandHandler;
         this.arbiter = arbiter;
+
+        if (Configuration.isDevMode()) {
+            backdoorCommandResolver = new BackdoorCommandResolver(serializer);
+        } else {
+            backdoorCommandResolver = BackdoorCommandResolver.NoOpResolver;
+        }
     }
 
     public List<GameEvent> createCharacter(Character character) {
@@ -64,8 +76,8 @@ public class CommandResolver {
     public List<GameEvent> dispatchPacket(CharacterId characterId, String payload, Consumer<GameEvent> send) {
         try {
             JsonArray messages = new Gson().fromJson(payload, JsonArray.class);
-            Iterable<JsonElement> iterable = messages::iterator;
-            return StreamSupport.stream(iterable.spliterator(), false).flatMap(element -> {
+            Stream<JsonElement> stream = StreamSupport.stream(((Iterable<JsonElement>) messages::iterator).spliterator(), false);
+            return stream.flatMap(element -> {
                 JsonArray message = element.getAsJsonArray();
                 int type = message.get(0).getAsNumber().intValue();
                 JsonElement data = message.get(1);
@@ -97,7 +109,15 @@ public class CommandResolver {
                 return Collections.emptyList();
             case JoinBattle:
                 String map = data.getAsJsonObject().get("map").getAsString();
-                arbiter.startInstance(map, address -> send.accept(new JoinToInstance(address.toString())));
+                JsonElement difficultyLevelJson = data.getAsJsonObject().get("difficultyLevel");
+                int difficultyLevel = Optional.ofNullable(difficultyLevelJson).map(JsonElement::getAsInt).orElse(1);
+                String instanceKey = map + new Random().nextInt();
+                arbiter.startInstance(instanceKey, map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
+                return Collections.emptyList();
+            case Backdoor:
+                return backdoorCommandResolver.resolveCommand(characterId, data, send);
+            case GoToHome:
+                send.accept(new JoinToInstance(arbiter.getHomeInstnceAddress().toString()));
                 return Collections.emptyList();
             default:
                 return Collections.emptyList();

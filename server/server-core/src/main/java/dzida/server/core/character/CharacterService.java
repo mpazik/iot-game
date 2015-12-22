@@ -1,6 +1,5 @@
 package dzida.server.core.character;
 
-import dzida.server.core.CharacterId;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;

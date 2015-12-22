@@ -1,6 +1,6 @@
 package dzida.server.core.position;
 
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.event.CharacterMoved;

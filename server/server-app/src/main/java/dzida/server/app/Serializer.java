@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import dzida.server.core.CharacterId;
-import dzida.server.core.PlayerId;
+import dzida.server.core.character.CharacterId;
+import dzida.server.core.player.PlayerId;
 
 import java.io.IOException;
 

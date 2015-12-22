@@ -1,15 +1,17 @@
 package dzida.server.app;
 
 import com.google.common.collect.ImmutableMap;
-import dzida.server.core.CharacterId;
-import dzida.server.core.PlayerId;
+import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.core.basic.Publisher;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
+import dzida.server.core.player.PlayerId;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.SkillService;
 import dzida.server.core.world.WorldService;
+import lombok.Value;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +26,19 @@ public class GameEventDispatcher {
     private final CharacterService characterService;
     private final WorldService worldService;
     private final SkillService skillService;
+    private final Scenario scenario;
 
-    public GameEventDispatcher(PositionService positionService, CharacterService characterService, WorldService worldService, SkillService skillService) {
+    public GameEventDispatcher(
+            PositionService positionService,
+            CharacterService characterService,
+            WorldService worldService,
+            SkillService skillService,
+            Scenario scenario) {
         this.positionService = positionService;
         this.characterService = characterService;
         this.worldService = worldService;
         this.skillService = skillService;
+        this.scenario = scenario;
     }
 
     public void registerCharacter(Character character, Consumer<GameEvent> send) {
@@ -40,7 +49,7 @@ public class GameEventDispatcher {
 
     // I do not think that this should be here.
     public void sendInitialPacket(CharacterId characterId, PlayerId playerId) {
-        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState()));
+        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario));
     }
 
     private Map<String, Object> getState() {
@@ -57,15 +66,16 @@ public class GameEventDispatcher {
         listeners.remove(characterId);
     }
 
-    public void dispatchEvents(List<GameEvent> gameEvents) {
-        gameEvents.stream().forEach(gameEvent -> {
-            eventPublisherBeforeChanges.notify(gameEvent);
-            characterService.processEvent(gameEvent);
-            positionService.processEvent(gameEvent);
-            skillService.processEvent(gameEvent);
+    public void dispatchEvent(GameEvent gameEvent) {
+        eventPublisherBeforeChanges.notify(gameEvent);
+        characterService.processEvent(gameEvent);
+        positionService.processEvent(gameEvent);
+        skillService.processEvent(gameEvent);
+        eventPublisher.notify(gameEvent);
+    }
 
-            eventPublisher.notify(gameEvent);
-        });
+    public void dispatchEvents(List<GameEvent> gameEvents) {
+        gameEvents.stream().forEach(this::dispatchEvent);
     }
 
     public Publisher<GameEvent> getEventPublisherBeforeChanges() {
@@ -76,28 +86,12 @@ public class GameEventDispatcher {
         return eventPublisher;
     }
 
+    @Value
     public static final class InitialMessage implements GameEvent {
-        private final CharacterId characterId;
-        private final PlayerId playerId;
-        private final Map<String, Object> state;
-
-        public InitialMessage(CharacterId characterId, PlayerId playerId, Map<String, Object> state) {
-            this.characterId = characterId;
-            this.playerId = playerId;
-            this.state = state;
-        }
-
-        public CharacterId getCharacterId() {
-            return characterId;
-        }
-
-        public PlayerId getPlayerId() {
-            return playerId;
-        }
-
-        public Map<String, Object> getState() {
-            return state;
-        }
+        CharacterId characterId;
+        PlayerId playerId;
+        Map<String, Object> state;
+        Scenario scenario;
 
         @Override
         public int getId() {

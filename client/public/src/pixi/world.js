@@ -3,7 +3,7 @@ define(function (require, exports, module) {
     const WorldStore = require('../store/world');
     const ResourcesStore = require('../store/resources');
     const Dispatcher = require('../component/dispatcher');
-    const tileSize = require('../component/configuration').tileSize;
+    const tileSize = require('configuration').tileSize;
     const Targeting = require('../component/targeting');
 
     function createTileTextures(tileset) {
@@ -50,6 +50,7 @@ define(function (require, exports, module) {
     var eventLayer = new Pixi.Container();
 
     Targeting.targetingState.subscribe(function (skill) {
+        //noinspection RedundantIfStatementJS
         if (skill === null) {
             // skill was deactivated so map is click-able again
             eventLayer.interactive = true;

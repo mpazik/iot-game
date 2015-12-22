@@ -1,6 +1,6 @@
 package dzida.server.app;
 
-import dzida.server.core.PlayerId;
+import dzida.server.core.player.PlayerId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -25,12 +25,15 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public final class WebSocketServer {
 
     public static void main(String[] args) throws IOException {
+        if (Configuration.isDevMode()) {
+            System.out.println("Server runs in DEV MODE!");
+        }
         int startPort = Configuration.getFirstInstancePort();
         Container container = new Container(startPort, Configuration.getContainerAddress());
 
         for (String instance : Configuration.getInitialInstances()) {
-            container.startInstance(instance, (port) -> {
-            });
+            container.startInstance(instance, instance, (port) -> {
+            }, null);
         }
 
         container.shutdownGracefully();

@@ -1,4 +1,4 @@
-package dzida.server.core;
+package dzida.server.core.player;
 
 import lombok.Value;
 

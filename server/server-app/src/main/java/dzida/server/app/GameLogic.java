@@ -1,53 +1,84 @@
 package dzida.server.app;
 
-import dzida.server.core.CharacterId;
-import dzida.server.core.PlayerId;
-import dzida.server.core.PlayerService;
+import dzida.server.app.map.descriptor.Scenario;
+import dzida.server.app.map.descriptor.Survival;
+import dzida.server.app.npc.AiService;
+import dzida.server.app.scenario.*;
 import dzida.server.core.Scheduler;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.event.CharacterDied;
-import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
+import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Move;
+import dzida.server.core.scenario.SurvivalScenarioFactory;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class GameLogic {
-    private static final int SPAWN_TIME = 4000;
-
-    private final Scheduler scheduler;
-    private final PositionService positionService;
     private final CharacterService characterService;
     private final PlayerService playerService;
+    private final GameEventDispatcher gameEventDispatcher;
+    private final Runnable send;
+    private final AiService aiService;
+    private final ScenarioLogic scenarioLogic;
+    private final Scheduler scheduler;
 
-    public GameLogic(Scheduler scheduler, PositionService positionService, CharacterService characterService, PlayerService playerService) {
-        this.scheduler = scheduler;
+    public GameLogic(
+            Scheduler scheduler,
+            GameEventDispatcher gameEventDispatcher,
+            PositionService positionService,
+            CharacterService characterService,
+            PlayerService playerService,
+            Optional<SurvivalScenarioFactory.SurvivalScenario> survivalScenario,
+            Scenario scenario,
+            Runnable send,
+            AiService aiService,
+            PositionStoreImpl positionStore,
+            CommandResolver commandResolver) {
+        this.gameEventDispatcher = gameEventDispatcher;
         this.characterService = characterService;
-        this.positionService = positionService;
         this.playerService = playerService;
+        this.send = send;
+        this.aiService = aiService;
+        this.scheduler = scheduler;
+
+        NpcScenarioLogic npcScenarioLogic = new NpcScenarioLogic(aiService, positionStore, commandResolver, gameEventDispatcher);
+        GameEventScheduler gameEventScheduler = new GameEventScheduler(gameEventDispatcher, scheduler);
+
+        if (survivalScenario.isPresent()) {
+            this.scenarioLogic = new SurvivalScenarioLogic(scheduler, gameEventDispatcher, npcScenarioLogic, (Survival) scenario, survivalScenario.get(), characterService);
+        } else {
+            this.scenarioLogic = new OpenWorldScenarioLogic(positionService, playerService, gameEventScheduler);
+        }
+    }
+
+    public void start() {
+        scheduler.schedulePeriodically(this::aiTick, 500, 500);
+        scenarioLogic.start();
     }
 
     public void processEventBeforeChanges(GameEvent gameEvent) {
         whenTypeOf(gameEvent).is(CharacterDied.class).then(event -> {
             Optional<PlayerCharacter> playerCharacterOpt = characterService.getPlayerCharacter(event.getCharacterId());
-            playerCharacterOpt.ifPresent(playerCharacter -> {
-                // player may died because logout
-                PlayerId playerId = playerCharacter.getPlayerId();
+            if (playerCharacterOpt.isPresent()) {
+                PlayerId playerId = playerCharacterOpt.get().getPlayerId();
+                // player may died because logout, so we have to check if he is still logged it.
                 if (playerService.isPlayerPlaying(playerId)) {
-                    respawnPlayer(event.getCharacterId(), playerCharacter.getNick(), playerId);
+                    scenarioLogic.handlePlayerDead(event.getCharacterId(), playerId);
                 }
-            });
+            } else {
+                gameEventDispatcher.unregisterCharacter(event.getCharacterId());
+                scenarioLogic.handleNpcDead(event.getCharacterId());
+            }
         });
     }
 
-    private void respawnPlayer(CharacterId characterId, String nick, PlayerId playerId) {
-        PlayerCharacter newPlayerCharacter = new PlayerCharacter(characterId, nick, playerId);
-        Move initialMove = positionService.getInitialMove(characterId);
-        scheduler.scheduleGameEvents(Collections.singletonList(new CharacterSpawned(newPlayerCharacter, initialMove)), SPAWN_TIME);
+    private void aiTick() {
+        gameEventDispatcher.dispatchEvents(aiService.processTick());
+        send.run();
     }
 }

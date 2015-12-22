@@ -6,29 +6,44 @@ define(function (require, exports, module) {
 
     var playerId = null;
     var characterId = null;
-    var setPlayerLiveState = null;
+
     Dispatcher.messageStream.subscribe(MessageIds.InitialData, function (response) {
         playerId = response.playerId;
         characterId = response.characterId;
-        setPlayerLiveState(true)
     });
 
-    Dispatcher.messageStream.subscribe(MessageIds.CharacterSpawned, (event) => {
-        if (event.character.id == characterId)
-            setPlayerLiveState(true)
-    });
-
-    Dispatcher.messageStream.subscribe(MessageIds.CharacterDied, (event) => {
-        if (event.characterId == characterId)
-            setPlayerLiveState(false)
-    });
 
     module.exports = {
         // positions are recalculated in character renderer
         position: new Point(0, 0),
-        positionInPixels: new Point(0,0),
+        positionInPixels: new Point(0, 0),
         playerId: () => playerId,
         characterId: () => characterId,
-        playerLiveState: new Publisher.StatePublisher(true, (push) => setPlayerLiveState = push)
+        playerLiveState: new Publisher.StatePublisher(true, (push) => {
+            Dispatcher.messageStream.subscribe(MessageIds.InitialData, () => {
+                push(true)
+            });
+
+            Dispatcher.messageStream.subscribe(MessageIds.CharacterSpawned, (event) => {
+                if (event.character.id == characterId)
+                    push(true)
+            });
+
+            Dispatcher.messageStream.subscribe(MessageIds.CharacterDied, (event) => {
+                if (event.characterId == characterId)
+                    push(false)
+            });
+        }),
+        playerRespawnTimeState: new Publisher.StatePublisher(null, (push) => {
+            Dispatcher.messageStream.subscribe(MessageIds.CharacterSpawned, (event) => {
+                if (event.character.id == characterId)
+                    push(null);
+            });
+            Dispatcher.messageStream.subscribe(MessageIds.PlayerWillRespawn, (event) => {
+                if (event.playerId == playerId) {
+                    push(event.respawnTime);
+                }
+            });
+        })
     };
 });

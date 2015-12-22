@@ -1,6 +1,6 @@
 package dzida.server.core.character.model;
 
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 
 public interface Character {
     int Player = 0;

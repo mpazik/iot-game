@@ -1,22 +1,22 @@
 package dzida.server.app;
 
 import com.google.common.collect.Lists;
-import dzida.server.app.map.descriptor.MapDescriptor;
 import dzida.server.app.map.descriptor.Scenario;
+import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
-import dzida.server.core.CharacterId;
-import dzida.server.core.PlayerId;
-import dzida.server.core.PlayerService;
+import dzida.server.core.character.CharacterId;
+import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.PlayerService;
 import dzida.server.core.Scheduler;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
-import dzida.server.core.character.model.NpcCharacter;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.scenario.SurvivalScenarioFactory;
+import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
@@ -34,41 +34,48 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static dzida.server.app.Serializer.getSerializer;
 
 class Instance {
-    private final PositionStoreImpl positionStore;
 
     private final CommandResolver commandResolver;
     private final GameEventDispatcher gameEventDispatcher;
-    private final AiService aiService;
     private final PlayerService playerService;
+    private final CharacterService characterService;
     private final String instanceKey;
 
     private final Map<ChannelId, CharacterId> charChannels = new HashMap<>();
     private final Map<ChannelId, List<Object>> messagesToSend = new HashMap<>();
 
     private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
+    private final GameLogic gameLogic;
+    private final Arbiter arbiter;
+    private final boolean isOnlyScenario;
 
-    public Instance(MapDescriptor mapDescriptor, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter) {
+    public Instance(String instanceKey, Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter) {
         this.playerService = playerService;
-        instanceKey = mapDescriptor.getMapName();
-        WorldState worldState = new WorldStateStore().loadMap(mapDescriptor.getMapName());
+        this.arbiter = arbiter;
+        this.instanceKey = instanceKey;
+        WorldState worldState = new WorldStateStore().loadMap(scenario.getMapName());
         Map<Integer, Skill> skills = new SkillStore().loadSkills();
-        positionStore = new PositionStoreImpl(worldState.getSpawnPoint());
+        PositionStoreImpl positionStore = new PositionStoreImpl(worldState.getSpawnPoint());
 
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser();
         TimeService timeService = new TimeService();
-        CharacterService characterService = CharacterService.create();
+        characterService = CharacterService.create();
         WorldService worldService = WorldService.create(worldState);
         SkillService skillService = SkillService.create(skills, timeService);
         PositionService positionService = PositionService.create(positionStore, timeService);
 
-        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldService, skillService);
+        Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
+        isOnlyScenario = survivalScenario.isPresent();
 
-        Scheduler scheduler = new SchedulerImpl(eventLoop, gameEventDispatcher);
+        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldService, skillService, scenario);
+
+        Scheduler scheduler = new SchedulerImpl(eventLoop);
 
         PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService);
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService);
@@ -76,22 +83,25 @@ class Instance {
 
         commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter);
 
-        GameLogic gameLogic = new GameLogic(scheduler, positionService, characterService, playerService);
-        gameEventDispatcher.getEventPublisherBeforeChanges().subscribe(gameLogic::processEventBeforeChanges);
-
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
-        aiService = new AiService(npcBehaviour);
+        AiService aiService = new AiService(npcBehaviour);
 
-        if (mapDescriptor instanceof Scenario) {
-            Scenario scenario = (Scenario) mapDescriptor;
-            initNpcs(scenario.getSpawns());
-        }
-
-        scheduler.schedulePeriodically(this::aiTick, 500, 500);
+        this.gameLogic = new GameLogic(scheduler, gameEventDispatcher, positionService, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver);
     }
 
-    private void initNpcs(List<Scenario.Spawn> spawns) {
-        spawns.stream().forEach(spawn -> addNpc(spawn.getPosition(), spawn.getBotType()));
+    public void start() {
+        gameEventDispatcher.getEventPublisherBeforeChanges().subscribe(gameLogic::processEventBeforeChanges);
+
+        gameLogic.start();
+    }
+
+    private Optional<SurvivalScenario> createSurvivalScenario(Scenario scenario) {
+        SurvivalScenarioFactory survivalScenarioFactory = new SurvivalScenarioFactory();
+        if (scenario instanceof Survival) {
+            Survival survival = (Survival) scenario;
+            return Optional.of(survivalScenarioFactory.createSurvivalScenario(survival.getDifficultyLevel()));
+        }
+        return Optional.empty();
     }
 
     public void addPlayer(Channel channel, PlayerId playerId) {
@@ -117,21 +127,14 @@ class Instance {
         charChannels.remove(channelId);
         messagesToSend.remove(channelId);
         gameEventDispatcher.unregisterCharacter(characterId);
-        gameEventDispatcher.dispatchEvents(commandResolver.removeCharacter(characterId));
+        if (characterService.isCharacterLive(characterId)){
+            gameEventDispatcher.dispatchEvents(commandResolver.removeCharacter(characterId));
+        }
         System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
         send();
-    }
-
-    public void addNpc(Position position, int npcType) {
-        CharacterId characterId = new CharacterId((int) Math.round((Math.random() * 100000)));
-        NpcCharacter character = new NpcCharacter(characterId, npcType);
-        positionStore.setPosition(characterId, position);
-        aiService.createNpc(npcType, character);
-        gameEventDispatcher.dispatchEvents(commandResolver.createCharacter(character));
-        gameEventDispatcher.registerCharacter(character, event -> {
-            List<GameEvent> gameEvents = aiService.processPacket(characterId, event);
-            gameEventDispatcher.dispatchEvents(gameEvents);
-        });
+        if (channels.size() == 0 && isOnlyScenario) {
+            arbiter.killInstance(instanceKey);
+        }
     }
 
     public void parseMessage(Channel channel, String request) {
@@ -158,11 +161,6 @@ class Instance {
             channel.writeAndFlush(new TextWebSocketFrame(getSerializer().toJson(messagesToSend)));
             messagesToSend.clear();
         }
-    }
-
-    public void aiTick() {
-        gameEventDispatcher.dispatchEvents(aiService.processTick());
-        send();
     }
 }
 

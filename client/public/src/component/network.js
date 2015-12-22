@@ -40,7 +40,6 @@ define(function (require, exports, module) {
             if (!messages) {
                 console.error("Received wrong message from sever: " + evt.data);
             } else {
-                console.debug("<- ", messages);
                 messages.forEach(function (message) {
                     return Dispatcher.messageStream.publish(message[0], message[1]);
                 });
@@ -69,7 +68,6 @@ define(function (require, exports, module) {
     };
     Network.prototype.sendCommands = function (commands) {
         var data = PacketSerialization.serialize(commands);
-        console.debug("-> ", data);
         this.socket.send(data);
     };
     Network.prototype.disconnect = function () {

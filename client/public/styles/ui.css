@@ -15,6 +15,27 @@ profiling-window div > span {
     padding-left: 2px;
 }
 
+.center-relative {
+    left: 50%;
+    position: absolute;
+    top: 0;
+}
+
+.center-relative > * {
+    position: relative;
+    left: -50%;
+}
+
+game-ui .window {
+    top: 90px;
+    padding: 10px;
+ }
+
+game-ui .window > * {
+    padding: 10px;
+    display: block;
+}
+
 #middle-bar {
     position: absolute;
     bottom: 1px;
@@ -28,15 +49,6 @@ profiling-window div > span {
 skill-bar {
     float: left;
     margin-right: 10px;
-}
-
-#join-battle-window {
-    top: 40px;
-    padding: 10px;
-}
-
-#join-battle-select {
-    margin-bottom: 20px;
 }
 
 #server-message {
@@ -86,12 +98,11 @@ skill-bar {
     animation: progress-bar-anim linear;
 }
 
-#death-screen {
-    position: absolute;
-    width: 100%;
-    height: 90%;
-    background: rgba(0, 0, 0, 0.2);
+survival-end-screen {
+    padding: 10px 100px 20px !IMPORTANT;
     text-align: center;
-    padding-top: 10%;
-    top: 0;
+}
+
+survival-end-screen h1 {
+    font-size: 50px;
 }

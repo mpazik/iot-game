@@ -1,6 +1,6 @@
 package dzida.server.core.character.event;
 
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.event.GameEvent;
 import lombok.Value;
 

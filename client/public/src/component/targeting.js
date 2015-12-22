@@ -42,7 +42,7 @@ define(function (require, exports, module) {
         } else {
             publishTargeting(event.skill);
             Dispatcher.userEventStream.subscribe('right-click', cancelTargetingImmediate);
-            Dispatcher.userEventStream.subscribeOnce('left-click', cancelTargetingDeferred);
+            Dispatcher.userEventStream.subscribe('left-click', cancelTargetingDeferred);
         }
     });
 

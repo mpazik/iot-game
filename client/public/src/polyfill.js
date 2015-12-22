@@ -1,13 +1,4 @@
 (function () {
-    function polyfill(prototype, name, func) {
-        if (!prototype[name]) {
-            Object.defineProperty(prototype, name, {
-                value: func,
-                enumerable: false,
-                configurable: false
-            });
-        }
-    }
 
     if (!String.prototype.format) {
         String.prototype.format = function () {
@@ -18,65 +9,82 @@
         };
     }
 
-    polyfill(Array.prototype, 'flatMap', function (transform) {
-        if (this == null) {
-            throw new TypeError('Array.prototype.findIndex called on null or undefined');
-        }
-        if (typeof transform !== 'function') {
-            throw new TypeError('predicate must be a function');
-        }
-        var list = Object(this);
-        var length = list.length >>> 0;
-        var thisArg = arguments[1];
-        var value;
-        var newFullArray = [];
-        for (var i = 0; i < length; i++) {
-            value = list[i];
-            newFullArray = newFullArray.concat(transform.call(thisArg, value, i));
-        }
-        return newFullArray;
-    });
+    if (!Array.prototype.flatMap) {
+        Object.defineProperty(Array.prototype, 'flatMap', {
+            value: function (transform) {
+                if (this == null) {
+                    throw new TypeError('Array.prototype.findIndex called on null or undefined');
+                }
+                if (typeof transform !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+                var list = Object(this);
+                var length = list.length >>> 0;
+                var thisArg = arguments[1];
+                var value;
+                var newFullArray = [];
+                for (var i = 0; i < length; i++) {
+                    value = list[i];
+                    newFullArray = newFullArray.concat(transform.call(thisArg, value, i));
+                }
+                return newFullArray;
+            },
+            enumerable: false,
+            configurable: false
+        });
+    }
 
-    polyfill(Array.prototype, 'includes', function (searchElement) {
+    Array.prototype.clear = function () {
         'use strict';
-        var O = Object(this);
-        var len = parseInt(O.length) || 0;
-        if (len === 0) {
+        this.length = 0;
+    };
+
+    if (!Array.prototype.includes) {
+        Array.prototype.includes = function (searchElement) {
+            'use strict';
+            var O = Object(this);
+            var len = parseInt(O.length) || 0;
+            if (len === 0) {
+                return false;
+            }
+            var n = parseInt(arguments[1]) || 0;
+            var k;
+            if (n >= 0) {
+                k = n;
+            }
+            else {
+                k = len + n;
+                if (k < 0) {
+                    k = 0;
+                }
+            }
+            var currentElement;
+            while (k < len) {
+                currentElement = O[k];
+                if (searchElement === currentElement ||
+                    (searchElement !== searchElement && currentElement !== currentElement)) {
+                    return true;
+                }
+                k++;
+            }
             return false;
-        }
-        var n = parseInt(arguments[1]) || 0;
-        var k;
-        if (n >= 0) {
-            k = n;
-        }
-        else {
-            k = len + n;
-            if (k < 0) {
-                k = 0;
-            }
-        }
-        var currentElement;
-        while (k < len) {
-            currentElement = O[k];
-            if (searchElement === currentElement ||
-                (searchElement !== searchElement && currentElement !== currentElement)) {
-                return true;
-            }
-            k++;
-        }
-        return false;
-    });
-
-    polyfill(Array.prototype, 'remove', function (predicate) {
-        for (var i = 0; i < this.length; i++) {
-            var value = this[i];
-            if (predicate(value)) {
-                this.splice(i, 1);
-                i--;
-            }
-        }
-    });
-
+        };
+    }
+    if (!Array.prototype.remove) {
+        Object.defineProperty(Array.prototype, 'remove', {
+            value: function (predicate) {
+                for (var i = 0; i < this.length; i++) {
+                    var value = this[i];
+                    if (predicate(value)) {
+                        this.splice(i, 1);
+                        i--;
+                    }
+                }
+            },
+            enumerable: false,
+            configurable: false
+        });
+    }
     Object.extend = function (target, source) {
         for (var prop in source) {
             if (!source.hasOwnProperty(prop)) {

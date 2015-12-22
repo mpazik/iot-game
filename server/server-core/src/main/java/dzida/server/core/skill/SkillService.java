@@ -1,6 +1,6 @@
 package dzida.server.core.skill;
 
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
@@ -75,10 +75,10 @@ public class SkillService {
 
     private SkillData characterInitState(int characterType) {
         if (characterType == Character.Bot) {
-            return new SkillData(100, 100, 0);
+            return new SkillData(10, 100, 0);
         }
         if (characterType == Character.Player) {
-            return new SkillData(10, 200, 0);
+            return new SkillData(200, 200, 0);
         }
         throw new IllegalStateException("If this is throw that means there is time to change implementation to use enums");
     }

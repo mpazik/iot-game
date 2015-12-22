@@ -4,10 +4,9 @@
  * Stores always have to generate the same state from the same portion of events. Theirs behaviour should be permanent.
  */
 define(function (require, exports, module) {
-    const Outcome = require('../basic/outcome');
-
     const ServerMessage = function () {
         function ServerMessage(message) {
+            //noinspection JSPotentiallyInvalidUsageOfThis
             this.message = message;
         }
 
@@ -18,6 +17,7 @@ define(function (require, exports, module) {
         return ServerMessage;
     }();
 
+    //noinspection JSUnusedGlobalSymbols
     const events = {
         constructors: {
             InstanceStarted: function () {
@@ -39,6 +39,7 @@ define(function (require, exports, module) {
             CharacterSpawned: function (characterId, position, characterType, nick) {
                 this.characterId = characterId;
                 this.position = position;
+                //noinspection JSUnusedGlobalSymbols
                 this.characterType = characterType;
                 this.nick = nick;
             },
@@ -63,10 +64,11 @@ define(function (require, exports, module) {
                 this.damage = damage;
             },
 
-            InitialData: function (playerId, characterId, state) {
+            InitialData: function (playerId, characterId, state, scenario) {
                 this.playerId = playerId;
                 this.characterId = characterId;
                 this.state = state;
+                this.scenario = scenario;
             },
 
             ServerMessage,
@@ -80,12 +82,22 @@ define(function (require, exports, module) {
             },
 
             PlayingPlayers: function (players) {
+                //noinspection JSUnusedGlobalSymbols
                 this.players = players;
             },
 
             TimeSync: function (clientTime, serverTime) {
                 this.clientTime = clientTime;
                 this.serverTime = serverTime;
+            },
+
+            PlayerWillRespawn: function (playerId, respawnTime) {
+                this.playerId = playerId;
+                this.respawnTime = respawnTime;
+            },
+
+            ScenarioEnd: function (resolution) {
+                this.resolution = resolution;
             }
         },
         ids: {
@@ -103,7 +115,9 @@ define(function (require, exports, module) {
             Player: 14,
             PlayingPlayers: 15,
             TimeSync: 16,
-            JoinToInstance: 17
+            JoinToInstance: 17,
+            PlayerWillRespawn: 18,
+            ScenarioEnd: 19
         },
         forId: []
     };

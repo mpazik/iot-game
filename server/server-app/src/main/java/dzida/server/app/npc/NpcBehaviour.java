@@ -1,6 +1,6 @@
 package dzida.server.app.npc;
 
-import dzida.server.core.CharacterId;
+import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.NpcCharacter;
