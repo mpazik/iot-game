@@ -30,7 +30,8 @@ define(function (require, exports, module) {
             Backdoor: function (type, data) {
                 this.type = type;
                 this.data = data;
-            }
+            },
+            GoToHome: function () {}
         },
         ids: {
             LogIn: 0,
@@ -41,7 +42,8 @@ define(function (require, exports, module) {
             PlayingPlayer: 5,
             TimeSync: 6,
             JoinBattle: 7,
-            Backdoor: 8
+            Backdoor: 8,
+            GoToHome: 9
         },
         forId: []
     };

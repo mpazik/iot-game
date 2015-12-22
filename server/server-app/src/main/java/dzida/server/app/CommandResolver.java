@@ -29,6 +29,7 @@ public class CommandResolver {
     private static final int Move = 2;
     private static final int UseSkill = 3;
     private static final int JoinBattle = 7;
+    private static final int GoToHome = 9;
 
     // requests
     private static final int Ping = 4;
@@ -113,6 +114,9 @@ public class CommandResolver {
                 return Collections.emptyList();
             case Backdoor:
                 return backdoorCommandResolver.resolveCommand(characterId, data, send);
+            case GoToHome:
+                send.accept(new JoinToInstance(arbiter.getHomeInstnceAddress().toString()));
+                return Collections.emptyList();
             default:
                 return Collections.emptyList();
         }

@@ -4,13 +4,13 @@ import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.scenario.*;
-import dzida.server.core.player.PlayerId;
-import dzida.server.core.player.PlayerService;
 import dzida.server.core.Scheduler;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
+import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.scenario.SurvivalScenarioFactory;
 
@@ -50,7 +50,7 @@ public class GameLogic {
         GameEventScheduler gameEventScheduler = new GameEventScheduler(gameEventDispatcher, scheduler);
 
         if (survivalScenario.isPresent()) {
-            this.scenarioLogic = new SurvivalScenarioLogic(scheduler, gameEventDispatcher, npcScenarioLogic, (Survival) scenario, survivalScenario.get());
+            this.scenarioLogic = new SurvivalScenarioLogic(scheduler, gameEventDispatcher, npcScenarioLogic, (Survival) scenario, survivalScenario.get(), characterService);
         } else {
             this.scenarioLogic = new OpenWorldScenarioLogic(positionService, playerService, gameEventScheduler);
         }
@@ -64,13 +64,15 @@ public class GameLogic {
     public void processEventBeforeChanges(GameEvent gameEvent) {
         whenTypeOf(gameEvent).is(CharacterDied.class).then(event -> {
             Optional<PlayerCharacter> playerCharacterOpt = characterService.getPlayerCharacter(event.getCharacterId());
-            playerCharacterOpt.ifPresent(playerCharacter -> {
+            if (playerCharacterOpt.isPresent()) {
+                PlayerId playerId = playerCharacterOpt.get().getPlayerId();
                 // player may died because logout, so we have to check if he is still logged it.
-                PlayerId playerId = playerCharacter.getPlayerId();
                 if (playerService.isPlayerPlaying(playerId)) {
                     scenarioLogic.handlePlayerDead(event.getCharacterId(), playerId);
                 }
-            });
+            }else {
+                scenarioLogic.handleNpcDead(event.getCharacterId());
+            }
         });
     }
 

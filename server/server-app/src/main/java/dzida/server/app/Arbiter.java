@@ -1,5 +1,8 @@
 package dzida.server.app;
 
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
+
 public class Arbiter {
 
     private final Container container;
@@ -8,7 +11,11 @@ public class Arbiter {
         this.container = container;
     }
 
-    void startInstance(String instanceType, Container.StartInstanceCallback startInstanceCallback, Integer difficultyLevel) {
+    public void startInstance(String instanceType, Container.StartInstanceCallback startInstanceCallback, Integer difficultyLevel) {
         container.startInstance(instanceType, startInstanceCallback, difficultyLevel);
+    }
+
+    public URI getHomeInstnceAddress() {
+        return UriBuilder.fromUri(Configuration.getContainerAddress()).port(Configuration.getFirstInstancePort()).build();
     }
 }

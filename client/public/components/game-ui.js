@@ -19,6 +19,7 @@ define([], function () {
         document.addEventListener('keydown', keyListener);
         uiState.playerAlive.subscribe(updateUi);
         uiState.scenarioType.subscribe(updateUi);
+        uiState.endScenario.subscribe(updateUi);
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -93,7 +94,7 @@ define([], function () {
             const uiFragmentInstance = document.createElement(uiFragment.tagName);
             if (uiFragment.location === 'center') {
                 const centerWrapper = document.createElement('div');
-                centerWrapper.classList.add('center');
+                centerWrapper.classList.add('center-relative');
                 centerWrapper.appendChild(uiFragmentInstance);
                 return centerWrapper
             } else {

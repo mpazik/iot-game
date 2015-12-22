@@ -15,25 +15,25 @@ profiling-window div > span {
     padding-left: 2px;
 }
 
-.center {
+.center-relative {
     left: 50%;
     position: absolute;
     top: 0;
 }
 
-.center > * {
+.center-relative > * {
     position: relative;
     left: -50%;
 }
 
 game-ui .window {
     top: 90px;
-    /* top: 0; */
-    padding: 20px;
+    padding: 10px;
  }
 
 game-ui .window > * {
     padding: 10px;
+    display: block;
 }
 
 #middle-bar {
@@ -96,4 +96,13 @@ skill-bar {
     height: 100%;
     background: rgba(0, 40, 255, 0.3);
     animation: progress-bar-anim linear;
+}
+
+survival-end-screen {
+    padding: 10px 100px 20px !IMPORTANT;
+    text-align: center;
+}
+
+survival-end-screen h1 {
+    font-size: 50px;
 }

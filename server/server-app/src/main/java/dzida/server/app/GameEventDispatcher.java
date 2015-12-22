@@ -66,14 +66,16 @@ public class GameEventDispatcher {
         listeners.remove(characterId);
     }
 
+    public void dispatchEvent(GameEvent gameEvent) {
+        eventPublisherBeforeChanges.notify(gameEvent);
+        characterService.processEvent(gameEvent);
+        positionService.processEvent(gameEvent);
+        skillService.processEvent(gameEvent);
+        eventPublisher.notify(gameEvent);
+    }
+
     public void dispatchEvents(List<GameEvent> gameEvents) {
-        gameEvents.stream().forEach(gameEvent -> {
-            eventPublisherBeforeChanges.notify(gameEvent);
-            characterService.processEvent(gameEvent);
-            positionService.processEvent(gameEvent);
-            skillService.processEvent(gameEvent);
-            eventPublisher.notify(gameEvent);
-        });
+        gameEvents.stream().forEach(this::dispatchEvent);
     }
 
     public Publisher<GameEvent> getEventPublisherBeforeChanges() {

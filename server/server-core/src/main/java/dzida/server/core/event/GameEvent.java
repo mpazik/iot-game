@@ -20,6 +20,7 @@ public interface GameEvent {
     int TimeSyncRes = 16;
     int InstanceCreated = 17;
     int PlayerWillRespawn = 18;
+    int ScenarioEnd = 19;
 
     int getId();
 }

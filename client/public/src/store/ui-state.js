@@ -7,10 +7,15 @@ define(function (require, exports, module) {
         playerAlive: MainPlayerStore.playerLiveState,
         playerRespawnTimeState: MainPlayerStore.playerRespawnTimeState,
         scenarioType: new Publisher.StatePublisher(null, (push) => {
-            ScenarioStore.subscribe(scenario => {
+            ScenarioStore.data.subscribe(scenario => {
                push(scenario.type);
             });
-        })
-
+        }),
+        endScenario: new Publisher.StatePublisher(false, (push) => {
+            ScenarioStore.endScenarioData.subscribe(scenario => {
+                push(!!scenario);
+            });
+        }),
+        endScenarioData: ScenarioStore.endScenarioData
     };
 });

@@ -1,0 +1,30 @@
+<template id="survival-end-screen">
+        <h1></h1>
+        <button class="large">Go back</button>
+</template>
+<script>
+    createUiElement('survival-end-screen', {
+        type: 'window',
+        properties: {
+            autoDisplay: true,
+            closeable: false,
+            requirements: {
+                endScenario: true,
+                scenarioType: 'survival'
+            }
+        },
+        attached: function () {
+            const scenarioEnd = this.uiState.endScenarioData.value;
+            const header = this.getElementsByTagName('h1')[0];
+            header.innerText = scenarioEnd.resolution;
+            if (scenarioEnd.resolution == 'Victory') {
+                header.classList.add('victory')
+            } else {
+                header.classList.add('defeat')
+            }
+            this.getElementsByTagName('button')[0].onclick = function () {
+                this.game.publishUiAction('go-to-home', {});
+            }.bind(this);
+        }
+    });
+</script>

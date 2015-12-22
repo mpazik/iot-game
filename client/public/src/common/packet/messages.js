@@ -4,10 +4,9 @@
  * Stores always have to generate the same state from the same portion of events. Theirs behaviour should be permanent.
  */
 define(function (require, exports, module) {
-    const Outcome = require('../basic/outcome');
-
     const ServerMessage = function () {
         function ServerMessage(message) {
+            //noinspection JSPotentiallyInvalidUsageOfThis
             this.message = message;
         }
 
@@ -18,6 +17,7 @@ define(function (require, exports, module) {
         return ServerMessage;
     }();
 
+    //noinspection JSUnusedGlobalSymbols
     const events = {
         constructors: {
             InstanceStarted: function () {
@@ -39,6 +39,7 @@ define(function (require, exports, module) {
             CharacterSpawned: function (characterId, position, characterType, nick) {
                 this.characterId = characterId;
                 this.position = position;
+                //noinspection JSUnusedGlobalSymbols
                 this.characterType = characterType;
                 this.nick = nick;
             },
@@ -81,6 +82,7 @@ define(function (require, exports, module) {
             },
 
             PlayingPlayers: function (players) {
+                //noinspection JSUnusedGlobalSymbols
                 this.players = players;
             },
 
@@ -92,6 +94,10 @@ define(function (require, exports, module) {
             PlayerWillRespawn: function (playerId, respawnTime) {
                 this.playerId = playerId;
                 this.respawnTime = respawnTime;
+            },
+
+            ScenarioEnd: function (resolution) {
+                this.resolution = resolution;
             }
         },
         ids: {
@@ -110,7 +116,8 @@ define(function (require, exports, module) {
             PlayingPlayers: 15,
             TimeSync: 16,
             JoinToInstance: 17,
-            PlayerWillRespawn: 18
+            PlayerWillRespawn: 18,
+            ScenarioEnd: 19
         },
         forId: []
     };

@@ -39,7 +39,7 @@ define(function (require, exports, module) {
     network.state.subscribe(function (networkState) {
         switch (networkState) {
             case Network.State.CONNECTED:
-                Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, (response) => {
+                Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, () => {
                     showGame();
                     console.log("Got initial data");
                 });
@@ -71,6 +71,7 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillCommand);
             Dispatcher.userEventStream.subscribe('join-battle', sendJoinBattle);
+            Dispatcher.userEventStream.subscribe('go-to-home', goToHome);
         } else {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillCommand);
@@ -89,6 +90,10 @@ define(function (require, exports, module) {
         network.sendCommands([new Commands.JoinBattle(map)]);
     }
 
+    function goToHome() {
+        network.sendCommands([new Commands.GoToHome()]);
+    }
+
     function connect(address) {
         network.connect(addNickToUrl(address));
     }
@@ -96,9 +101,12 @@ define(function (require, exports, module) {
     function disconnect() {
         network.disconnect();
         Render.cleanWorld();
-        Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
-        Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillCommand);
+        if (MainPlayer.playerLiveState.state) {
+            Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
+            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillCommand);
+        }
         Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
+        Dispatcher.userEventStream.unsubscribe('go-to-home', goToHome);
     }
 
     function loadGameAssets() {
