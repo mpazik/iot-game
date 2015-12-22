@@ -34,8 +34,8 @@
             }
         });
 
-        require(['src/component/application', 'src/store/stats', 'src/component/dispatcher', 'src/component/backdoor', 'src/store/ui-state'
-        ], function (App, StatsStore, Dispatcher, Backdoor, UiStateStore) {
+        require(['src/component/application', 'src/store/stats', 'src/component/dispatcher', 'src/component/backdoor', 'src/store/ui-state', 'src/component/timer'
+        ], function (App, StatsStore, Dispatcher, Backdoor, UiStateStore, Timer) {
             const GameTag = Object.create(HTMLElement.prototype, {
                 createdCallback: {
                     value: function () {
@@ -96,7 +96,8 @@
                 },
                 uiState: {value: UiStateStore},
                 publishUiAction: {value: Dispatcher.userEventStream.publish.bind(Dispatcher.userEventStream)},
-                backdoor: {value: Backdoor}
+                backdoor: {value: Backdoor},
+                timer: {value: Timer}
             });
 
             document.registerElement('dzida-game', {

@@ -33,6 +33,17 @@ define(function (require, exports, module) {
                 if (event.characterId == characterId)
                     push(false)
             });
+        }),
+        playerRespawnTimeState: new Publisher.StatePublisher(null, (push) => {
+            Dispatcher.messageStream.subscribe(MessageIds.CharacterSpawned, (event) => {
+                if (event.character.id == characterId)
+                    push(null);
+            });
+            Dispatcher.messageStream.subscribe(MessageIds.PlayerWillRespawn, (event) => {
+                if (event.playerId == playerId) {
+                    push(event.respawnTime);
+                }
+            });
         })
     };
 });

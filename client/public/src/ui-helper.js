@@ -28,6 +28,13 @@ UiElement = Object.create(HTMLElement.prototype, {
             }
         }
     },
+    detachedCallback: {
+        value: function () {
+            if (this.detached) {
+                this.detached();
+            }
+        }
+    },
     game: {
       get: function () {
           return this.ui.game;

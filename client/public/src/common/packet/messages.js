@@ -86,6 +86,11 @@ define(function (require, exports, module) {
             TimeSync: function (clientTime, serverTime) {
                 this.clientTime = clientTime;
                 this.serverTime = serverTime;
+            },
+
+            PlayerWillRespawn: function (playerId, respawnTime) {
+                this.playerId = playerId;
+                this.respawnTime = respawnTime;
             }
         },
         ids: {
@@ -103,7 +108,8 @@ define(function (require, exports, module) {
             Player: 14,
             PlayingPlayers: 15,
             TimeSync: 16,
-            JoinToInstance: 17
+            JoinToInstance: 17,
+            PlayerWillRespawn: 18
         },
         forId: []
     };
