@@ -50,7 +50,7 @@ public class GameLogic {
         GameEventScheduler gameEventScheduler = new GameEventScheduler(gameEventDispatcher, scheduler);
 
         if (survivalScenario.isPresent()) {
-            this.scenarioLogic = new SurvivalScenarioLogic(scheduler, gameEventDispatcher, npcScenarioLogic, (Survival) scenario, survivalScenario.get(), characterService);
+            this.scenarioLogic = new SurvivalScenarioLogic(scheduler, gameEventDispatcher, npcScenarioLogic, (Survival) scenario, survivalScenario.get(), characterService, playerService);
         } else {
             this.scenarioLogic = new OpenWorldScenarioLogic(positionService, playerService, gameEventScheduler);
         }
@@ -80,5 +80,9 @@ public class GameLogic {
     private void aiTick() {
         gameEventDispatcher.dispatchEvents(aiService.processTick());
         send.run();
+    }
+
+    public void playerJoined(PlayerCharacter character) {
+        scenarioLogic.playerJoined(character);
     }
 }

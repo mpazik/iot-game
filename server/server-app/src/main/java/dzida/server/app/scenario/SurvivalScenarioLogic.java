@@ -8,8 +8,11 @@ import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.model.Character;
+import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
+import dzida.server.core.player.PlayerData;
 import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.PlayerService;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 import lombok.Data;
@@ -29,6 +32,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     private final GameEventDispatcher gameEventDispatcher;
     private final SurvivalScenarioState survivalScenarioState;
     private final CharacterService characterService;
+    private final PlayerService playerService;
 
     public SurvivalScenarioLogic(
             Scheduler scheduler,
@@ -36,12 +40,14 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
             NpcScenarioLogic npcScenarioLogic,
             Survival survival,
             SurvivalScenario survivalScenario,
-            CharacterService characterService) {
+            CharacterService characterService,
+            PlayerService playerService) {
         this.npcScenarioLogic = npcScenarioLogic;
         this.survival = survival;
         this.survivalScenario = survivalScenario;
         this.gameEventDispatcher =gameEventDispatcher;
         this.characterService = characterService;
+        this.playerService = playerService;
         survivalScenarioState = new SurvivalScenarioState();
     }
 
@@ -62,12 +68,22 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
         int npcDied = survivalScenarioState.getNpcDied() + 1;
         survivalScenarioState.setNpcDied(npcDied);
         if (npcDied == survival.getSpawns().size()) {
-
-            Stream<CharacterDied> characterDiedStream = characterService.getCharactersOfType(Character.Player).map(Character::getId).map(CharacterDied::new);
-            List<GameEvent> messages = Stream.concat(characterDiedStream, Stream.of(new ScenarioEnd(Victory))).collect(Collectors.toList());
-            survivalScenarioState.setEnd(true);
-            gameEventDispatcher.dispatchEvents(messages);
+            victory();
         }
+    }
+
+    private void victory() {
+        List<PlayerCharacter> players = characterService.getCharactersOfType(PlayerCharacter.class);
+        players.stream().forEach(playerCharacter -> {
+            PlayerData playerData = playerService.getPlayerData(playerCharacter.getPlayerId());
+            if (survivalScenario.getDifficultyLevel() > playerData.getHighestDifficultyLevel()) {
+                playerData.setHighestDifficultyLevel(survivalScenario.getDifficultyLevel());
+            }
+        });
+        Stream<CharacterDied> characterDiedStream = players.stream().map(Character::getId).map(CharacterDied::new);
+        List<GameEvent> messages = Stream.concat(characterDiedStream, Stream.of(new ScenarioEnd(Victory))).collect(Collectors.toList());
+        survivalScenarioState.setEnd(true);
+        gameEventDispatcher.dispatchEvents(messages);
     }
 
     @Override

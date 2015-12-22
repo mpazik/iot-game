@@ -19,6 +19,11 @@ define(function (require, exports, module) {
         positionInPixels: new Point(0, 0),
         playerId: () => playerId,
         characterId: () => characterId,
+        playerData: new Publisher.StatePublisher({}, (push) => {
+            Dispatcher.messageStream.subscribe(MessageIds.InitialData, (data) => {
+                push(data.playerData)
+            });
+        }),
         playerLiveState: new Publisher.StatePublisher(true, (push) => {
             Dispatcher.messageStream.subscribe(MessageIds.InitialData, () => {
                 push(true)

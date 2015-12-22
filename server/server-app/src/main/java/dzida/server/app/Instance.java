@@ -6,6 +6,7 @@ import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
 import dzida.server.core.character.CharacterId;
+import dzida.server.core.player.PlayerData;
 import dzida.server.core.player.PlayerId;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.Scheduler;
@@ -81,12 +82,12 @@ class Instance {
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService);
 
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter);
+        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService, characterService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
 
-        this.gameLogic = new GameLogic(scheduler, gameEventDispatcher, positionService, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver);
+        this.gameLogic =  new GameLogic(scheduler, gameEventDispatcher, positionService, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver);
     }
 
     public void start() {
@@ -111,11 +112,13 @@ class Instance {
         ChannelId channelId = channel.id();
         charChannels.put(channelId, characterId);
         messagesToSend.put(channelId, Lists.newArrayList());
-        String nick = playerService.getPlayerNick(playerId);
+        PlayerData playerData = playerService.getPlayerData(playerId);
+        String nick = playerData.getNick();
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
+        gameLogic.playerJoined(character);
         gameEventDispatcher.dispatchEvents(commandResolver.createCharacter(character));
         gameEventDispatcher.registerCharacter(character, addDataToSend(channel));
-        gameEventDispatcher.sendInitialPacket(characterId, playerId);
+        gameEventDispatcher.sendInitialPacket(characterId, playerId, playerData);
         System.out.println(String.format("Instance: %s - character %s joined", instanceKey, characterId));
         send();
     }

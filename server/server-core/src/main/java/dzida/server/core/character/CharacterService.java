@@ -6,7 +6,6 @@ import dzida.server.core.event.GameEvent;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public interface CharacterService {
     static CharacterService create() {
@@ -21,7 +20,7 @@ public interface CharacterService {
 
     void processEvent(GameEvent gameEvent);
 
-    Stream<Character> getCharactersOfType(int type);
+    <T extends Character> List<T> getCharactersOfType(Class<T> clazz);
 
     int getCharacterType(CharacterId characterId);
 
