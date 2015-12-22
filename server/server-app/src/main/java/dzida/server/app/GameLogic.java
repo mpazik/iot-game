@@ -70,7 +70,8 @@ public class GameLogic {
                 if (playerService.isPlayerPlaying(playerId)) {
                     scenarioLogic.handlePlayerDead(event.getCharacterId(), playerId);
                 }
-            }else {
+            } else {
+                gameEventDispatcher.unregisterCharacter(event.getCharacterId());
                 scenarioLogic.handleNpcDead(event.getCharacterId());
             }
         });

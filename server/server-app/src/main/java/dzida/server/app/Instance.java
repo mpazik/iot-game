@@ -44,6 +44,7 @@ class Instance {
     private final CommandResolver commandResolver;
     private final GameEventDispatcher gameEventDispatcher;
     private final PlayerService playerService;
+    private final CharacterService characterService;
     private final String instanceKey;
 
     private final Map<ChannelId, CharacterId> charChannels = new HashMap<>();
@@ -61,7 +62,7 @@ class Instance {
 
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser();
         TimeService timeService = new TimeService();
-        CharacterService characterService = CharacterService.create();
+        characterService = CharacterService.create();
         WorldService worldService = WorldService.create(worldState);
         SkillService skillService = SkillService.create(skills, timeService);
         PositionService positionService = PositionService.create(positionStore, timeService);
@@ -122,7 +123,9 @@ class Instance {
         charChannels.remove(channelId);
         messagesToSend.remove(channelId);
         gameEventDispatcher.unregisterCharacter(characterId);
-        gameEventDispatcher.dispatchEvents(commandResolver.removeCharacter(characterId));
+        if (characterService.isCharacterLive(characterId)){
+            gameEventDispatcher.dispatchEvents(commandResolver.removeCharacter(characterId));
+        }
         System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
         send();
     }
