@@ -52,10 +52,13 @@ class Instance {
 
     private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
     private final GameLogic gameLogic;
+    private final Arbiter arbiter;
+    private final boolean isOnlyScenario;
 
-    public Instance(Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter) {
+    public Instance(String instanceKey, Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter) {
         this.playerService = playerService;
-        instanceKey = scenario.getMapName();
+        this.arbiter = arbiter;
+        this.instanceKey = instanceKey;
         WorldState worldState = new WorldStateStore().loadMap(scenario.getMapName());
         Map<Integer, Skill> skills = new SkillStore().loadSkills();
         PositionStoreImpl positionStore = new PositionStoreImpl(worldState.getSpawnPoint());
@@ -68,6 +71,7 @@ class Instance {
         PositionService positionService = PositionService.create(positionStore, timeService);
 
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
+        isOnlyScenario = survivalScenario.isPresent();
 
         gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldService, skillService, scenario);
 
@@ -128,6 +132,9 @@ class Instance {
         }
         System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
         send();
+        if (channels.size() == 0 && isOnlyScenario) {
+            arbiter.killInstance(instanceKey);
+        }
     }
 
     public void parseMessage(Channel channel, String request) {

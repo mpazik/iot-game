@@ -32,7 +32,7 @@ public final class WebSocketServer {
         Container container = new Container(startPort, Configuration.getContainerAddress());
 
         for (String instance : Configuration.getInitialInstances()) {
-            container.startInstance(instance, (port) -> {
+            container.startInstance(instance, instance, (port) -> {
             }, null);
         }
 

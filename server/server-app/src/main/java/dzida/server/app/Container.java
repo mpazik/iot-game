@@ -16,14 +16,16 @@ import lombok.Value;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 class Container {
     private final URI address;
     private final EventLoopGroup bossGroup;
     private final InstanceFactory instanceFactory;
     private final PlayerService playerService = new PlayerService();
-    private final List<InstanceData> instances = new ArrayList<>();
+    private final Map<String, InstanceData> instances = new HashMap<>();
     private final Map<ChannelId, PlayerId> players = new HashMap<>();
     private int nextPort;
 
@@ -34,10 +36,10 @@ class Container {
         this.address = address;
     }
 
-    public void startInstance(String instanceType, StartInstanceCallback callback, Integer difficultyLevel) {
+    public void startInstance(String instanceKey, String instanceType, StartInstanceCallback callback, Integer difficultyLevel) {
         EventLoopGroup workerGroup = new NioEventLoopGroup(1);
         EventLoop eventLoop = workerGroup.next();
-        Optional<Instance> instance = instanceFactory.createInstance(instanceType, eventLoop, difficultyLevel);
+        Optional<Instance> instance = instanceFactory.createInstance(instanceKey, instanceType, eventLoop, difficultyLevel);
         if (!instance.isPresent()) {
             System.err.println("map descriptor is not valid: " + instanceType);
             return;
@@ -59,19 +61,25 @@ class Container {
                     });
             int instancePort = nextPort;
             Channel instanceChannel = b.bind(instancePort).sync().channel();
-            instances.add(new InstanceData(instanceChannel, workerGroup));
+            instances.put(instanceKey, new InstanceData(instanceKey, instanceChannel, workerGroup));
             URI instanceUri = UriBuilder.fromUri(address).port(instancePort).build();
             callback.call(instanceUri);
             this.nextPort += 1;
-            System.out.println(String.format("Started instance:%s on port:%s", instanceType, instancePort));
+            System.out.println(String.format("Started instance:%s on port:%s", instanceKey, instancePort));
         } catch (InterruptedException e) {
             System.err.println(e.toString());
         }
     }
 
+    public void killInstance(String instanceKey) {
+        InstanceData instance = instances.get(instanceKey);
+        instance.getWorkerGroup().shutdownGracefully();
+        System.out.println("Killed instance: " + instance.getInstanceKey());
+    }
+
     public Future<?> shutdownGracefully() {
         // it won't be closed because instances are blocking.
-        instances.stream().forEach(instance -> {
+        instances.values().stream().forEach(instance -> {
             try {
                 instance.getInstanceChannel().closeFuture().sync();
                 instance.getWorkerGroup().shutdownGracefully();
@@ -88,6 +96,7 @@ class Container {
 
     @Value
     private static final class InstanceData {
+        String instanceKey;
         Channel instanceChannel;
         EventLoopGroup workerGroup;
     }

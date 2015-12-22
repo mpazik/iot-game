@@ -19,6 +19,7 @@ import lombok.Value;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -110,7 +111,8 @@ public class CommandResolver {
                 String map = data.getAsJsonObject().get("map").getAsString();
                 JsonElement difficultyLevelJson = data.getAsJsonObject().get("difficultyLevel");
                 int difficultyLevel = Optional.ofNullable(difficultyLevelJson).map(JsonElement::getAsInt).orElse(1);
-                arbiter.startInstance(map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
+                String instanceKey = map + new Random().nextInt();
+                arbiter.startInstance(instanceKey, map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
                 return Collections.emptyList();
             case Backdoor:
                 return backdoorCommandResolver.resolveCommand(characterId, data, send);

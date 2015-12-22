@@ -11,8 +11,12 @@ public class Arbiter {
         this.container = container;
     }
 
-    public void startInstance(String instanceType, Container.StartInstanceCallback startInstanceCallback, Integer difficultyLevel) {
-        container.startInstance(instanceType, startInstanceCallback, difficultyLevel);
+    public void startInstance(String instanceKey, String instanceType, Container.StartInstanceCallback startInstanceCallback, Integer difficultyLevel) {
+        container.startInstance(instanceKey, instanceType, startInstanceCallback, difficultyLevel);
+    }
+
+    public void killInstance(String instanceKey) {
+        container.killInstance(instanceKey);
     }
 
     public URI getHomeInstnceAddress() {
