@@ -8,6 +8,8 @@
     <link rel="shortcut icon" type="image/png" href="images/favicon-experiment.ico">
     <script src="src/polyfill.js"></script>
     <script src="src/configuration.js"></script>
+    <script src="components/ui-helper.js"></script>
+    <script src="components/key-codes.js"></script>
     <link rel="import" href="game.html">
     <link rel="import" href="components/game-ui.html">
     <style>
@@ -30,13 +32,10 @@
             game.setAttribute("url", Configuration.serverAddress);
             game.setAttribute("user", nick);
             document.body.appendChild(game);
-            game.addEventListener('running', function () {
+            game.addEventListener('ready-to-connect', function () {
                 const ui = document.createElement("game-ui");
                 ui.init(game);
                 document.body.appendChild(ui);
-            });
-            game.addEventListener('disconnected', function () {
-                document.getElementsByTagName('game-ui')[0].remove();
             });
         });
     </script>
