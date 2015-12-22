@@ -41,7 +41,11 @@ define([], function () {
 
         function showWindow(key) {
             if (activeWindow) {
-                cleanWindow();
+                if (windowRegister.get(activeWindow).closeable) {
+                    cleanWindow();
+                } else {
+                    return;
+                }
             }
             const window = windowRegister.get(key);
             if (!window) {
@@ -67,8 +71,11 @@ define([], function () {
 
             if (activeWindow != null) {
                 const uiWindow = windowRegister.get(activeWindow);
-                //noinspection AmdModulesDependencies
-                currentKeyBinds.set(KEY_CODES.ESC, hideWindow);
+
+                if (uiWindow.closeable) {
+                    //noinspection AmdModulesDependencies
+                    currentKeyBinds.set(KEY_CODES.ESC, hideWindow);
+                }
                 if (uiWindow.keyBinds) {
                     uiWindow.keyBinds.forEach(function (entry) {
                         const key = entry[0];
@@ -169,8 +176,11 @@ define([], function () {
                 }
                 params.key = key;
 
-                if (!params.tagName) {
+                if (typeof params.tagName === 'undefined') {
                     params.tagName = key
+                }
+                if (typeof params.closeable === 'undefined') {
+                    params.closeable = true
                 }
 
                 windowRegister.set(key, params);
