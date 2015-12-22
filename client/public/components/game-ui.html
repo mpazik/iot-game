@@ -58,8 +58,8 @@
         });
 
 
-        require(['src/store/cooldown-bar', 'src/store/server-messages', 'src/store/ui-state'],
-                function (CooldownBar, Messages, UiStateStore) {
+        require(['src/store/cooldown-bar', 'src/store/server-messages'],
+                function (CooldownBar, Messages) {
                     document.registerElement('game-ui', {
                         prototype: Object.create(HTMLElement.prototype, {
                             createdCallback: {
@@ -101,17 +101,19 @@
                                         cancelable: true
                                     }));
 
-                                    function updateState(state) {
+                                    function updateState(playerAlive) {
                                         //noinspection JSPotentiallyInvalidUsageOfThis
                                         this.dispatchEvent(new CustomEvent("ui-state-updated", {
                                             bubbles: false,
                                             cancelable: false,
-                                            detail: state
+                                            detail: {
+                                                playerAlive: playerAlive
+                                            }
                                         }));
                                     }
                                     this._stateUpdated = updateState.bind(this);
-                                    this._stateUpdated(UiStateStore.state.value);
-                                    UiStateStore.state.subscribe(this._stateUpdated)
+                                    this._stateUpdated(this.game.uiState.playerAlive.value);
+                                    this.game.uiState.playerAlive.subscribe(this._stateUpdated)
                                 }
                             },
                             detachedCallback: {
@@ -119,7 +121,12 @@
                                     document.removeEventListener('resize', this._handleResize);
                                     CooldownBar.playerCooldown.unsubscribe(this._updateCooldown);
                                     Messages.messageToShowState.unsubscribe(this._serverMessageUpdate);
-                                    UiStateStore.state.unsubscribe(this._stateUpdated);
+                                    this.game.uiState.playerAlive.unsubscribe(this._stateUpdated);
+                                }
+                            },
+                            showWindow: {
+                                value: function(windowKey) {
+                                    GAME_UI.showWindow(windowKey)
                                 }
                             },
                             _handleResize: {

@@ -32,6 +32,11 @@ UiElement = Object.create(HTMLElement.prototype, {
       get: function () {
           return this.ui.game;
       }
+    },
+    uiState: {
+        get: function () {
+            return this.ui.game.uiState;
+        }
     }
 });
 
