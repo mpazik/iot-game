@@ -58,8 +58,8 @@
         });
 
 
-        require(['src/store/main-player', 'src/store/cooldown-bar', 'src/store/server-messages', 'src/store/ui-state'],
-                function (MainPlayer, CooldownBar, Messages, UiStateStore) {
+        require(['src/store/cooldown-bar', 'src/store/server-messages', 'src/store/ui-state'],
+                function (CooldownBar, Messages, UiStateStore) {
                     document.registerElement('game-ui', {
                         prototype: Object.create(HTMLElement.prototype, {
                             createdCallback: {
@@ -91,7 +91,6 @@
                                 value: function () {
                                     this._handleResize();
                                     document.addEventListener('resize', this._handleResize);
-                                    MainPlayer.playerLiveState.subscribe(this._playerLiveUpdate);
                                     CooldownBar.playerCooldown.subscribe(this._updateCooldown);
                                     Messages.messageToShowState.subscribe(this._serverMessageUpdate);
                                     document.getElementById('cooldown-bar').style.display = 'none';
@@ -118,7 +117,6 @@
                             detachedCallback: {
                                 value: function () {
                                     document.removeEventListener('resize', this._handleResize);
-                                    MainPlayer.playerLiveState.unsubscribe(this._playerLiveUpdate);
                                     CooldownBar.playerCooldown.unsubscribe(this._updateCooldown);
                                     Messages.messageToShowState.unsubscribe(this._serverMessageUpdate);
                                     UiStateStore.state.unsubscribe(this._stateUpdated);
@@ -128,26 +126,6 @@
                                 value: function () {
                                     const middleBar = document.getElementById('middle-bar');
                                     middleBar.style.left = countLeft(middleBar.offsetWidth) + 'px';
-                                }
-                            },
-                            _playerLiveUpdate: {
-                                value: function (live) {
-                                    document.getElementById('death-screen').style.display = live ? 'none' : 'block';
-                                    if (!live) {
-                                        const timeToRespawnSpan = document.getElementById('death-screen-time-to-respawn');
-                                        var timeToRespawn = 4;
-
-                                        function countDown() {
-                                            if (timeToRespawn > 0) {
-                                                setTimeout(countDown, 1000);
-                                            }
-                                            timeToRespawnSpan.innerText = timeToRespawn;
-                                            timeToRespawn -= 1;
-                                        }
-
-                                        countDown();
-
-                                    }
                                 }
                             },
                             _updateCooldown: {

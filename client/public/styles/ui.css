@@ -97,13 +97,3 @@ skill-bar {
     background: rgba(0, 40, 255, 0.3);
     animation: progress-bar-anim linear;
 }
-
-#death-screen {
-    position: absolute;
-    width: 100%;
-    height: 90%;
-    background: rgba(0, 0, 0, 0.2);
-    text-align: center;
-    padding-top: 10%;
-    top: 0;
-}
