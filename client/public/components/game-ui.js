@@ -29,12 +29,13 @@ var GAME_UI;
         const activeUiFragments = [];
         const activeUiFragmentElements = new Map();
         var activeWindow = null;
+        var activeWindowElement = null;
         var uiState = {};
 
+        windowElement.style.display = 'none';
         gameUiElement.addEventListener('ui-state-updated', (event) => updateState(event.detail));
         document.addEventListener('keydown', keyListener);
         renderUiFragments();
-        hideWindow();
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -45,8 +46,9 @@ var GAME_UI;
 
         function cleanWindow() {
             windowElement.style.display = 'none';
+            windowElement.removeChild(activeWindowElement);
             activeWindow = null;
-            windowElement.innerHTML = '';
+            activeWindowElement = null;
         }
 
         function hideWindow() {
@@ -64,11 +66,12 @@ var GAME_UI;
             }
 
             activeWindow = key;
-            setKeyBindings();
 
             const windowInstance = document.createElement(window.tagName);
             windowElement.appendChild(windowInstance);
             windowElement.style.display = 'block';
+            activeWindowElement = windowInstance;
+            setKeyBindings();
         }
 
         function setKeyBindings() {
@@ -84,7 +87,7 @@ var GAME_UI;
                 currentKeyBinds.set(KeyCodes.ESC, hideWindow);
                 if (window.keyBinds) {
                     Object.forEach(window.keyBinds, function (binding, key) {
-                        currentKeyBinds.set(getCharCode(key), binding)
+                        currentKeyBinds.set(getCharCode(key), activeWindowElement[binding].bind(activeWindowElement))
                     });
                 }
                 if (window.activateKeyBind) {

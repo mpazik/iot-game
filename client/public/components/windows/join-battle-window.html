@@ -6,34 +6,21 @@
     <button>Join!</button>
 </template>
 <script>
-    (function (doc) {
-        require(['src/component/dispatcher'], function (Dispatcher) {
-            document.registerElement('join-battle-window', {
-                prototype: Object.create(HTMLElement.prototype, {
-                    createdCallback: {
-                        value: function () {
-                            var main = doc.getElementById("join-battle-window");
-                            var mainElement = document.importNode(main.content, true);
-                            this.appendChild(mainElement);
-                        }
-                    },
-                    attachedCallback: {
-                        value: function () {
-                            const select = this.getElementsByTagName('select')[0];
-                            this.getElementsByTagName("button")[0].onclick = function () {
-                                const map = select.value;
-                                Dispatcher.userEventStream.publish('join-battle', map);
-                            };
-                        }
-                    }
-                })
-            });
-        });
-        GAME_UI.registerWindow("join-battle-window", {
+    createUiElement('join-battle-window', {
+        type: 'window',
+        properties: {
             activateKeyBind: "J",
             requirements: {
                 playerAlive: true
             }
-        });
-    })(document.currentScript.ownerDocument);
+        },
+        attached: function () {
+            const element = this;
+            const select = this.getElementsByTagName('select')[0];
+            this.getElementsByTagName("button")[0].onclick = function () {
+                const map = select.value;
+                element.game.publishUiAction('join-battle', map);
+            };
+        }
+    });
 </script>

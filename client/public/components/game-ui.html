@@ -46,6 +46,18 @@
             return windowWidth / 2 - width / 2;
         }
 
+        Object.keys(UiElements).forEach(function(elementKey) {
+            const element = UiElements[elementKey].prototype;
+            if (element.type == 'fragment') {
+                GAME_UI.registerUiFragment(elementKey, element.properties);
+            } else if (element.type == 'window') {
+                GAME_UI.registerWindow(elementKey, element.properties);
+            } else {
+                throw `Ui element ${elementKey} has undefined type`;
+            }
+        });
+
+
         require(['src/store/main-player', 'src/store/cooldown-bar', 'src/store/server-messages', 'src/store/ui-state'],
                 function (MainPlayer, CooldownBar, Messages, UiStateStore) {
                     document.registerElement('game-ui', {
@@ -61,6 +73,7 @@
                             init: {
                                 value: function (game) {
                                     const ui = this;
+                                    this.game = game;
                                     game.addEventListener('update-profile-stats', function (event) {
                                         const data = event.detail;
                                         ui.profilingWindow.setAttribute('fps', data.fps);

@@ -2,30 +2,19 @@
     <button>Join Battle!</button>
 </template>
 <script>
-    (function (doc) {
-        document.registerElement('join-battle-button', {
-            prototype: Object.create(HTMLElement.prototype, {
-                createdCallback: {
-                    value: function () {
-                        var main = doc.getElementById("join-battle-button");
-                        var mainElement = document.importNode(main.content, true);
-                        this.appendChild(mainElement);
-                    }
-                },
-                attachedCallback: {
-                    value: function () {
-                        this.getElementsByTagName("button")[0].onclick = function () {
-                            GAME_UI.showWindow("join-battle-window");
-                        };
-                    }
-                }
-            })
-        });
-        GAME_UI.registerUiFragment("join-battle-button", {
+    createUiElement('join-battle-button', {
+        type: 'fragment',
+        properties: {
             location: 'center',
             requirements: {
                 playerAlive: true
             }
-        });
-    })(document.currentScript.ownerDocument);
+        },
+        attached: function () {
+            const element = this;
+            this.getElementsByTagName("button")[0].onclick = function () {
+                element.ui.showWindow("join-battle-window");
+            };
+        }
+    });
 </script>

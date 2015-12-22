@@ -34,7 +34,8 @@
             }
         });
 
-        require(['src/component/application', 'src/store/stats', 'src/component/dispatcher'], function (App, StatsStore, Dispatcher) {
+        require(['src/component/application', 'src/common/packet/backdoor-commands', 'src/component/application', 'src/store/stats', 'src/component/dispatcher'
+        ], function (Application, BackdoorCommands, App, StatsStore, Dispatcher) {
             const GameTag = Object.create(HTMLElement.prototype, {
                 createdCallback: {
                     value: function () {
@@ -92,7 +93,19 @@
                             }
                         });
                     }
-                }
+                },
+                publishUiAction: {
+                    value: function (type, data) {
+                        Dispatcher.userEventStream.publish(type, data);
+                    }
+                },
+                backdoor: {
+                    value: {
+                        killCharacter: function () {
+                            Application.sendCommands([BackdoorCommands.killCharacter()]);
+                        }
+                    }
+                },
             });
 
             document.registerElement('dzida-game', {
