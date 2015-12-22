@@ -14,7 +14,7 @@ define([], function () {
         throw "key bing should be either a letter or a key code";
     }
 
-    function initUi(gameUiElement) {
+    function initUi(gameUiElement, uiState) {
         const windowRegister = new Map();
         const uiFragmentsRegister = new Map();
         const windowActivateKeyBinds = new Map();
@@ -30,10 +30,10 @@ define([], function () {
         var activeWindow = null;
         var activeWindowElement = null;
 
-        var uiState = {};
-
         windowElement.style.display = 'none';
         document.addEventListener('keydown', keyListener);
+        uiState.playerAlive.subscribe(updateUi);
+        uiState.scenarioType.subscribe(updateUi);
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -125,7 +125,7 @@ define([], function () {
 
             return Object.keys(requirements).every(key => {
                 const requiredValue = requirements[key];
-                return uiState[key] === requiredValue;
+                return uiState[key].value === requiredValue;
             });
         }
 
@@ -159,12 +159,18 @@ define([], function () {
             }
         }
 
+        function updateUi () {
+            renderUiFragments();
+            renderWindow();
+            setKeyBindings();
+        }
+
         return {
             registerWindow: function (key, params) {
                 if (typeof params == 'undefined') {
                     params = {};
                 }
-                if (!params.tagName || !(params.tagName instanceof "string")) {
+                if (!params.tagName) {
                     params.tagName = key
                 }
 
@@ -178,19 +184,14 @@ define([], function () {
                 if (typeof params == 'undefined') {
                     params = {};
                 }
-                if (!params.tagName || !(params.tagName instanceof "string")) {
+                if (!params.tagName) {
                     params.tagName = key
                 }
 
                 uiFragmentsRegister.set(key, params);
             },
-            updateState: function (state) {
-                uiState = state;
-                renderUiFragments();
-                renderWindow();
-                setKeyBindings();
-            },
-            showWindow
+            showWindow,
+            updateUi
         }
     }
 

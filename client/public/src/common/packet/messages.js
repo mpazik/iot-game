@@ -63,10 +63,11 @@ define(function (require, exports, module) {
                 this.damage = damage;
             },
 
-            InitialData: function (playerId, characterId, state) {
+            InitialData: function (playerId, characterId, state, scenario) {
                 this.playerId = playerId;
                 this.characterId = characterId;
                 this.state = state;
+                this.scenario = scenario;
             },
 
             ServerMessage,

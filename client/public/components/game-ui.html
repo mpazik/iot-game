@@ -57,19 +57,6 @@
                                     var mainElement = document.importNode(main.content, true);
                                     this.appendChild(mainElement);
                                     this.profilingWindow = this.getElementsByTagName('profiling-window')[0];
-
-                                    const gameUi = GameUi.create(this);
-                                    this.gameUi = gameUi;
-                                    Object.keys(UiElements).forEach(function(elementKey) {
-                                        const element = UiElements[elementKey].prototype;
-                                        if (element.type == 'fragment') {
-                                            gameUi.registerUiFragment(elementKey, element.properties);
-                                        } else if (element.type == 'window') {
-                                            gameUi.registerWindow(elementKey, element.properties);
-                                        } else {
-                                            throw `Ui element ${elementKey} has undefined type`;
-                                        }
-                                    });
                                 }
                             },
                             init: {
@@ -85,6 +72,20 @@
                                         ui.profilingWindow.setAttribute('y', data.y);
                                     });
 
+                                    const gameUi = GameUi.create(this, game.uiState);
+                                    this.gameUi = gameUi;
+                                    Object.keys(UiElements).forEach(function (elementKey) {
+                                        const element = UiElements[elementKey].prototype;
+                                        if (element.type == 'fragment') {
+                                            gameUi.registerUiFragment(elementKey, element.properties);
+                                        } else if (element.type == 'window') {
+                                            gameUi.registerWindow(elementKey, element.properties);
+                                        } else {
+                                            throw `Ui element ${elementKey} has undefined type`;
+                                        }
+                                    });
+                                    gameUi.updateUi();
+
                                     const skillBar = document.createElement("skill-bar");
                                     this.querySelector('#action-bar').appendChild(skillBar);
                                 }
@@ -97,16 +98,6 @@
                                     Messages.messageToShowState.subscribe(this._serverMessageUpdate);
                                     document.getElementById('cooldown-bar').style.display = 'none';
                                     document.getElementById('death-screen').style.display = 'none';
-
-                                    const gameUi = this.gameUi;
-                                    function updateState(playerAlive) {
-                                        gameUi.updateState({
-                                            playerAlive: playerAlive
-                                        })
-                                    }
-                                    this._stateUpdated = updateState.bind(this);
-                                    this._stateUpdated(this.game.uiState.playerAlive.value);
-                                    this.game.uiState.playerAlive.subscribe(this._stateUpdated)
                                 }
                             },
                             detachedCallback: {
@@ -114,11 +105,10 @@
                                     document.removeEventListener('resize', this._handleResize);
                                     CooldownBar.playerCooldown.unsubscribe(this._updateCooldown);
                                     Messages.messageToShowState.unsubscribe(this._serverMessageUpdate);
-                                    this.game.uiState.playerAlive.unsubscribe(this._stateUpdated);
                                 }
                             },
                             showWindow: {
-                                value: function(windowKey) {
+                                value: function (windowKey) {
                                     this.gameUi.showWindow(windowKey)
                                 }
                             },

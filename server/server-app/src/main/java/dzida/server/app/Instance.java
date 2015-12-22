@@ -68,7 +68,7 @@ class Instance {
 
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
 
-        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldService, skillService, survivalScenario);
+        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldService, skillService, scenario);
 
         Scheduler scheduler = new SchedulerImpl(eventLoop);
 

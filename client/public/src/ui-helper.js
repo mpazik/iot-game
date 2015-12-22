@@ -21,6 +21,7 @@ UiElement = Object.create(HTMLElement.prototype, {
                 }
                 return findUiElement(parent);
             }
+
             this.ui = findUiElement(this);
 
             if (this.attached) {
@@ -32,6 +33,13 @@ UiElement = Object.create(HTMLElement.prototype, {
         value: function () {
             if (this.detached) {
                 this.detached();
+            }
+        }
+    },
+    attributeChangedCallback: {
+        value: function (attrName, oldVal, newVal) {
+            if (this.attributeChanged) {
+                this.attributeChanged(attrName, oldVal, newVal);
             }
         }
     },

@@ -6,6 +6,7 @@ import lombok.Value;
 import java.util.List;
 
 public class Survival implements Scenario {
+    private final String type;
     private final String mapName;
     private final List<Spawn> spawns;
     private final int difficultyLevel;
@@ -14,6 +15,7 @@ public class Survival implements Scenario {
         this.mapName = mapName;
         this.spawns = spawns;
         this.difficultyLevel = difficultyLevel;
+        this.type = "survival";
     }
 
     public List<Spawn> getSpawns() {
@@ -27,6 +29,11 @@ public class Survival implements Scenario {
 
     public int getDifficultyLevel() {
         return difficultyLevel;
+    }
+
+    @Override
+    public String getType() {
+        return type;
     }
 
     @Value
