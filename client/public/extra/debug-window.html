@@ -6,10 +6,10 @@
     createUiElement('debug-window', {
         type: 'window',
         properties: {
-            activateKeyBind: "D",
-            keyBinds: {
-                "K": "killCharacter"
-            },
+            activateKeyBind: KEY_CODES.fromLetter("D"),
+            keyBinds: [
+                [KEY_CODES.fromLetter("K"), "killCharacter"]
+            ],
             requirements: {
                 playerAlive: true
             }

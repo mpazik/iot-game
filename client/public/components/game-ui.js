@@ -1,19 +1,4 @@
 define([], function () {
-    const KeyCodes = {
-        ESC: 27,
-        ENTER: 13
-    };
-
-    function getCharCode(key) {
-        if (typeof key == "string" && key.length == 1) {
-            return key.charCodeAt(0);
-        }
-        if (typeof key == "number") {
-            return key;
-        }
-        throw "key bing should be either a letter or a key code";
-    }
-
     function initUi(gameUiElement, uiState) {
         const windowRegister = new Map();
         const uiFragmentsRegister = new Map();
@@ -82,14 +67,17 @@ define([], function () {
 
             if (activeWindow != null) {
                 const window = windowRegister.get(activeWindow);
-                currentKeyBinds.set(KeyCodes.ESC, hideWindow);
+                //noinspection AmdModulesDependencies
+                currentKeyBinds.set(KEY_CODES.ESC, hideWindow);
                 if (window.keyBinds) {
-                    Object.forEach(window.keyBinds, function (binding, key) {
-                        currentKeyBinds.set(getCharCode(key), activeWindowElement[binding].bind(activeWindowElement))
+                    window.keyBinds.forEach(function (entry) {
+                        const key = entry[0];
+                        const binding = entry[1];
+                        currentKeyBinds.set(key, activeWindowElement[binding].bind(activeWindowElement))
                     });
                 }
                 if (window.activateKeyBind) {
-                    currentKeyBinds.set(getCharCode(window.activateKeyBind), hideWindow);
+                    currentKeyBinds.set(window.activateKeyBind, hideWindow);
                 }
             }
         }
@@ -177,7 +165,7 @@ define([], function () {
                 windowRegister.set(key, params);
 
                 if (params.activateKeyBind) {
-                    windowActivateKeyBinds.set(getCharCode(params.activateKeyBind), key);
+                    windowActivateKeyBinds.set(params.activateKeyBind, key);
                 }
             },
             registerUiFragment: function (key, params) {

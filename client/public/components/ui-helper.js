@@ -44,9 +44,9 @@ UiElement = Object.create(HTMLElement.prototype, {
         }
     },
     game: {
-      get: function () {
-          return this.ui.game;
-      }
+        get: function () {
+            return this.ui.game;
+        }
     },
     uiState: {
         get: function () {

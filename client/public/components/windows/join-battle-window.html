@@ -9,19 +9,22 @@
     createUiElement('join-battle-window', {
         type: 'window',
         properties: {
-            activateKeyBind: "J",
+            activateKeyBind: KEY_CODES.fromLetter("J"),
+            keyBinds: [
+                [KEY_CODES.ENTER, "joinBattle"]
+            ],
             requirements: {
                 playerAlive: true,
                 scenarioType: 'open-world'
             }
         },
         attached: function () {
-            const element = this;
+            this.getElementsByTagName("button")[0].onclick = this.joinBattle.bind(this);
+        },
+        joinBattle: function () {
             const select = this.getElementsByTagName('select')[0];
-            this.getElementsByTagName("button")[0].onclick = function () {
-                const map = select.value;
-                element.game.publishUiAction('join-battle', map);
-            };
+            const map = select.value;
+            this.game.publishUiAction('join-battle', map);
         }
     });
 </script>
