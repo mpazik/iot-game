@@ -86,8 +86,8 @@ define(function (require, exports, module) {
         network.sendCommands([new Commands.UseSkill(data.skillId, data.characterId)]);
     }
 
-    function sendJoinBattle(map) {
-        network.sendCommands([new Commands.JoinBattle(map)]);
+    function sendJoinBattle(data) {
+        network.sendCommands([new Commands.JoinBattle(data.map, data.difficultyLevel)]);
     }
 
     function goToHome() {

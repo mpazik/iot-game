@@ -7,9 +7,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterId;
+import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
+import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.position.model.Position;
@@ -18,7 +21,6 @@ import lombok.Value;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -45,18 +47,23 @@ public class CommandResolver {
     private final CharacterCommandHandler characterCommandHandler;
     private final Arbiter arbiter;
     private final BackdoorCommandResolver backdoorCommandResolver;
+    private final PlayerService playerService;
+    private final CharacterService characterService;
 
     public CommandResolver(
             PositionCommandHandler positionCommandHandler,
             SkillCommandHandler skillCommandHandler,
             CharacterCommandHandler characterCommandHandler,
             TimeSynchroniser timeSynchroniser,
-            Arbiter arbiter) {
+            Arbiter arbiter, PlayerService playerService,
+            CharacterService characterService) {
         this.positionCommandHandler = positionCommandHandler;
         this.timeSynchroniser = timeSynchroniser;
         this.skillCommandHandler = skillCommandHandler;
         this.characterCommandHandler = characterCommandHandler;
         this.arbiter = arbiter;
+        this.playerService = playerService;
+        this.characterService = characterService;
 
         if (Configuration.isDevMode()) {
             backdoorCommandResolver = new BackdoorCommandResolver(serializer);
@@ -109,8 +116,9 @@ public class CommandResolver {
                 return Collections.emptyList();
             case JoinBattle:
                 String map = data.getAsJsonObject().get("map").getAsString();
-                JsonElement difficultyLevelJson = data.getAsJsonObject().get("difficultyLevel");
-                int difficultyLevel = Optional.ofNullable(difficultyLevelJson).map(JsonElement::getAsInt).orElse(1);
+                int difficultyLevel = data.getAsJsonObject().get("difficultyLevel").getAsInt();
+                PlayerId playerId = characterService.getPlayerCharacter(characterId).get().getPlayerId();
+                playerService.getPlayerData(playerId).setLastDifficultyLevel(difficultyLevel);
                 String instanceKey = map + new Random().nextInt();
                 arbiter.startInstance(instanceKey, map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
                 return Collections.emptyList();

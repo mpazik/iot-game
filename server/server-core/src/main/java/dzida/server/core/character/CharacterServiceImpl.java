@@ -1,5 +1,6 @@
 package dzida.server.core.character;
 
+import com.google.common.collect.FluentIterable;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
@@ -44,8 +45,10 @@ class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public Stream<Character> getCharactersOfType(int type) {
-        return state.values().stream().filter(character -> character.getType() == type);
+    public <T extends Character> List<T> getCharactersOfType(Class<T> clazz) {
+        return FluentIterable.from(state.values())
+                .filter(clazz)
+                .toList();
     }
 
     @Override

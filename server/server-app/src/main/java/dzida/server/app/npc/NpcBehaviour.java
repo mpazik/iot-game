@@ -4,6 +4,7 @@ import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.NpcCharacter;
+import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
@@ -51,7 +52,7 @@ public class NpcBehaviour {
     }
 
     public List<GameEvent> processTick(NpcImpl npc) {
-        Stream<CharacterId> players = characterService.getCharactersOfType(Character.Player).map(Character::getId);
+        Stream<CharacterId> players = characterService.getCharactersOfType(PlayerCharacter.class).stream().map(Character::getId);
         NpcCharacter npcCharacter = npc.getCharacter();
         Optional<CharacterId> target = players.filter(player -> positionService.areCharactersInDistance(npcCharacter.getId(), player, AggroRange, timeService.getCurrentMillis())).findAny();
         if (target.isPresent()) {

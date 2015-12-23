@@ -1,11 +1,19 @@
 <script src="../../lib/requirejs/require.js"></script>
 <template id="join-battle-window">
-    <label>
-        <select>
-            <option value="small-island">Small Island - Survival</option>
-        </select>
-    </label>
-    <button>Join!</button>
+    <div class="form">
+        <form>
+            <label>
+                <select>
+                    <option value="small-island">Small Island - Survival</option>
+                </select>
+            </label>
+            <label>
+                Difficulty Level:
+                <input type="number" id="difficulty-level">
+            </label>
+            <input type="submit" value="Join!">
+        </form>
+    </div>
 </template>
 <script>
     createUiElement('join-battle-window', {
@@ -21,12 +29,31 @@
             }
         },
         attached: function () {
-            this.getElementsByTagName("button")[0].onclick = this.joinBattle.bind(this);
+            const playerData = this.uiState.playerData.value;
+            const difficultyLevelElement = document.getElementById('difficulty-level');
+            difficultyLevelElement.value = playerData.lastDifficultyLevel;
+            difficultyLevelElement.min = 1;
+            difficultyLevelElement.max = playerData.highestDifficultyLevel + 5;
+            const select = this.getElementsByTagName('select')[0];
+            deffer(function () {
+                select.focus();
+            });
+
+            this.getElementsByTagName("form")[0].onsubmit = function(event) {
+                const map = select.value;
+                const difficultyLevel = difficultyLevelElement.value;
+                this.game.publishUiAction('join-battle', {map, difficultyLevel});
+                if (event) {
+                    event.stopPropagation();
+                }
+                return false;
+            }.bind(this)
         },
         joinBattle: function () {
-            const select = this.getElementsByTagName('select')[0];
-            const battle = select.value;
-            this.game.publishUiAction('join-battle', battle);
+            const form = this.getElementsByTagName("form")[0];
+            if (form.reportValidity()){
+                form.onsubmit.call(this);
+            }
         }
     });
 </script>

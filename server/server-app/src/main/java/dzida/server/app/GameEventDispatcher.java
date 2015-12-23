@@ -7,6 +7,7 @@ import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
+import dzida.server.core.player.PlayerData;
 import dzida.server.core.player.PlayerId;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.SkillService;
@@ -48,8 +49,8 @@ public class GameEventDispatcher {
     }
 
     // I do not think that this should be here.
-    public void sendInitialPacket(CharacterId characterId, PlayerId playerId) {
-        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario));
+    public void sendInitialPacket(CharacterId characterId, PlayerId playerId, PlayerData playerData) {
+        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario, playerData));
     }
 
     private Map<String, Object> getState() {
@@ -78,6 +79,10 @@ public class GameEventDispatcher {
         gameEvents.stream().forEach(this::dispatchEvent);
     }
 
+    public void sendEvent(CharacterId characterId, GameEvent gameEvent) {
+        listeners.get(characterId).accept(gameEvent);
+    }
+
     public Publisher<GameEvent> getEventPublisherBeforeChanges() {
         return eventPublisherBeforeChanges;
     }
@@ -92,6 +97,7 @@ public class GameEventDispatcher {
         PlayerId playerId;
         Map<String, Object> state;
         Scenario scenario;
+        PlayerData playerData;
 
         @Override
         public int getId() {

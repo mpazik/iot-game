@@ -31,7 +31,7 @@ public class OpenWorldScenarioLogic implements ScenarioLogic {
 
     @Override
     public void handlePlayerDead(CharacterId characterId, PlayerId playerId) {
-        String playerNick = playerService.getPlayerNick(playerId);
+        String playerNick = playerService.getPlayerData(playerId).getNick();
         respawnPlayer(characterId, playerNick, playerId);
     }
 
