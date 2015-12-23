@@ -34,9 +34,13 @@
             difficultyLevelElement.value = playerData.lastDifficultyLevel;
             difficultyLevelElement.min = 1;
             difficultyLevelElement.max = playerData.highestDifficultyLevel + 5;
+            const select = this.getElementsByTagName('select')[0];
+            deffer(function () {
+                select.focus();
+            });
 
             this.getElementsByTagName("form")[0].onsubmit = function(event) {
-                const map = this.getElementsByTagName('select')[0].value;
+                const map = select.value;
                 const difficultyLevel = difficultyLevelElement.value;
                 this.game.publishUiAction('join-battle', {map, difficultyLevel});
                 if (event) {
