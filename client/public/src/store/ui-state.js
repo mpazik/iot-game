@@ -15,12 +15,7 @@ define(function (require, exports, module) {
                push(scenario.type);
             });
         }),
-        endScenario: new Publisher.StatePublisher(false, (push) => {
-            ScenarioStore.endScenarioData.subscribe(scenario => {
-                push(!!scenario);
-            });
-        }),
-        endScenarioData: ScenarioStore.endScenarioData,
+        endScenario: ScenarioStore.endScenarioData,
         applicationState: Application.state,
         actionBarSkills: ActionBar.skills,
         actionBarActiveSkill: ActionBar.activeState,

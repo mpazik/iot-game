@@ -9,12 +9,12 @@
             autoDisplay: true,
             closeable: false,
             requirements: {
-                endScenario: true,
-                scenarioType: 'survival'
+                endScenario: Predicates.isSet(),
+                scenarioType: Predicates.is('survival')
             }
         },
         attached: function () {
-            const scenarioEnd = this.uiState.endScenarioData.value;
+            const scenarioEnd = this.uiState.endScenario.value;
             const header = this.getElementsByTagName('h1')[0];
             header.innerText = scenarioEnd.resolution;
             if (scenarioEnd.resolution == 'Victory') {

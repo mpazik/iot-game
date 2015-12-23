@@ -6,8 +6,8 @@
         type: 'fragment',
         properties: {
             requirements: {
-                playerAlive: true,
-                scenarioType: 'open-world'
+                playerAlive: Predicates.is(true),
+                scenarioType: Predicates.is('open-world')
             }
         },
         attached: function () {

@@ -114,8 +114,7 @@ define([], function () {
             if (!requirements) return true;
 
             return Object.keys(requirements).every(key => {
-                const requiredValue = requirements[key];
-                return uiState[key].value === requiredValue;
+                return requirements[key](uiState[key].value);
             });
         }
 
@@ -164,16 +163,19 @@ define([], function () {
             setKeyBindings();
         }
 
-        function validateRequirements(requirements) {
+        function validateRequirements(requirements, key) {
             if (!requirements) return;
 
-            const wrongRequirements = Object.keys(requirements).filter(requirement => {
-                return !supportableRequirements.includes(requirement)
-            });
+            Object.keys(requirements).forEach(requirement => {
+                if (typeof requirements[requirement] !== 'function') {
+                    throw `Requirement <[${requirement}]> of element <[${key}]> has to be function`;
+                }
 
-            if (wrongRequirements.length > 0) {
-                throw `Requirements [${wrongRequirements}] are not supported. \n List of supported requirements: ${supportableRequirements}`
-            }
+                if (!supportableRequirements.includes(requirement)) {
+                    throw `Requirement <[${requirement}]> of element <[${key}]> is not supported. \n` +
+                    `List of supported requirements: ${supportableRequirements}`
+                }
+            });
         }
 
         return {
@@ -189,7 +191,7 @@ define([], function () {
                 if (typeof params.closeable === 'undefined') {
                     params.closeable = true
                 }
-                validateRequirements(params.requirements);
+                validateRequirements(params.requirements, key);
 
                 windowRegister.set(key, params);
 
@@ -204,7 +206,7 @@ define([], function () {
                 if (!params.tagName) {
                     params.tagName = key
                 }
-                validateRequirements(params.requirements);
+                validateRequirements(params.requirements, key);
 
                 uiFragmentsRegister.set(key, params);
             },

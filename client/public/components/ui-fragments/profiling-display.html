@@ -9,7 +9,7 @@
         type: 'fragment',
         properties: {
             requirements: {
-                applicationState: 'running'
+                applicationState: Predicates.is('running')
             }
         },
         attached: function () {
