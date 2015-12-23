@@ -34,8 +34,8 @@
             }
         });
 
-        require(['src/component/application', 'src/store/stats', 'src/component/dispatcher', 'src/component/backdoor', 'src/store/ui-state', 'src/component/timer', 'src/store/skill'
-        ], function (App, StatsStore, Dispatcher, Backdoor, UiStateStore, Timer, Skills) {
+        require(['src/component/application', 'src/component/dispatcher', 'src/component/backdoor', 'src/store/ui-state', 'src/component/timer', 'src/store/skill'
+        ], function (App, Dispatcher, Backdoor, UiStateStore, Timer, Skills) {
             const GameTag = Object.create(HTMLElement.prototype, {
                 createdCallback: {
                     value: function () {
@@ -76,10 +76,6 @@
                             //noinspection JSClosureCompilerSyntax
                             game.dispatchEvent(new Event(state));
                         });
-
-                        StatsStore.updateStatsState.subscribe((function (data) {
-                            game.dispatchEvent(new CustomEvent('update-profile-stats', {detail: data}));
-                        }));
 
                         window.addEventListener('mousedown', function (event) {
                             if (event.which && event.which == 1) {

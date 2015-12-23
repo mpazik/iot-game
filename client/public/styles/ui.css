@@ -1,14 +1,16 @@
-profiling-window {
-    width: 335px;
+profiling-display {
+    width: 262px;
     padding: 2px;
+    top: 0;
+    right: 0;
 }
 
-profiling-window div {
+profiling-display div {
     float: left;
     margin: 3px;
 }
 
-profiling-window div > span {
+profiling-display div > span {
     display: block;
     float: right;
     width: 34px;
@@ -35,8 +37,7 @@ game-ui {
     left: 0;
 }
 
-game-ui .ui-fragments {
-}
+game-ui .ui-fragments {}
 
 game-ui .ui-fragments > * {
     position: fixed;
@@ -123,6 +124,6 @@ join-battle-button {
     display: inline-block;
     left: 50%;
     transform: translateX(-50%);
-    top: 0;
+    top: 0px;
 }
 

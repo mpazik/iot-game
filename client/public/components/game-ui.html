@@ -1,6 +1,6 @@
 <script src="ui-helper.js"></script>
 <script src="key-codes.js"></script>
-<link rel="import" href="profiling-window.html">
+<link rel="import" href="ui-fragments/profiling-display.html">
 <link rel="import" href="ui-fragments/respawnScreen.html">
 <link rel="import" href="ui-fragments/join-battle-button.html">
 <link rel="import" href="ui-fragments/respawnScreen.html">
@@ -12,15 +12,8 @@
 <link rel="stylesheet" href="../styles/icon.css">
 <script src="../lib/requirejs/require.js"></script>
 <template id="game-ui">
-    <style>
-        profiling-window {
-            top: 1px;
-            right: 1px;
-        }
-    </style>
     <div class="ui-fragments"></div>
     <div class="window area"></div>
-    <profiling-window fps="0" rft="0" ping="0" x="0" y="0"></profiling-window>
     <div id="center-bottom">
         <div id="cooldown-bar">
             <div class="progress-bar"></div>
@@ -40,21 +33,12 @@
                                     var main = doc.querySelector('#game-ui');
                                     var mainElement = document.importNode(main.content, true);
                                     this.appendChild(mainElement);
-                                    this.profilingWindow = this.getElementsByTagName('profiling-window')[0];
                                 }
                             },
                             init: {
                                 value: function (game) {
                                     const ui = this;
                                     this.game = game;
-                                    game.addEventListener('update-profile-stats', function (event) {
-                                        const data = event.detail;
-                                        ui.profilingWindow.setAttribute('fps', data.fps);
-                                        ui.profilingWindow.setAttribute('rft', data.rft);
-                                        ui.profilingWindow.setAttribute('ping', data.ping);
-                                        ui.profilingWindow.setAttribute('x', data.x);
-                                        ui.profilingWindow.setAttribute('y', data.y);
-                                    });
 
                                     const gameUi = GameUi.create(this, game.uiState);
                                     this.gameUi = gameUi;

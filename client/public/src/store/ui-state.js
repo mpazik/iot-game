@@ -2,6 +2,7 @@ define(function (require, exports, module) {
     const MainPlayerStore = require('./main-player');
     const ScenarioStore = require('./scenario');
     const ActionBar = require('./action-bar');
+    const ProfilingStore = require('./profiling');
     const Publisher = require('../common/basic/publisher');
     const Application = require('../component/application');
 
@@ -22,6 +23,7 @@ define(function (require, exports, module) {
         endScenarioData: ScenarioStore.endScenarioData,
         applicationState: Application.state,
         actionBarSkills: ActionBar.skills,
-        actionBarActiveSkill: ActionBar.activeState
+        actionBarActiveSkill: ActionBar.activeState,
+        profilingStats: ProfilingStore.updateStatsState
     };
 });
