@@ -15,25 +15,31 @@ profiling-window div > span {
     padding-left: 2px;
 }
 
-.center-relative {
-    left: 50%;
-    position: absolute;
-    top: 0;
-}
-
-.center-relative > * {
-    position: relative;
-    left: -50%;
-}
-
 game-ui .window {
-    top: 90px;
+    top: 35%;
     padding: 10px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: fixed;
  }
 
 game-ui .window > * {
     padding: 10px;
     display: block;
+}
+
+game-ui {
+    width: 100%;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+game-ui .ui-fragments {
+}
+
+game-ui .ui-fragments > * {
+    position: fixed;
 }
 
 #middle-bar {
@@ -106,3 +112,17 @@ survival-end-screen {
 survival-end-screen h1 {
     font-size: 50px;
 }
+
+action-bar {
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
+
+join-battle-button {
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+}
+

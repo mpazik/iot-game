@@ -1,5 +1,4 @@
 .icon {
-    position: relative;
     text-align: right;
     width: 48px;
     height: 48px;
@@ -10,7 +9,7 @@
     background: rgba(0, 0, 0, 0.7);
     border: #777 solid 1px;
     border-radius: 3px;
-    float:  left;
+    display: inline-block;
 }
 
 .icon.disabled {

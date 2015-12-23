@@ -93,18 +93,11 @@ define([], function () {
         }
 
         function createUiFragmentElement(uiFragment) {
-            const uiFragmentInstance = document.createElement(uiFragment.tagName);
-            if (uiFragment.location === 'center') {
-                const centerWrapper = document.createElement('div');
-                centerWrapper.classList.add('center-relative');
-                centerWrapper.appendChild(uiFragmentInstance);
-                return centerWrapper
-            } else {
-                return uiFragmentInstance
-            }
+            return document.createElement(uiFragment.tagName);
         }
 
         function displayUiFragment(fragmentKey) {
+            activeUiFragments.push(fragmentKey);
             if (activeUiFragmentElements.has(fragmentKey)) {
                 // ui fragment already displayed.
                 return;
@@ -115,7 +108,6 @@ define([], function () {
 
             uiFragmentsElement.appendChild(uiFragmentElement);
             activeUiFragmentElements.set(fragmentKey, uiFragmentElement);
-            activeUiFragments.push(fragmentKey);
         }
 
         function shouldDisplay(requirements) {

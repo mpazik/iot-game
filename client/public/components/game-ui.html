@@ -1,9 +1,10 @@
 <script src="ui-helper.js"></script>
 <script src="key-codes.js"></script>
 <link rel="import" href="profiling-window.html">
-<link rel="import" href="skill-bar.html">
+<link rel="import" href="ui-fragments/respawnScreen.html">
 <link rel="import" href="ui-fragments/join-battle-button.html">
 <link rel="import" href="ui-fragments/respawnScreen.html">
+<link rel="import" href="ui-fragments/action-bar.html">
 <link rel="import" href="windows/join-battle-window.html">
 <link rel="import" href="windows/survival-end-window.html">
 <link rel="import" href="../extra/extra.html">
@@ -17,6 +18,8 @@
             right: 1px;
         }
     </style>
+    <div class="ui-fragments"></div>
+    <div class="window area"></div>
     <profiling-window fps="0" rft="0" ping="0" x="0" y="0"></profiling-window>
     <div id="center-bottom">
         <div id="cooldown-bar">
@@ -24,31 +27,9 @@
         </div>
     </div>
     <span id="server-message"></span>
-    <div id="death-screen">
-        <h1>Your character died.</h1>
-        <h3>They will respawn in <span id="death-screen-time-to-respawn"></span></h3>
-    </div>
-    <div id="middle-top-bar">
-        <div id="middle-top-bar-content"></div>
-    </div>
-    <div id="middle-bar">
-        <div id="action-bar">
-
-        </div>
-    </div>
-    <div class="ui-fragments"></div>
-    <div class="center-relative">
-        <div class="window area"></div>
-    </div>
 </template>
 <script>
     (function (doc) {
-
-        function countLeft(width) {
-            const windowWidth = window.innerWidth;
-            return windowWidth / 2 - width / 2;
-        }
-
         require(['components/game-ui', 'src/store/cooldown-bar', 'src/store/server-messages'],
                 function (GameUi, CooldownBar, Messages) {
 
@@ -88,24 +69,17 @@
                                         }
                                     });
                                     gameUi.updateUi();
-
-                                    const skillBar = document.createElement("skill-bar");
-                                    this.querySelector('#action-bar').appendChild(skillBar);
                                 }
                             },
                             attachedCallback: {
                                 value: function () {
-                                    this._handleResize();
-                                    document.addEventListener('resize', this._handleResize);
                                     CooldownBar.playerCooldown.subscribe(this._updateCooldown);
                                     Messages.messageToShowState.subscribe(this._serverMessageUpdate);
                                     document.getElementById('cooldown-bar').style.display = 'none';
-                                    document.getElementById('death-screen').style.display = 'none';
                                 }
                             },
                             detachedCallback: {
                                 value: function () {
-                                    document.removeEventListener('resize', this._handleResize);
                                     CooldownBar.playerCooldown.unsubscribe(this._updateCooldown);
                                     Messages.messageToShowState.unsubscribe(this._serverMessageUpdate);
                                 }
@@ -113,12 +87,6 @@
                             showWindow: {
                                 value: function (windowKey) {
                                     this.gameUi.showWindow(windowKey)
-                                }
-                            },
-                            _handleResize: {
-                                value: function () {
-                                    const middleBar = document.getElementById('middle-bar');
-                                    middleBar.style.left = countLeft(middleBar.offsetWidth) + 'px';
                                 }
                             },
                             _updateCooldown: {
