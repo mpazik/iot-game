@@ -3,6 +3,7 @@ package dzida.server.app;
 import dzida.server.core.Scheduler;
 import io.netty.channel.EventLoop;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 public class SchedulerImpl implements Scheduler {
@@ -16,6 +17,11 @@ public class SchedulerImpl implements Scheduler {
     @Override
     public void schedule(Runnable command, long delay) {
         eventLoop.schedule(command, delay, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void schedule(Runnable command, Duration delay) {
+        schedule(command, delay.getSeconds() * 1000);
     }
 
     @Override
