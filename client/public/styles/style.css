@@ -113,3 +113,7 @@ form label {
 form button {
     margin-top: 10px;
 }
+
+.action-key-shortcut {
+    text-decoration: underline;
+}

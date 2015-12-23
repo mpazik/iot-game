@@ -64,6 +64,14 @@ define([], function () {
             setKeyBindings();
         }
 
+        function toggleWindow(key) {
+            if (activeWindow == key) {
+                hideWindow();
+            } else {
+                showWindow(key);
+            }
+        }
+
         function setKeyBindings() {
             currentKeyBinds.clear();
             windowActivateKeyBinds.forEach((windowKey, shortCut) => {
@@ -144,16 +152,18 @@ define([], function () {
             if (autoDisplayWindow.length > 1) {
                 throw "can not display two auto displayable windows at the same time";
             }
-            if (autoDisplayWindow[0]) {
-                showWindow(autoDisplayWindow[0].key);
-                return
+
+            // first check if window is displayed and hide it if it is.
+            // displaying of new window won't close  the previous one in case it was not closable
+            if (activeWindow != null){
+                const uiWindow = windowRegister.get(activeWindow);
+                if (!shouldDisplay(uiWindow.requirements)) {
+                    hideWindow();
+                }
             }
 
-            if (activeWindow == null) return;
-
-            const uiWindow = windowRegister.get(activeWindow);
-            if (!shouldDisplay(uiWindow.requirements)) {
-                hideWindow();
+            if (autoDisplayWindow[0]) {
+                showWindow(autoDisplayWindow[0].key);
             }
         }
 
@@ -212,6 +222,7 @@ define([], function () {
             },
             showWindow,
             hideWindow,
+            toggleWindow,
             updateUi
         }
     }

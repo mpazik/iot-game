@@ -45,6 +45,7 @@ define(function (require, exports, module) {
                     console.log("Got initial data");
                 });
                 break;
+
             case Network.State.DISCONNECTED:
                 disconnected();
                 break;
@@ -128,6 +129,7 @@ define(function (require, exports, module) {
     }
 
     function disconnected() {
+        Dispatcher.messageStream.publish(MessagesIds.Disconnected, {});
         setState('disconnected');
     }
 
@@ -140,7 +142,8 @@ define(function (require, exports, module) {
         setUserNick: function (nick) {
             userNick = nick;
         },
-        connect: connect,
+        connect,
+        disconnect,
         sendCommands: function(commands) {
             network.sendCommands(commands)
         }

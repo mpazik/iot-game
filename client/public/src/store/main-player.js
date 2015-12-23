@@ -40,6 +40,9 @@ define(function (require, exports, module) {
                 if (event.characterId != characterId) return;
                 push(false)
             });
+            Dispatcher.messageStream.subscribe(MessageIds.Disconnected, () => {
+                push(false)
+            });
         }),
         playerRespawnTimeState: new Publisher.StatePublisher(null, (push) => {
             Dispatcher.messageStream.subscribe(MessageIds.CharacterSpawned, (event) => {

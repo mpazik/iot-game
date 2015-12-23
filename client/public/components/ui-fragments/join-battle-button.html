@@ -1,5 +1,5 @@
 <template id="join-battle-button">
-    <button>Join Battle!</button>
+    <button><span class="action-key-shortcut">J</span>oin Battle!</button>
 </template>
 <script>
     createUiElement('join-battle-button', {
@@ -13,7 +13,7 @@
         attached: function () {
             const element = this;
             this.getElementsByTagName("button")[0].onclick = function () {
-                element.ui.showWindow("join-battle-window");
+                element.ui.toggleWindow("join-battle-window");
             };
         }
     });

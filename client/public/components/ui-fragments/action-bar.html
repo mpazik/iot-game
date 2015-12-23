@@ -29,7 +29,7 @@
             // init system bar
             const systemBar = this.getElementsByClassName("system-bar")[0];
             var settingsButton = createSystemIcon('settings', 'sys-settings', 'S', function () {
-                alert('dupa');
+                actionBar.ui.toggleWindow('settings-window');
             });
             systemBar.appendChild(settingsButton);
 
