@@ -24,7 +24,7 @@ define(function (require, exports, module) {
                 push(data.playerData)
             });
         }),
-        playerLiveState: new Publisher.StatePublisher(true, (push) => {
+        playerLiveState: new Publisher.StatePublisher(false, (push) => {
             Dispatcher.messageStream.subscribe(MessageIds.InitialData, () => {
                 push(true)
             });

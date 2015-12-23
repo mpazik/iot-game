@@ -2,6 +2,7 @@ define(function (require, exports, module) {
     const MainPlayerStore = require('./main-player');
     const ScenarioStore = require('./scenario');
     const Publisher = require('../common/basic/publisher');
+    const Application = require('../component/application');
 
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
@@ -17,6 +18,7 @@ define(function (require, exports, module) {
                 push(!!scenario);
             });
         }),
-        endScenarioData: ScenarioStore.endScenarioData
+        endScenarioData: ScenarioStore.endScenarioData,
+        applicationState: Application.state
     };
 });

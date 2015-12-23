@@ -1,5 +1,5 @@
 define([], function () {
-    const supportableRequirements = ['playerAlive', 'scenarioType', 'endScenario'];
+    const supportableRequirements = ['playerAlive', 'scenarioType', 'endScenario', 'applicationState'];
 
     function initUi(gameUiElement, uiState) {
         const windowRegister = new Map();
