@@ -1,4 +1,6 @@
 define([], function () {
+    const supportableRequirements = ['playerAlive', 'scenarioType', 'endScenario'];
+
     function initUi(gameUiElement, uiState) {
         const windowRegister = new Map();
         const uiFragmentsRegister = new Map();
@@ -17,9 +19,9 @@ define([], function () {
 
         windowElement.style.display = 'none';
         document.addEventListener('keydown', keyListener);
-        uiState.playerAlive.subscribe(updateUi);
-        uiState.scenarioType.subscribe(updateUi);
-        uiState.endScenario.subscribe(updateUi);
+        supportableRequirements.forEach(requirements => {
+            uiState[requirements].subscribe(updateUi);
+        });
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -164,10 +166,22 @@ define([], function () {
             }
         }
 
-        function updateUi () {
+        function updateUi() {
             renderUiFragments();
             renderWindow();
             setKeyBindings();
+        }
+
+        function validateRequirements(requirements) {
+            if (!requirements) return;
+
+            const wrongRequirements = Object.keys(requirements).filter(requirement => {
+                return !supportableRequirements.includes(requirement)
+            });
+
+            if (wrongRequirements.length > 0) {
+                throw `Requirements [${wrongRequirements}] are not supported. \n List of supported requirements: ${supportableRequirements}`
+            }
         }
 
         return {
@@ -183,6 +197,7 @@ define([], function () {
                 if (typeof params.closeable === 'undefined') {
                     params.closeable = true
                 }
+                validateRequirements(params.requirements);
 
                 windowRegister.set(key, params);
 
@@ -197,6 +212,7 @@ define([], function () {
                 if (!params.tagName) {
                     params.tagName = key
                 }
+                validateRequirements(params.requirements);
 
                 uiFragmentsRegister.set(key, params);
             },

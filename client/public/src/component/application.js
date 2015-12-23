@@ -95,6 +95,9 @@ define(function (require, exports, module) {
     }
 
     function connect(address) {
+        if (userNick == null) {
+            throw 'userNick has to be defined before game can connect to the server';
+        }
         network.connect(addNickToUrl(address));
     }
 
@@ -129,10 +132,12 @@ define(function (require, exports, module) {
 
     module.exports = {
         state: statePublisher,
-        init: function (nick, gameElement) {
-            userNick = nick;
+        init: function (gameElement) {
             loadGameAssets();
             Render.init(gameElement);
+        },
+        setUserNick: function (nick) {
+            userNick = nick;
         },
         connect: connect,
         sendCommands: function(commands) {
