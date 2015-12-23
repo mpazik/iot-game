@@ -1,0 +1,52 @@
+<link rel="import" href="../elements/action-socket.html">
+<template id="action-bar">
+    <div class="skill-bar icon-socket-set"></div>
+</template>
+<script>
+    createUiElement('action-bar', {
+        type: 'fragment',
+        properties: {
+            requirements: {
+                playerAlive: true
+            }
+        },
+
+        attached: function () {
+            const keyBinds = ['Q', 'W', 'E', 'R', '1', '2', '3', '4', '5'];
+            const skillBar = this.getElementsByClassName("skill-bar")[0];
+            const skillByKey = this.game.skillByKey;
+            const skills = this.uiState.actionBarSkills.value.map(function (id) {
+                return skillByKey(id);
+            });
+            const game = this.game;
+            skills.forEach(function (skill, index) {
+                var socket = document.createElement('action-socket');
+                if (skill) {
+                    socket.setAttribute('icon', skill.icon);
+                    socket.setAttribute('key', skill.id);
+                    socket.addEventListener('action-triggered', function (event) {
+                        const skill = skillByKey(event.detail.key);
+                        game.publishUiAction('skill-triggered', {skill});
+                    });
+                }
+                socket.setAttribute('keyBind', keyBinds[index]);
+                skillBar.appendChild(socket);
+            });
+            this._updateActive(this.uiState.actionBarActiveSkill.value);
+            this.uiState.actionBarActiveSkill.subscribe(this._updateActive.bind(this));
+        },
+        detached: function () {
+            this.uiState.actionBarActiveSkill.unsubscribe(this._updateActive.bind(this));
+        },
+        _updateActive: function (active) {
+            const sockets = this.getElementsByTagName('action-socket');
+            if (this.activeSkill) {
+                sockets[this.activeSkill].removeAttribute('active');
+            }
+            if (active) {
+                this.activeSkill = active;
+                sockets[active].setAttribute('active', 'active');
+            }
+        }
+    });
+</script>

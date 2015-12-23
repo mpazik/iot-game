@@ -7,7 +7,8 @@ define(function (require, exports, module) {
         return publishActive = fn;
     });
 
-    var skills = [0, 1, 2, null, null, null, null, null, null];
+    var skills = new Publisher.StatePublisher([0, 1, 2, null, null, null, null, null, null], () => {
+    });
 
     Targeting.targetingState.subscribe(function (skill) {
         if (skill === null) {
@@ -17,7 +18,7 @@ define(function (require, exports, module) {
                 publishActive(null);
             }
         } else {
-            const index = skills.indexOf(skill.id);
+            const index = skills.value.indexOf(skill.id);
             if (index !== -1) {
                 // skill was activated from action-bar
                 publishActive(index);
