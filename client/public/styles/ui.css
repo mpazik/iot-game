@@ -1,6 +1,6 @@
 game-ui .window {
     top: 35%;
-    padding: 10px;
+    padding: 20px;
     left: 50%;
     transform: translate(-50%, -50%);
     position: fixed;

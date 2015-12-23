@@ -1,0 +1,32 @@
+<template id="login-window">
+    <form>
+        <label>
+            Nick:
+            <input type="text" class="user-nick" minlength="3" maxlength="20" required="required">
+        </label>
+        <input type="submit" value="Login!">
+    </form>
+</template>
+<script>
+    createUiElement('login-window', {
+        type: 'window',
+        properties: {
+            autoDisplay: true,
+            closeable: false,
+            requirements: {
+                applicationState: Predicates.is('ready-to-connect')
+            }
+        },
+        attached: function () {
+            const userNickElement = this.getElementsByClassName('user-nick')[0];
+            deffer(function () {
+                userNickElement.focus();
+            });
+            this.getElementsByTagName("form")[0].onsubmit = function () {
+                const nick = userNickElement.value;
+                this.game.setAttribute("user", nick);
+                return false;
+            }.bind(this);
+        }
+    });
+</script>

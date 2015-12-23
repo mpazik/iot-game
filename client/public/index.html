@@ -27,13 +27,11 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            const nick = 'test' + Math.round(Math.random() * 100);
             const game = document.createElement("dzida-game");
 
             game.setAttribute("url", Configuration.serverAddress);
             document.body.appendChild(game);
             game.addEventListener('ready-to-connect', function () {
-                game.setAttribute("user", nick);
                 const ui = document.createElement("game-ui");
                 ui.init(game);
                 document.body.appendChild(ui);

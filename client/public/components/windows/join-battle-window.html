@@ -1,28 +1,23 @@
 <script src="../../lib/requirejs/require.js"></script>
 <template id="join-battle-window">
-    <div class="form">
-        <form>
-            <label>
-                <select>
-                    <option value="small-island">Small Island - Survival</option>
-                </select>
-            </label>
-            <label>
-                Difficulty Level:
-                <input type="number" id="difficulty-level">
-            </label>
-            <input type="submit" value="Join!">
-        </form>
-    </div>
+    <form>
+        <label>
+            <select>
+                <option value="small-island">Small Island - Survival</option>
+            </select>
+        </label>
+        <label>
+            Difficulty Level:
+            <input type="number" id="difficulty-level" required = "required">
+        </label>
+        <input type="submit" value="Join!">
+    </form>
 </template>
 <script>
     createUiElement('join-battle-window', {
         type: 'window',
         properties: {
             activateKeyBind: KEY_CODES.fromLetter("J"),
-            keyBinds: [
-                [KEY_CODES.ENTER, "joinBattle"]
-            ],
             requirements: {
                 playerAlive: Predicates.is(true),
                 scenarioType: Predicates.is('open-world')
@@ -39,21 +34,12 @@
                 select.focus();
             });
 
-            this.getElementsByTagName("form")[0].onsubmit = function(event) {
+            this.getElementsByTagName("form")[0].onsubmit = function () {
                 const map = select.value;
                 const difficultyLevel = difficultyLevelElement.value;
                 this.game.publishUiAction('join-battle', {map, difficultyLevel});
-                if (event) {
-                    event.stopPropagation();
-                }
                 return false;
             }.bind(this)
-        },
-        joinBattle: function () {
-            const form = this.getElementsByTagName("form")[0];
-            if (form.reportValidity()){
-                form.onsubmit.call(this);
-            }
         }
     });
 </script>
