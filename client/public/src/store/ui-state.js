@@ -19,6 +19,7 @@ define(function (require, exports, module) {
         applicationState: Application.state,
         actionBarSkills: ActionBar.skills,
         actionBarActiveSkill: ActionBar.activeState,
-        profilingStats: ProfilingStore.updateStatsState
+        profilingStats: ProfilingStore.updateStatsState,
+        cooldown: MainPlayerStore.playerCooldown
     };
 });

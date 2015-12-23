@@ -5,6 +5,7 @@
 <link rel="import" href="ui-fragments/join-battle-button.html">
 <link rel="import" href="ui-fragments/respawnScreen.html">
 <link rel="import" href="ui-fragments/action-bar.html">
+<link rel="import" href="ui-fragments/cooldown-bar.html">
 <link rel="import" href="windows/join-battle-window.html">
 <link rel="import" href="windows/survival-end-window.html">
 <link rel="import" href="../extra/extra.html">
@@ -14,17 +15,12 @@
 <template id="game-ui">
     <div class="ui-fragments"></div>
     <div class="window area"></div>
-    <div id="center-bottom">
-        <div id="cooldown-bar">
-            <div class="progress-bar"></div>
-        </div>
-    </div>
     <span id="server-message"></span>
 </template>
 <script>
     (function (doc) {
-        require(['components/game-ui', 'src/store/cooldown-bar', 'src/store/server-messages'],
-                function (GameUi, CooldownBar, Messages) {
+        require(['components/game-ui', 'src/store/server-messages'],
+                function (GameUi, Messages) {
 
                     document.registerElement('game-ui', {
                         prototype: Object.create(HTMLElement.prototype, {
@@ -37,7 +33,6 @@
                             },
                             init: {
                                 value: function (game) {
-                                    const ui = this;
                                     this.game = game;
 
                                     const gameUi = GameUi.create(this, game.uiState);
@@ -57,32 +52,17 @@
                             },
                             attachedCallback: {
                                 value: function () {
-                                    CooldownBar.playerCooldown.subscribe(this._updateCooldown);
                                     Messages.messageToShowState.subscribe(this._serverMessageUpdate);
-                                    document.getElementById('cooldown-bar').style.display = 'none';
                                 }
                             },
                             detachedCallback: {
                                 value: function () {
-                                    CooldownBar.playerCooldown.unsubscribe(this._updateCooldown);
                                     Messages.messageToShowState.unsubscribe(this._serverMessageUpdate);
                                 }
                             },
                             showWindow: {
                                 value: function (windowKey) {
                                     this.gameUi.showWindow(windowKey)
-                                }
-                            },
-                            _updateCooldown: {
-                                value: function (state) {
-                                    const cooldownBar = document.getElementById('cooldown-bar');
-                                    if (state) {
-                                        cooldownBar.style.display = 'block';
-                                        const progressBar = document.querySelector('#cooldown-bar .progress-bar');
-                                        progressBar.style.animationDuration = state.cooldown + 'ms';
-                                    } else {
-                                        cooldownBar.style.display = 'none';
-                                    }
                                 }
                             },
                             _serverMessageUpdate: {
