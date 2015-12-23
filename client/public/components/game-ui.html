@@ -1,81 +1,73 @@
 <script src="../src/global/ui-helper.js"></script>
 <script src="../src/global/key-codes.js"></script>
+
+<link rel="import" href="../extra/extra.html">
 <link rel="import" href="ui-fragments/profiling-display.html">
 <link rel="import" href="ui-fragments/respawnScreen.html">
 <link rel="import" href="ui-fragments/join-battle-button.html">
 <link rel="import" href="ui-fragments/respawnScreen.html">
 <link rel="import" href="ui-fragments/action-bar.html">
 <link rel="import" href="ui-fragments/cooldown-bar.html">
+<link rel="import" href="ui-fragments/game-message.html">
+
 <link rel="import" href="windows/join-battle-window.html">
 <link rel="import" href="windows/survival-end-window.html">
-<link rel="import" href="../extra/extra.html">
+
 <link rel="stylesheet" href="../styles/ui.css">
 <link rel="stylesheet" href="../styles/icon.css">
+
 <script src="../lib/requirejs/require.js"></script>
+
 <template id="game-ui">
     <div class="ui-fragments"></div>
     <div class="window area"></div>
-    <span id="server-message"></span>
 </template>
+
 <script>
     (function (doc) {
-        require(['components/game-ui', 'src/store/server-messages'],
-                function (GameUi, Messages) {
+        require(['components/game-ui'], function (GameUi) {
 
-                    document.registerElement('game-ui', {
-                        prototype: Object.create(HTMLElement.prototype, {
-                            createdCallback: {
-                                value: function () {
-                                    var main = doc.querySelector('#game-ui');
-                                    var mainElement = document.importNode(main.content, true);
-                                    this.appendChild(mainElement);
-                                }
-                            },
-                            init: {
-                                value: function (game) {
-                                    this.game = game;
+            document.registerElement('game-ui', {
+                prototype: Object.create(HTMLElement.prototype, {
+                    createdCallback: {
+                        value: function () {
+                            var main = doc.querySelector('#game-ui');
+                            var mainElement = document.importNode(main.content, true);
+                            this.appendChild(mainElement);
+                        }
+                    },
+                    init: {
+                        value: function (game) {
+                            this.game = game;
 
-                                    const gameUi = GameUi.create(this, game.uiState);
-                                    this.gameUi = gameUi;
-                                    Object.keys(UiElements).forEach(function (elementKey) {
-                                        const element = UiElements[elementKey].prototype;
-                                        if (element.type == 'fragment') {
-                                            gameUi.registerUiFragment(elementKey, element.properties);
-                                        } else if (element.type == 'window') {
-                                            gameUi.registerWindow(elementKey, element.properties);
-                                        } else {
-                                            throw `Ui element ${elementKey} has undefined type`;
-                                        }
-                                    });
-                                    gameUi.updateUi();
+                            const gameUi = GameUi.create(this, game.uiState);
+                            this.gameUi = gameUi;
+                            Object.keys(UiElements).forEach(function (elementKey) {
+                                const element = UiElements[elementKey].prototype;
+                                if (element.type == 'fragment') {
+                                    gameUi.registerUiFragment(elementKey, element.properties);
+                                } else if (element.type == 'window') {
+                                    gameUi.registerWindow(elementKey, element.properties);
+                                } else {
+                                    throw `Ui element ${elementKey} has undefined type`;
                                 }
-                            },
-                            attachedCallback: {
-                                value: function () {
-                                    Messages.messageToShowState.subscribe(this._serverMessageUpdate);
-                                }
-                            },
-                            detachedCallback: {
-                                value: function () {
-                                    Messages.messageToShowState.unsubscribe(this._serverMessageUpdate);
-                                }
-                            },
-                            showWindow: {
-                                value: function (windowKey) {
-                                    this.gameUi.showWindow(windowKey)
-                                }
-                            },
-                            _serverMessageUpdate: {
-                                value: function (message) {
-                                    var serverMessage = document.getElementById('server-message');
-                                    serverMessage.style.display = message ? 'block' : 'none';
-                                    if (message) {
-                                        serverMessage.innerText = message;
-                                    }
-                                }
-                            }
-                        })
-                    });
-                });
+                            });
+                            gameUi.updateUi();
+                        }
+                    },
+                    attachedCallback: {
+                        value: function () {}
+                    },
+                    detachedCallback: {
+                        value: function () {}
+                    },
+                    showWindow: {
+                        value: function (windowKey) {
+                            this.gameUi.showWindow(windowKey)
+                        }
+                    }
+                })
+            });
+        });
     })(document.currentScript.ownerDocument);
 </script>

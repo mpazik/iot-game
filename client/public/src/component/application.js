@@ -6,7 +6,7 @@
  *  3. Loading game assets (textures, sounds) and getting address of the server to connect
  *  4. Connecting to the server.
  *  5. Waiting for initial message.
- *  6. Init world state based on initial message.`
+ *  6. Init world state based on initial message.
  *  7. Show loaded game to player.
  *
  * Joining to the new instnace

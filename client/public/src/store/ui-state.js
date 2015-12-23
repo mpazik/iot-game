@@ -3,6 +3,7 @@ define(function (require, exports, module) {
     const ScenarioStore = require('./scenario');
     const ActionBar = require('./action-bar');
     const ProfilingStore = require('./profiling');
+    const ServerMessagesStore = require('./server-messages');
     const Publisher = require('../common/basic/publisher');
     const Application = require('../component/application');
 
@@ -20,6 +21,7 @@ define(function (require, exports, module) {
         actionBarSkills: ActionBar.skills,
         actionBarActiveSkill: ActionBar.activeState,
         profilingStats: ProfilingStore.updateStatsState,
-        cooldown: MainPlayerStore.playerCooldown
+        cooldown: MainPlayerStore.playerCooldown,
+        gameMessage: ServerMessagesStore.messageToShowState
     };
 });
