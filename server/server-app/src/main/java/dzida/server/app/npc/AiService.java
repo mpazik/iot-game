@@ -31,6 +31,10 @@ public class AiService {
         throw new IllegalArgumentException();
     }
 
+    public void removeNpc(CharacterId characterId) {
+        npcs.remove(characterId);
+    }
+
     public List<GameEvent> processTick() {
         return npcs.values().stream().flatMap(npc -> npc.processTick().stream()).collect(Collectors.toList());
     }

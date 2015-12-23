@@ -35,4 +35,8 @@ public class NpcScenarioLogic {
             gameEventDispatcher.dispatchEvents(gameEvents);
         });
     }
+
+    public void removeNpc(CharacterId characterId) {
+        aiService.removeNpc(characterId);
+    }
 }

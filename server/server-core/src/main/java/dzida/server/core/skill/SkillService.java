@@ -75,7 +75,7 @@ public class SkillService {
 
     private SkillData characterInitState(int characterType) {
         if (characterType == Character.Bot) {
-            return new SkillData(10, 100, 0);
+            return new SkillData(10, 50, 0);
         }
         if (characterType == Character.Player) {
             return new SkillData(200, 200, 0);
