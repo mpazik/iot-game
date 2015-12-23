@@ -11,7 +11,7 @@
     <script src="src/global/ui-helper.js"></script>
     <script src="src/global/predicates.js"></script>
     <script src="src/global/key-codes.js"></script>
-    <link rel="import" href="game.html">
+    <link rel="import" href="components/game.html">
     <link rel="import" href="components/game-ui.html">
     <style>
         body {
@@ -26,16 +26,18 @@
             setTimeout(func, 0)
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const game = document.createElement("dzida-game");
-
-            game.setAttribute("url", Configuration.serverAddress);
-            document.body.appendChild(game);
-            game.addEventListener('ready-to-connect', function () {
+            game.addEventListener('element-attached', function () {
+                game.setAttribute("url", Configuration.serverAddress);
                 const ui = document.createElement("game-ui");
-                ui.init(game);
+                ui.addEventListener('element-attached', function () {
+                    ui.init(game);
+                });
                 document.body.appendChild(ui);
             });
+            document.body.appendChild(game);
+
         });
     </script>
 </head>

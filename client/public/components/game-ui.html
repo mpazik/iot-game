@@ -28,7 +28,6 @@
 <script>
     (function (doc) {
         require(['components/game-ui'], function (GameUi) {
-
             document.registerElement('game-ui', {
                 prototype: Object.create(HTMLElement.prototype, {
                     createdCallback: {
@@ -36,6 +35,12 @@
                             var main = doc.querySelector('#game-ui');
                             var mainElement = document.importNode(main.content, true);
                             this.appendChild(mainElement);
+                        }
+                    },
+                    attachedCallback: {
+                        value: function () {
+                            // because element is created asynchronously due to use requireJs we need to emit event when it's has been propertly created.
+                            this.dispatchEvent(new CustomEvent('element-attached'))
                         }
                     },
                     init: {
@@ -55,10 +60,6 @@
                                 }
                             });
                             gameUi.updateUi();
-                        }
-                    },
-                    attachedCallback: {
-                        value: function () {
                         }
                     },
                     detachedCallback: {

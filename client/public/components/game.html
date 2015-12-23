@@ -1,4 +1,4 @@
-<script src="lib/requirejs/require.js"></script>
+<script src="../lib/requirejs/require.js"></script>
 <template id="game-element">
     <style>
         :host {
@@ -29,8 +29,8 @@
                 }
             },
             paths: {
-                "lib/pixi": "lib/pixi.js/bin/pixi",
-                "configuration": "src/global/configuration"
+                "lib/pixi": "../lib/pixi.js/bin/pixi",
+                "configuration": "../src/global/configuration"
             }
         });
 
@@ -85,6 +85,9 @@
                                 Dispatcher.userEventStream.publish('right-click', event);
                             }
                         });
+
+                        // because element is created asynchronously due to use requireJs we need to emit event when it's has been propertly created.
+                        this.dispatchEvent(new CustomEvent('element-attached'))
                     }
                 },
                 attributeChangedCallback: {
