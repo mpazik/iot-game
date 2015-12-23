@@ -1,6 +1,7 @@
 <link rel="import" href="../elements/action-socket.html">
 <template id="action-bar">
     <div class="skill-bar icon-socket-set"></div>
+    <div class="system-bar icon-socket-set"></div>
 </template>
 <script>
     createUiElement('action-bar', {
@@ -13,20 +14,40 @@
 
         attached: function () {
             const keyBinds = ['Q', 'W', 'E', 'R', '1', '2', '3', '4', '5'];
+            const actionBar = this;
+
+            function createSystemIcon(key, icon, keyBind, action) {
+                var socket = document.createElement('action-socket');
+                socket.setAttribute('icon-set', 'system-icons');
+                if (icon) socket.setAttribute('icon', icon);
+                if (key) socket.setAttribute('key', key);
+                if (action) socket.addEventListener('action-triggered', action);
+                if (keyBind) socket.setAttribute('keyBind', keyBind);
+                return socket;
+            }
+
+            // init system bar
+            const systemBar = this.getElementsByClassName("system-bar")[0];
+            var settingsButton = createSystemIcon('settings', 'sys-settings', 'S', function () {
+                alert('dupa');
+            });
+            systemBar.appendChild(settingsButton);
+
+            // init skill bar
             const skillBar = this.getElementsByClassName("skill-bar")[0];
             const skillByKey = this.game.skillByKey;
             const skills = this.uiState.actionBarSkills.value.map(function (id) {
                 return skillByKey(id);
             });
-            const game = this.game;
             skills.forEach(function (skill, index) {
                 var socket = document.createElement('action-socket');
                 if (skill) {
                     socket.setAttribute('icon', skill.icon);
                     socket.setAttribute('key', skill.id);
+                    socket.setAttribute('icon-set', 'game-icons');
                     socket.addEventListener('action-triggered', function (event) {
                         const skill = skillByKey(event.detail.key);
-                        game.publishUiAction('skill-triggered', {skill});
+                        actionBar.game.publishUiAction('skill-triggered', {skill});
                     });
                 }
                 socket.setAttribute('keyBind', keyBinds[index]);

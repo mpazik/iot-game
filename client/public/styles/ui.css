@@ -90,6 +90,15 @@ action-bar {
     text-align: center;
 }
 
+action-bar div {
+    display: inline-block;
+}
+
+action-bar .system-bar {
+    /* float: left; */
+    margin-left: 2px;
+}
+
 join-battle-button {
     display: inline-block;
     left: 50%;

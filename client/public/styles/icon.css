@@ -16,13 +16,11 @@
     opacity: 0.4;
 }
 
-.icon-sys {
+.system-icons {
     background-image: url("../images/system-icons.png") !important;
-    border: #eee solid 1px !important;
 }
 
-.icon:hover,
-.icon-sys:hover {
+.icon:hover {
     border-color: #CCC !important;
     cursor: pointer;
 }
