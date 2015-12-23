@@ -57,14 +57,21 @@
                         }
                     },
                     attachedCallback: {
-                        value: function () {}
+                        value: function () {
+                        }
                     },
                     detachedCallback: {
-                        value: function () {}
+                        value: function () {
+                        }
                     },
                     showWindow: {
                         value: function (windowKey) {
                             this.gameUi.showWindow(windowKey)
+                        }
+                    },
+                    hideWindow: {
+                        value: function () {
+                            this.gameUi.hideWindow()
                         }
                     }
                 })

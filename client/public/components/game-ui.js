@@ -211,6 +211,7 @@ define([], function () {
                 uiFragmentsRegister.set(key, params);
             },
             showWindow,
+            hideWindow,
             updateUi
         }
     }

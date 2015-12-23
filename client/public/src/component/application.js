@@ -39,7 +39,8 @@ define(function (require, exports, module) {
     network.state.subscribe(function (networkState) {
         switch (networkState) {
             case Network.State.CONNECTED:
-                Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, () => {
+                Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, (data) => {
+                    document.cookie="nick=" + data.playerData.nick;
                     showGame();
                     console.log("Got initial data");
                 });
