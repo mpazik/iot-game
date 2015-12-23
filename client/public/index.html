@@ -30,9 +30,9 @@
             const game = document.createElement("dzida-game");
 
             game.setAttribute("url", Configuration.serverAddress);
-            game.setAttribute("user", nick);
             document.body.appendChild(game);
             game.addEventListener('ready-to-connect', function () {
+                game.setAttribute("user", nick);
                 const ui = document.createElement("game-ui");
                 ui.init(game);
                 document.body.appendChild(ui);

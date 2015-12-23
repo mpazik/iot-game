@@ -48,8 +48,6 @@
                     value: function () {
                         const gameState = this.querySelector('#game-state');
                         const gameRender = this.querySelector('#game-render');
-                        const url = this.getAttribute("url");
-                        const user = this.getAttribute("user");
                         gameRender.style.display = 'none';
 
                         const game = this;
@@ -57,8 +55,7 @@
                             gameState.innerHTML = 'Loading game assets...';
                         });
                         App.state.subscribeState("ready-to-connect", function () {
-                            gameState.innerHTML = 'Connecting...';
-                            App.connect(url);
+                            gameState.innerHTML = '';
                         });
                         App.state.subscribeState("running", function () {
                             gameState.style.display = 'none';
@@ -74,7 +71,7 @@
                             gameRender.style.display = 'none';
                             gameState.innerHTML = 'Disconnected from the server.'
                         });
-                        App.init(user, gameRender);
+                        App.init(gameRender);
                         App.state.subscribe(function (state) {
                             //noinspection JSClosureCompilerSyntax
                             game.dispatchEvent(new Event(state));
@@ -92,6 +89,15 @@
                                 Dispatcher.userEventStream.publish('right-click', event);
                             }
                         });
+                    }
+                },
+                attributeChangedCallback: {
+                    value: function (attrName, oldVal, newVal) {
+                        if (attrName == 'user') {
+                            const url = this.getAttribute("url");
+                            App.setUserNick(newVal);
+                            App.connect(url);
+                        }
                     }
                 },
                 uiState: {value: UiStateStore},
