@@ -124,3 +124,7 @@ game-message {
     color: #f7d104;
     text-shadow: 0 0 4px #fff;
 }
+
+dzida-game canvas {
+    position: absolute;
+}

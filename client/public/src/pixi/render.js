@@ -7,8 +7,8 @@ define(function (require, exports, module) {
     const GroundIndicators = require('./ground-indicators');
     const Projectiles = require('./projectiles');
 
-    var width = 0;
-    var height = 0;
+    var width = window.innerWidth;
+    var height = window.innerHeight;
     const container = new Pixi.Container();
     const stage = new Pixi.Container();
     stage.addChild(container);
