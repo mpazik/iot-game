@@ -115,3 +115,12 @@ game-message {
     text-align: center;
     width: 100%;
 }
+
+.game-state {
+    font-size: 44px;
+    width: 100%;
+    text-align: center;
+    top: 30%;
+    color: #f7d104;
+    text-shadow: 0 0 4px #fff;
+}

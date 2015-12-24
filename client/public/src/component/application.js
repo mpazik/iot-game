@@ -26,10 +26,7 @@ define(function (require, exports, module) {
     const MainPlayer = require('../store/main-player');
     const network = new Network();
     var userNick;
-
-    function addNickToUrl(url) {
-        return url + "/?nick=" + userNick;
-    }
+    var serverAddress;
 
     var setState = null;
     const statePublisher = new Publisher.StatePublisher('started', function (f) {
@@ -40,7 +37,7 @@ define(function (require, exports, module) {
         switch (networkState) {
             case Network.State.CONNECTED:
                 Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, (data) => {
-                    document.cookie="nick=" + data.playerData.nick;
+                    document.cookie = "nick=" + data.playerData.nick;
                     showGame();
                     console.log("Got initial data");
                 });
@@ -61,7 +58,8 @@ define(function (require, exports, module) {
             switch (networkState) {
                 case Network.State.DISCONNECTED:
                     network.state.unsubscribe(listener);
-                    connect(data.address);
+                    serverAddress = data.address;
+                    connect();
                     break;
             }
         };
@@ -96,14 +94,34 @@ define(function (require, exports, module) {
         network.sendCommands([new Commands.GoToHome()]);
     }
 
-    function connect(address) {
-        if (userNick == null) {
-            throw 'userNick has to be defined before game can connect to the server';
+    function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1);
+            if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
         }
-        network.connect(addNickToUrl(address));
+        return null;
+    }
+
+    function connect() {
+        if (serverAddress == null) {
+            throw '<[serverAddress]> has to be defined before game can connect to the server';
+        }
+        if (userNick == null) {
+            userNick = getCookie('nick');
+        }
+        if (userNick == null) {
+            setState('need-authentication');
+            return;
+        }
+
+        network.connect(serverAddress + "/?nick=" + userNick);
     }
 
     function disconnect() {
+        userNick = null;
         network.disconnect();
         Render.cleanWorld();
         if (MainPlayer.playerLiveState.state) {
@@ -116,7 +134,8 @@ define(function (require, exports, module) {
 
     function loadGameAssets() {
         setState("loading-game-assets");
-        ResourcesStore.load().then(() => setState("ready-to-connect"));
+
+        ResourcesStore.load().then(connect);
     }
 
     function showGame() {
@@ -139,12 +158,16 @@ define(function (require, exports, module) {
             loadGameAssets();
             Render.init(gameElement);
         },
+        setAddres: function (address) {
+            serverAddress = address;
+        },
         setUserNick: function (nick) {
             userNick = nick;
+            connect();
         },
         connect,
         disconnect,
-        sendCommands: function(commands) {
+        sendCommands: function (commands) {
             network.sendCommands(commands)
         }
     };

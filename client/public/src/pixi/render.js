@@ -7,8 +7,8 @@ define(function (require, exports, module) {
     const GroundIndicators = require('./ground-indicators');
     const Projectiles = require('./projectiles');
 
-    var width = 800;
-    var height = 600;
+    var width = 0;
+    var height = 0;
     const container = new Pixi.Container();
     const stage = new Pixi.Container();
     stage.addChild(container);
@@ -18,7 +18,7 @@ define(function (require, exports, module) {
     function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
-        return renderer.resize(width, height);
+        renderer.resize(width, height);
     }
 
     window.onresize = resize;
@@ -35,7 +35,7 @@ define(function (require, exports, module) {
     module.exports = {
         init: function (element) {
             element.appendChild(renderer.view);
-            resize();
+            renderer.render(stage);
         },
         initWorld: function () {
             WorldRender.init();
@@ -54,11 +54,13 @@ define(function (require, exports, module) {
             container.addChild(Projectiles.layer);
 
             //container.addChild(GameMap.gameHoveringObjectLayer)
+            resize();
             MainLoop.start();
         },
         cleanWorld: function () {
             MainLoop.stop();
             container.removeChildren();
+            renderer.render(stage);
         }
     };
 });

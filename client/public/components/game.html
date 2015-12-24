@@ -6,17 +6,7 @@
             height: 100%;
         }
 
-        #game-state {
-            font-size: 44px;
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            top: 30%;
-            color: #f7d104;
-            text-shadow: 0 0 4px #fff;
-        }
     </style>
-    <div id="game-state"></div>
     <div id="game-render"></div>
 </template>
 <script>
@@ -46,36 +36,9 @@
                 },
                 attachedCallback: {
                     value: function () {
-                        const gameState = this.querySelector('#game-state');
                         const gameRender = this.querySelector('#game-render');
-                        gameRender.style.display = 'none';
-
-                        const game = this;
-                        App.state.subscribeState("loading-game-assets", function () {
-                            gameState.innerHTML = 'Loading game assets...';
-                        });
-                        App.state.subscribeState("ready-to-connect", function () {
-                            gameState.innerHTML = '';
-                        });
-                        App.state.subscribeState("running", function () {
-                            gameState.style.display = 'none';
-                            gameRender.style.display = 'block';
-                        });
-                        App.state.subscribeState("error", function () {
-                            gameState.style.display = 'block';
-                            gameRender.style.display = 'none';
-                            gameState.innerHTML = 'Server error, refer to logs for more information.'
-                        });
-                        App.state.subscribeState("disconnected", function () {
-                            gameState.style.display = 'block';
-                            gameRender.style.display = 'none';
-                            gameState.innerHTML = 'Disconnected from the server.'
-                        });
+                        App.setAddres(this.getAttribute("url"));
                         App.init(gameRender);
-                        App.state.subscribe(function (state) {
-                            //noinspection JSClosureCompilerSyntax
-                            game.dispatchEvent(new Event(state));
-                        });
 
                         window.addEventListener('mousedown', function (event) {
                             if (event.which && event.which == 1) {
@@ -93,13 +56,14 @@
                 attributeChangedCallback: {
                     value: function (attrName, oldVal, newVal) {
                         if (attrName == 'user') {
-                            const url = this.getAttribute("url");
                             App.setUserNick(newVal);
-                            App.connect(url);
                         }
                     }
                 },
                 disconnect: {value: App.disconnect},
+                connect: {value: function () {
+                    App.connect();
+                }},
                 uiState: {value: UiStateStore},
                 publishUiAction: {value: Dispatcher.userEventStream.publish.bind(Dispatcher.userEventStream)},
                 backdoor: {value: Backdoor},

@@ -28,8 +28,8 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             const game = document.createElement("dzida-game");
+            game.setAttribute("url", Configuration.serverAddress);
             game.addEventListener('element-attached', function () {
-                game.setAttribute("url", Configuration.serverAddress);
                 const ui = document.createElement("game-ui");
                 ui.addEventListener('element-attached', function () {
                     ui.init(game);

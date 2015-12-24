@@ -14,27 +14,10 @@
             autoDisplay: true,
             closeable: false,
             requirements: {
-                applicationState: Predicates.is('ready-to-connect')
+                applicationState: Predicates.is('need-authentication')
             }
         },
         attached: function () {
-            function getCookie(cname) {
-                var name = cname + "=";
-                var ca = document.cookie.split(';');
-                for(var i=0; i<ca.length; i++) {
-                    var c = ca[i];
-                    while (c.charAt(0)==' ') c = c.substring(1);
-                    if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
-                }
-                return "";
-            }
-
-            const nick = getCookie('nick');
-            if (nick) {
-                this.game.setAttribute("user", nick);
-                this.style.display = 'none';
-                return;
-            }
             const userNickElement = this.getElementsByClassName('user-nick')[0];
             deffer(function () {
                 userNickElement.focus();
