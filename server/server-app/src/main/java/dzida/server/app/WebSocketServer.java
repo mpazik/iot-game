@@ -9,13 +9,8 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
@@ -70,24 +65,6 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         return "ws://" + req.headers().get(HOST) + WEBSOCKET_PATH;
     }
 
-    private static Map<String, String> splitQuery(URI url) {
-        Map<String, String> query_pairs = new LinkedHashMap<>();
-        String query = url.getQuery();
-        if (query == null) {
-            return Collections.emptyMap();
-        }
-        String[] pairs = query.split("&");
-        for (String pair : pairs) {
-            int idx = pair.indexOf("=");
-            try {
-                query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return query_pairs;
-    }
-
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof FullHttpRequest) {
@@ -127,9 +104,8 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
-            URI uri = URI.create(req.uri());
-            String nick = splitQuery(uri).get("nick");
-            Optional<PlayerId> validPlayer = connectionHandler.isValidPlayer(nick);
+            Optional<String> nick = readPlayerNickFromCookie(req);
+            Optional<PlayerId> validPlayer = connectionHandler.isValidPlayer(nick.orElse(null));
             if (validPlayer.isPresent()) {
                 ChannelFuture channelFuture = handshaker.handshake(ctx.channel(), req);
                 connectionHandler.handleConnection(channelFuture.channel(), validPlayer.get());
@@ -139,6 +115,11 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
             }
 
         }
+    }
+
+    private Optional<String> readPlayerNickFromCookie(HttpRequest req) {
+        Set<Cookie> cookies = ServerCookieDecoder.decode(req.headers().get("Cookie").toString());
+        return cookies.stream().filter(cookie -> cookie.name().equals("nick")).findFirst().map(Cookie::value);
     }
 
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {

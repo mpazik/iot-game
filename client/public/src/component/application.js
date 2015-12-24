@@ -25,7 +25,6 @@ define(function (require, exports, module) {
     const MessagesIds = require('../common/packet/messages').ids;
     const MainPlayer = require('../store/main-player');
     const network = new Network();
-    var userNick;
     var serverAddress;
 
     var setState = null;
@@ -37,7 +36,6 @@ define(function (require, exports, module) {
         switch (networkState) {
             case Network.State.CONNECTED:
                 Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, (data) => {
-                    document.cookie = "nick=" + data.playerData.nick;
                     showGame();
                     console.log("Got initial data");
                 });
@@ -109,19 +107,16 @@ define(function (require, exports, module) {
         if (serverAddress == null) {
             throw '<[serverAddress]> has to be defined before game can connect to the server';
         }
-        if (userNick == null) {
-            userNick = getCookie('nick');
-        }
+        const userNick = getCookie('nick');
         if (userNick == null) {
             setState('need-authentication');
             return;
         }
 
-        network.connect(serverAddress + "/?nick=" + userNick);
+        network.connect(serverAddress);
     }
 
     function disconnect() {
-        userNick = null;
         network.disconnect();
         Render.cleanWorld();
         if (MainPlayer.playerLiveState.state) {
@@ -162,7 +157,7 @@ define(function (require, exports, module) {
             serverAddress = address;
         },
         setUserNick: function (nick) {
-            userNick = nick;
+            document.cookie = "nick=" + nick;
             connect();
         },
         connect,

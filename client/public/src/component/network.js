@@ -1,7 +1,6 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const PacketSerialization = require('../common/packet/packet-serialization');
-    const Requests = require('../common/packet/commands').constructors;
     const Dispatcher = require('./dispatcher');
 
     const State = {
@@ -50,7 +49,7 @@ define(function (require, exports, module) {
         };
         var self = this;
         var connectionPromise = new Promise(function (resolve, reject) {
-            socket.onopen = function (event) {
+            socket.onopen = function () {
                 //_this.sendRequests([new Requests.TimeSync(Date.now())]);
                 self.updateState(State.CONNECTED);
                 resolve();
