@@ -74,10 +74,10 @@ public class SkillService {
     }
 
     private SkillData characterInitState(int characterType) {
-        if (characterType == Character.Bot) {
+        if (characterType == Character.Type.Bot) {
             return new SkillData(10, 50, 0);
         }
-        if (characterType == Character.Player) {
+        if (characterType == Character.Type.Player) {
             return new SkillData(200, 200, 0);
         }
         throw new IllegalStateException("If this is throw that means there is time to change implementation to use enums");

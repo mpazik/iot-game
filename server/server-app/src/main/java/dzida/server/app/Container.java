@@ -1,8 +1,9 @@
 package dzida.server.app;
 
+import dzida.server.core.player.PlayerStoreInMemory;
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Result;
-import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -26,20 +27,23 @@ public class Container {
     private final URI address;
     private final EventLoopGroup bossGroup;
     private final InstanceFactory instanceFactory;
-    private final PlayerService playerService = new PlayerService();
+    private final PlayerService playerService;
     private final Map<String, InstanceData> instances = new HashMap<>();
-    private final Map<ChannelId, PlayerId> players = new HashMap<>();
+    private final Map<ChannelId, Player.Id> players = new HashMap<>();
     private int nextPort;
 
     Container(int startPort, URI address) {
         bossGroup = new NioEventLoopGroup();
+        playerService = new PlayerService(new PlayerStoreInMemory());
         instanceFactory = new InstanceFactory(playerService, new Arbiter(this));
         nextPort = startPort;
         this.address = address;
     }
 
     public Result canPlayerLogIn(String nick) {
-        if (playerService.isPlayerPlaying(nick)){
+        // since there is auto account creator if player does not exist it can log in.
+        Boolean isPlayerPlaying = playerService.findPlayer(nick).map(playerService::isPlayerPlaying).orElse(false);
+        if (isPlayerPlaying){
             return Result.error(new Error("Players is already logged in."));
         }
         return Result.ok();
@@ -117,17 +121,21 @@ public class Container {
             this.instance = instance;
         }
 
+
         @Override
-        public Optional<PlayerId> isValidPlayer(String nick) {
-            if (playerService.isPlayerPlaying(nick)) {
-                return Optional.empty();
-            }
-            return playerService.loadPlayer(nick);
+        public Player.Id findOrCreatePlayer(String nick) {
+            return playerService.findPlayer(nick).orElseGet(() -> playerService.createPlayer(nick).getValue().getId());
         }
 
         @Override
-        public void handleConnection(Channel channel, PlayerId playerId) {
+        public boolean canPlayerConnect(Player.Id playerId) {
+            return !playerService.isPlayerPlaying(playerId);
+        }
+
+        @Override
+        public void handleConnection(Channel channel, Player.Id playerId) {
             players.put(channel.id(), playerId);
+            playerService.loginPlayer(playerId);
             instance.addPlayer(channel, playerId);
         }
 
@@ -139,7 +147,7 @@ public class Container {
         @Override
         public void handleDisconnection(Channel channel) {
             ChannelId channelId = channel.id();
-            PlayerId playerId = players.get(channelId);
+            Player.Id playerId = players.get(channelId);
             players.remove(channelId);
             playerService.logoutPlayer(playerId);
             instance.removePlayer(channel);

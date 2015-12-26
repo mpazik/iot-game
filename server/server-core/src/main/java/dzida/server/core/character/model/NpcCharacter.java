@@ -9,7 +9,7 @@ public class NpcCharacter implements Character {
 
     public NpcCharacter(CharacterId id, int botType) {
         this.id = id;
-        this.type = Character.Bot;
+        this.type = Character.Type.Bot;
         this.botType = botType;
     }
 

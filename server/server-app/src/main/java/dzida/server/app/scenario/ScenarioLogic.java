@@ -2,10 +2,10 @@ package dzida.server.app.scenario;
 
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.model.PlayerCharacter;
-import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.Player;
 
 public interface ScenarioLogic {
-    default void handlePlayerDead(CharacterId characterId, PlayerId playerId) {
+    default void handlePlayerDead(CharacterId characterId, Player.Id playerId) {
     }
 
     default void handleNpcDead(CharacterId characterId) {

@@ -3,7 +3,7 @@ package dzida.server.app;
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.rest.ContainerResource;
-import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.Player;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -115,21 +115,26 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
-            Optional<String> nick = readPlayerNickFromCookie(req);
-            Optional<PlayerId> validPlayer = connectionHandler.isValidPlayer(nick.orElse(null));
-            if (validPlayer.isPresent()) {
+            Optional<String> nickOpt = readPlayerNickFromCookie(req);
+            Optional<Player.Id> playerIdOpt = nickOpt.map(connectionHandler::findOrCreatePlayer);
+            Boolean canPlayerConnect = playerIdOpt.map(connectionHandler::canPlayerConnect).orElse(false);
+            if (canPlayerConnect) {
+                Player.Id playerId = playerIdOpt.get();
                 ChannelFuture channelFuture = handshaker.handshake(ctx.channel(), req);
-                connectionHandler.handleConnection(channelFuture.channel(), validPlayer.get());
-                System.out.println(String.format("Player %s connected", nick));
+                connectionHandler.handleConnection(channelFuture.channel(), playerId);
+                System.out.println(String.format("Player <[%s]> <[%s]> connected", nickOpt.get(), playerIdOpt.get()));
             } else {
                 handshaker.close(ctx.channel(), new CloseWebSocketFrame(401, "Not valid nick"));
             }
-
         }
     }
 
     private Optional<String> readPlayerNickFromCookie(HttpRequest req) {
-        Set<Cookie> cookies = ServerCookieDecoder.decode(req.headers().get("Cookie").toString());
+        CharSequence cookiesChars = req.headers().get("Cookie");
+        if (cookiesChars == null) {
+            return Optional.empty();
+        }
+        Set<Cookie> cookies = ServerCookieDecoder.decode(cookiesChars.toString());
         return cookies.stream().filter(cookie -> cookie.name().equals("nick")).findFirst().map(Cookie::value);
     }
 
@@ -161,9 +166,11 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     public interface ConnectionHandler {
-        Optional<PlayerId> isValidPlayer(String nick);
+        Player.Id findOrCreatePlayer(String nick);
 
-        void handleConnection(Channel channel, PlayerId playerId);
+        boolean canPlayerConnect(Player.Id playerId);
+
+        void handleConnection(Channel channel, Player.Id playerId);
 
         void handleMessage(Channel channel, String request);
 

@@ -1,19 +1,19 @@
 package dzida.server.core.character.model;
 
 import dzida.server.core.character.CharacterId;
-import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.Player;
 
 public class PlayerCharacter implements Character {
     private final CharacterId id;
     private final String nick;
     private final int type;
-    private final PlayerId playerId;
+    private final Player.Id playerId;
 
-    public PlayerCharacter(CharacterId id, String nick, PlayerId playerId) {
+    public PlayerCharacter(CharacterId id, String nick, Player.Id playerId) {
         this.id = id;
         this.nick = nick;
         this.playerId = playerId;
-        type = Character.Player;
+        type = Character.Type.Player;
     }
 
     public CharacterId getId() {
@@ -28,7 +28,7 @@ public class PlayerCharacter implements Character {
         return nick;
     }
 
-    public PlayerId getPlayerId() {
+    public Player.Id getPlayerId() {
         return playerId;
     }
 }

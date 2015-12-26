@@ -1,50 +1,59 @@
 package dzida.server.core.player;
 
-import java.util.*;
+import dzida.server.core.basic.Error;
+import dzida.server.core.basic.Outcome;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class PlayerService {
+    private final PlayerStore playerStore;
+    private final Map<Player.Id, Player.Entity> playingPlayers = new HashMap<>();
 
-    private Map<PlayerId, PlayerData> playingPlayers = new HashMap<>();
-    private Map<String, PlayerData> persistedData = new HashMap<>();
+    public PlayerService(PlayerStore playerStore) {
+        this.playerStore = playerStore;
+    }
 
-    public PlayerData getPlayerData(PlayerId playerId) {
+
+    public Player.Entity getPlayer(Player.Id playerId) {
         return playingPlayers.get(playerId);
     }
 
-    public Optional<PlayerId> loadPlayer(String nick) {
-        // this method should check player from data base.
-        PlayerId playerId = generatePlayerId();
-        PlayerData playerData = readPlayerData(nick);
-        playingPlayers.put(playerId, playerData);
-        persistedData.put(nick, playerData);
-        return Optional.of(playerId);
+    public Optional<Player.Id> findPlayer(String nick) {
+        return playerStore.findPlayerByNick(nick);
     }
 
-    public boolean isPlayerPlaying(PlayerId playerId) {
+    public void loginPlayer(Player.Id playerId) {
+        Player.Entity player = playerStore.getPlayer(playerId);
+        playingPlayers.put(playerId, player);
+
+    }
+
+    public Outcome<Player.Entity> createPlayer(String nick) {
+        Optional<Player.Id> player = findPlayer(nick);
+        if (player.isPresent()) {
+            return Outcome.<Player.Entity>error(new Error("player already exists"));
+        }
+        Player.Data playerData = Player.Data.builder()
+                .nick(nick)
+                .highestDifficultyLevel(0)
+                .lastDifficultyLevel(1)
+                .build();
+
+        Player.Entity playerEntity = playerStore.createPlayer(playerData);
+        return Outcome.ok(playerEntity);
+    }
+
+    public boolean isPlayerPlaying(Player.Id playerId) {
         return playingPlayers.containsKey(playerId);
     }
 
-    public void logoutPlayer(PlayerId playerId) {
+    public void logoutPlayer(Player.Id playerId) {
         playingPlayers.remove(playerId);
-        playingPlayers.remove(playerId);
     }
 
-    private PlayerData readPlayerData(String nick) {
-        if (persistedData.containsKey(nick)) {
-            return persistedData.get(nick);
-        }
-        return new PlayerData(nick, 0, 1);
-    }
-
-    private PlayerId generatePlayerId() {
-        return new PlayerId((int) Math.round((Math.random() * 100000)));
-    }
-
-    public void updatePlayerData(PlayerId playerId, PlayerData playerData) {
-        playingPlayers.put(playerId, playerData);
-    }
-
-    public boolean isPlayerPlaying(String nick) {
-        return playingPlayers.values().stream().anyMatch(playerData -> playerData.getNick().equals(nick));
+    public void updatePlayerData(Player.Id playerId, Player.Data playerData) {
+        playerStore.updatePlayer(playerId, playerData);
     }
 }

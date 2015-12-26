@@ -16,7 +16,7 @@ public abstract class AbstractResource extends AbstractHttpHandler {
     private final Gson serializer = Serializer.getSerializer();
 
     protected void sendResult(HttpResponder responder, Result result) {
-        result.forEach(validResult -> {
+        result.consume(validResult -> {
             responder.sendStatus(HttpResponseStatus.NO_CONTENT);
         }, errorResult -> {
             sendJson(responder, HttpResponseStatus.BAD_REQUEST, serializer.toJson(errorResult));

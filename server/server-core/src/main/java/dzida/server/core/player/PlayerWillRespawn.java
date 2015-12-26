@@ -6,7 +6,7 @@ import lombok.Value;
 @Value
 public class PlayerWillRespawn implements GameEvent {
 
-    PlayerId playerId;
+    Player.Id playerId;
     long respawnTime;
 
     @Override

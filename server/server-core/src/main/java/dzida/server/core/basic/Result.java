@@ -18,7 +18,7 @@ public interface Result {
         return new ErrorResult(error);
     }
 
-    void forEach(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError);
+    void consume(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError);
 
     final class ValidResult implements Result {
 
@@ -31,7 +31,7 @@ public interface Result {
         }
 
         @Override
-        public void forEach(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError) {
+        public void consume(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError) {
             onValid.accept(this);
         }
 
@@ -50,7 +50,7 @@ public interface Result {
         }
 
         @Override
-        public void forEach(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError) {
+        public void consume(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError) {
             onError.accept(this);
         }
 

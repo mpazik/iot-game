@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
@@ -59,7 +58,7 @@ class CharacterServiceImpl implements CharacterService {
     @Override
     public Optional<PlayerCharacter> getPlayerCharacter(CharacterId characterId) {
         Character character = state.get(characterId);
-        if (character.getType() == Character.Player) {
+        if (character.getType() == Character.Type.Player) {
             return Optional.of((PlayerCharacter) character);
         }
         return Optional.empty();
