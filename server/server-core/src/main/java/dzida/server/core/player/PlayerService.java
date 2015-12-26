@@ -4,29 +4,28 @@ import java.util.*;
 
 public class PlayerService {
 
-    private Map<PlayerId, PlayerData> players = new HashMap<>();
-    private Set<PlayerId> playingPlayers = new HashSet<>();
+    private Map<PlayerId, PlayerData> playingPlayers = new HashMap<>();
     private Map<String, PlayerData> persistedData = new HashMap<>();
 
     public PlayerData getPlayerData(PlayerId playerId) {
-        return players.get(playerId);
+        return playingPlayers.get(playerId);
     }
 
     public Optional<PlayerId> loadPlayer(String nick) {
         // this method should check player from data base.
         PlayerId playerId = generatePlayerId();
         PlayerData playerData = readPlayerData(nick);
-        players.put(playerId, playerData);
+        playingPlayers.put(playerId, playerData);
         persistedData.put(nick, playerData);
-        playingPlayers.add(playerId);
         return Optional.of(playerId);
     }
 
     public boolean isPlayerPlaying(PlayerId playerId) {
-        return playingPlayers.contains(playerId);
+        return playingPlayers.containsKey(playerId);
     }
 
     public void logoutPlayer(PlayerId playerId) {
+        playingPlayers.remove(playerId);
         playingPlayers.remove(playerId);
     }
 
@@ -42,6 +41,10 @@ public class PlayerService {
     }
 
     public void updatePlayerData(PlayerId playerId, PlayerData playerData) {
-        players.put(playerId, playerData);
+        playingPlayers.put(playerId, playerData);
+    }
+
+    public boolean isPlayerPlaying(String nick) {
+        return playingPlayers.values().stream().anyMatch(playerData -> playerData.getNick().equals(nick));
     }
 }

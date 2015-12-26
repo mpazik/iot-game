@@ -2,9 +2,10 @@
     <form>
         <label>
             Nick:
-            <input type="text" class="user-nick" minlength="3" maxlength="20" required="required">
+            <input type="text" class="user-nick" minlength="3" maxlength="20" required autofocus>
         </label>
         <input type="submit" value="Login!">
+        <div class="error-message error"></div>
     </form>
 </template>
 <script>
@@ -18,13 +19,39 @@
             }
         },
         attached: function () {
-            const userNickElement = this.getElementsByClassName('user-nick')[0];
+            const game = this.game;
+            const form = this.getElementsByTagName("form")[0];
+            const userNickElement = form.getElementsByClassName('user-nick')[0];
+            const errorMessage = form.getElementsByClassName('error-message')[0];
+            errorMessage.style.display = 'none';
+
+            function showError(error) {
+                errorMessage.innerText = error;
+                errorMessage.style.display = 'block';
+            }
+
             deffer(function () {
                 userNickElement.focus();
             });
-            this.getElementsByTagName("form")[0].onsubmit = function () {
+
+            form.onsubmit = function (event) {
                 const nick = userNickElement.value;
-                this.game.setAttribute("user", nick);
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function () {
+                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                        if (httpRequest.status === 204) {
+                            errorMessage.style.display = 'none';
+                            game.setUser(nick);
+                            game.connect();
+                        } else {
+                            const response = JSON.parse(httpRequest.responseText);
+                            showError(response.error.message);
+                        }
+                    }
+                };
+                httpRequest.open('GET', '/can-player-login/' + nick);
+                httpRequest.send();
+
                 return false;
             }.bind(this);
         }

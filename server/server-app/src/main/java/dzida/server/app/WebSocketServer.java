@@ -1,5 +1,8 @@
 package dzida.server.app;
 
+import co.cask.http.NettyHttpService;
+import com.google.common.collect.ImmutableList;
+import dzida.server.app.rest.ContainerResource;
 import dzida.server.core.player.PlayerId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -24,12 +27,20 @@ public final class WebSocketServer {
             System.out.println("Server runs in DEV MODE!");
         }
         int startPort = Configuration.getFirstInstancePort();
-        Container container = new Container(startPort, Configuration.getContainerAddress());
+        Container container = new Container(startPort, Configuration.getContainerWsAddress());
 
         for (String instance : Configuration.getInitialInstances()) {
             container.startInstance(instance, instance, (port) -> {
             }, null);
         }
+
+        NettyHttpService service = NettyHttpService.builder()
+                .setPort(Configuration.getContainerRestPort())
+                .addHttpHandlers(ImmutableList.of(new ContainerResource(container)))
+                .build();
+
+        service.startAsync();
+        service.awaitTerminated();
 
         container.shutdownGracefully();
     }

@@ -13,15 +13,10 @@
             }
         },
         attached: function () {
-            function deleteCookie(name) {
-                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-            }
-
             const game = this.game;
 
             this.getElementsByClassName("logout")[0].onclick = function () {
-                deleteCookie('nick');
-                game.disconnect();
+                game.logout();
             };
         },
         logout: function () {

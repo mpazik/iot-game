@@ -1,5 +1,7 @@
 package dzida.server.app;
 
+import dzida.server.core.basic.Error;
+import dzida.server.core.basic.Result;
 import dzida.server.core.player.PlayerId;
 import dzida.server.core.player.PlayerService;
 import io.netty.bootstrap.ServerBootstrap;
@@ -20,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class Container {
+public class Container {
     private final URI address;
     private final EventLoopGroup bossGroup;
     private final InstanceFactory instanceFactory;
@@ -34,6 +36,13 @@ class Container {
         instanceFactory = new InstanceFactory(playerService, new Arbiter(this));
         nextPort = startPort;
         this.address = address;
+    }
+
+    public Result canPlayerLogIn(String nick) {
+        if (playerService.isPlayerPlaying(nick)){
+            return Result.error(new Error("Players is already logged in."));
+        }
+        return Result.ok();
     }
 
     public void startInstance(String instanceKey, String instanceType, StartInstanceCallback callback, Integer difficultyLevel) {
@@ -110,6 +119,9 @@ class Container {
 
         @Override
         public Optional<PlayerId> isValidPlayer(String nick) {
+            if (playerService.isPlayerPlaying(nick)) {
+                return Optional.empty();
+            }
             return playerService.loadPlayer(nick);
         }
 

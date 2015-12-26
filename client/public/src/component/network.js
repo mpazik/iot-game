@@ -58,8 +58,6 @@ define(function (require, exports, module) {
                 if (self.state.value === State.CONNECTING) {
                     reject(error);
                 }
-                console.error(error);
-                self.updateState(State.DISCONNECTED);
             };
         });
         this.socket = socket;

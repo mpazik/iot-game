@@ -53,17 +53,9 @@
                         this.dispatchEvent(new CustomEvent('element-attached'))
                     }
                 },
-                attributeChangedCallback: {
-                    value: function (attrName, oldVal, newVal) {
-                        if (attrName == 'user') {
-                            App.setUserNick(newVal);
-                        }
-                    }
-                },
-                disconnect: {value: App.disconnect},
-                connect: {value: function () {
-                    App.connect();
-                }},
+                logout: {value: App.logout},
+                setUser: {value: App.setUser},
+                connect: {value: App.connect},
                 uiState: {value: UiStateStore},
                 publishUiAction: {value: Dispatcher.userEventStream.publish.bind(Dispatcher.userEventStream)},
                 backdoor: {value: Backdoor},

@@ -117,3 +117,8 @@ form button {
 .action-key-shortcut {
     text-decoration: underline;
 }
+
+form .error-message {
+    margin-top: 15px;
+    font-size: 14px;
+}

@@ -26,6 +26,7 @@ define(function (require, exports, module) {
     const MainPlayer = require('../store/main-player');
     const network = new Network();
     var serverAddress;
+    var userNick;
 
     var setState = null;
     const statePublisher = new Publisher.StatePublisher('started', function (f) {
@@ -103,13 +104,44 @@ define(function (require, exports, module) {
         return null;
     }
 
+    function deleteCookie(name) {
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+
+    function getAndCheckUserNick(callback, error) {
+        const nick = getCookie('nick');
+        if (nick == null) {
+            return error()
+        }
+        const httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (httpRequest.status === 204) {
+                    callback(nick);
+                } else {
+                    const response = JSON.parse(httpRequest.responseText);
+                    error(response.error.message);
+                }
+            }
+        };
+        httpRequest.open('GET', '/can-player-login/' + nick);
+        httpRequest.send();
+    }
+
     function connect() {
         if (serverAddress == null) {
             throw '<[serverAddress]> has to be defined before game can connect to the server';
         }
-        const userNick = getCookie('nick');
         if (userNick == null) {
-            setState('need-authentication');
+            getAndCheckUserNick((nick) => {
+                userNick = nick;
+                connect();
+            }, (error) => {
+                if (error) {
+                    alert(error);
+                }
+                setState('need-authentication');
+            });
             return;
         }
 
@@ -125,6 +157,7 @@ define(function (require, exports, module) {
         }
         Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
         Dispatcher.userEventStream.unsubscribe('go-to-home', goToHome);
+        Dispatcher.messageStream.publish(MessagesIds.Disconnected, {});
     }
 
     function loadGameAssets() {
@@ -143,7 +176,6 @@ define(function (require, exports, module) {
     }
 
     function disconnected() {
-        Dispatcher.messageStream.publish(MessagesIds.Disconnected, {});
         setState('disconnected');
     }
 
@@ -156,12 +188,15 @@ define(function (require, exports, module) {
         setAddres: function (address) {
             serverAddress = address;
         },
-        setUserNick: function (nick) {
+        setUser: function (nick) {
             document.cookie = "nick=" + nick;
-            connect();
         },
         connect,
-        disconnect,
+        logout: function () {
+            userNick = null;
+            deleteCookie('nick');
+            disconnect();
+        },
         sendCommands: function (commands) {
             network.sendCommands(commands)
         }
