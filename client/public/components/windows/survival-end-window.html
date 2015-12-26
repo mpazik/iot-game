@@ -1,6 +1,6 @@
 <template id="survival-end-screen">
         <h1></h1>
-        <button class="large">Go back</button>
+        <button class="large" autofocus>Go back</button>
 </template>
 <script>
     createUiElement('survival-end-screen', {
@@ -22,7 +22,12 @@
             } else {
                 header.classList.add('defeat')
             }
-            this.getElementsByTagName('button')[0].onclick = function () {
+
+            const button = this.getElementsByTagName('button')[0];
+            deffer(function () {
+                button.focus();
+            });
+            button.onclick = function () {
                 this.game.publishUiAction('go-to-home', {});
             }.bind(this);
         }
