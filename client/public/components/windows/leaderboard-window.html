@@ -1,0 +1,26 @@
+<template id="leaderboard-window">
+    <table>
+        <thead>
+            <tr><td>Rank</td><td>Nick</td><td>Record</td></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</template>
+<script>
+    createUiElement('leaderboard-window', {
+        type: 'window',
+        properties: {
+            requirements: {
+                applicationState: Predicates.is('running')
+            }
+        },
+        attached: function () {
+            const table = this.getElementsByTagName('tbody')[0];
+            Request.Server.leaderboard().then(function (data) {
+                table.innerHTML = data.map(function(rowData, i) {
+                    return `<tr><td>${i+1}.</td><td>${rowData.nick}</td><td>${rowData.record}</td>`;
+                }).join('\n');
+            });
+        }
+    });
+</script>

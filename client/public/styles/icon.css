@@ -18,6 +18,7 @@
 
 .system-icons {
     background-image: url("../images/system-icons.png") !important;
+    background-size: 288px 48px;
 }
 
 .icon:hover {
@@ -80,6 +81,10 @@
 
 .sys-help {
     background-position: -196px 0 !important;
+}
+
+.sys-leaderboard {
+    background-position: -240px 0 !important;
 }
 
 .key-bind {

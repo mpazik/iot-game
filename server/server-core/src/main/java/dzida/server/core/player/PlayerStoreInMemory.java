@@ -3,10 +3,16 @@ package dzida.server.core.player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class PlayerStoreInMemory implements PlayerStore {
     private long lastId = 0;
     private final Map<Player.Id, Player.Entity> players = new HashMap<>();
+
+    @Override
+    public Stream<Player.Entity> getAllPlayers() {
+        return players.values().stream();
+    }
 
     @Override
     public Player.Entity createPlayer(Player.Data data) {
