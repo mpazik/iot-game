@@ -1,66 +1,50 @@
-profiling-window {
-    width: 335px;
-    padding: 2px;
-}
-
-profiling-window div {
-    float: left;
-    margin: 3px;
-}
-
-profiling-window div > span {
-    display: block;
-    float: right;
-    width: 34px;
-    padding-left: 2px;
-}
-
-.center-relative {
-    left: 50%;
-    position: absolute;
-    top: 0;
-}
-
-.center-relative > * {
-    position: relative;
-    left: -50%;
-}
-
 game-ui .window {
-    top: 90px;
-    padding: 10px;
- }
+    top: 35%;
+    padding: 20px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: fixed;
+}
 
 game-ui .window > * {
     padding: 10px;
     display: block;
 }
 
-#middle-bar {
+game-ui {
     position: absolute;
-    bottom: 1px;
+    top: 0;
 }
 
-#middle-top-bar {
-    position: absolute;
-    top: 1px;
+game-ui .ui-fragments {
+}
+
+.ui-fragments > * {
+    position: fixed;
+}
+
+profiling-display {
+    width: 262px;
+    padding: 2px;
+    top: 0;
+    right: 0;
+}
+
+profiling-display div {
+    float: left;
+    margin: 3px;
+}
+
+profiling-display div > span {
+    display: block;
+    float: right;
+    width: 34px;
+    padding-left: 2px;
 }
 
 skill-bar {
     float: left;
     margin-right: 10px;
-}
-
-#server-message {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    top: 30%;
-    font-weight: bold;
-    color: #c20101;
-    text-shadow: 0 0 4px #ff8287;
-    z-index: 200;
-    font-size: 24px;
 }
 
 @keyframes progress-bar-anim {
@@ -72,30 +56,23 @@ skill-bar {
     }
 }
 
-#center-bottom {
-    position: absolute;
+cooldown-bar {
     left: 50%;
-    bottom: 0;
-}
-
-#center-bottom > div {
-    position: relative;
-    left: -50%;
-}
-
-#cooldown-bar {
-    margin: 0 auto;
+    transform: translateX(-50%);
     width: 300px;
-    height: 20px;
-    top: -120px;
+    height: 35px;
+    bottom: 20%;
     background: rgba(0, 0, 0, 0.1);
     box-shadow: inset 0 2px 10px 0 rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
 }
 
-#cooldown-bar .progress-bar {
+cooldown-bar .progress-bar {
     height: 100%;
-    background: rgba(0, 40, 255, 0.3);
+    width: 0;
+    background: rgba(0, 40, 255, 0.2);
     animation: progress-bar-anim linear;
+    border-radius: 4px;
 }
 
 survival-end-screen {
@@ -105,4 +82,49 @@ survival-end-screen {
 
 survival-end-screen h1 {
     font-size: 50px;
+}
+
+action-bar {
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
+
+action-bar div {
+    display: inline-block;
+}
+
+action-bar .system-bar {
+    /* float: left; */
+    margin-left: 2px;
+}
+
+join-battle-button {
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+game-message {
+    top: 30%;
+    font-weight: bold;
+    color: #c20101;
+    text-shadow: 0 0 20px #FFFFFF;
+    font-size: 26px;
+    pointer-events: none;
+    text-align: center;
+    width: 100%;
+}
+
+.game-state {
+    font-size: 44px;
+    width: 100%;
+    text-align: center;
+    top: 30%;
+    color: #f7d104;
+    text-shadow: 0 0 4px #fff;
+}
+
+dzida-game canvas {
+    position: absolute;
 }

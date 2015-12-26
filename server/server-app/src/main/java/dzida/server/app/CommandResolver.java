@@ -11,7 +11,7 @@ import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
-import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
@@ -117,8 +117,10 @@ public class CommandResolver {
             case JoinBattle:
                 String map = data.getAsJsonObject().get("map").getAsString();
                 int difficultyLevel = data.getAsJsonObject().get("difficultyLevel").getAsInt();
-                PlayerId playerId = characterService.getPlayerCharacter(characterId).get().getPlayerId();
-                playerService.getPlayerData(playerId).setLastDifficultyLevel(difficultyLevel);
+                Player.Id playerId = characterService.getPlayerCharacter(characterId).get().getPlayerId();
+                Player.Data playerData = playerService.getPlayer(playerId).getData();
+                Player.Data updatedPlayerData = playerData.toBuilder().lastDifficultyLevel(difficultyLevel).build();
+                playerService.updatePlayerData(playerId, updatedPlayerData);
                 String instanceKey = map + new Random().nextInt();
                 arbiter.startInstance(instanceKey, map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
                 return Collections.emptyList();

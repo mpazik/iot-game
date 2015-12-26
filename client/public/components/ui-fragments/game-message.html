@@ -1,0 +1,16 @@
+<template id="game-message">
+    <span></span>
+</template>
+<script>
+    createUiElement('game-message', {
+        type: 'fragment',
+        properties: {
+            requirements: {
+                gameMessage: Predicates.isSet()
+            }
+        },
+        attached: function () {
+            this.getElementsByTagName('span')[0].innerText = this.uiState.gameMessage.value;
+        }
+    });
+</script>

@@ -20,6 +20,6 @@ public class Arbiter {
     }
 
     public URI getHomeInstnceAddress() {
-        return UriBuilder.fromUri(Configuration.getContainerAddress()).port(Configuration.getFirstInstancePort()).build();
+        return UriBuilder.fromUri(Configuration.getContainerWsAddress()).port(Configuration.getFirstInstancePort()).build();
     }
 }

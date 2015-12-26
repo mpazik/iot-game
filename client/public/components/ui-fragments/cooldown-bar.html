@@ -1,0 +1,17 @@
+<template id="cooldown-bar">
+    <div class="progress-bar"></div>
+</template>
+<script>
+    createUiElement('cooldown-bar', {
+        type: 'fragment',
+        properties: {
+            requirements: {
+                cooldown: Predicates.isSet()
+            }
+        },
+        attached: function () {
+            const cooldown = this.uiState.cooldown.value.cooldown;
+            this.getElementsByClassName('progress-bar')[0].style.animationDuration = cooldown + 'ms';
+        }
+    });
+</script>

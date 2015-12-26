@@ -1,4 +1,6 @@
 define([], function () {
+    const supportableRequirements = ['playerAlive', 'scenarioType', 'endScenario', 'applicationState', 'cooldown', 'gameMessage'];
+
     function initUi(gameUiElement, uiState) {
         const windowRegister = new Map();
         const uiFragmentsRegister = new Map();
@@ -17,9 +19,9 @@ define([], function () {
 
         windowElement.style.display = 'none';
         document.addEventListener('keydown', keyListener);
-        uiState.playerAlive.subscribe(updateUi);
-        uiState.scenarioType.subscribe(updateUi);
-        uiState.endScenario.subscribe(updateUi);
+        supportableRequirements.forEach(requirements => {
+            uiState[requirements].subscribe(updateUi);
+        });
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -62,6 +64,14 @@ define([], function () {
             setKeyBindings();
         }
 
+        function toggleWindow(key) {
+            if (activeWindow == key) {
+                hideWindow();
+            } else {
+                showWindow(key);
+            }
+        }
+
         function setKeyBindings() {
             currentKeyBinds.clear();
             windowActivateKeyBinds.forEach((windowKey, shortCut) => {
@@ -91,18 +101,11 @@ define([], function () {
         }
 
         function createUiFragmentElement(uiFragment) {
-            const uiFragmentInstance = document.createElement(uiFragment.tagName);
-            if (uiFragment.location === 'center') {
-                const centerWrapper = document.createElement('div');
-                centerWrapper.classList.add('center-relative');
-                centerWrapper.appendChild(uiFragmentInstance);
-                return centerWrapper
-            } else {
-                return uiFragmentInstance
-            }
+            return document.createElement(uiFragment.tagName);
         }
 
         function displayUiFragment(fragmentKey) {
+            activeUiFragments.push(fragmentKey);
             if (activeUiFragmentElements.has(fragmentKey)) {
                 // ui fragment already displayed.
                 return;
@@ -113,15 +116,13 @@ define([], function () {
 
             uiFragmentsElement.appendChild(uiFragmentElement);
             activeUiFragmentElements.set(fragmentKey, uiFragmentElement);
-            activeUiFragments.push(fragmentKey);
         }
 
         function shouldDisplay(requirements) {
             if (!requirements) return true;
 
             return Object.keys(requirements).every(key => {
-                const requiredValue = requirements[key];
-                return uiState[key].value === requiredValue;
+                return requirements[key](uiState[key].value);
             });
         }
 
@@ -151,23 +152,40 @@ define([], function () {
             if (autoDisplayWindow.length > 1) {
                 throw "can not display two auto displayable windows at the same time";
             }
-            if (autoDisplayWindow[0]) {
-                showWindow(autoDisplayWindow[0].key);
-                return
+
+            // first check if window is displayed and hide it if it is.
+            // displaying of new window won't close  the previous one in case it was not closable
+            if (activeWindow != null){
+                const uiWindow = windowRegister.get(activeWindow);
+                if (!shouldDisplay(uiWindow.requirements)) {
+                    hideWindow();
+                }
             }
 
-            if (activeWindow == null) return;
-
-            const uiWindow = windowRegister.get(activeWindow);
-            if (!shouldDisplay(uiWindow.requirements)) {
-                hideWindow();
+            if (autoDisplayWindow[0]) {
+                showWindow(autoDisplayWindow[0].key);
             }
         }
 
-        function updateUi () {
+        function updateUi() {
             renderUiFragments();
             renderWindow();
             setKeyBindings();
+        }
+
+        function validateRequirements(requirements, key) {
+            if (!requirements) return;
+
+            Object.keys(requirements).forEach(requirement => {
+                if (typeof requirements[requirement] !== 'function') {
+                    throw `Requirement <[${requirement}]> of element <[${key}]> has to be function`;
+                }
+
+                if (!supportableRequirements.includes(requirement)) {
+                    throw `Requirement <[${requirement}]> of element <[${key}]> is not supported. \n` +
+                    `List of supported requirements: ${supportableRequirements}`
+                }
+            });
         }
 
         return {
@@ -183,6 +201,7 @@ define([], function () {
                 if (typeof params.closeable === 'undefined') {
                     params.closeable = true
                 }
+                validateRequirements(params.requirements, key);
 
                 windowRegister.set(key, params);
 
@@ -197,10 +216,13 @@ define([], function () {
                 if (!params.tagName) {
                     params.tagName = key
                 }
+                validateRequirements(params.requirements, key);
 
                 uiFragmentsRegister.set(key, params);
             },
             showWindow,
+            hideWindow,
+            toggleWindow,
             updateUi
         }
     }

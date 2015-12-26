@@ -1,6 +1,9 @@
 package dzida.server.app;
 
-import dzida.server.core.player.PlayerId;
+import co.cask.http.NettyHttpService;
+import com.google.common.collect.ImmutableList;
+import dzida.server.app.rest.ContainerResource;
+import dzida.server.core.player.Player;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -9,13 +12,8 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
@@ -29,12 +27,20 @@ public final class WebSocketServer {
             System.out.println("Server runs in DEV MODE!");
         }
         int startPort = Configuration.getFirstInstancePort();
-        Container container = new Container(startPort, Configuration.getContainerAddress());
+        Container container = new Container(startPort, Configuration.getContainerWsAddress());
 
         for (String instance : Configuration.getInitialInstances()) {
             container.startInstance(instance, instance, (port) -> {
             }, null);
         }
+
+        NettyHttpService service = NettyHttpService.builder()
+                .setPort(Configuration.getContainerRestPort())
+                .addHttpHandlers(ImmutableList.of(new ContainerResource(container)))
+                .build();
+
+        service.startAsync();
+        service.awaitTerminated();
 
         container.shutdownGracefully();
     }
@@ -68,24 +74,6 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
     private static String getWebSocketLocation(FullHttpRequest req) {
         return "ws://" + req.headers().get(HOST) + WEBSOCKET_PATH;
-    }
-
-    private static Map<String, String> splitQuery(URI url) {
-        Map<String, String> query_pairs = new LinkedHashMap<>();
-        String query = url.getQuery();
-        if (query == null) {
-            return Collections.emptyMap();
-        }
-        String[] pairs = query.split("&");
-        for (String pair : pairs) {
-            int idx = pair.indexOf("=");
-            try {
-                query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return query_pairs;
     }
 
     @Override
@@ -127,18 +115,27 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
-            URI uri = URI.create(req.uri());
-            String nick = splitQuery(uri).get("nick");
-            Optional<PlayerId> validPlayer = connectionHandler.isValidPlayer(nick);
-            if (validPlayer.isPresent()) {
+            Optional<String> nickOpt = readPlayerNickFromCookie(req);
+            Optional<Player.Id> playerIdOpt = nickOpt.map(connectionHandler::findOrCreatePlayer);
+            Boolean canPlayerConnect = playerIdOpt.map(connectionHandler::canPlayerConnect).orElse(false);
+            if (canPlayerConnect) {
+                Player.Id playerId = playerIdOpt.get();
                 ChannelFuture channelFuture = handshaker.handshake(ctx.channel(), req);
-                connectionHandler.handleConnection(channelFuture.channel(), validPlayer.get());
-                System.out.println(String.format("Player %s connected", nick));
+                connectionHandler.handleConnection(channelFuture.channel(), playerId);
+                System.out.println(String.format("Player <[%s]> <[%s]> connected", nickOpt.get(), playerIdOpt.get()));
             } else {
                 handshaker.close(ctx.channel(), new CloseWebSocketFrame(401, "Not valid nick"));
             }
-
         }
+    }
+
+    private Optional<String> readPlayerNickFromCookie(HttpRequest req) {
+        CharSequence cookiesChars = req.headers().get("Cookie");
+        if (cookiesChars == null) {
+            return Optional.empty();
+        }
+        Set<Cookie> cookies = ServerCookieDecoder.decode(cookiesChars.toString());
+        return cookies.stream().filter(cookie -> cookie.name().equals("nick")).findFirst().map(Cookie::value);
     }
 
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
@@ -169,9 +166,11 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     public interface ConnectionHandler {
-        Optional<PlayerId> isValidPlayer(String nick);
+        Player.Id findOrCreatePlayer(String nick);
 
-        void handleConnection(Channel channel, PlayerId playerId);
+        boolean canPlayerConnect(Player.Id playerId);
+
+        void handleConnection(Channel channel, Player.Id playerId);
 
         void handleMessage(Channel channel, String request);
 

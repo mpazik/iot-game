@@ -3,7 +3,7 @@ package dzida.server.app.scenario;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.PlayerCharacter;
-import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.player.PlayerWillRespawn;
 import dzida.server.core.position.PositionService;
@@ -30,8 +30,8 @@ public class OpenWorldScenarioLogic implements ScenarioLogic {
     }
 
     @Override
-    public void handlePlayerDead(CharacterId characterId, PlayerId playerId) {
-        String playerNick = playerService.getPlayerData(playerId).getNick();
+    public void handlePlayerDead(CharacterId characterId, Player.Id playerId) {
+        String playerNick = playerService.getPlayer(playerId).getData().getNick();
         respawnPlayer(characterId, playerNick, playerId);
     }
 
@@ -40,7 +40,7 @@ public class OpenWorldScenarioLogic implements ScenarioLogic {
 
     }
 
-    private void respawnPlayer(CharacterId characterId, String nick, PlayerId playerId) {
+    private void respawnPlayer(CharacterId characterId, String nick, Player.Id playerId) {
         PlayerCharacter newPlayerCharacter = new PlayerCharacter(characterId, nick, playerId);
         Move initialMove = positionService.getInitialMove(characterId);
         long respawnTime = Instant.now().plusMillis(SPAWN_TIME).toEpochMilli();

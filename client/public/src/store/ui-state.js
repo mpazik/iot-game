@@ -1,7 +1,11 @@
 define(function (require, exports, module) {
     const MainPlayerStore = require('./main-player');
     const ScenarioStore = require('./scenario');
+    const ActionBar = require('./action-bar');
+    const ProfilingStore = require('./profiling');
+    const ServerMessagesStore = require('./server-messages');
     const Publisher = require('../common/basic/publisher');
+    const Application = require('../component/application');
 
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
@@ -12,11 +16,12 @@ define(function (require, exports, module) {
                push(scenario.type);
             });
         }),
-        endScenario: new Publisher.StatePublisher(false, (push) => {
-            ScenarioStore.endScenarioData.subscribe(scenario => {
-                push(!!scenario);
-            });
-        }),
-        endScenarioData: ScenarioStore.endScenarioData
+        endScenario: ScenarioStore.endScenarioData,
+        applicationState: Application.state,
+        actionBarSkills: ActionBar.skills,
+        actionBarActiveSkill: ActionBar.activeState,
+        profilingStats: ProfilingStore.updateStatsState,
+        cooldown: MainPlayerStore.playerCooldown,
+        gameMessage: ServerMessagesStore.messageToShowState
     };
 });

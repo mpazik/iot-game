@@ -11,7 +11,7 @@
                 [KEY_CODES.fromLetter("K"), "killCharacter"]
             ],
             requirements: {
-                playerAlive: true
+                playerAlive: Predicates.is(true)
             }
         },
         killCharacter: function () {

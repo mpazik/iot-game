@@ -1,0 +1,16 @@
+<template id="loading-screen">
+    Loading...
+</template>
+<script>
+    createUiElement('loading-screen', {
+        type: 'fragment',
+        properties: {
+            requirements: {
+                applicationState: Predicates.is('loading-game-assets')
+            }
+        },
+        created: function () {
+            this.classList.add('game-state')
+        }
+    });
+</script>

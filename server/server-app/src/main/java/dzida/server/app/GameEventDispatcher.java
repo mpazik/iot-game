@@ -7,8 +7,7 @@ import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
-import dzida.server.core.player.PlayerData;
-import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.Player;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.SkillService;
 import dzida.server.core.world.WorldService;
@@ -49,8 +48,8 @@ public class GameEventDispatcher {
     }
 
     // I do not think that this should be here.
-    public void sendInitialPacket(CharacterId characterId, PlayerId playerId, PlayerData playerData) {
-        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario, playerData));
+    public void sendInitialPacket(CharacterId characterId, Player.Id playerId, Player.Entity playerEntity) {
+        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario, playerEntity.getData()));
     }
 
     private Map<String, Object> getState() {
@@ -94,10 +93,10 @@ public class GameEventDispatcher {
     @Value
     public static final class InitialMessage implements GameEvent {
         CharacterId characterId;
-        PlayerId playerId;
+        Player.Id playerId;
         Map<String, Object> state;
         Scenario scenario;
-        PlayerData playerData;
+        Player.Data playerData;
 
         @Override
         public int getId() {

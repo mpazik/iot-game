@@ -9,7 +9,7 @@ html, body, div {
     margin: 0;
 }
 
-div {
+div, h1 {
     -moz-user-select: none;
     -webkit-user-select: none;
 }
@@ -105,11 +105,20 @@ input::-webkit-inner-spin-button {
     color: #3DD83D;
 }
 
-.form label {
+form label {
     display: block;
-    padding: 10px 0;
+    padding: 0 0 20px;
 }
 
-.form button {
+form button {
     margin-top: 10px;
+}
+
+.action-key-shortcut {
+    text-decoration: underline;
+}
+
+form .error-message {
+    margin-top: 15px;
+    font-size: 14px;
 }

@@ -6,7 +6,7 @@
  *  3. Loading game assets (textures, sounds) and getting address of the server to connect
  *  4. Connecting to the server.
  *  5. Waiting for initial message.
- *  6. Init world state based on initial message.`
+ *  6. Init world state based on initial message.
  *  7. Show loaded game to player.
  *
  * Joining to the new instnace
@@ -25,11 +25,8 @@ define(function (require, exports, module) {
     const MessagesIds = require('../common/packet/messages').ids;
     const MainPlayer = require('../store/main-player');
     const network = new Network();
+    var serverAddress;
     var userNick;
-
-    function addNickToUrl(url) {
-        return url + "/?nick=" + userNick;
-    }
 
     var setState = null;
     const statePublisher = new Publisher.StatePublisher('started', function (f) {
@@ -39,11 +36,12 @@ define(function (require, exports, module) {
     network.state.subscribe(function (networkState) {
         switch (networkState) {
             case Network.State.CONNECTED:
-                Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, () => {
+                Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, (data) => {
                     showGame();
                     console.log("Got initial data");
                 });
                 break;
+
             case Network.State.DISCONNECTED:
                 disconnected();
                 break;
@@ -59,7 +57,8 @@ define(function (require, exports, module) {
             switch (networkState) {
                 case Network.State.DISCONNECTED:
                     network.state.unsubscribe(listener);
-                    connect(data.address);
+                    serverAddress = data.address;
+                    connect();
                     break;
             }
         };
@@ -94,8 +93,59 @@ define(function (require, exports, module) {
         network.sendCommands([new Commands.GoToHome()]);
     }
 
-    function connect(address) {
-        network.connect(addNickToUrl(address));
+    function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1);
+            if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+        }
+        return null;
+    }
+
+    function deleteCookie(name) {
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+
+    function getAndCheckUserNick(callback, error) {
+        const nick = getCookie('nick');
+        if (nick == null) {
+            return error()
+        }
+        const httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function () {
+            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                if (httpRequest.status === 204) {
+                    callback(nick);
+                } else {
+                    const response = JSON.parse(httpRequest.responseText);
+                    error(response.error.message);
+                }
+            }
+        };
+        httpRequest.open('GET', '/can-player-login/' + nick);
+        httpRequest.send();
+    }
+
+    function connect() {
+        if (serverAddress == null) {
+            throw '<[serverAddress]> has to be defined before game can connect to the server';
+        }
+        if (userNick == null) {
+            getAndCheckUserNick((nick) => {
+                userNick = nick;
+                connect();
+            }, (error) => {
+                if (error) {
+                    alert(error);
+                }
+                setState('need-authentication');
+            });
+            return;
+        }
+
+        network.connect(serverAddress);
     }
 
     function disconnect() {
@@ -107,11 +157,13 @@ define(function (require, exports, module) {
         }
         Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
         Dispatcher.userEventStream.unsubscribe('go-to-home', goToHome);
+        Dispatcher.messageStream.publish(MessagesIds.Disconnected, {});
     }
 
     function loadGameAssets() {
         setState("loading-game-assets");
-        ResourcesStore.load().then(() => setState("ready-to-connect"));
+
+        ResourcesStore.load().then(connect);
     }
 
     function showGame() {
@@ -129,13 +181,23 @@ define(function (require, exports, module) {
 
     module.exports = {
         state: statePublisher,
-        init: function (nick, gameElement) {
-            userNick = nick;
+        init: function (gameElement) {
             loadGameAssets();
             Render.init(gameElement);
         },
-        connect: connect,
-        sendCommands: function(commands) {
+        setAddres: function (address) {
+            serverAddress = address;
+        },
+        setUser: function (nick) {
+            document.cookie = "nick=" + nick;
+        },
+        connect,
+        logout: function () {
+            userNick = null;
+            deleteCookie('nick');
+            disconnect();
+        },
+        sendCommands: function (commands) {
             network.sendCommands(commands)
         }
     };

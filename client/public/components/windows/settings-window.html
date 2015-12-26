@@ -1,0 +1,26 @@
+<template id="settings-window">
+    <button class="logout"><span class="action-key-shortcut">L</span>ogout!</button>
+</template>
+<script>
+    createUiElement('settings-window', {
+        type: 'window',
+        properties: {
+            keyBinds: [
+                [KEY_CODES.fromLetter("L"), "logout"]
+            ],
+            requirements: {
+                applicationState: Predicates.is('running')
+            }
+        },
+        attached: function () {
+            const game = this.game;
+
+            this.getElementsByClassName("logout")[0].onclick = function () {
+                game.logout();
+            };
+        },
+        logout: function () {
+            this.getElementsByClassName("logout")[0].click();
+        }
+    });
+</script>

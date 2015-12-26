@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" href="styles/style.css">
     <link rel="shortcut icon" type="image/png" href="images/favicon-experiment.ico">
-    <script src="src/polyfill.js"></script>
-    <script src="src/configuration.js"></script>
-    <script src="components/ui-helper.js"></script>
-    <script src="components/key-codes.js"></script>
-    <link rel="import" href="game.html">
+    <script src="src/global/polyfill.js"></script>
+    <script src="src/global/configuration.js"></script>
+    <script src="src/global/ui-helper.js"></script>
+    <script src="src/global/predicates.js"></script>
+    <script src="src/global/key-codes.js"></script>
+    <link rel="import" href="components/game.html">
     <link rel="import" href="components/game-ui.html">
     <style>
         body {
@@ -25,18 +26,18 @@
             setTimeout(func, 0)
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const nick = 'test' + Math.round(Math.random() * 100);
+        document.addEventListener("DOMContentLoaded", function () {
             const game = document.createElement("dzida-game");
-
             game.setAttribute("url", Configuration.serverAddress);
-            game.setAttribute("user", nick);
-            document.body.appendChild(game);
-            game.addEventListener('ready-to-connect', function () {
+            game.addEventListener('element-attached', function () {
                 const ui = document.createElement("game-ui");
-                ui.init(game);
+                ui.addEventListener('element-attached', function () {
+                    ui.init(game);
+                });
                 document.body.appendChild(ui);
             });
+            document.body.appendChild(game);
+
         });
     </script>
 </head>

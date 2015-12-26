@@ -6,8 +6,7 @@ import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
 import dzida.server.core.character.CharacterId;
-import dzida.server.core.player.PlayerData;
-import dzida.server.core.player.PlayerId;
+import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.Scheduler;
 import dzida.server.core.character.CharacterCommandHandler;
@@ -105,20 +104,20 @@ class Instance {
         return Optional.empty();
     }
 
-    public void addPlayer(Channel channel, PlayerId playerId) {
+    public void addPlayer(Channel channel, Player.Id playerId) {
         channels.add(channel);
         CharacterId characterId = new CharacterId((int) Math.round((Math.random() * 100000)));
 
         ChannelId channelId = channel.id();
         charChannels.put(channelId, characterId);
         messagesToSend.put(channelId, Lists.newArrayList());
-        PlayerData playerData = playerService.getPlayerData(playerId);
-        String nick = playerData.getNick();
+        Player.Entity playerEntity = playerService.getPlayer(playerId);
+        String nick = playerEntity.getData().getNick();
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
         gameLogic.playerJoined(character);
         gameEventDispatcher.dispatchEvents(commandResolver.createCharacter(character));
         gameEventDispatcher.registerCharacter(character, addDataToSend(channel));
-        gameEventDispatcher.sendInitialPacket(characterId, playerId, playerData);
+        gameEventDispatcher.sendInitialPacket(characterId, playerId, playerEntity);
         System.out.println(String.format("Instance: %s - character %s joined", instanceKey, characterId));
         send();
     }
