@@ -33,6 +33,9 @@ define(function (require, exports, module) {
         this.listeners = [];
         this.stateListeners = [];
         const newPublish = function (state) {
+            if (state === this._value) {
+                return;
+            }
             this._value = state;
             publish.call(this, state);
             var givenStateListeners = this.stateListeners[state];
