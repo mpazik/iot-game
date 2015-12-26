@@ -5,11 +5,15 @@ import java.net.URI;
 
 class Configuration {
     public static String getContainerHost() {
-        return System.getProperty("containerAddress", "localhost");
+        return System.getProperty("containerHost", "localhost");
     }
 
     public static URI getContainerWsAddress() {
         return UriBuilder.fromPath("").host(getContainerHost()).scheme("ws").build();
+    }
+
+    public static URI getStaticServerAddress() {
+        return URI.create(System.getProperty("containerHost", "http://localhost:8080"));
     }
 
     public static int getContainerRestPort() {
