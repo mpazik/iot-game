@@ -24,9 +24,7 @@ public abstract class Id<T> {
 
     @Override
     public String toString() {
-        return "Id{" +
-                "id=" + id +
-                '}';
+        return "Id{" + id + '}';
     }
 
     public long getValue() {

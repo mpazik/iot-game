@@ -96,7 +96,7 @@ public class GameEventDispatcher {
         Player.Id playerId;
         Map<String, Object> state;
         Scenario scenario;
-        Player.Data player;
+        Player.Data playerData;
 
         @Override
         public int getId() {

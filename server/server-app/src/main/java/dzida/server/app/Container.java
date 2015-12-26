@@ -1,6 +1,6 @@
 package dzida.server.app;
 
-import dzida.server.core.player.PlayerStoreInMemory;
+import dzida.server.app.store.mapdb.PlayerStoreMapDb;
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Result;
 import dzida.server.core.player.Player;
@@ -34,7 +34,7 @@ public class Container {
 
     Container(int startPort, URI address) {
         bossGroup = new NioEventLoopGroup();
-        playerService = new PlayerService(new PlayerStoreInMemory());
+        playerService = new PlayerService(new PlayerStoreMapDb());
         instanceFactory = new InstanceFactory(playerService, new Arbiter(this));
         nextPort = startPort;
         this.address = address;
@@ -43,7 +43,7 @@ public class Container {
     public Result canPlayerLogIn(String nick) {
         // since there is auto account creator if player does not exist it can log in.
         Boolean isPlayerPlaying = playerService.findPlayer(nick).map(playerService::isPlayerPlaying).orElse(false);
-        if (isPlayerPlaying){
+        if (isPlayerPlaying) {
             return Result.error(new Error("Players is already logged in."));
         }
         return Result.ok();
