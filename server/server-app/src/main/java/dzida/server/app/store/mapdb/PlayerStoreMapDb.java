@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.stream.Stream;
 
 public class PlayerStoreMapDb implements PlayerStore {
 
@@ -26,6 +27,16 @@ public class PlayerStoreMapDb implements PlayerStore {
                 .make();
         players = db.treeMap("players", BTreeKeySerializer.LONG, org.mapdb.Serializer.STRING);
         playersByNick = db.treeMap("playersByNick", BTreeKeySerializer.STRING, org.mapdb.Serializer.LONG);
+    }
+
+    @Override
+    public Stream<Player.Entity> getAllPlayers() {
+        return players.entrySet().stream()
+                .map(entry -> {
+                    Player.Data data = serializer.fromJson(entry.getValue(), Player.Data.class);
+                    Player.Id id = new Player.Id(entry.getKey());
+                    return new Player.Entity(id, data);
+                });
     }
 
     @Override
@@ -59,6 +70,6 @@ public class PlayerStoreMapDb implements PlayerStore {
         if (keySet.isEmpty()) {
             return 1L;
         }
-        return keySet.first() + 1;
+        return keySet.last() + 1;
     }
 }

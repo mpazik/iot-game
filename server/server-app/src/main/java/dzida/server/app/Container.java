@@ -32,9 +32,9 @@ public class Container {
     private final Map<ChannelId, Player.Id> players = new HashMap<>();
     private int nextPort;
 
-    Container(int startPort, URI address) {
+    Container(int startPort, URI address, PlayerStoreMapDb playerStore) {
         bossGroup = new NioEventLoopGroup();
-        playerService = new PlayerService(new PlayerStoreMapDb());
+        playerService = new PlayerService(playerStore);
         instanceFactory = new InstanceFactory(playerService, new Arbiter(this));
         nextPort = startPort;
         this.address = address;

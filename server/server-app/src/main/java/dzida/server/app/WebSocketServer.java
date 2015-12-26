@@ -3,6 +3,8 @@ package dzida.server.app;
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.rest.ContainerResource;
+import dzida.server.app.rest.LeaderboardResource;
+import dzida.server.app.store.mapdb.PlayerStoreMapDb;
 import dzida.server.core.player.Player;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -27,16 +29,18 @@ public final class WebSocketServer {
             System.out.println("Server runs in DEV MODE!");
         }
         int startPort = Configuration.getFirstInstancePort();
-        Container container = new Container(startPort, Configuration.getContainerWsAddress());
+        PlayerStoreMapDb playerStore = new PlayerStoreMapDb();
+        Container container = new Container(startPort, Configuration.getContainerWsAddress(), playerStore);
 
         for (String instance : Configuration.getInitialInstances()) {
             container.startInstance(instance, instance, (port) -> {
             }, null);
         }
 
+        Leaderboard leaderboard = new Leaderboard(playerStore);
         NettyHttpService service = NettyHttpService.builder()
                 .setPort(Configuration.getContainerRestPort())
-                .addHttpHandlers(ImmutableList.of(new ContainerResource(container)))
+                .addHttpHandlers(ImmutableList.of(new ContainerResource(container), new LeaderboardResource(leaderboard)))
                 .build();
 
         service.startAsync();

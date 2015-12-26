@@ -16,14 +16,17 @@ public abstract class AbstractResource extends AbstractHttpHandler {
     private final Gson serializer = Serializer.getSerializer();
 
     protected void sendResult(HttpResponder responder, Result result) {
-        result.consume(validResult -> {
-            responder.sendStatus(HttpResponseStatus.NO_CONTENT);
-        }, errorResult -> {
-            sendJson(responder, HttpResponseStatus.BAD_REQUEST, serializer.toJson(errorResult));
-        });
+        result.consume(validResult -> responder.sendStatus(HttpResponseStatus.NO_CONTENT),
+                errorResult -> sendJson(responder, HttpResponseStatus.BAD_REQUEST, serializer.toJson(errorResult))
+        );
     }
 
-    private void sendJson(HttpResponder responder, HttpResponseStatus status, String json) {
+    protected void sendObject(HttpResponder responder, Object data) {
+        String json = serializer.toJson(data);
+        sendJson(responder, HttpResponseStatus.OK, json);
+    }
+
+    protected void sendJson(HttpResponder responder, HttpResponseStatus status, String json) {
         ChannelBuffer channelBuffer = ChannelBuffers.wrappedBuffer(Charsets.UTF_8.encode(json));
         responder.sendContent(status, channelBuffer, "application/json", ImmutableMultimap.<String, String>of());
     }

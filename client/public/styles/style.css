@@ -122,3 +122,22 @@ form .error-message {
     margin-top: 15px;
     font-size: 14px;
 }
+
+table {
+    font-size: 16px;
+    border-spacing: 0;
+}
+
+col.center {
+    text-align: center;
+    background: red;
+}
+
+table tbody td {
+    border-top: 1px solid #f7d104;
+    color: white;
+}
+
+table td {
+    padding: 5px 15px;
+}

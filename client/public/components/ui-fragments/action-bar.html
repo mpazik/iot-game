@@ -33,6 +33,11 @@
             });
             systemBar.appendChild(settingsButton);
 
+            var leaderboardButton = createSystemIcon('settings', 'sys-leaderboard', 'L', function () {
+                actionBar.ui.toggleWindow('leaderboard-window');
+            });
+            systemBar.appendChild(leaderboardButton);
+
             // init skill bar
             const skillBar = this.getElementsByClassName("skill-bar")[0];
             const skillByKey = this.game.skillByKey;
