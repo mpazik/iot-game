@@ -31,4 +31,16 @@ class Configuration {
     public static boolean isDevMode() {
         return "true".equals(System.getProperty("devMode"));
     }
+
+    public static void pirnt() {
+        System.out.println("Configuration listing");
+        System.out.println("---------------------");
+        System.out.println("dev mode: " + isDevMode());
+        System.out.println("container host: " + getContainerHost());
+        System.out.println("container rest port: " + getContainerRestPort());
+        System.out.println("container first instance port: " + getFirstInstancePort());
+        System.out.println("static server address: " + getStaticServerAddress());
+        System.out.println("initial instances: " + String.join(",", getInitialInstances()));
+        System.out.println("---------------------\n");
+    }
 }
