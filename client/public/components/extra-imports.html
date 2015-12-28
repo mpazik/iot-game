@@ -1,0 +1,16 @@
+<script src="../dev/lib/requirejs/require.js"></script>
+<script src="../dev/configuration.js"></script>
+
+<script>
+    require.config({
+        shim: {
+            'configuration': {
+                exports: 'Configuration'
+            }
+        },
+        paths: {
+            "lib/pixi": "../dev/lib/pixi.js/bin/pixi",
+            "configuration": "../dev/configuration"
+        }
+    });
+</script>

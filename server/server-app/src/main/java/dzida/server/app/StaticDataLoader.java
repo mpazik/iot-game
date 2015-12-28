@@ -14,7 +14,7 @@ public class StaticDataLoader {
     public <T> T loadJsonFromServer(String path, TypeToken<T> typeToken) {
         long startTime = System.currentTimeMillis();
         try {
-            URL url = UriBuilder.fromUri(Configuration.getStaticServerAddress()).path("assets").path(path).build().toURL();
+            URL url = UriBuilder.fromUri(Configuration.getStaticServerAddress()).path(path).build().toURL();
             System.out.printf("Downloading json file from %s \n", url);
             InputStream inputStream = url.openStream();
             JsonReader jsonReader = new JsonReader(new InputStreamReader(inputStream));

@@ -1,6 +1,7 @@
 define(function (require, exports, module) {
     var Pixi = require('lib/pixi');
-    var dataServer = "http://localhost:8080/assets/";
+    var Configuration = require('configuration');
+    var assetsPath = Configuration.assetsLocalization + '/';
     var tilesets = {};
     var skills = {};
 
@@ -26,7 +27,7 @@ define(function (require, exports, module) {
     }
 
     function loadImage(name) {
-        var absoluteUrl = dataServer + name;
+        var absoluteUrl = assetsPath + name;
         Pixi.loader.add(name, absoluteUrl);
         return new Promise(function (resolve, reject) {
             Pixi.loader.once('complete', function () {
@@ -38,7 +39,7 @@ define(function (require, exports, module) {
     }
 
     function loadJson(url) {
-        var absoluteUrl = dataServer + url + '.json';
+        var absoluteUrl = assetsPath + url + '.json';
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
         xobj.open('GET', absoluteUrl, true);
@@ -69,9 +70,9 @@ define(function (require, exports, module) {
             return skills[id];
         },
         load: function () {
-            loadCss(dataServer + "sprites/game-icons.css");
+            loadCss(assetsPath + "icons/icons.css");
             const spritesPaths = sprites.map(function (file) {
-                return dataServer + "sprites/" + file + ".json"
+                return assetsPath + "sprites/" + file + ".json"
             });
 
             return Promise.all([

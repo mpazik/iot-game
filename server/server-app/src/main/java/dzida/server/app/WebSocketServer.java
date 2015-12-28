@@ -40,6 +40,7 @@ public final class WebSocketServer {
 
         Leaderboard leaderboard = new Leaderboard(playerStore);
         NettyHttpService service = NettyHttpService.builder()
+                .setHost(Configuration.getContainerHost())
                 .setPort(Configuration.getContainerRestPort())
                 .addHttpHandlers(ImmutableList.of(new ContainerResource(container), new LeaderboardResource(leaderboard)))
                 .build();

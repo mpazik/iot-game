@@ -4,21 +4,20 @@
     height: 48px;
     font-size: 14px;
     line-height: 14px;
-    text-shadow: -1px 1px 2px #000000;
-    color: #777;
-    background: rgba(0, 0, 0, 0.7);
-    border: #777 solid 1px;
+    text-shadow: -1px 1px 1px #000000, 1px -1px 1px #000000;
+    color: #999;
+    background-color: black !important;
+    border: #999 solid 1px;
     border-radius: 3px;
     display: inline-block;
 }
 
-.icon.disabled {
-    opacity: 0.4;
+.icon.icon-empty {
+    background-color: rgba(0, 0, 0, 0.7) !important;
 }
 
-.system-icons {
-    background-image: url("../images/system-icons.png") !important;
-    background-size: 288px 48px;
+.icon.disabled {
+    opacity: 0.4;
 }
 
 .icon:hover {
@@ -61,30 +60,6 @@
 .icon-name .icon div,
 .icon-name .icon-socket div {
     background: none;
-}
-
-.sys-inventory {
-    background-position: 0 0 !important;
-}
-
-.sys-skill {
-    background-position: -48px 0 !important;
-}
-
-.sys-character {
-    background-position: -96px 0 !important;
-}
-
-.sys-settings {
-    background-position: -144px 0 !important;
-}
-
-.sys-help {
-    background-position: -196px 0 !important;
-}
-
-.sys-leaderboard {
-    background-position: -240px 0 !important;
 }
 
 .key-bind {

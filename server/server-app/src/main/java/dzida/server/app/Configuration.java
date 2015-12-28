@@ -13,7 +13,7 @@ class Configuration {
     }
 
     public static URI getStaticServerAddress() {
-        return URI.create(System.getProperty("containerHost", "http://localhost:8080"));
+        return URI.create(System.getProperty("assetsAddress", "http://localhost:8080/dev/lib/dzida-assets"));
     }
 
     public static int getContainerRestPort() {

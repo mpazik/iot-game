@@ -27,8 +27,12 @@
                 },
                 attachedCallback: {
                     value: function () {
-                        this.classList.add(this.getAttribute('icon'));
-                        this.classList.add(this.getAttribute('icon-set'));
+                        const icon = this.getAttribute('icon');
+                        if (icon) {
+                            this.classList.add(icon);
+                        } else {
+                            this.classList.add('.icon-empty');
+                        }
 
                         const active = this.getAttribute('active');
                         if (this.getAttribute('active')) {

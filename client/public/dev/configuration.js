@@ -4,5 +4,6 @@ Configuration = {
     spawnTime: 4000,
     devMode: true,
     serverAddress: "ws://localhost:7001",
-    containerRestAddress: "http://localhost:7000"
+    containerRestAddress: "http://localhost:7000",
+    assetsLocalization: "/dev/lib/dzida-assets"
 };

@@ -1,0 +1,17 @@
+<script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.22/require.js"></script>
+<script src="../configuration.js"></script>
+
+<script>
+    //noinspection JSFileReferences
+    require.config({
+        shim: {
+            'configuration': {
+                exports: 'Configuration'
+            }
+        },
+        paths: {
+            "lib/pixi": "https://cdnjs.cloudflare.com/ajax/libs/pixi.js/3.0.8/pixi",
+            "configuration": "../configuration"
+        }
+    });
+</script>
