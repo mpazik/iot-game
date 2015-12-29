@@ -36,22 +36,13 @@
 
             form.onsubmit = function (event) {
                 const nick = userNickElement.value;
-                const httpRequest = new XMLHttpRequest();
-                httpRequest.onreadystatechange = function () {
-                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                        if (httpRequest.status === 204) {
-                            errorMessage.style.display = 'none';
-                            game.setUser(nick);
-                            game.connect();
-                        } else {
-                            const response = JSON.parse(httpRequest.responseText);
-                            showError(response.error.message);
-                        }
-                    }
-                };
-                httpRequest.open('GET', '/can-player-login/' + nick);
-                httpRequest.send();
-
+                Request.Server.canPlayerLogin(nick).then(function () {
+                    errorMessage.style.display = 'none';
+                    game.setUser(nick);
+                    game.connect();
+                }).catch(function (error) {
+                    showError(error);
+                });
                 return false;
             }.bind(this);
         }

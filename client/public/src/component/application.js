@@ -113,19 +113,11 @@ define(function (require, exports, module) {
         if (nick == null) {
             return error()
         }
-        const httpRequest = new XMLHttpRequest();
-        httpRequest.onreadystatechange = function () {
-            if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                if (httpRequest.status === 204) {
-                    callback(nick);
-                } else {
-                    const response = JSON.parse(httpRequest.responseText);
-                    error(response.error.message);
-                }
-            }
-        };
-        httpRequest.open('GET', '/can-player-login/' + nick);
-        httpRequest.send();
+        Request.Server.canPlayerLogin(nick).then(function () {
+            callback(nick)
+        }).catch(function (error) {
+            error(error);
+        });
     }
 
     function connect() {
