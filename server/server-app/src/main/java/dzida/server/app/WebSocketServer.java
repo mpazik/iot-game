@@ -14,8 +14,10 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.Set;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.util.*;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
@@ -118,7 +120,8 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         if (handshaker == null) {
             WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
         } else {
-            Optional<String> nickOpt = readPlayerNickFromCookie(req);
+            URI uri = URI.create(req.uri());
+            Optional<String> nickOpt = Optional.ofNullable(queryParams(uri).get("nick"));
             Optional<Player.Id> playerIdOpt = nickOpt.map(connectionHandler::findOrCreatePlayer);
             Boolean canPlayerConnect = playerIdOpt.map(connectionHandler::canPlayerConnect).orElse(false);
             if (canPlayerConnect) {
@@ -132,13 +135,22 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
-    private Optional<String> readPlayerNickFromCookie(HttpRequest req) {
-        CharSequence cookiesChars = req.headers().get("Cookie");
-        if (cookiesChars == null) {
-            return Optional.empty();
+    private static Map<String, String> queryParams(URI url) {
+        Map<String, String> query_pairs = new LinkedHashMap<>();
+        String query = url.getQuery();
+        if (query == null) {
+            return Collections.emptyMap();
         }
-        Set<Cookie> cookies = ServerCookieDecoder.decode(cookiesChars.toString());
-        return cookies.stream().filter(cookie -> cookie.name().equals("nick")).findFirst().map(Cookie::value);
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            try {
+                query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return query_pairs;
     }
 
     private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {

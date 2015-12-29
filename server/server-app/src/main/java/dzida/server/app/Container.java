@@ -44,7 +44,7 @@ public class Container {
         // since there is auto account creator if player does not exist it can log in.
         Boolean isPlayerPlaying = playerService.findPlayer(nick).map(playerService::isPlayerPlaying).orElse(false);
         if (isPlayerPlaying) {
-            return Result.error(new Error("Players is already logged in."));
+            return Result.error(new Error("Player is already logged in."));
         }
         return Result.ok();
     }

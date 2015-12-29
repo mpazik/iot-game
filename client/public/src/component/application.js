@@ -108,15 +108,17 @@ define(function (require, exports, module) {
         document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }
 
-    function getAndCheckUserNick(callback, error) {
-        const nick = getCookie('nick');
-        if (nick == null) {
-            return error()
-        }
-        Request.Server.canPlayerLogin(nick).then(function () {
-            callback(nick)
-        }).catch(function (error) {
-            error(error);
+    function getAndCheckUserNick() {
+        return new Promise((resolve, reject) => {
+            const nick = getCookie('nick');
+            if (nick == null) {
+                return reject()
+            }
+            Request.Server.canPlayerLogin(nick).then(function () {
+                resolve(nick)
+            }).catch(function (error) {
+                reject(error);
+            });
         });
     }
 
@@ -125,19 +127,18 @@ define(function (require, exports, module) {
             throw '<[serverAddress]> has to be defined before game can connect to the server';
         }
         if (userNick == null) {
-            getAndCheckUserNick((nick) => {
+            getAndCheckUserNick().then(nick=> {
                 userNick = nick;
                 connect();
-            }, (error) => {
+            }).catch(error => {
                 if (error) {
                     alert(error);
                 }
                 setState('need-authentication');
             });
-            return;
+        } else {
+            network.connect(serverAddress + '?nick=' + userNick);
         }
-
-        network.connect(serverAddress);
     }
 
     function disconnect() {
@@ -177,7 +178,7 @@ define(function (require, exports, module) {
             loadGameAssets();
             Render.init(gameElement);
         },
-        setAddres: function (address) {
+        setAddress: function (address) {
             serverAddress = address;
         },
         setUser: function (nick) {
