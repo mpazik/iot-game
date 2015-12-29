@@ -4,5 +4,5 @@ Configuration = {
     spawnTime: 4000,
     devMode: true,
     serverAddress: "ws://localhost:7001",
-    containerRestAddress: "http://localhost:8080"
+    containerRestAddress: "http://localhost:7000"
 };
