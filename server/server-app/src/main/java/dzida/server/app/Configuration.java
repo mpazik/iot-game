@@ -5,11 +5,15 @@ import java.net.URI;
 
 class Configuration {
     public static String getContainerHost() {
-        return System.getProperty("containerAddress", "localhost");
+        return System.getProperty("containerHost", "localhost");
     }
 
     public static URI getContainerWsAddress() {
         return UriBuilder.fromPath("").host(getContainerHost()).scheme("ws").build();
+    }
+
+    public static URI getStaticServerAddress() {
+        return URI.create(System.getProperty("assetsAddress", "http://localhost:8080/dev/lib/dzida-assets"));
     }
 
     public static int getContainerRestPort() {
@@ -26,5 +30,17 @@ class Configuration {
 
     public static boolean isDevMode() {
         return "true".equals(System.getProperty("devMode"));
+    }
+
+    public static void pirnt() {
+        System.out.println("Configuration listing");
+        System.out.println("---------------------");
+        System.out.println("dev mode: " + isDevMode());
+        System.out.println("container host: " + getContainerHost());
+        System.out.println("container rest port: " + getContainerRestPort());
+        System.out.println("container first instance port: " + getFirstInstancePort());
+        System.out.println("static server address: " + getStaticServerAddress());
+        System.out.println("initial instances: " + String.join(",", getInitialInstances()));
+        System.out.println("---------------------\n");
     }
 }

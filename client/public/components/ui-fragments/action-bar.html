@@ -18,7 +18,6 @@
 
             function createSystemIcon(key, icon, keyBind, action) {
                 var socket = document.createElement('action-socket');
-                socket.setAttribute('icon-set', 'system-icons');
                 if (icon) socket.setAttribute('icon', icon);
                 if (key) socket.setAttribute('key', key);
                 if (action) socket.addEventListener('action-triggered', action);
@@ -28,12 +27,12 @@
 
             // init system bar
             const systemBar = this.getElementsByClassName("system-bar")[0];
-            var settingsButton = createSystemIcon('settings', 'sys-settings', 'S', function () {
+            var settingsButton = createSystemIcon('settings', 'icon-settings', 'S', function () {
                 actionBar.ui.toggleWindow('settings-window');
             });
             systemBar.appendChild(settingsButton);
 
-            var leaderboardButton = createSystemIcon('settings', 'sys-leaderboard', 'L', function () {
+            var leaderboardButton = createSystemIcon('settings', 'icon-ranking', 'L', function () {
                 actionBar.ui.toggleWindow('leaderboard-window');
             });
             systemBar.appendChild(leaderboardButton);
@@ -49,7 +48,6 @@
                 if (skill) {
                     socket.setAttribute('icon', skill.icon);
                     socket.setAttribute('key', skill.id);
-                    socket.setAttribute('icon-set', 'game-icons');
                     socket.addEventListener('action-triggered', function (event) {
                         const skill = skillByKey(event.detail.key);
                         actionBar.game.publishUiAction('skill-triggered', {skill});

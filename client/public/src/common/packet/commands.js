@@ -15,9 +15,6 @@ define(function (require, exports, module) {
                 this.skillId = skillId;
                 this.target = target;
             },
-            Ping: function (clientTime) {
-                this.clientTime = clientTime;
-            },
             PlayingPlayer: function (playerId) {
                 this.playerId = playerId;
             },
@@ -39,7 +36,6 @@ define(function (require, exports, module) {
             LogOut: 1,
             Move: 2,
             UseSkill: 3,
-            Ping: 4,
             PlayingPlayer: 5,
             TimeSync: 6,
             JoinBattle: 7,

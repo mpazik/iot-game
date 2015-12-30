@@ -109,7 +109,6 @@ define(function (require, exports, module) {
             CharacterMoved: 7,
             SkillUsed: 8,
             CharacterGotDamage: 9,
-            Pong: 10,
             InitialData: 11,
             ServerMessage: 12,
             Location: 13,

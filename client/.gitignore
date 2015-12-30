@@ -1,1 +1,3 @@
-public/lib
+dist
+node_modules
+.awspublish-game.dzida-online.pl

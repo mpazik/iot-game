@@ -14,9 +14,10 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 public abstract class AbstractResource extends AbstractHttpHandler {
 
     private final Gson serializer = Serializer.getSerializer();
+    protected ImmutableMultimap<String, String> headers = ImmutableMultimap.of("Access-Control-Allow-Origin", "*");
 
     protected void sendResult(HttpResponder responder, Result result) {
-        result.consume(validResult -> responder.sendStatus(HttpResponseStatus.NO_CONTENT),
+        result.consume(validResult -> responder.sendStatus(HttpResponseStatus.NO_CONTENT, headers),
                 errorResult -> sendJson(responder, HttpResponseStatus.BAD_REQUEST, serializer.toJson(errorResult))
         );
     }
@@ -28,6 +29,6 @@ public abstract class AbstractResource extends AbstractHttpHandler {
 
     protected void sendJson(HttpResponder responder, HttpResponseStatus status, String json) {
         ChannelBuffer channelBuffer = ChannelBuffers.wrappedBuffer(Charsets.UTF_8.encode(json));
-        responder.sendContent(status, channelBuffer, "application/json", ImmutableMultimap.<String, String>of());
+        responder.sendContent(status, channelBuffer, "application/json", headers);
     }
 }

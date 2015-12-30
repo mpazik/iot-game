@@ -1,22 +1,43 @@
 Request = {};
 Request.Server = (function () {
 
+    function request(method, path, action) {
+        return new Promise(function (resolve, reject) {
+            const httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function () {
+                if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                    action(httpRequest, resolve, reject);
+                }
+            };
+            httpRequest.open(method, Configuration.containerRestAddress + '/' + path);
+            httpRequest.send();
+        });
+    }
+
+    function get(path, action) {
+        return request('get', path, action);
+    }
+
     return {
         leaderboard: function () {
-            return new Promise(function (resolve, reject) {
-                const httpRequest = new XMLHttpRequest();
-                httpRequest.onreadystatechange = function () {
-                    if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                        if (httpRequest.status === 200) {
-                            const response = JSON.parse(httpRequest.responseText);
-                            resolve(response);
-                        } else {
-                            reject(httpRequest.responseText)
-                        }
-                    }
-                };
-                httpRequest.open('GET', '/leaderboard');
-                httpRequest.send();
+            return get('leaderboard', function (httpRequest, resolve, reject) {
+                if (httpRequest.status === 200) {
+                    const response = JSON.parse(httpRequest.responseText);
+                    resolve(response);
+                } else {
+                    reject(httpRequest.responseText)
+                }
+            })
+
+        },
+        canPlayerLogin: function (nick) {
+            return get('can-player-login/' + nick, function (httpRequest, resolve, reject) {
+                if (httpRequest.status === 204) {
+                    resolve();
+                } else {
+                    const response = JSON.parse(httpRequest.responseText);
+                    reject(response.error.message);
+                }
             });
         }
     }

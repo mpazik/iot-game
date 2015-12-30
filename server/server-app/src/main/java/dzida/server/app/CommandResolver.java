@@ -35,7 +35,6 @@ public class CommandResolver {
     private static final int GoToHome = 9;
 
     // requests
-    private static final int Ping = 4;
     private static final int PlayingPlayer = 5;
     private static final int TimeSync = 6;
     private static final int Backdoor = 8;
@@ -105,8 +104,6 @@ public class CommandResolver {
             case UseSkill:
                 SkillUse skillUse = serializer.fromJson(data, SkillUse.class);
                 return skillCommandHandler.useSkill(characterId, skillUse.skillId, skillUse.target);
-            case Ping:
-                return Collections.emptyList();
             case PlayingPlayer:
                 return Collections.emptyList();
             case TimeSync:
