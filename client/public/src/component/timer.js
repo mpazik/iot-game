@@ -7,7 +7,6 @@ define(function (require, exports, module) {
     Dispatcher.messageStream.subscribe(ResponseIds.TimeSync, (response) => {
         var oneWayPing = (Date.now() - response.clientTime) / 2;
         offset = response.serverTime - Date.now() + oneWayPing;
-        console.log(`time sync: offset: ${offset}, one way ping: ${oneWayPing}`)
     });
 
     function runOnServerTime(time, duration, func) {
