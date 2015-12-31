@@ -2,7 +2,7 @@ package dzida.server.core.basic.entity;
 
 import com.google.common.base.Objects;
 
-public abstract class Id<T> {
+public class Id<T> {
     private final long id;
 
     public Id(long id) {

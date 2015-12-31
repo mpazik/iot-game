@@ -1,5 +1,6 @@
 package dzida.server.core.skill;
 
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
@@ -22,19 +23,19 @@ public class SkillService {
     public static final String Key = "skill";
 
     private final Map<CharacterId, SkillData> state = new HashMap<>();
-    private final Map<Integer, Skill> skills;
+    private final SkillStore skillsStore;
 
     private final TimeService timeService;
 
 
-    public SkillService(Map<Integer, Skill> skills, TimeService timeService) {
-        this.skills = skills;
+    private SkillService(SkillStore skillsStore, TimeService timeService) {
+        this.skillsStore = skillsStore;
         this.timeService = timeService;
     }
 
 
-    public static SkillService create(Map<Integer, Skill> skills, TimeService timeService) {
-        return new SkillService(skills, timeService);
+    public static SkillService create(SkillStore skillsStore, TimeService timeService) {
+        return new SkillService(skillsStore, timeService);
     }
 
     public List<SkillCharacterState> getState() {
@@ -49,8 +50,13 @@ public class SkillService {
         return time < state.get(casterId).getCooldownTill();
     }
 
+    @Deprecated
     public Skill getSkill(int skillId) {
-        return skills.get(skillId);
+        return getSkill(new Id<>((long) skillId));
+    }
+
+    public Skill getSkill(Id<Skill> skillId) {
+        return skillsStore.getSkill(skillId);
     }
 
     public int getHealth(CharacterId characterId) {
@@ -64,7 +70,7 @@ public class SkillService {
         }).is(CharacterDied.class).then(
                 event -> state.remove(event.getCharacterId())
         ).is(SkillUsed.class).then(event -> {
-            int skillCooldown = skills.get(event.getSkillId()).getCooldown();
+            int skillCooldown = getSkill(event.getSkillId()).getCooldown();
             state.get(event.getCasterId()).setCooldownTill(timeService.getCurrentMillis() + skillCooldown);
         }).is(CharacterGotDamage.class).then(event -> {
             SkillData skillData = state.get(event.getCharacterId());

@@ -55,7 +55,7 @@ public class SkillCommandHandler {
         double damage = skill.getDamage();
         List<GameEvent> events = new ArrayList<>();
         events.add(new CharacterGotDamage(targetId, damage));
-        events.add(new SkillUsed(casterId, skill.getId(), targetId));
+        events.add(new SkillUsed(casterId, (int) skill.getId().getValue(), targetId));
         if (skillService.getHealth(targetId) <= damage) {
             // the got damage event must be before the died event
             events.add(new CharacterDied(targetId));

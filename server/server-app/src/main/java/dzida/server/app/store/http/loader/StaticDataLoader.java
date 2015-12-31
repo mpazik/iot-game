@@ -1,8 +1,9 @@
-package dzida.server.app;
+package dzida.server.app.store.http.loader;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import dzida.server.app.Configuration;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -43,6 +44,4 @@ public class StaticDataLoader {
         }
         return new InputStreamReader(inputStream);
     }
-
-
 }

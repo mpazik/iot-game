@@ -5,6 +5,7 @@ import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
+import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
@@ -15,14 +16,16 @@ import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
+import dzida.server.core.position.PositionStore;
 import dzida.server.core.scenario.SurvivalScenarioFactory;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
-import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
+import dzida.server.core.skill.SkillStore;
 import dzida.server.core.time.TimeService;
+import dzida.server.core.world.WorldMapStore;
 import dzida.server.core.world.WorldService;
-import dzida.server.core.world.model.WorldState;
+import dzida.server.core.world.model.WorldMap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 import io.netty.channel.DefaultEventLoop;
@@ -55,19 +58,18 @@ class Instance {
     private final Arbiter arbiter;
     private final boolean isOnlyScenario;
 
-    public Instance(String instanceKey, Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter) {
+    public Instance(String instanceKey, Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter, SkillStore skillStore, WorldMapStore worldMapStore) {
         this.playerService = playerService;
         this.arbiter = arbiter;
         this.instanceKey = instanceKey;
-        WorldState worldState = new WorldStateStore().loadMap(scenario.getMapName());
-        Map<Integer, Skill> skills = new SkillStore().loadSkills();
-        PositionStoreImpl positionStore = new PositionStoreImpl(worldState.getSpawnPoint());
+        WorldMap worldMap = worldMapStore.getMap(scenario.getWorldMapKey());
+        PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
 
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser();
         TimeService timeService = new TimeService();
         characterService = CharacterService.create();
-        WorldService worldService = WorldService.create(worldState);
-        SkillService skillService = SkillService.create(skills, timeService);
+        WorldService worldService = WorldService.create(worldMapStore, scenario.getWorldMapKey());
+        SkillService skillService = SkillService.create(skillStore, timeService);
         PositionService positionService = PositionService.create(positionStore, timeService);
 
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);

@@ -2,7 +2,7 @@ package dzida.server.core.world.model;
 
 import dzida.server.core.position.model.Position;
 
-public class WorldState {
+public class WorldMap {
     private final String name;
     private final int width;
     private final int height;
@@ -10,7 +10,7 @@ public class WorldState {
     private final Position spawnPoint;
     private final int[] tiles;
 
-    public WorldState(String name, int width, int height, String tileset, Position spawnPoint, int[] tiles) {
+    public WorldMap(String name, int width, int height, String tileset, Position spawnPoint, int[] tiles) {
         this.name = name;
         this.width = width;
         this.height = height;
@@ -42,4 +42,6 @@ public class WorldState {
     public int[] getTiles() {
         return tiles;
     }
+
+
 }

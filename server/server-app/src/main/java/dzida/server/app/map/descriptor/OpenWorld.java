@@ -1,17 +1,19 @@
 package dzida.server.app.map.descriptor;
 
+import dzida.server.core.basic.entity.Key;
+import dzida.server.core.world.model.WorldMap;
+
 public class OpenWorld implements Scenario {
     private final String type;
-    private final String mapName;
+    private final Key<WorldMap> worldMapKey;
 
-    public OpenWorld(String mapName) {
-        this.mapName = mapName;
+    public OpenWorld(Key<WorldMap> worldMapKey) {
+        this.worldMapKey = worldMapKey;
         this.type = "open-world";
     }
 
-    @Override
-    public String getMapName() {
-        return mapName;
+    public Key<WorldMap> getWorldMapKey() {
+        return worldMapKey;
     }
 
     @Override
