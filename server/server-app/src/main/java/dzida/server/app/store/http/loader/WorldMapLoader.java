@@ -1,7 +1,7 @@
 package dzida.server.app.store.http.loader;
 
-import com.google.common.reflect.TypeToken;
 import dzida.server.core.basic.entity.Key;
+import dzida.server.core.world.model.Tileset;
 import dzida.server.core.world.model.WorldMap;
 
 public class WorldMapLoader {
@@ -11,7 +11,11 @@ public class WorldMapLoader {
         this.staticDataLoader = staticDataLoader;
     }
 
-    public WorldMap loadMap(Key<WorldMap> name) {
-        return staticDataLoader.loadJsonFromServer("maps/" + name.getValue() + ".json", TypeToken.of(WorldMap.class));
+    public WorldMap loadMap(Key<WorldMap> worldMapKey) {
+        return staticDataLoader.loadJsonFromServer("maps/" + worldMapKey.getValue() + ".json", WorldMap.class);
+    }
+
+    public Tileset loadTileset(Key<Tileset> tilesetKey) {
+        return staticDataLoader.loadJsonFromServer("tilesets", Tileset.class);
     }
 }

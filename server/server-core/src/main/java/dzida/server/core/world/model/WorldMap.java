@@ -6,11 +6,11 @@ import dzida.server.core.position.model.Position;
 public class WorldMap {
     private final int width;
     private final int height;
-    private final Key<TileSet> tileset;
+    private final Key<Tileset> tileset;
     private final Position spawnPoint;
     private final int[] tiles;
 
-    public WorldMap(int width, int height, Key<TileSet> tileset, Position spawnPoint, int[] tiles) {
+    public WorldMap(int width, int height, Key<Tileset> tileset, Position spawnPoint, int[] tiles) {
         this.width = width;
         this.height = height;
         this.tileset = tileset;
@@ -26,7 +26,7 @@ public class WorldMap {
         return height;
     }
 
-    public Key<TileSet> getTileset() {
+    public Key<Tileset> getTileset() {
         return tileset;
     }
 

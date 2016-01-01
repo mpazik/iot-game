@@ -14,6 +14,11 @@ import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
 public class StaticDataLoader {
+
+    public <T> T loadJsonFromServer(String path, Class<T> clazz) {
+        return loadJsonFromServer(path, TypeToken.of(clazz));
+    }
+
     public <T> T loadJsonFromServer(String path, TypeToken<T> typeToken) {
         long startTime = System.currentTimeMillis();
         try {
