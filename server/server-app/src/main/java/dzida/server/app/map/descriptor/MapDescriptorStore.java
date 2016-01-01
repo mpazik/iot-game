@@ -2,7 +2,7 @@ package dzida.server.app.map.descriptor;
 
 import com.google.common.collect.ImmutableList;
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Point;
 
 import java.util.Optional;
 

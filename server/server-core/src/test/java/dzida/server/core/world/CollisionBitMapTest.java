@@ -2,7 +2,7 @@ package dzida.server.core.world;
 
 import com.google.common.collect.ImmutableMap;
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.model.Tileset;
 import dzida.server.core.world.model.WorldMap;
 import org.junit.Test;

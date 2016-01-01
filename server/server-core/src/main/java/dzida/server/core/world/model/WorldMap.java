@@ -1,7 +1,7 @@
 package dzida.server.core.world.model;
 
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Point;
 
 public class WorldMap {
     private final int width;

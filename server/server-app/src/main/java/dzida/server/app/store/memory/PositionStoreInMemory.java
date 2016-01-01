@@ -2,7 +2,7 @@ package dzida.server.app.store.memory;
 
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.position.PositionStore;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Point;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -12,7 +12,7 @@ import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Point;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 

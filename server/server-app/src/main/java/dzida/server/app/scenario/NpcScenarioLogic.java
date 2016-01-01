@@ -7,7 +7,7 @@ import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.model.NpcCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionStore;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Point;
 
 import java.util.List;
 

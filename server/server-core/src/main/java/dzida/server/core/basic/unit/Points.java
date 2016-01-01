@@ -1,4 +1,4 @@
-package dzida.server.core.position.model;
+package dzida.server.core.basic.unit;
 
 public class Points {
     private Points() {

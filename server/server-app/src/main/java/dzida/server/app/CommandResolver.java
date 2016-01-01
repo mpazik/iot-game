@@ -16,7 +16,7 @@ import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Point;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import lombok.Value;

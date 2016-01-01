@@ -1,7 +1,7 @@
 package dzida.server.core.assertions;
 
-import dzida.server.core.position.model.Move;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Move;
+import dzida.server.core.basic.unit.Point;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.data.Offset;
 

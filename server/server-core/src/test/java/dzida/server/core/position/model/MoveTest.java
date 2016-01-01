@@ -1,6 +1,8 @@
 package dzida.server.core.position.model;
 
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
+import dzida.server.core.basic.unit.Move;
+import dzida.server.core.basic.unit.Point;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

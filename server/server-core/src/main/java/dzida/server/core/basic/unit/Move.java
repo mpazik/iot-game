@@ -1,4 +1,4 @@
-package dzida.server.core.position.model;
+package dzida.server.core.basic.unit;
 
 /**
  * Class that represent move. It's a list of a position in times.

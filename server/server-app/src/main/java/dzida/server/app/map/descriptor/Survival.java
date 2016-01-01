@@ -1,7 +1,7 @@
 package dzida.server.app.map.descriptor;
 
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.position.model.Point;
+import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.model.WorldMap;
 import lombok.Value;
 
