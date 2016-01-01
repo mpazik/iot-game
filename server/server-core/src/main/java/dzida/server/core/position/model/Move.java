@@ -20,13 +20,13 @@ public final class Move {
         this.times = times;
     }
 
-    public static Move fromPosition(long startTime, Position position) {
+    public static Move fromPosition(long startTime, Point position) {
         double[] points = {position.getX(), position.getY()};
         long[] times = {startTime};
         return new Move(points, times);
     }
 
-    public static Move of(long startTime, double velocity, Position... positions) {
+    public static Move of(long startTime, double velocity, Point... positions) {
         double[] points = new double[positions.length * 2];
         long[] times = new long[positions.length];
         setPointInTime(points, times, 0, startTime, positions[0].getX(), positions[0].getY());
@@ -68,7 +68,7 @@ public final class Move {
         setPointInTime(points, times, index, newTime, x, y);
     }
 
-    public Move continueMoveTo(long time, double velocity, Position position) {
+    public Move continueMoveTo(long time, double velocity, Point position) {
         int segment = findSegment(time);
 
         // this is the case when move to new position starts before move start
@@ -119,7 +119,7 @@ public final class Move {
         if (segment == times.length) {
             double x = points[points.length - 2];
             double y = points[points.length - 1];
-            return Move.fromPosition(times[times.length - 1], Position.of(x, y));
+            return Move.fromPosition(times[times.length - 1], Point.of(x, y));
         }
 
         int numberOfPointsThatRemains = times.length - segment + 1;
@@ -132,7 +132,7 @@ public final class Move {
         return new Move(newPoints, newTimes);
     }
 
-    public Position getPositionAtTime(long time) {
+    public Point getPositionAtTime(long time) {
         int segment = findSegment(time);
         if (segment == 0) {
             return getStart();
@@ -145,7 +145,7 @@ public final class Move {
         int index = (segment - 1) * 2;
         double x = interpolate(segmentRatio, points[index], points[index + 2]);
         double y = interpolate(segmentRatio, points[index + 1], points[index + 3]);
-        return Position.of(x, y);
+        return Point.of(x, y);
     }
 
     public double getAngleAtTime(long time) {
@@ -205,13 +205,13 @@ public final class Move {
         return times[times.length - 1];
     }
 
-    private Position getStart() {
-        return Position.of(points[0], points[1]);
+    private Point getStart() {
+        return Point.of(points[0], points[1]);
     }
 
-    private Position getEnd() {
+    private Point getEnd() {
         int length = points.length;
-        return Position.of(points[length - 2], points[length - 1]);
+        return Point.of(points[length - 2], points[length - 1]);
     }
 
     private double getLength() {

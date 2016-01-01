@@ -4,7 +4,7 @@ import dzida.server.core.character.CharacterId;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.position.model.Move;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 import dzida.server.core.time.TimeService;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public interface PositionService {
 
     Move getInitialMove(CharacterId characterId);
 
-    Position getPosition(CharacterId characterId, long currentMillis);
+    Point getPosition(CharacterId characterId, long currentMillis);
 
     boolean isStanding(CharacterId characterId, long currentMillis);
 }

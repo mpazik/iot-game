@@ -5,7 +5,7 @@ import dzida.server.core.character.CharacterService;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.position.model.Move;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 import dzida.server.core.time.TimeService;
 
 import java.util.Collections;
@@ -22,7 +22,7 @@ public class PositionCommandHandler {
         this.timeService = timeService;
     }
 
-    public List<GameEvent> move(CharacterId characterId, Position position, double velocity) {
+    public List<GameEvent> move(CharacterId characterId, Point position, double velocity) {
         if (!characterService.isCharacterLive(characterId)) {
             return Collections.emptyList();
         }

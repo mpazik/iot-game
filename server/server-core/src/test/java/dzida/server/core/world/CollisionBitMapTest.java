@@ -2,7 +2,7 @@ package dzida.server.core.world;
 
 import com.google.common.collect.ImmutableMap;
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 import dzida.server.core.world.model.Tileset;
 import dzida.server.core.world.model.WorldMap;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class CollisionBitMapTest {
                 2, 1, 1, 2,
                 2, 2, 2, 2
         };
-        WorldMap worldMap = new WorldMap(4, 4, tilesetKey, new Position(0, 0), tiles);
+        WorldMap worldMap = new WorldMap(4, 4, tilesetKey, new Point(0, 0), tiles);
 
         CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, tileset);
         assertThat(collisionBitMap.isColliding(0, 0)).isTrue();

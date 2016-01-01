@@ -1,10 +1,10 @@
 package dzida.server.core.position.model;
 
-public final class TilePosition {
+public final class TilePoints {
     private final int x;
     private final int y;
 
-    public TilePosition(int x, int y) {
+    public TilePoints(int x, int y) {
         this.x = x;
         this.y = y;
     }

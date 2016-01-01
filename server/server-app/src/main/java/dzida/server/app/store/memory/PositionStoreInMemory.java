@@ -2,27 +2,27 @@ package dzida.server.app.store.memory;
 
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.position.PositionStore;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PositionStoreInMemory implements PositionStore {
-    private final Map<CharacterId, Position> positions = new HashMap<>();
+    private final Map<CharacterId, Point> positions = new HashMap<>();
 
-    private final Position spawnPoint;
+    private final Point spawnPoint;
 
-    public PositionStoreInMemory(Position spawnPoint) {
+    public PositionStoreInMemory(Point spawnPoint) {
         this.spawnPoint = spawnPoint;
     }
 
     @Override
-    public Position getCharacterPosition(CharacterId characterId) {
+    public Point getCharacterPosition(CharacterId characterId) {
         return positions.getOrDefault(characterId, spawnPoint);
     }
 
     @Override
-    public void setPosition(CharacterId characterId, Position position) {
+    public void setPosition(CharacterId characterId, Point position) {
         positions.put(characterId, position);
     }
 }

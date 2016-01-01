@@ -9,7 +9,7 @@ import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
@@ -71,8 +71,8 @@ public class NpcBehaviour {
     }
 
     private List<GameEvent> gotToRandomPosition(CharacterId id) {
-        Position pos = positionService.getPosition(id, timeService.getCurrentMillis());
-        Position direction = Position.of(randomCord(pos.getX()), randomCord(pos.getY()));
+        Point pos = positionService.getPosition(id, timeService.getCurrentMillis());
+        Point direction = Point.of(randomCord(pos.getX()), randomCord(pos.getY()));
         return positionCommandHandler.move(id, direction, PositionService.BotSpeed);
     }
 
@@ -85,7 +85,7 @@ public class NpcBehaviour {
     }
 
     private List<GameEvent> gotToPlayer(NpcCharacter npc, CharacterId targetId) {
-        Position direction = positionService.getPosition(targetId, timeService.getCurrentMillis());
+        Point direction = positionService.getPosition(targetId, timeService.getCurrentMillis());
         return positionCommandHandler.move(npc.getId(), direction, PositionService.BotSpeed);
     }
 

@@ -9,9 +9,9 @@ import static dzida.server.core.assertions.Assertions.assertThat;
 @RunWith(HierarchicalContextRunner.class)
 public class MoveTest {
     private final long velocity = 1;
-    private final Position startPosition = Position.of(1, 1);
-    private final Position middlePosition = Position.of(4, 5);
-    private final Position endPosition = Position.of(1, 9);
+    private final Point startPosition = Point.of(1, 1);
+    private final Point middlePosition = Point.of(4, 5);
+    private final Point endPosition = Point.of(1, 9);
     private final double pathLength = startPosition.distanceTo(middlePosition) + middlePosition.distanceTo(endPosition);
 
     private final long startTime = 1000;
@@ -27,7 +27,7 @@ public class MoveTest {
     public class PositionAtTime {
 
         public class ForMoveFromSinglePoint {
-            private final Position position = Position.of(3, 3);
+            private final Point position = Point.of(3, 3);
             Move move = Move.of(startTime, velocity, position);
 
             @Test
@@ -66,7 +66,7 @@ public class MoveTest {
             @Test
             public void returnsHalfWayBetweenFirstAndSecondPositionForQuarterTime() {
                 long quarterTime = startTime + (endTime - startTime) / 4;
-                Position quarterPosition = Position.of(2.5, 3);
+                Point quarterPosition = Point.of(2.5, 3);
 
                 assertThat(move).hasPositionAtTime(quarterTime, quarterPosition);
             }
@@ -74,7 +74,7 @@ public class MoveTest {
     }
 
     public class ContinueMoveTo {
-        private final Position newPosition = Position.of(-1, -1);
+        private final Point newPosition = Point.of(-1, -1);
 
         @Test
         public void returnsMoveIsWithoutOldPositions_WhenNewMoveIsAddedBeforeMoveStarted() {
@@ -91,7 +91,7 @@ public class MoveTest {
         public void returnedMoveThatIsSameTillNewMove() {
             long middleTime = startTime + (endTime - startTime) / 2;
             long thirdQuarterTime = startTime + (endTime - startTime) * 3 / 4;
-            Position thirdQuarterPosition = Position.of(2.5, 7);
+            Point thirdQuarterPosition = Point.of(2.5, 7);
             long newVelocity = velocity * 2;
             Move newMove = move.continueMoveTo(thirdQuarterTime, newVelocity, newPosition);
             long newEndTime = thirdQuarterTime + countDuration(thirdQuarterPosition.distanceTo(newPosition), newVelocity);

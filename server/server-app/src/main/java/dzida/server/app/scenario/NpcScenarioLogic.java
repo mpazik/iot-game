@@ -7,7 +7,7 @@ import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.model.NpcCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionStore;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class NpcScenarioLogic {
         this.gameEventDispatcher = gameEventDispatcher;
     }
 
-    public void addNpc(Position position, int npcType) {
+    public void addNpc(Point position, int npcType) {
         CharacterId characterId = new CharacterId((int) Math.round((Math.random() * 100000)));
         NpcCharacter character = new NpcCharacter(characterId, npcType);
         positionStore.setPosition(characterId, position);

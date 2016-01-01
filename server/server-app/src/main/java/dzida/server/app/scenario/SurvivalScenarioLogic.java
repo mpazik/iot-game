@@ -12,7 +12,7 @@ import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 
@@ -102,7 +102,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
         }
 
         survivalScenarioState.spawnedNpc += 1;
-        Position randomNpcSpawnPoint = getRandomNpcSpawnPoint();
+        Point randomNpcSpawnPoint = getRandomNpcSpawnPoint();
         npcScenarioLogic.addNpc(randomNpcSpawnPoint, getRandomNpcType());
 
         if (survivalScenarioState.spawnedNpc < survivalScenario.getNumberOfNpcToKill()) {
@@ -116,7 +116,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
         return npcTypes[index];
     }
 
-    private Position getRandomNpcSpawnPoint() {
+    private Point getRandomNpcSpawnPoint() {
         List<Survival.Spawn> spawns = survival.getSpawns();
         int index = new Random().nextInt(spawns.size());
         return spawns.get(index).getPosition();

@@ -16,7 +16,7 @@ import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import lombok.Value;
@@ -102,7 +102,7 @@ public class CommandResolver {
     private List<GameEvent> dispatchMessage(CharacterId characterId, int type, JsonElement data, Consumer<GameEvent> send) {
         switch (type) {
             case Move:
-                return positionCommandHandler.move(characterId, serializer.fromJson(data, Position.class), PositionService.PlayerSpeed);
+                return positionCommandHandler.move(characterId, serializer.fromJson(data, Point.class), PositionService.PlayerSpeed);
             case UseSkill:
                 SkillUse skillUse = serializer.fromJson(data, SkillUse.class);
                 return skillCommandHandler.useSkill(characterId, skillUse.skillId, skillUse.target);

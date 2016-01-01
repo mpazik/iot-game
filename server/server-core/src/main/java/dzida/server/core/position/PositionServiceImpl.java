@@ -6,7 +6,7 @@ import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.position.model.Move;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.position.model.Point;
 import dzida.server.core.time.TimeService;
 
 import java.util.HashMap;
@@ -43,8 +43,8 @@ final class PositionServiceImpl implements PositionService {
 
     @Override
     public boolean areCharactersInDistance(CharacterId character1, CharacterId character2, double distance, long time) {
-        Position char1Pos = state.get(character1).getPositionAtTime(time);
-        Position char2Pos = state.get(character2).getPositionAtTime(time);
+        Point char1Pos = state.get(character1).getPositionAtTime(time);
+        Point char2Pos = state.get(character2).getPositionAtTime(time);
         return char1Pos.isInRange(char2Pos, distance);
     }
 
@@ -65,7 +65,7 @@ final class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public Position getPosition(CharacterId characterId, long currentMillis) {
+    public Point getPosition(CharacterId characterId, long currentMillis) {
         return state.get(characterId).getPositionAtTime(currentMillis);
     }
 
