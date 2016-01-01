@@ -21,7 +21,7 @@ public class WorldMapStoreHttp implements WorldMapStore {
             .build(
                     new CacheLoader<Key<WorldMap>, WorldMap>() {
                         public WorldMap load(@Nonnull Key<WorldMap> key) {
-                            return worldMapLoader.loadMap(key.getValue());
+                            return worldMapLoader.loadMap(key);
                         }
                     });
 

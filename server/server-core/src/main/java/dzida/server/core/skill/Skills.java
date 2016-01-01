@@ -1,5 +1,7 @@
 package dzida.server.core.skill;
 
+import dzida.server.core.basic.entity.Id;
+
 public class Skills {
     public static class Types {
         public final static int ATTACK = 0;
@@ -10,8 +12,8 @@ public class Skills {
     }
 
     public static class Ids {
-        public final static int PUNCH = 0;
-        public final static int BOW_SHOT = 1;
-        public final static int SWORD_HIT = 2;
+        public final static Id<Skill> PUNCH = new Id<>(0);
+        public final static Id<Skill> BOW_SHOT = new Id<>(1);
+        public final static Id<Skill> SWORD_HIT = new Id<>(2);
     }
 }

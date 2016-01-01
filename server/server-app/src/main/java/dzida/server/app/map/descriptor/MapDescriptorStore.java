@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public class MapDescriptorStore {
 
-
     public Optional<Scenario> getDescriptor(String name, Integer difficultyLevel) {
         if ("eden".equals(name)) {
             return Optional.of(new OpenWorld(new Key<>("eden")));
@@ -21,6 +20,4 @@ public class MapDescriptorStore {
         }
         return Optional.empty();
     }
-
-
 }

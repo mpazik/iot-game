@@ -50,11 +50,6 @@ public class SkillService {
         return time < state.get(casterId).getCooldownTill();
     }
 
-    @Deprecated
-    public Skill getSkill(int skillId) {
-        return getSkill(new Id<>((long) skillId));
-    }
-
     public Skill getSkill(Id<Skill> skillId) {
         return skillsStore.getSkill(skillId);
     }

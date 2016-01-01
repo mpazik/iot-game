@@ -1,5 +1,6 @@
 package dzida.server.app.npc;
 
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
@@ -96,12 +97,12 @@ public class NpcBehaviour {
     }
 
     private boolean isInAttackRange(NpcCharacter npc, CharacterId target) {
-        int skillId = getBotAttackSkillId(npc.getBotType());
+        Id<Skill> skillId = getBotAttackSkillId(npc.getBotType());
         Skill skill = skillService.getSkill(skillId);
         return positionService.areCharactersInDistance(npc.getId(), target, skill.getRange(), timeService.getCurrentMillis());
     }
 
-    private int getBotAttackSkillId(int npcType) {
+    private Id<Skill> getBotAttackSkillId(int npcType) {
         if (npcType == Npc.Fighter) return Skills.Ids.SWORD_HIT;
         if (npcType == Npc.Archer) return Skills.Ids.BOW_SHOT;
         throw new UnsupportedOperationException("");

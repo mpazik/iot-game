@@ -1,26 +1,21 @@
 package dzida.server.core.world.model;
 
+import dzida.server.core.basic.entity.Key;
 import dzida.server.core.position.model.Position;
 
 public class WorldMap {
-    private final String name;
     private final int width;
     private final int height;
-    private final String tileset;
+    private final Key<TileSet> tileset;
     private final Position spawnPoint;
     private final int[] tiles;
 
-    public WorldMap(String name, int width, int height, String tileset, Position spawnPoint, int[] tiles) {
-        this.name = name;
+    public WorldMap(int width, int height, Key<TileSet> tileset, Position spawnPoint, int[] tiles) {
         this.width = width;
         this.height = height;
         this.tileset = tileset;
         this.spawnPoint = spawnPoint;
         this.tiles = tiles;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public int getWidth() {
@@ -31,7 +26,7 @@ public class WorldMap {
         return height;
     }
 
-    public String getTileset() {
+    public Key<TileSet> getTileset() {
         return tileset;
     }
 
