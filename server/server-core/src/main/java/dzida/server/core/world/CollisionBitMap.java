@@ -1,49 +1,46 @@
 package dzida.server.core.world;
 
 import com.google.common.collect.ImmutableSet;
+import dzida.server.core.basic.unit.BitMap;
+import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.model.Tileset;
 import dzida.server.core.world.model.Tileset.TerrainTypes;
 import dzida.server.core.world.model.WorldMap;
 
-import java.util.BitSet;
 import java.util.Set;
 
 public class CollisionBitMap {
     public static final Set<TerrainTypes> COLLISION_TERRAINS = ImmutableSet.of(TerrainTypes.WATER, TerrainTypes.WATER_GRASS);
 
-    private final BitSet bitSet;
-    private final int width;
+    private final BitMap bitMap;
 
-    public CollisionBitMap(int width) {
-        bitSet = new BitSet();
-        this.width = width;
+    public CollisionBitMap(BitMap bitMap) {
+        this.bitMap = bitMap;
     }
 
     public boolean isColliding(int x, int y) {
-        return bitSet.get(bitSetPos(x, y));
+        return bitMap.isSet(x, y);
     }
 
-    private void setCollision(int x, int y) {
-        bitSet.set(bitSetPos(x, y));
+    public boolean isColliding(Point point) {
+        return isColliding(doubleToInt(point.getX()), doubleToInt(point.getY()));
     }
 
-    private void clearCollision(int x, int y) {
-        bitSet.clear(bitSetPos(x, y));
-    }
-
-    private int bitSetPos(int x, int y) {
-        return y * width + x;
+    private int doubleToInt(double num) {
+        return Math.toIntExact(Math.round(num));
     }
 
     public static CollisionBitMap createForWorldMap(WorldMap worldMap, Tileset tileset) {
-        CollisionBitMap collisionBitMap = new CollisionBitMap(worldMap.getWidth());
+        int width = worldMap.getWidth();
+        int height = worldMap.getHeight();
+        BitMap.Builder bitMapBuilder = BitMap.builder(width, height);
         int[] tiles = worldMap.getTiles();
 
-        for (int i = 0; i < tiles.length; i++){
-            collisionBitMap.bitSet.set(i, isTileCollidable(tiles[i], tileset));
+        for (int i = 0; i < tiles.length; i++) {
+            bitMapBuilder.set(i % width, i /  height, isTileCollidable(tiles[i], tileset));
         }
 
-        return collisionBitMap;
+        return new CollisionBitMap(bitMapBuilder.build());
     }
 
     private static boolean isTileCollidable(int tile, Tileset tileset) {

@@ -1,10 +1,10 @@
 package dzida.server.core.basic.unit;
 
-public final class TilePoint {
+public final class IntPoint {
     private final int x;
     private final int y;
 
-    public TilePoint(int x, int y) {
+    public IntPoint(int x, int y) {
         this.x = x;
         this.y = y;
     }

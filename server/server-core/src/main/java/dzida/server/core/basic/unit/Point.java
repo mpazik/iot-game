@@ -53,6 +53,10 @@ public final class Point {
         return distanceSqrTo(position) <= radius * radius;
     }
 
+    public double crossProduct(Point p) {
+        return x * p.y - y * p.y;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,9 +73,6 @@ public final class Point {
 
     @Override
     public String toString() {
-        return "Position{" +
-                "x=" + x +
-                ", y=" + y +
-                '}';
+        return "(" + x + ", " + y + ')';
     }
 }

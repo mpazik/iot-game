@@ -14,7 +14,7 @@ public class CollisionBitMapTest {
     public static final Tileset.TerrainTypes COLLIDABLE_TERRAIN = Tileset.TerrainTypes.WATER;
 
     @Test
-    public void collidableAndNonCollidableTerainsForTestsArePickedCorrectly() {
+    public void collidableAndNonCollidableTerrainsForTestsArePickedCorrectly() {
         assertThat(CollisionBitMap.COLLISION_TERRAINS).contains(COLLIDABLE_TERRAIN);
         assertThat(CollisionBitMap.COLLISION_TERRAINS).doesNotContain(NON_COLLIDABLE_TERRAIN);
     }
