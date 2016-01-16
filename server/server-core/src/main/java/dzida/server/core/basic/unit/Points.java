@@ -29,4 +29,9 @@ public class Points {
     public static boolean isSinglePoint(double[] points) {
         return points.length == 2;
     }
+
+    @FunctionalInterface
+    public interface IntPointOperator {
+        void apply(int x, int y);
+    }
 }
