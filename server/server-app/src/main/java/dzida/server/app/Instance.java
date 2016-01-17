@@ -17,6 +17,7 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.position.PositionStore;
+import dzida.server.core.profiling.Profilings;
 import dzida.server.core.scenario.SurvivalScenarioFactory;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 import dzida.server.core.skill.SkillCommandHandler;
@@ -26,6 +27,9 @@ import dzida.server.core.time.TimeService;
 import dzida.server.core.world.WorldMapStore;
 import dzida.server.core.world.WorldService;
 import dzida.server.core.world.model.WorldMap;
+import dzida.server.core.world.pathfinding.CollisionBitMap;
+import dzida.server.core.world.pathfinding.PathFinder;
+import dzida.server.core.world.pathfinding.PathFinderFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 import io.netty.channel.DefaultEventLoop;
@@ -79,7 +83,9 @@ class Instance {
 
         Scheduler scheduler = new SchedulerImpl(eventLoop);
 
-        PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService);
+        CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, worldMapStore.getTileset(worldMap.getTileset()));
+        PathFinder pathFinder = Profilings.printTime("Collision map built", () -> new PathFinderFactory().createPathFinder(collisionBitMap));
+        PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService, pathFinder);
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService);
 

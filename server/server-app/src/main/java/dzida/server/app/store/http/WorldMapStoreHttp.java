@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 import dzida.server.app.store.http.loader.WorldMapLoader;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.world.WorldMapStore;
+import dzida.server.core.world.model.Tileset;
 import dzida.server.core.world.model.WorldMap;
 
 import javax.annotation.Nonnull;
@@ -25,6 +26,15 @@ public class WorldMapStoreHttp implements WorldMapStore {
                         }
                     });
 
+    private final LoadingCache<Key<Tileset>, Tileset> tilesets = CacheBuilder.newBuilder()
+            .maximumSize(100)
+            .expireAfterWrite(2, TimeUnit.HOURS)
+            .build(
+                    new CacheLoader<Key<Tileset>, Tileset>() {
+                        public Tileset load(@Nonnull Key<Tileset> key) {
+                            return worldMapLoader.loadTileset(key);
+                        }
+                    });
 
     public WorldMapStoreHttp(WorldMapLoader worldMapLoader) {
         this.worldMapLoader = worldMapLoader;
@@ -34,6 +44,15 @@ public class WorldMapStoreHttp implements WorldMapStore {
     public WorldMap getMap(Key<WorldMap> worldMapKey) {
         try {
             return worldMaps.get(worldMapKey);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Tileset getTileset(Key<Tileset> tilesetKey) {
+        try {
+            return tilesets.get(tilesetKey);
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }

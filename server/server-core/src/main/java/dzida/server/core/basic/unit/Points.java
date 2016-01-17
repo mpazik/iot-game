@@ -30,6 +30,14 @@ public class Points {
         return points.length == 2;
     }
 
+    public static int cordToTail(double cord) {
+        return (int) Math.floor(cord);
+    }
+
+    public static boolean isBetween(double num, double a, double b) {
+        return num >= Math.min(a, b) && num <= Math.max(a, b);
+    }
+
     @FunctionalInterface
     public interface IntPointOperator {
         void apply(int x, int y);

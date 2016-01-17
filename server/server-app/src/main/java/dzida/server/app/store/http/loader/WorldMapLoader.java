@@ -16,6 +16,6 @@ public class WorldMapLoader {
     }
 
     public Tileset loadTileset(Key<Tileset> tilesetKey) {
-        return staticDataLoader.loadJsonFromServer("tilesets", Tileset.class);
+        return staticDataLoader.loadJsonFromServer("tilesets/" + tilesetKey.getValue() + ".json", Tileset.class);
     }
 }

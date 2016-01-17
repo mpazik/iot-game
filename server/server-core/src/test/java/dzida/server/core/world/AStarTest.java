@@ -3,6 +3,7 @@ package dzida.server.core.world;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import dzida.server.core.basic.unit.Point;
+import dzida.server.core.world.pathfinding.AStar;
 import org.junit.Test;
 
 import java.util.List;

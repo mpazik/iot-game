@@ -1,7 +1,8 @@
-package dzida.server.core.world;
+package dzida.server.core.world.pathfinding;
 
 import com.google.common.collect.ImmutableSet;
 import dzida.server.core.basic.unit.BitMap;
+import dzida.server.core.basic.unit.BitMap.ImmutableBitMap;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.model.Tileset;
 import dzida.server.core.world.model.Tileset.TerrainTypes;
@@ -22,6 +23,10 @@ public class CollisionBitMap {
         return bitMap.isSet(x, y);
     }
 
+    public BitMap toBitMap() {
+        return bitMap;
+    }
+
     public boolean isColliding(Point point) {
         return isColliding(doubleToInt(point.getX()), doubleToInt(point.getY()));
     }
@@ -33,7 +38,7 @@ public class CollisionBitMap {
     public static CollisionBitMap createForWorldMap(WorldMap worldMap, Tileset tileset) {
         int width = worldMap.getWidth();
         int height = worldMap.getHeight();
-        BitMap.Builder bitMapBuilder = BitMap.builder(width, height);
+        ImmutableBitMap.Builder bitMapBuilder = ImmutableBitMap.builder(width, height);
         int[] tiles = worldMap.getTiles();
 
         for (int i = 0; i < tiles.length; i++) {

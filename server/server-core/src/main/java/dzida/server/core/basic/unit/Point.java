@@ -54,7 +54,7 @@ public final class Point {
     }
 
     public double crossProduct(Point p) {
-        return x * p.y - y * p.y;
+        return x * p.y - y * p.x;
     }
 
     @Override

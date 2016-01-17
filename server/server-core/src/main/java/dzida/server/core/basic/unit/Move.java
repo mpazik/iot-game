@@ -68,15 +68,15 @@ public final class Move {
         setPointInTime(points, times, index, newTime, x, y);
     }
 
-    public Move continueMoveTo(long time, double velocity, Point position) {
+    public Move continueMoveTo(long time, double velocity, Point... positions) {
         int segment = findSegment(time);
 
         // this is the case when move to new position starts before move start
         if (segment == 0) {
-            return Move.of(time, 1.0, position);
+            return Move.of(time, 1.0, positions);
         }
 
-        int numOfNewPoints = segment + 2; // +1 because segment has -1 offset, +1 because there will be new point.
+        int numOfNewPoints = segment + 1 + positions.length; // +1 because segment has -1 offset, + place for new points.
         double[] newPoints = new double[(numOfNewPoints) * 2];
         long[] newTimes = new long[numOfNewPoints];
 
@@ -104,7 +104,10 @@ public final class Move {
         }
 
         setPointInTime(newPoints, newTimes, segment, time, x, y);
-        addNextPoint(newPoints, newTimes, segment + 1, velocity, position.getX(), position.getY());
+        for (int i = 0; i < positions.length; i++) {
+            addNextPoint(newPoints, newTimes, segment + i + 1, velocity, positions[i].getX(), positions[i].getY());
+        }
+
         return new Move(newPoints, newTimes);
     }
 

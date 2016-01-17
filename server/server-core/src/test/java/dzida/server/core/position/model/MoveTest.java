@@ -116,6 +116,21 @@ public class MoveTest {
                     .hasPositionAtTime(startTimeOfMoveToNewPosition, endPosition)
                     .hasPositionAtTime(newEndTime, newPosition);
         }
+
+        @Test
+        public void returnedMoveHasMultipleNewPositions() {
+            Point newPosition2 = Point.of(-3, -3);
+            Move newMove = move.continueMoveTo(middleTime, velocity, newPosition, newPosition2);
+
+            long timeToNewPos = middleTime + countDuration(middlePosition.distanceTo(newPosition), velocity);
+            long newEndTime = timeToNewPos + countDuration(newPosition.distanceTo(newPosition2), velocity);
+
+            assertThat(newMove)
+                    .hasPositionAtTime(startTime, startPosition)
+                    .hasPositionAtTime(middleTime, middlePosition)
+                    .hasPositionAtTime(timeToNewPos, newPosition)
+                    .hasPositionAtTime(newEndTime, newPosition2);
+        }
     }
 
     public class CompactHistory {

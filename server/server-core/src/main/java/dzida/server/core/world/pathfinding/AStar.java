@@ -1,4 +1,4 @@
-package dzida.server.core.world;
+package dzida.server.core.world.pathfinding;
 
 import com.google.common.collect.Multimap;
 import dzida.server.core.basic.unit.Point;
