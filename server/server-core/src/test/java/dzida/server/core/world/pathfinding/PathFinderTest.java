@@ -57,4 +57,44 @@ public class PathFinderTest {
 
         assertThat(path).containsExactly(begin, end);
     }
+
+    @Test
+    public void shouldFindPathAndIgnoreFreePlacesInClosedSpace() {
+        BitMap bitMap = BitMap.createBitMap(
+                "       ",
+                " ##### ",
+                " #   # ",
+                " # # # ",
+                " #   # ",
+                " ##### ",
+                "       ");
+        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+
+        Point begin = Point.of(0.5, 0.5);
+        Point end = Point.of(6.5, 6.0);
+
+        List<Point> path = pathFinder.findPathToDestination(begin, end);
+
+        assertThat(path).containsExactly(begin, Point.of(6, 1), end);
+    }
+
+    @Test
+    public void shouldFindPathInsideInClosedSpace() {
+        BitMap bitMap = BitMap.createBitMap(
+                "       ",
+                " ##### ",
+                " #   # ",
+                " # # # ",
+                " #   # ",
+                " ##### ",
+                "       ");
+        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+
+        Point begin = Point.of(2.9, 2.9);
+        Point end = Point.of(4.1, 3.9);
+
+        List<Point> path = pathFinder.findPathToDestination(begin, end);
+
+        assertThat(path).containsExactly(begin, Point.of(4, 3), end);
+    }
 }

@@ -57,15 +57,12 @@ public class PathFinder {
         return enrichedLineOfSightGraphBuilder.build();
     }
 
-    private Iterable<Point> findPointsInLineOfSight(Point point, Set<Point> convexPoints, Polygon polygon) {
-        return convexPoints.stream().filter(p2 -> {
-            Line line = new Line(point, p2);
-            return !polygon.intersectInside(line);
-        }).collect(Collectors.toList());
+    private Iterable<Point> findPointsInLineOfSight(Point point, Set<Point> convexPoints, MovableArea polygon) {
+        return convexPoints.stream().filter(p2 -> isInLineOfSight(point, p2, polygon)).collect(Collectors.toList());
     }
 
     private Point getEndPoint(Point begin, Point end, MovableArea polygon) {
-        if (polygon.isInside(end)) {
+        if (polygon.getPolygon().isInside(end)) {
             return end;
         } else {
             return findClosestReachableEndPoint(begin, end, polygon);
@@ -135,14 +132,14 @@ public class PathFinder {
 
     private boolean isInLineOfSight(Point begin, Point end, MovableArea polygon) {
         Line line = new Line(begin, end);
-        return !polygon.intersectInside(line) && !polygon.getCollisionBlocks().stream().anyMatch(child -> child.intersect(line));
+        return !polygon.getPolygon().intersectInside(line) && polygon.getCollisionBlocks().stream().allMatch(child -> !child.getPolygon().intersect(line));
     }
 
     static class CollisionMap {
-        private final Set<MovableArea> movableAreas;
+        private final List<MovableArea> movableAreas;
         private final CollisionBitMap collisionMap;
 
-        CollisionMap(Set<MovableArea> movableAreas, CollisionBitMap collisionMap) {
+        CollisionMap(List<MovableArea> movableAreas, CollisionBitMap collisionMap) {
             this.movableAreas = movableAreas;
             this.collisionMap = collisionMap;
         }
@@ -154,27 +151,32 @@ public class PathFinder {
             return Optional.of(getMovableAreaForPosition(x, y, movableAreas));
         }
 
-        private MovableArea getMovableAreaForPosition(int x, int y, Set<MovableArea> movableAreas) {
+        private MovableArea getMovableAreaForPosition(int x, int y, List<MovableArea> movableAreas) {
             MovableArea movableAreaForPosition = movableAreas.stream()
-                    .filter(movableArea -> movableArea.isInside(x, y))
+                    .filter(movableArea -> movableArea.getPolygon().isInside(x, y))
                     .findAny().get();
 
             Optional<CollisionBlock> blackPolygon = movableAreaForPosition.getCollisionBlocks().stream()
-                    .filter(polygon -> polygon.isInside(x, y))
+                    .filter(polygon -> polygon.getPolygon().isInside(x, y))
                     .findAny();
 
             return blackPolygon.map(p -> getMovableAreaForPosition(x, y, p.getMovableAreas())).orElse(movableAreaForPosition);
         }
     }
 
-    static class MovableArea extends Polygon {
+    static class MovableArea {
+        private final Polygon polygon;
         private final List<CollisionBlock> childPolygons;
         private final Multimap<Point, Point> lineOfSightGraph;
 
-        MovableArea(List<Point> points, Multimap<Point, Point> lineOfSightGraph) {
-            super(points);
-            this.childPolygons = Collections.emptyList();
+        MovableArea(Polygon polygon, List<CollisionBlock> childPolygons, Multimap<Point, Point> lineOfSightGraph) {
+            this.polygon = polygon;
+            this.childPolygons = childPolygons;
             this.lineOfSightGraph = lineOfSightGraph;
+        }
+
+        public Polygon getPolygon() {
+            return polygon;
         }
 
         Multimap<Point, Point> getLineOfSightGraph() {
@@ -186,15 +188,20 @@ public class PathFinder {
         }
     }
 
-    static class CollisionBlock extends Polygon {
-        private final Set<MovableArea> childPolygons;
+    static class CollisionBlock {
+        private final Polygon polygon;
+        private final List<MovableArea> childPolygons;
 
-        CollisionBlock(List<Point> points) {
-            super(points);
-            this.childPolygons = Collections.emptySet();
+        CollisionBlock(Polygon polygon, List<MovableArea> childPolygons) {
+            this.polygon = polygon;
+            this.childPolygons = childPolygons;
         }
 
-        Set<MovableArea> getMovableAreas() {
+        public Polygon getPolygon() {
+            return polygon;
+        }
+
+        List<MovableArea> getMovableAreas() {
             return childPolygons;
         }
     }
