@@ -1,12 +1,14 @@
 package dzida.server.core.world.pathfinding;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dzida.server.core.basic.unit.Line;
 import dzida.server.core.basic.unit.Point;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static dzida.server.core.basic.unit.Points.cordToTail;
@@ -97,7 +99,7 @@ class Polygon {
         return false;
     }
 
-    public boolean intersectionWithPolygonLines(Line line, int j) {
+    private boolean intersectionWithPolygonLines(Line line, int j) {
         for (int i = 0; i < points.size(); i++) {
             Point p1 = points.get(j);
 
@@ -110,7 +112,7 @@ class Polygon {
         return false;
     }
 
-    boolean isInside(int x, int y) {
+    public boolean isInside(int x, int y) {
         boolean isInside = false;
 
         int j = points.size() - 1;
@@ -126,11 +128,11 @@ class Polygon {
         return isInside;
     }
 
-    boolean isInside(Point point) {
+    public boolean isInside(Point point) {
         return isInside(cordToTail(point.getX()), cordToTail(point.getY()));
     }
 
-    boolean isOnBorder(Point point) {
+    public boolean isOnBorder(Point point) {
         int j = points.size() - 1;
         for (int i = 0; i < points.size(); i += 1) {
             Line line = new Line(points.get(j), points.get(i));
@@ -142,7 +144,7 @@ class Polygon {
         return false;
     }
 
-    Set<Point> getConvexPoints() {
+    public Set<Point> getConvexPoints() {
         ImmutableSet.Builder<Point> builder = ImmutableSet.builder();
 
         int j = points.size() - 1;
@@ -191,7 +193,7 @@ class Polygon {
         return builder.build();
     }
 
-    Set<Point> getConcavePoints() {
+    public Set<Point> getConcavePoints() {
         Set<Point> points = new HashSet<>(this.points);
         points.removeAll(getConvexPoints());
         return ImmutableSet.copyOf(points);
@@ -219,5 +221,20 @@ class Polygon {
 
     public List<Point> getPoints() {
         return points;
+    }
+
+    public List<Point> getIntersections(Line line) {
+        ImmutableList.Builder<Point> builder = ImmutableList.builder();
+
+        int j = points.size() - 1;
+        for (int i = 0; i < points.size(); i += 1) {
+            Line border = new Line(points.get(j), points.get(i));
+            j = i;
+            Optional<Point> intersection = border.getIntersection(line);
+            if (intersection.isPresent()) {
+                builder.add(intersection.get());
+            }
+        }
+        return builder.build();
     }
 }

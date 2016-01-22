@@ -1,5 +1,7 @@
 package dzida.server.core.basic.unit;
 
+import java.util.Optional;
+
 import static dzida.server.core.basic.unit.Points.isBetween;
 
 public class Line {
@@ -41,10 +43,33 @@ public class Line {
                 lineVector().crossProduct(point.minus(start)) == 0.0;
     }
 
-    //it's based on http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/
+    // It's based on: http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/
     public boolean isIntersecting(Line line) {
         return crosses(line) &&
                 line.crosses(this);
+    }
+
+    /// It's based on: http://stackoverflow.com/a/14143738/292237
+    public Optional<Point> getIntersection(Line line) {
+        Point p = start;
+        Point q = line.start;
+        Point r = lineVector();
+        Point s = line.lineVector();
+        double rxs = r.crossProduct(s);
+        Point qp = q.minus(p);
+        double qpxr = qp.crossProduct(r);
+        if (rxs == 0) {
+            return Optional.empty(); // Lines are parallel.
+        }
+
+        double ratioA = qp.crossProduct(s) / rxs;
+        double ratioB = qp.crossProduct(r) / rxs;
+
+        if ((0 <= ratioA && ratioA <= 1) && (0 <= ratioB && ratioB <= 1)) {
+            return Optional.of(q.plus(s.multiply(ratioB)));
+        }
+
+        return Optional.empty();
     }
 
     public Point getStart() {

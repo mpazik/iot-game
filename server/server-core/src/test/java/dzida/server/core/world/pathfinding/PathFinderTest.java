@@ -97,4 +97,20 @@ public class PathFinderTest {
 
         assertThat(path).containsExactly(begin, Point.of(4, 3), end);
     }
+
+    @Test
+    public void shouldGoToNearestDestinationPossiblePositionThatWasOnTheMoveLine() {
+        BitMap bitMap = BitMap.createBitMap(
+                "      ",
+                " # # #",
+                "      ");
+        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+
+        Point begin = Point.of(0.5, 1.1);
+        Point end = Point.of(5.5, 1.1);
+
+        List<Point> path = pathFinder.findPathToDestination(begin, end);
+
+        assertThat(path).containsExactly(begin, Point.of(1, 1), Point.of(4, 1), Point.of(5, 1.1));
+    }
 }

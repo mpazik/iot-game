@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static dzida.server.core.basic.unit.Points.cordToTail;
 
@@ -37,13 +38,13 @@ public class PathFinder {
         }
         MovableArea movableArea = childPolygonOpt.get();
 
-        Point reachableEnd = getEndPoint(begin, end, movableArea);
-        if (isInLineOfSight(begin, reachableEnd, movableArea)) {
-            return ImmutableList.of(begin, reachableEnd);
+        Point reachableDestination = getEndPoint(begin, end, movableArea);
+        if (isInLineOfSight(begin, reachableDestination, movableArea)) {
+            return ImmutableList.of(begin, reachableDestination);
         }
 
-        Multimap<Point, Point> enrichedLineOfSightGraph = addMoveToGraph(begin, reachableEnd, movableArea);
-        return AStar.findShortestPath(begin, reachableEnd, enrichedLineOfSightGraph);
+        Multimap<Point, Point> enrichedLineOfSightGraph = addMoveToGraph(begin, reachableDestination, movableArea);
+        return AStar.findShortestPath(begin, reachableDestination, enrichedLineOfSightGraph);
     }
 
     public Multimap<Point, Point> addMoveToGraph(Point begin, Point end, MovableArea movableArea) {
@@ -70,65 +71,15 @@ public class PathFinder {
     }
 
     private Point findClosestReachableEndPoint(Point begin, Point end, MovableArea polygon) {
-        // go from end to beginning until find inside but not in child point.
-        System.out.println("Not supported yet");
-        return begin;
-    }
+        Line moveLine = Line.of(begin, end);
+        Optional<Point> nearestCollationPointToEnd = Stream.concat(
+                polygon.getPolygon().getIntersections(moveLine).stream(),
+                polygon.getCollisionBlocks().stream().flatMap(collisionBlock -> collisionBlock.getPolygon().getIntersections(moveLine).stream())
+        ).min((o1, o2) -> (int) (o1.distanceSqrTo(end) - o2.distanceSqrTo(end)));
 
-    //    private double cordCount(double conditionValue, double cord) {
-//        if (conditionValue < 0) {
-//            return Math.floor(cord) - 0.001;
-//        } else {
-//            if (cord % 1 == 0) return cord + 1;
-//            else return Math.ceil(cord);
-//        }
-//    }
-//
-//
-//    private Point step(Point p, BitMap bitMap, double tailToX, double tailToY, double to_X, double to_Y, double dx, double a) {
-//        double x = p.getX();
-//        int tailX = cordToTail(x);
-//        double y = p.getY();
-//        int tailY = cordToTail(y);
-//
-//            if (bitMap.isSet(tailX, tailY)) {
-//                //going to the previus tail
-//                if (x % 1 == 0) to_X = x - 0.001;
-//                else to_X = x + 0.001;
-//                if (y % 1 == 0) to_Y = y - 0.001;
-//                else to_Y = y + 0.001;
-//                return new Point(to_X, to_Y);
-//            }
-//
-//            if (tailToX == tailX && tailToY == tailY) new Point(to_X, to_Y);
-//            //px py - współżędne punku przecięcięcia promienia z krawędzią kafelka
-//            double px = cordCount(dx, x);
-//            double py = a * (px - x) + y; //obliczenie wysokości przecięcia
-//            //jeżeli punkt jest na innym poziomie, czyli dolnej lub górnej krawędzi
-//            if (py.floor.toInt != tailY) {
-//                py = pyCount(y)
-//                px = 1 / a * (py - y) + x;
-//            }
-//            return step(p, bitMap px, py, tailToX, tailToY, to_X, to_Y, dx, a);
-//        }
-//    def goFromTo(fromX: Double, fromY: Double, toX: Double, toY: Double): (Double, Double) = {
-//
-//        if (isCollide(fromX.floor.toInt, fromY.floor.toInt)) {
-//            println("player on collision box")
-//            return (toX, toY)
-//        }
-//
-//        val dx = toX - fromX
-//        val dy = toY - fromY
-//        val a = dy / dx
-//        val tailToX = toX.floor.toInt
-//        val tailToY = toY.floor.toInt
-//
-//        def pxCount = cordCount(dx) _
-//        def pyCount = cordCount(dy) _
-//
-//        step(fromX, fromY)
-//    }
+        // assuming that end is outside of movable area so move line will crossed the boarded.
+        return nearestCollationPointToEnd.get();
+    }
 
     private boolean isInLineOfSight(Point begin, Point end, MovableArea polygon) {
         Line line = new Line(begin, end);

@@ -98,8 +98,6 @@ public class PolygonTest {
         assertThat(polygon.intersect(new Line(p(0, 2), p(2, 2)))).isTrue();
     }
 
-
-
     @Test
     public void intersectionInside() {
         assertThat(polygon.intersectInside(new Line(p(0, 0.5), p(1.5, 0.5)))).isTrue();
@@ -155,6 +153,21 @@ public class PolygonTest {
         assertThat(polygon.isOnBorder(p(1.5, 0.5))).isFalse();
         // outside of polygon
         assertThat(polygon.isOnBorder(p(0.5, 0.5))).isFalse();
+    }
+
+    @Test
+    public void returnsAllIntersectionWithBoard() {
+        // single point
+        assertThat(polygon.getIntersections(Line.of(0.5, 0.5, 3, 0.5))).containsExactly(p(1, 0.5));
+
+        // multiple points
+        assertThat(polygon.getIntersections(Line.of(-1.0, 1.5, 8, 1.5))).containsExactly(p(6, 1.5), p(3, 1.5), p(2, 1.5), p(0, 1.5));
+
+        // boarders included
+        assertThat(polygon.getIntersections(Line.of(1.0, 0.5, 6, 0.5))).containsExactly(p(1, 0.5), p(6, 0.5));
+
+        // empty on no intersection
+        assertThat(polygon.getIntersections(Line.of(0.0, 0.5, 0.5, 0.5))).isEmpty();
     }
 
     /**
