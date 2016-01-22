@@ -113,4 +113,20 @@ public class PathFinderTest {
 
         assertThat(path).containsExactly(begin, Point.of(1, 1), Point.of(4, 1), Point.of(5, 1.1));
     }
+
+    @Test
+    public void shouldFindPathIfPositionIsOnBorderButTilePositionIsOutOfMovableArea() {
+        BitMap bitMap = BitMap.createBitMap(
+                "   ",
+                " # ",
+                "   ");
+        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+
+        Point begin = Point.of(1, 1);
+        Point end = Point.of(2.5, 2);
+
+        List<Point> path = pathFinder.findPathToDestination(begin, end);
+
+        assertThat(path).containsExactly(begin, Point.of(2, 1), end);
+    }
 }

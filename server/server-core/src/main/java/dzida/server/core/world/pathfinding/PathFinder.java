@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dzida.server.core.basic.unit.Points.cordToTail;
-
 /**
  * Pathfinder that use graph with points in line of sight and A* algorithm to find the shortest path.
  * For more information see: http://www.david-gouveia.com/portfolio/pathfinding-on-a-2d-polygonal-map.
@@ -27,10 +25,7 @@ public class PathFinder {
     }
 
     public List<Point> findPathToDestination(Point begin, Point end) {
-        int x = cordToTail(begin.getX());
-        int y = cordToTail(begin.getY());
-
-        Optional<MovableArea> childPolygonOpt = collisionMap.getMovableAreaForPosition(x, y);
+        Optional<MovableArea> childPolygonOpt = collisionMap.getMovableAreaForPosition(begin);
 
         if (!childPolygonOpt.isPresent()) {
             // Player can not have be inside collidable polygon.
@@ -88,30 +83,31 @@ public class PathFinder {
 
     static class CollisionMap {
         private final List<MovableArea> movableAreas;
-        private final CollisionBitMap collisionMap;
 
-        CollisionMap(List<MovableArea> movableAreas, CollisionBitMap collisionMap) {
+        CollisionMap(List<MovableArea> movableAreas) {
             this.movableAreas = movableAreas;
-            this.collisionMap = collisionMap;
         }
 
-        public Optional<MovableArea> getMovableAreaForPosition(int x, int y) {
-            if (collisionMap.isColliding(x, y)) {
-                return Optional.empty();
-            }
-            return Optional.of(getMovableAreaForPosition(x, y, movableAreas));
+        public Optional<MovableArea> getMovableAreaForPosition(Point position) {
+            return Optional.of(getMovableAreaForPosition(position, movableAreas));
         }
 
-        private MovableArea getMovableAreaForPosition(int x, int y, List<MovableArea> movableAreas) {
+        private MovableArea getMovableAreaForPosition(Point position, List<MovableArea> movableAreas) {
             MovableArea movableAreaForPosition = movableAreas.stream()
-                    .filter(movableArea -> movableArea.getPolygon().isInside(x, y))
+                    .filter(movableArea -> {
+                        Polygon polygon = movableArea.getPolygon();
+                        return polygon.isInside(position) || polygon.isOnBorder(position);
+                    })
                     .findAny().get();
 
             Optional<CollisionBlock> blackPolygon = movableAreaForPosition.getCollisionBlocks().stream()
-                    .filter(polygon -> polygon.getPolygon().isInside(x, y))
+                    .filter(block -> {
+                        Polygon polygon = block.getPolygon();
+                        return polygon.isInside(position) && !polygon.isOnBorder(position);
+                    })
                     .findAny();
 
-            return blackPolygon.map(p -> getMovableAreaForPosition(x, y, p.getMovableAreas())).orElse(movableAreaForPosition);
+            return blackPolygon.map(p -> getMovableAreaForPosition(position, p.getMovableAreas())).orElse(movableAreaForPosition);
         }
     }
 

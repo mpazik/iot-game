@@ -21,7 +21,7 @@ public class PathFinderFactory {
 
         List<MovableArea> movableAreas = movablePolygons.stream().map(this::createMovableArea).collect(Collectors.toList());
 
-        PathFinder.CollisionMap collisionMap = new PathFinder.CollisionMap(movableAreas, collisionBitMap);
+        PathFinder.CollisionMap collisionMap = new PathFinder.CollisionMap(movableAreas);
         return new PathFinder(collisionMap);
     }
 
