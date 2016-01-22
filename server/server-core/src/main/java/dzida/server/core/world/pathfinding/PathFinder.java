@@ -42,7 +42,7 @@ public class PathFinder {
         return AStar.findShortestPath(begin, reachableDestination, enrichedLineOfSightGraph);
     }
 
-    public Multimap<Point, Point> addMoveToGraph(Point begin, Point end, MovableArea movableArea) {
+    private Multimap<Point, Point> addMoveToGraph(Point begin, Point end, MovableArea movableArea) {
         Multimap<Point, Point> lineOfSightGraph = movableArea.getLineOfSightGraph();
         Set<Point> convexPoints = lineOfSightGraph.keySet();
         ImmutableMultimap.Builder<Point, Point> enrichedLineOfSightGraphBuilder = ImmutableMultimap.<Point, Point>builder()
