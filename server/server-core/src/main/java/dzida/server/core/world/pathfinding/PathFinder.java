@@ -29,6 +29,10 @@ public class PathFinder {
         MovableArea movableArea = childPolygonOpt.get();
 
         Point reachableDestination = getEndPoint(begin.getX(), begin.getY(), end.getX(), end.getY(), movableArea);
+        if (reachableDestination.equals(begin)) {
+            return Collections.singletonList(begin);
+        }
+
         if (isInLineOfSight(begin, reachableDestination, movableArea)) {
             return ImmutableList.of(begin, reachableDestination);
         }
@@ -64,6 +68,7 @@ public class PathFinder {
 
     private Point findClosestReachableEndPoint(double sx, double sy, double dx, double dy, MovableArea polygon) {
         PointList.Builder builder = PointList.builder();
+        builder.add(sx, sy);
         builder.add(polygon.getPolygon().getIntersections(sx, sy, dx, dy));
         polygon.getCollisionBlocks().forEach(collisionBlock -> builder.add(collisionBlock.getPolygon().getIntersections(sx, sy, dx, dy)));
         PointList pointList = builder.build();

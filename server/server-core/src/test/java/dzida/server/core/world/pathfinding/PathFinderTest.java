@@ -28,6 +28,22 @@ public class PathFinderTest {
     }
 
     @Test
+    public void shouldReturnStartPointIfPlayerIsFacingWallAndTryGoToCollidableArea() {
+        BitMap bitMap = BitMap.createBitMap(
+                "    ",
+                " ## ",
+                " #  ");
+        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+
+        Point begin = Point.of(1, 1.5);
+        Point end = Point.of(1.5, 1.5);
+
+        List<Point> path = pathFinder.findPathToDestination(begin, end);
+
+        assertThat(path).containsExactly(begin);
+    }
+
+    @Test
     public void shouldFindPathThatAvoidMultipleCorners() {
         BitMap bitMap = BitMap.createBitMap(
                 "    ",
