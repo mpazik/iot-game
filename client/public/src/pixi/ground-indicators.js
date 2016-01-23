@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const Pixi = require('lib/pixi');
+    const Pixi = require('pixi');
     const TileSize = require('configuration').tileSize;
     const Targeting = require('../component/targeting');
     const MainPlayer = require('../store/main-player');
@@ -14,7 +14,7 @@ define(function (require, exports, module) {
             rangeIndicator = null;
         }
         if (skill !== null && skill.type === Skills.Types.ATTACK) {
-            rangeIndicator = new PIXI.Graphics();
+            rangeIndicator = new Pixi.Graphics();
             rangeIndicator.beginFill(0x74C0FF, 0.2);
             rangeIndicator.lineStyle(3, 0x74C0FF, 0.4);
             const radius = skill.range * TileSize;

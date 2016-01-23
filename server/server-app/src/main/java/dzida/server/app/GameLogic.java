@@ -12,6 +12,7 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionService;
+import dzida.server.core.position.PositionStore;
 import dzida.server.core.scenario.SurvivalScenarioFactory;
 
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class GameLogic {
             Scenario scenario,
             Runnable send,
             AiService aiService,
-            PositionStoreImpl positionStore,
+            PositionStore positionStore,
             CommandResolver commandResolver) {
         this.gameEventDispatcher = gameEventDispatcher;
         this.characterService = characterService;

@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
@@ -15,7 +16,8 @@ import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.basic.unit.Point;
+import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import lombok.Value;
 
@@ -100,7 +102,7 @@ public class CommandResolver {
     private List<GameEvent> dispatchMessage(CharacterId characterId, int type, JsonElement data, Consumer<GameEvent> send) {
         switch (type) {
             case Move:
-                return positionCommandHandler.move(characterId, serializer.fromJson(data, Position.class), PositionService.PlayerSpeed);
+                return positionCommandHandler.move(characterId, serializer.fromJson(data, Point.class), PositionService.PlayerSpeed);
             case UseSkill:
                 SkillUse skillUse = serializer.fromJson(data, SkillUse.class);
                 return skillCommandHandler.useSkill(characterId, skillUse.skillId, skillUse.target);
@@ -133,7 +135,7 @@ public class CommandResolver {
 
     @Value
     private static class SkillUse {
-        int skillId;
+        Id<Skill> skillId;
         CharacterId target;
     }
 

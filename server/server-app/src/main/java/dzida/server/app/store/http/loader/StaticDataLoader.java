@@ -1,8 +1,9 @@
-package dzida.server.app;
+package dzida.server.app.store.http.loader;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import dzida.server.app.Configuration;
+import dzida.server.app.Serializer;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -13,6 +14,11 @@ import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
 public class StaticDataLoader {
+
+    public <T> T loadJsonFromServer(String path, Class<T> clazz) {
+        return loadJsonFromServer(path, TypeToken.of(clazz));
+    }
+
     public <T> T loadJsonFromServer(String path, TypeToken<T> typeToken) {
         long startTime = System.currentTimeMillis();
         try {
@@ -22,7 +28,7 @@ public class StaticDataLoader {
             URLConnection urlConnection = url.openConnection();
             String contentEncoding = urlConnection.getContentEncoding();
             JsonReader jsonReader = new JsonReader(requestInputStream(url.openStream(), contentEncoding));
-            T data = new Gson().fromJson(jsonReader, typeToken.getType());
+            T data = Serializer.getSerializer().fromJson(jsonReader, typeToken.getType());
 
             long loadTime = System.currentTimeMillis() - startTime;
             System.out.printf("File %s downloaded in %dms \n", path, loadTime);
@@ -43,6 +49,4 @@ public class StaticDataLoader {
         }
         return new InputStreamReader(inputStream);
     }
-
-
 }

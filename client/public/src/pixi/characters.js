@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const Pixi = require('lib/pixi');
+    const Pixi = require('pixi');
     const CharacterStore = require('../store/character');
     const MainPlayer = require('../store/main-player');
     const MoveStore = require('../store/move');
@@ -115,7 +115,9 @@ define(function (require, exports, module) {
     });
 
     function createCharacterModel(character) {
-        var model = new CharacterModel(character);
+        const health = SkillStore.percentHealth(character.id);
+        var model = new CharacterModel(character, health);
+        model.position = characterPosition(model, Timer.currentTimeOnServer());
         characterModels.push(model);
         layer.addChild(model);
         if (character.id === MainPlayer.characterId()) {
@@ -135,11 +137,11 @@ define(function (require, exports, module) {
     }
 
     CharacterStore.characterSpawnedStream.subscribe(function (character) {
-        createCharacterModel(character);
+        deffer(() => createCharacterModel(character));
     });
 
     CharacterStore.characterDiedStream.subscribe(function (characterToRemove) {
-        removeCharacterModel(characterToRemove);
+        deffer(() => removeCharacterModel(characterToRemove));
     });
 
     SkillStore.characterGotDamageStream.subscribe(function (event) {
@@ -149,6 +151,10 @@ define(function (require, exports, module) {
         startDamagePointsAnimation(characterModel.position, event.damage);
         characterModel.updateHpBar(SkillStore.percentHealth(event.characterId));
     });
+
+    function characterPosition(characterModel, time) {
+        return Point.multiplyInPlace(MoveStore.positionAtTime(characterModel.id, time), TileSize);
+    }
 
     module.exports = {
         init: function () {
@@ -162,7 +168,14 @@ define(function (require, exports, module) {
             processAnimations();
             const time = Timer.currentTimeOnServer();
             characterModels.forEach(function (characterModel) {
-                characterModel.position = Point.multiplyInPlace(MoveStore.positionAtTime(characterModel.id, time), TileSize);
+                const newPosition = characterPosition(characterModel, time);
+                if (!Point.equal(newPosition, characterModel.position)) {
+                    if (characterModel.spine.state.getCurrent(0) == null) {
+                        characterModel.spine.state.setAnimationByName(0, 'walk', false);
+                    }
+                }
+
+                characterModel.position = newPosition;
                 characterModel.rotatable.rotation = MoveStore.angleAtTime(characterModel.id, time)
             });
             if (mainPlayerModel) {

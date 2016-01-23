@@ -1,10 +1,17 @@
 package dzida.server.app;
 
+import dzida.server.app.store.http.WorldMapStoreHttp;
+import dzida.server.app.store.http.loader.SkillLoader;
+import dzida.server.app.store.http.loader.StaticDataLoader;
+import dzida.server.app.store.http.loader.WorldMapLoader;
 import dzida.server.app.store.mapdb.PlayerStoreMapDb;
+import dzida.server.app.store.memory.SkillStoreInMemory;
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Result;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
+import dzida.server.core.skill.Skill;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -35,7 +42,12 @@ public class Container {
     Container(int startPort, URI address, PlayerStoreMapDb playerStore) {
         bossGroup = new NioEventLoopGroup();
         playerService = new PlayerService(playerStore);
-        instanceFactory = new InstanceFactory(playerService, new Arbiter(this));
+        StaticDataLoader staticDataLoader = new StaticDataLoader();
+
+        Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
+        WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
+
+        instanceFactory = new InstanceFactory(playerService, new Arbiter(this), new SkillStoreInMemory(skills), worldMapStore);
         nextPort = startPort;
         this.address = address;
     }

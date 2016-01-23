@@ -1,5 +1,6 @@
 package dzida.server.app.npc;
 
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
@@ -8,7 +9,7 @@ import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Position;
+import dzida.server.core.basic.unit.Point;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
@@ -70,8 +71,8 @@ public class NpcBehaviour {
     }
 
     private List<GameEvent> gotToRandomPosition(CharacterId id) {
-        Position pos = positionService.getPosition(id, timeService.getCurrentMillis());
-        Position direction = Position.of(randomCord(pos.getX()), randomCord(pos.getY()));
+        Point pos = positionService.getPosition(id, timeService.getCurrentMillis());
+        Point direction = Point.of(randomCord(pos.getX()), randomCord(pos.getY()));
         return positionCommandHandler.move(id, direction, PositionService.BotSpeed);
     }
 
@@ -84,7 +85,7 @@ public class NpcBehaviour {
     }
 
     private List<GameEvent> gotToPlayer(NpcCharacter npc, CharacterId targetId) {
-        Position direction = positionService.getPosition(targetId, timeService.getCurrentMillis());
+        Point direction = positionService.getPosition(targetId, timeService.getCurrentMillis());
         return positionCommandHandler.move(npc.getId(), direction, PositionService.BotSpeed);
     }
 
@@ -96,12 +97,12 @@ public class NpcBehaviour {
     }
 
     private boolean isInAttackRange(NpcCharacter npc, CharacterId target) {
-        int skillId = getBotAttackSkillId(npc.getBotType());
+        Id<Skill> skillId = getBotAttackSkillId(npc.getBotType());
         Skill skill = skillService.getSkill(skillId);
         return positionService.areCharactersInDistance(npc.getId(), target, skill.getRange(), timeService.getCurrentMillis());
     }
 
-    private int getBotAttackSkillId(int npcType) {
+    private Id<Skill> getBotAttackSkillId(int npcType) {
         if (npcType == Npc.Fighter) return Skills.Ids.SWORD_HIT;
         if (npcType == Npc.Archer) return Skills.Ids.BOW_SHOT;
         throw new UnsupportedOperationException("");

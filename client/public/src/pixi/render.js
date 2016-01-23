@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const Pixi = require('lib/pixi');
+    const Pixi = require('pixi');
     const MainPlayer = require('../store/main-player');
     const WorldRender = require('./world');
     const MainLoop = require('../store/main-loop');

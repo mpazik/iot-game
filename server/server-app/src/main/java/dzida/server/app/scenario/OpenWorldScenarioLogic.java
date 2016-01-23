@@ -7,7 +7,7 @@ import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.player.PlayerWillRespawn;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Move;
+import dzida.server.core.basic.unit.Move;
 
 import java.time.Instant;
 

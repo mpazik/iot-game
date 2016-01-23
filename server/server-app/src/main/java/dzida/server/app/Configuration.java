@@ -3,7 +3,7 @@ package dzida.server.app;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
-class Configuration {
+public class Configuration {
     public static String getContainerHost() {
         return System.getProperty("containerHost", "localhost");
     }

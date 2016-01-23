@@ -1,4 +1,4 @@
-package dzida.server.core.position.model;
+package dzida.server.core.basic.unit;
 
 /**
  * Class that represent move. It's a list of a position in times.
@@ -20,13 +20,13 @@ public final class Move {
         this.times = times;
     }
 
-    public static Move fromPosition(long startTime, Position position) {
+    public static Move fromPosition(long startTime, Point position) {
         double[] points = {position.getX(), position.getY()};
         long[] times = {startTime};
         return new Move(points, times);
     }
 
-    public static Move of(long startTime, double velocity, Position... positions) {
+    public static Move of(long startTime, double velocity, Point... positions) {
         double[] points = new double[positions.length * 2];
         long[] times = new long[positions.length];
         setPointInTime(points, times, 0, startTime, positions[0].getX(), positions[0].getY());
@@ -62,21 +62,21 @@ public final class Move {
     private static void addNextPoint(double[] points, long[] times, int index, double velocity, double x, double y) {
         double previousX = points[(index - 1) * 2];
         double previousY = points[(index - 1) * 2 + 1];
-        double length = Points.distance(previousX, previousY, x, y);
+        double length = Geometry2D.distance(previousX, previousY, x, y);
         long duration = countDuration(velocity, length);
         long newTime = times[index - 1] + duration;
         setPointInTime(points, times, index, newTime, x, y);
     }
 
-    public Move continueMoveTo(long time, double velocity, Position position) {
+    public Move continueMoveTo(long time, double velocity, Point... positions) {
         int segment = findSegment(time);
 
         // this is the case when move to new position starts before move start
         if (segment == 0) {
-            return Move.of(time, 1.0, position);
+            return Move.of(time, 1.0, positions);
         }
 
-        int numOfNewPoints = segment + 2; // +1 because segment has -1 offset, +1 because there will be new point.
+        int numOfNewPoints = segment + 1 + positions.length; // +1 because segment has -1 offset, + place for new points.
         double[] newPoints = new double[(numOfNewPoints) * 2];
         long[] newTimes = new long[numOfNewPoints];
 
@@ -104,7 +104,10 @@ public final class Move {
         }
 
         setPointInTime(newPoints, newTimes, segment, time, x, y);
-        addNextPoint(newPoints, newTimes, segment + 1, velocity, position.getX(), position.getY());
+        for (int i = 0; i < positions.length; i++) {
+            addNextPoint(newPoints, newTimes, segment + i + 1, velocity, positions[i].getX(), positions[i].getY());
+        }
+
         return new Move(newPoints, newTimes);
     }
 
@@ -119,7 +122,7 @@ public final class Move {
         if (segment == times.length) {
             double x = points[points.length - 2];
             double y = points[points.length - 1];
-            return Move.fromPosition(times[times.length - 1], Position.of(x, y));
+            return Move.fromPosition(times[times.length - 1], Point.of(x, y));
         }
 
         int numberOfPointsThatRemains = times.length - segment + 1;
@@ -132,7 +135,7 @@ public final class Move {
         return new Move(newPoints, newTimes);
     }
 
-    public Position getPositionAtTime(long time) {
+    public Point getPositionAtTime(long time) {
         int segment = findSegment(time);
         if (segment == 0) {
             return getStart();
@@ -145,7 +148,7 @@ public final class Move {
         int index = (segment - 1) * 2;
         double x = interpolate(segmentRatio, points[index], points[index + 2]);
         double y = interpolate(segmentRatio, points[index + 1], points[index + 3]);
-        return Position.of(x, y);
+        return Point.of(x, y);
     }
 
     public double getAngleAtTime(long time) {
@@ -205,20 +208,20 @@ public final class Move {
         return times[times.length - 1];
     }
 
-    private Position getStart() {
-        return Position.of(points[0], points[1]);
+    private Point getStart() {
+        return Point.of(points[0], points[1]);
     }
 
-    private Position getEnd() {
+    private Point getEnd() {
         int length = points.length;
-        return Position.of(points[length - 2], points[length - 1]);
+        return Point.of(points[length - 2], points[length - 1]);
     }
 
     private double getLength() {
-        return Points.getLength(points);
+        return Geometry2D.getLength(points);
     }
 
     private boolean isSinglePoint() {
-        return Points.isSinglePoint(points);
+        return Geometry2D.isSinglePoint(points);
     }
 }

@@ -57,8 +57,8 @@ define(function (require, exports, module) {
                 segment -= 1;
             }
             const index = segment * 2;
-            const dx = move.points[index] - move.points[index - 2];
-            const dy = move.points[index + 1] - move.points[index - 1];
+            const dx = move.points[index - 2] - move.points[index];
+            const dy = move.points[index - 1] - move.points[index + 1];
             return -Math.atan2(dx, dy)
         }
     };

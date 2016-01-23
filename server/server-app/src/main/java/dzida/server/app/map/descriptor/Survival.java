@@ -1,17 +1,19 @@
 package dzida.server.app.map.descriptor;
 
-import dzida.server.core.position.model.Position;
+import dzida.server.core.basic.entity.Key;
+import dzida.server.core.basic.unit.Point;
+import dzida.server.core.world.model.WorldMap;
 import lombok.Value;
 
 import java.util.List;
 
 public class Survival implements Scenario {
     private final String type;
-    private final String mapName;
+    private final Key<WorldMap> mapName;
     private final List<Spawn> spawns;
     private final int difficultyLevel;
 
-    public Survival(String mapName, int difficultyLevel, List<Spawn> spawns) {
+    public Survival(Key<WorldMap> mapName, int difficultyLevel, List<Spawn> spawns) {
         this.mapName = mapName;
         this.spawns = spawns;
         this.difficultyLevel = difficultyLevel;
@@ -22,8 +24,7 @@ public class Survival implements Scenario {
         return spawns;
     }
 
-    @Override
-    public String getMapName() {
+    public Key<WorldMap> getWorldMapKey() {
         return mapName;
     }
 
@@ -38,6 +39,6 @@ public class Survival implements Scenario {
 
     @Value
     public static class Spawn {
-        private final Position position;
+        private final Point position;
     }
 }

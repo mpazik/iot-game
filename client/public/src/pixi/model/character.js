@@ -1,5 +1,7 @@
 define(function (require, exports, module) {
-    const Pixi = require('lib/pixi');
+    const Pixi = require('pixi');
+    require('pixi-spine');
+    const Resources = require('../../store/resources');
     const CharacterType = require('../../store/character').CharacterType;
     const Dispatcher = require('../../component/dispatcher');
 
@@ -15,21 +17,19 @@ define(function (require, exports, module) {
     const healthBarLength = 50;
     const healthBarBgLength = 56;
 
-    function CharacterModel(character) {
+    function CharacterModel(character, health) {
         this.id = character.id;
         Pixi.Container.call(this);
 
         this.rotatable = new Pixi.Container();
         this.addChild(this.rotatable);
-        this.createPart('rightShoe', "right-shoe.png", -9, 3);
-        this.createPart('leftShoe', "left-shoe.png", 9, 3);
-        this.createPart('rightHand', "hand.png", 18, 3);
-        this.createPart('leftHand', "hand.png", -18, 3);
-        this.createPart('chest', "chest.png", 0, 0);
-        this.createPart('head', "head.png", 0, 2);
+
+        this.spine = new Pixi.spine.Spine(Resources.spine('player').spineData);
+        this.spine.skeleton.setToSetupPose();
+        this.rotatable.addChild(this.spine);
         this.hitArea = new Pixi.Circle(0, 0, 40);
         this.createHpBar();
-        //this.updateHpBar(creature.health);
+        this.updateHpBar(health);
 
         this.mousedown = function () {
             Dispatcher.userEventStream.publish({
@@ -50,39 +50,14 @@ define(function (require, exports, module) {
             this.createNick(character.nick);
         }
         if (character.type === CharacterType.Bot) {
-            this.chest.tint = 0xFF7777;
-            this.scale = {x: 0.9, y: 0.9};
+            const chest = this.spine.skeleton.findSlot('chest');
+            chest.b = 0.5;
+            chest.g = 0.5;
+            this.spine.scale = {x: 0.9, y: 0.9};
         }
-
-        //moveAnim = new TimeLine({
-        //    paused: true
-        //});
-        //moveAnim.to(this.leftShoe.position, 0.25, {y: 11}, 0);
-        //moveAnim.to(this.leftShoe.position, 0.5, {y: -5}, 0.25);
-        //moveAnim.to(this.leftShoe.position, 0.25, {y: 3}, 0.75);
-        //moveAnim.to(this.rightShoe.position, 0.25, {y: -5}, 0);
-        //moveAnim.to(this.rightShoe.position, 0.5, {y: 11}, 0.25);
-        //moveAnim.to(this.rightShoe.position, 0.25, {y: 3}, 0.75);
-        //moveAnim.to(this.leftHand.position, 0.25, {y: 7}, 0);
-        //moveAnim.to(this.leftHand.position, 0.5, {y: -1}, 0.25);
-        //moveAnim.to(this.leftHand.position, 0.25, {y: 3}, 0.75);
-        //moveAnim.to(this.rightHand.position, 0.25, {y: -1}, 0);
-        //moveAnim.to(this.rightHand.position, 0.5, {y: 7}, 0.25);
-        //moveAnim.to(this.rightHand.position, 0.25, {y: 3}, 0.75);
-        //this.animation = {
-        //    move: moveAnim
-        //};
     }
 
     CharacterModel.prototype = Object.create(Pixi.Container.prototype);
-
-    CharacterModel.prototype.createPart = function (name, img, x, y) {
-        const part = new Pixi.Sprite.fromImage(img);
-        part.anchor = new Pixi.Point(0.5, 0.5);
-        part.position = new Pixi.Point(x, y);
-        this.rotatable.addChild(part);
-        this[name] = part;
-    };
 
     CharacterModel.prototype.makeInteractive = function () {
         this.interactive = true;
@@ -97,11 +72,11 @@ define(function (require, exports, module) {
     };
 
     CharacterModel.prototype.createHpBar = function () {
-        var healthBarBg = new PIXI.Graphics();
+        var healthBarBg = new Pixi.Graphics();
         healthBarBg.beginFill(0x000000);
         healthBarBg.drawRect(-healthBarBgLength / 2, -36, healthBarBgLength, 10);
         this.addChild(healthBarBg);
-        var healthBar = new PIXI.Graphics();
+        var healthBar = new Pixi.Graphics();
         healthBar.beginFill(0x00FF00);
         healthBar.drawRect(-healthBarLength / 2, -34, healthBarLength, 6);
         this.healthBar = healthBar;

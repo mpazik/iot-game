@@ -1,26 +1,27 @@
 package dzida.server.core.world;
 
-import dzida.server.core.world.model.WorldState;
+import dzida.server.core.basic.entity.Key;
+import dzida.server.core.world.model.WorldMap;
 
 public class WorldService {
 
-    public static final String Key = "world";
+    public static final String ServiceKey = "world";
 
-    private final WorldState worldState;
+    private final WorldMap worldMap;
 
-    private WorldService(WorldState worldState) {
-        this.worldState = worldState;
+    private WorldService(WorldMapStore worldMapStore, Key<WorldMap> worldMapKey) {
+        this.worldMap = worldMapStore.getMap(worldMapKey);
     }
 
-    static public WorldService create(WorldState worldState) {
-        return new WorldService(worldState);
+    static public WorldService create(WorldMapStore worldMapStore, Key<WorldMap> worldMapKey) {
+        return new WorldService(worldMapStore, worldMapKey);
     }
 
-    public WorldState getState() {
-        return worldState;
+    public WorldMap getState() {
+        return worldMap;
     }
 
     public String getKey() {
-        return Key;
+        return ServiceKey;
     }
 }
