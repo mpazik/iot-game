@@ -86,7 +86,7 @@ PathFindingBenchmark.lineIntersection:·gc.alloc.rate                    sample 
 PathFindingBenchmark.lineIntersection:·gc.alloc.rate.norm               sample     10  545884.002 ±     7.733    B/op
 ```
 
-## Used arry in graph insead of hash map
+## Used array in graph insead of hash map
 
 #### Results
 ```
@@ -122,3 +122,40 @@ PathFindingBenchmark.lineIntersection:·stack                            sample 
 
 #### Finding
 WoW!. That was that. Memory usage dropped more than 10 times. Execution time is two time faster. There is still room for improvement in graph building.
+
+## Replaced List of Points by PointList that stores points as double array.
+
+```
+....[Thread state: RUNNABLE]........................................................................
+ 47.2%  47.2% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
+ 27.8%  27.8% dzida.server.core.world.pathfinding.Polygon.isLineInside
+  4.3%   4.3% java.util.PriorityQueue.siftDown
+  4.2%   4.2% dzida.server.core.basic.unit.Graph.builder
+  3.9%   3.9% dzida.server.core.world.pathfinding.AStar.findShortestPath
+  3.4%   3.4% dzida.server.core.basic.unit.Graph$Builder.put
+  2.8%   2.8% java.util.PriorityQueue.siftUpUsingComparator
+  1.7%   1.7% dzida.server.core.basic.unit.Graph$Builder.build
+  1.5%   1.5% java.util.PriorityQueue.siftDownUsingComparator
+  0.4%   0.4% java.util.stream.MatchOps$BooleanTerminalSink.<init>
+  2.7%   2.7% <other>
+
+
+
+# Run complete. Total time: 00:01:20
+
+Benchmark                                                                 Mode     Cnt      Score      Error   Units
+PathFindingBenchmark.lineIntersection                                   sample  165408    362.781 ±    0.681   us/op
+PathFindingBenchmark.lineIntersection:·gc.alloc.rate                    sample      20    130.459 ±    0.900  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.alloc.rate.norm               sample      20  49684.825 ±    2.921    B/op
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Eden_Space           sample      20    130.982 ±    2.730  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Eden_Space.norm      sample      20  49886.738 ± 1076.477    B/op
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Survivor_Space       sample      20      0.119 ±    0.027  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Survivor_Space.norm  sample      20     45.241 ±   10.259    B/op
+PathFindingBenchmark.lineIntersection:·gc.count                         sample      20    258.000             counts
+PathFindingBenchmark.lineIntersection:·gc.time                          sample      20    133.000                 ms
+PathFindingBenchmark.lineIntersection:·stack                            sample                NaN                ---
+
+```
+
+#### Finding
+Still checking if line is inside polygon takes a lot of time but performance has been improved.

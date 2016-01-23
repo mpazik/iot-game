@@ -6,7 +6,7 @@ import dzida.server.core.basic.unit.Point;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static dzida.server.core.assertions.Assertions.assertThat;
+import static common.assertions.Assertions.assertThat;
 
 @RunWith(HierarchicalContextRunner.class)
 public class MoveTest {

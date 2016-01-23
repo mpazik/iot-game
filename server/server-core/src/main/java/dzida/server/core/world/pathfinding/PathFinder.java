@@ -1,18 +1,12 @@
 package dzida.server.core.world.pathfinding;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import dzida.server.core.basic.unit.Graph;
-import dzida.server.core.basic.unit.Line;
-import dzida.server.core.basic.unit.Point;
+import dzida.server.core.basic.unit.*;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Pathfinder that use graph with points in line of sight and A* algorithm to find the shortest path.
@@ -34,7 +28,7 @@ public class PathFinder {
         }
         MovableArea movableArea = childPolygonOpt.get();
 
-        Point reachableDestination = getEndPoint(begin, end, movableArea);
+        Point reachableDestination = getEndPoint(begin.getX(), begin.getY(), end.getX(), end.getY(), movableArea);
         if (isInLineOfSight(begin, reachableDestination, movableArea)) {
             return ImmutableList.of(begin, reachableDestination);
         }
@@ -60,23 +54,32 @@ public class PathFinder {
         return convexPoints.stream().filter(p2 -> isInLineOfSight(point, p2, polygon)).collect(Collectors.toList());
     }
 
-    private Point getEndPoint(Point begin, Point end, MovableArea polygon) {
-        if (polygon.getPolygon().isInside(end.getX(), end.getY())) {
-            return end;
+    private Point getEndPoint(double sx, double sy, double dx, double dy, MovableArea polygon) {
+        if (polygon.getPolygon().isInside(dx, dy)) {
+            return new Point(dx, dy);
         } else {
-            return findClosestReachableEndPoint(begin, end, polygon);
+            return findClosestReachableEndPoint(sx, sy, dx, dy, polygon);
         }
     }
 
-    private Point findClosestReachableEndPoint(Point begin, Point end, MovableArea polygon) {
-        Line moveLine = Line.of(begin, end);
-        Optional<Point> nearestCollationPointToEnd = Stream.concat(
-                polygon.getPolygon().getIntersections(moveLine).stream(),
-                polygon.getCollisionBlocks().stream().flatMap(collisionBlock -> collisionBlock.getPolygon().getIntersections(moveLine).stream())
-        ).min((o1, o2) -> (int) (o1.distanceSqrTo(end) - o2.distanceSqrTo(end)));
+    private Point findClosestReachableEndPoint(double sx, double sy, double dx, double dy, MovableArea polygon) {
+        PointList.Builder builder = PointList.builder();
+        builder.add(polygon.getPolygon().getIntersections(sx, sy, dx, dy));
+        polygon.getCollisionBlocks().forEach(collisionBlock -> builder.add(collisionBlock.getPolygon().getIntersections(sx, sy, dx, dy)));
+        PointList pointList = builder.build();
+
+        double closesDistance = Double.MAX_VALUE;
+        int nearestCollationPointToEnd = 0;
+        for (int i = 0; i< pointList.size(); i++) {
+            double distanceSqr = Geometry2D.distanceSqr(pointList.x(i), pointList.y(i), dx, dy);
+            if (distanceSqr < closesDistance) {
+                closesDistance = distanceSqr;
+                nearestCollationPointToEnd = i;
+            }
+        }
 
         // assuming that end is outside of movable area so move line will crossed the boarded.
-        return nearestCollationPointToEnd.get();
+        return new Point(pointList.x(nearestCollationPointToEnd), pointList.y(nearestCollationPointToEnd));
     }
 
     private boolean isInLineOfSight(Point begin, Point end, MovableArea polygon) {

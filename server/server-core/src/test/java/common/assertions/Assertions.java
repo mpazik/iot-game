@@ -1,4 +1,4 @@
-package dzida.server.core.assertions;
+package common.assertions;
 
 import dzida.server.core.basic.unit.Move;
 

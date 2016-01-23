@@ -1,14 +1,13 @@
 package dzida.server.core.world.pathfinding;
 
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
-import dzida.server.core.basic.unit.Line;
 import dzida.server.core.basic.unit.Point;
+import dzida.server.core.basic.unit.PointList;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(HierarchicalContextRunner.class)
@@ -157,16 +156,16 @@ public class PolygonTest {
     @Test
     public void returnsAllIntersectionWithBoard() {
         // single point
-        assertThat(polygon.getIntersections(Line.of(0.5, 0.5, 3, 0.5))).containsExactly(p(1, 0.5));
+        assertThat(polygon.getIntersections(0.5, 0.5, 3, 0.5).toList()).containsExactly(p(1, 0.5));
 
         // multiple points
-        assertThat(polygon.getIntersections(Line.of(-1.0, 1.5, 8, 1.5))).containsExactly(p(6, 1.5), p(3, 1.5), p(2, 1.5), p(0, 1.5));
+        assertThat(polygon.getIntersections(-1.0, 1.5, 8, 1.5).toList()).containsExactly(p(6, 1.5), p(3, 1.5), p(2, 1.5), p(0, 1.5));
 
         // empty if point is on border
-        assertThat(polygon.getIntersections(Line.of(1.0, 0.5, 6, 0.5))).isEmpty();
+        assertThat(polygon.getIntersections(1.0, 0.5, 6, 0.5).toList()).isEmpty();
 
         // empty on no intersection
-        assertThat(polygon.getIntersections(Line.of(0.0, 0.5, 0.5, 0.5))).isEmpty();
+        assertThat(polygon.getIntersections(0.0, 0.5, 0.5, 0.5).toList()).isEmpty();
     }
 
     /**
@@ -176,14 +175,14 @@ public class PolygonTest {
      * .#.###
      */
     private Polygon createPolygon() {
-        List<Point> points = newArrayList(
-                p(1, 0), p(6, 0),
-                p(6, 3), p(3, 3),
-                p(3, 1), p(2, 1),
-                p(2, 3), p(1, 3),
-                p(1, 2), p(0, 2),
-                p(0, 1), p(1, 1)
-        );
+        PointList points = PointList.builder().add(
+                1, 0, 6, 0,
+                6, 3, 3, 3,
+                3, 1, 2, 1,
+                2, 3, 1, 3,
+                1, 2, 0, 2,
+                0, 1, 1, 1
+        ).build();
         return new Polygon(points);
     }
 

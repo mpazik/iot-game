@@ -143,4 +143,9 @@ public class Geometry2D {
     public interface IntPointOperator {
         void apply(int x, int y);
     }
+
+    @FunctionalInterface
+    public interface PointOperator {
+        void apply(double x, double y);
+    }
 }

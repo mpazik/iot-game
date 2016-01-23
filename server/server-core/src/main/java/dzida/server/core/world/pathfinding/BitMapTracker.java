@@ -3,6 +3,7 @@ package dzida.server.core.world.pathfinding;
 import com.google.common.collect.ImmutableList;
 import dzida.server.core.basic.unit.BitMap;
 import dzida.server.core.basic.unit.Point;
+import dzida.server.core.basic.unit.PointList;
 import dzida.server.core.basic.unit.TreeNode;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class BitMapTracker {
     }
 
     private TreeNode<Polygon> trackPath(BitMap bitMap, int startX, int startY) {
-        List<Point> points = new ArrayList<>(20);
+        PointList.Builder points = PointList.builder();
 
         int x = startX;
         int y = startY;
@@ -113,7 +114,7 @@ public class BitMapTracker {
             }
         }
 
-        Polygon polygon = new Polygon(ImmutableList.copyOf(points));
+        Polygon polygon = new Polygon(points.build());
 
         // +1 and -2 because we do not need to track borders.
         List<TreeNode<Polygon>> children = track(new PolygonBitMap(minX, minY, maxX - startX, maxY - startY, bitMap, polygon));
