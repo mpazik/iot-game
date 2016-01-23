@@ -62,7 +62,7 @@ public final class Move {
     private static void addNextPoint(double[] points, long[] times, int index, double velocity, double x, double y) {
         double previousX = points[(index - 1) * 2];
         double previousY = points[(index - 1) * 2 + 1];
-        double length = Points.distance(previousX, previousY, x, y);
+        double length = Geometry2D.distance(previousX, previousY, x, y);
         long duration = countDuration(velocity, length);
         long newTime = times[index - 1] + duration;
         setPointInTime(points, times, index, newTime, x, y);
@@ -218,10 +218,10 @@ public final class Move {
     }
 
     private double getLength() {
-        return Points.getLength(points);
+        return Geometry2D.getLength(points);
     }
 
     private boolean isSinglePoint() {
-        return Points.isSinglePoint(points);
+        return Geometry2D.isSinglePoint(points);
     }
 }

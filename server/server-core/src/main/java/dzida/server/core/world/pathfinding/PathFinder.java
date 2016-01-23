@@ -58,7 +58,7 @@ public class PathFinder {
     }
 
     private Point getEndPoint(Point begin, Point end, MovableArea polygon) {
-        if (polygon.getPolygon().isInside(end)) {
+        if (polygon.getPolygon().isInside(end.getX(), end.getY())) {
             return end;
         } else {
             return findClosestReachableEndPoint(begin, end, polygon);
@@ -96,14 +96,14 @@ public class PathFinder {
             MovableArea movableAreaForPosition = movableAreas.stream()
                     .filter(movableArea -> {
                         Polygon polygon = movableArea.getPolygon();
-                        return polygon.isInside(position) || polygon.isOnBorder(position);
+                        return polygon.isInside(position.getX(), position.getY()) || polygon.isOnBorder(position);
                     })
                     .findAny().get();
 
             Optional<CollisionBlock> blackPolygon = movableAreaForPosition.getCollisionBlocks().stream()
                     .filter(block -> {
                         Polygon polygon = block.getPolygon();
-                        return polygon.isInside(position) && !polygon.isOnBorder(position);
+                        return polygon.isInside(position.getX(), position.getY()) && !polygon.isOnBorder(position);
                     })
                     .findAny();
 

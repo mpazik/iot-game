@@ -22,7 +22,7 @@ public interface BitMap {
         return x >= getX() && x < getX() + getWidth() && y >= getY() && y < getY() + getHeight();
     }
 
-    default void forEach(Points.IntPointOperator function) {
+    default void forEach(Geometry2D.IntPointOperator function) {
         for (int y = getY(); y < getY() + getHeight(); y++) {
             for (int x = getX(); x < getX() + getWidth(); x++) {
                 if (isSet(x, y)) {

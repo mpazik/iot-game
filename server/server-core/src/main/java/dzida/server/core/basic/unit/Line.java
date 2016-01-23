@@ -2,8 +2,6 @@ package dzida.server.core.basic.unit;
 
 import java.util.Optional;
 
-import static dzida.server.core.basic.unit.Points.isBetween;
-
 public class Line {
     private final Point start;
     private final Point end;
@@ -38,38 +36,17 @@ public class Line {
     }
 
     public boolean isPointOnLine(Point point) {
-        return isBetween(point.getX(), start.getX(), end.getX()) &&
-                isBetween(point.getY(), start.getY(), end.getY()) &&
-                lineVector().crossProduct(point.minus(start)) == 0.0;
+        return Geometry2D.isPointOnLine(point.getX(), point.getY(), start.getX(), start.getY(), end.getX(), end.getY());
     }
 
-    // It's based on: http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/
     public boolean isIntersecting(Line line) {
-        return crosses(line) &&
-                line.crosses(this);
+        return Geometry2D.isIntersecting(start.getX(), start.getY(), end.getX(), end.getY(),
+                line.getStart().getX(), line.getStart().getY(), line.getEnd().getX(), line.getEnd().getY());
     }
 
-    /// It's based on: http://stackoverflow.com/a/14143738/292237
     public Optional<Point> getIntersection(Line line) {
-        Point p = start;
-        Point q = line.start;
-        Point r = lineVector();
-        Point s = line.lineVector();
-        double rxs = r.crossProduct(s);
-        Point qp = q.minus(p);
-        double qpxr = qp.crossProduct(r);
-        if (rxs == 0) {
-            return Optional.empty(); // Lines are parallel.
-        }
-
-        double ratioA = qp.crossProduct(s) / rxs;
-        double ratioB = qp.crossProduct(r) / rxs;
-
-        if ((0 <= ratioA && ratioA <= 1) && (0 <= ratioB && ratioB <= 1)) {
-            return Optional.of(q.plus(s.multiply(ratioB)));
-        }
-
-        return Optional.empty();
+        return Geometry2D.getIntersection(start.getX(), start.getY(), end.getX(), end.getY(),
+                line.getStart().getX(), line.getStart().getY(), line.getEnd().getX(), line.getEnd().getY());
     }
 
     public Point getStart() {
@@ -78,13 +55,5 @@ public class Line {
 
     public Point getEnd() {
         return end;
-    }
-
-    //line argument is treated like infinite line, not like segment line
-    private boolean crosses(Line line) {
-        Point lineVector = lineVector();
-        double crossProduct1 = lineVector.crossProduct(line.start.minus(start));
-        double crossProduct2 = lineVector.crossProduct(line.end.minus(start));
-        return crossProduct1 != 0 && crossProduct2 != 0 && crossProduct1 < 0 != crossProduct2 < 0;
     }
 }

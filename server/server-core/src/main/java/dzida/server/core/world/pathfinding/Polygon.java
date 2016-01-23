@@ -3,6 +3,7 @@ package dzida.server.core.world.pathfinding;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import dzida.server.core.basic.unit.Geometry2D;
 import dzida.server.core.basic.unit.Line;
 import dzida.server.core.basic.unit.Point;
 
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static dzida.server.core.basic.unit.Points.cordToTail;
 import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.*;
 
 class Polygon {
@@ -22,11 +22,13 @@ class Polygon {
     }
 
     public boolean intersect(Line line) {
-        boolean isStartInside = isInside(line.getStart()) && !isOnBorder(line.getStart());
+        Point point1 = line.getStart();
+        boolean isStartInside = isInside(point1.getX(), point1.getY()) && !isOnBorder(line.getStart());
         if (isStartInside) {
             return true;
         }
-        boolean isEndInside = isInside(line.getEnd()) && !isOnBorder(line.getEnd());
+        Point point = line.getEnd();
+        boolean isEndInside = isInside(point.getX(), point.getY()) && !isOnBorder(line.getEnd());
         if (isEndInside) {
             return true;
         }
@@ -47,11 +49,11 @@ class Polygon {
                 }
                 double pointRatio = line.getStart().distanceTo(p1) / line.length();
                 Point probe1 = line.interpolate(Math.max(0, pointRatio - 0.001));
-                if (pointRatio > 0 && !isOnBorder(probe1) && isInside(probe1)) {
+                if (pointRatio > 0 && !isOnBorder(probe1) && isInside(probe1.getX(), probe1.getY())) {
                     return true;
                 }
                 Point probe2 = line.interpolate(Math.min(1, pointRatio + 0.001));
-                if (pointRatio < 1 && !isOnBorder(probe2) && isInside(probe2)) {
+                if (pointRatio < 1 && !isOnBorder(probe2) && isInside(probe2.getX(), probe2.getY())) {
                     return true;
                 }
             }
@@ -61,11 +63,13 @@ class Polygon {
     }
 
     public boolean intersectInside(Line line) {
-        boolean isStartOutside = !isInside(line.getStart()) && !isOnBorder(line.getStart());
+        Point point1 = line.getStart();
+        boolean isStartOutside = !isInside(point1.getX(), point1.getY()) && !isOnBorder(line.getStart());
         if (isStartOutside) {
             return true;
         }
-        boolean isEndOutside = !isInside(line.getEnd()) && !isOnBorder(line.getEnd());
+        Point point = line.getEnd();
+        boolean isEndOutside = !isInside(point.getX(), point.getY()) && !isOnBorder(line.getEnd());
         if (isEndOutside) {
             return true;
         }
@@ -86,11 +90,11 @@ class Polygon {
                 }
                 double pointRatio = line.getStart().distanceTo(p1) / lineLength;
                 Point probe1 = line.interpolate(Math.max(0, pointRatio - 0.001));
-                if (pointRatio > 0 && !isOnBorder(probe1) && !isInside(probe1)) {
+                if (pointRatio > 0 && !isOnBorder(probe1) && !isInside(probe1.getX(), probe1.getY())) {
                     return true;
                 }
                 Point probe2 = line.interpolate(Math.min(1, pointRatio + 0.001));
-                if (pointRatio < 1 && !isOnBorder(probe2) && !isInside(probe2)) {
+                if (pointRatio < 1 && !isOnBorder(probe2) && !isInside(probe2.getX(), probe2.getY())) {
                     return true;
                 }
             }
@@ -112,24 +116,34 @@ class Polygon {
         return false;
     }
 
-    public boolean isInside(int x, int y) {
+    /**
+     * Check if tile is inside polygon.
+     */
+    public boolean isInsideTile(int tileX, int tileY) {
+        // added epsilon since is isInside doesn't count polygon borders
+        return isInside(tileX + 0.5, tileY + 0.5);
+    }
+
+    /**
+     * Check if point is inside the polygon. If points are on the boarder the behaviour is undefined.
+     */
+    public boolean isInside(double x, double y) {
         boolean isInside = false;
 
         int j = points.size() - 1;
+        // iterate over all horizontal lines
+        // checks number of lines crossing horizontal line on the left side of the point
+        // if it's not event then point is inside
         for (int i = 0; i < points.size(); i += 2) {
-            int p1y = (int) points.get(j).getY();
-            int p2y = (int) points.get(i).getY();
-            int lineX = (int) points.get(j).getX();
+            double p1y = points.get(j).getY();
+            double p2y = points.get(i).getY();
+            double lineX = points.get(j).getX();
             j = i + 1;
-            if (lineX <= x && y >= Math.min(p1y, p2y) && y < Math.max(p1y, p2y)) {
+            if (lineX <= x && Geometry2D.isBetween(y, p1y, p2y)) {
                 isInside = !isInside;
             }
         }
         return isInside;
-    }
-
-    public boolean isInside(Point point) {
-        return isInside(cordToTail(point.getX()), cordToTail(point.getY()));
     }
 
     public boolean isOnBorder(Point point) {

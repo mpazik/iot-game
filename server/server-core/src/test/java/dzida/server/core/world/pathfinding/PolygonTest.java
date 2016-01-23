@@ -1,9 +1,11 @@
 package dzida.server.core.world.pathfinding;
 
 import com.google.common.collect.ImmutableSet;
+import de.bechte.junit.runners.context.HierarchicalContextRunner;
 import dzida.server.core.basic.unit.Line;
 import dzida.server.core.basic.unit.Point;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Set;
@@ -11,6 +13,7 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@RunWith(HierarchicalContextRunner.class)
 public class PolygonTest {
 
     private final Polygon polygon = createPolygon();
@@ -31,24 +34,21 @@ public class PolygonTest {
         assertThat(concavePoints).isEqualTo(expectedConcavePoints);
     }
 
-    @Test
-    public void pointIsInsidePolygon() {
-        assertThat(polygon.isInside(5, 1)).isTrue();
-    }
 
-    @Test
-    public void pointIsInsidePolygonIfIsOnLeftLine() {
-        assertThat(polygon.isInside(0, 1)).isTrue();
-    }
+    public class IsInside {
+        @Test
+        public void pointIsInsidePolygon_isTrue() {
+            assertThat(polygon.isInside(5, 0.5)).isTrue();
+            assertThat(polygon.isInside(5, 1)).isTrue();
+            assertThat(polygon.isInside(1.1, 2)).isTrue();
+        }
 
-    @Test
-    public void pointIsNotInSidePolygon() {
-        assertThat(polygon.isInside(2, 1)).isFalse();
-    }
-
-    @Test
-    public void pointIsNotInsidePolygonIfIsOnRightLine() {
-        assertThat(polygon.isInside(6, 1)).isFalse();
+        @Test
+        public void pointIsOutSidePolygon_isFalse() {
+            assertThat(polygon.isInside(2, 1)).isFalse();
+            assertThat(polygon.isInside(5, 3.5)).isFalse();
+            assertThat(polygon.isInside(5, -1)).isFalse();
+        }
     }
 
     @Test
@@ -66,7 +66,7 @@ public class PolygonTest {
 
     @Test
     public void intersectionIfLineIsInsideOfPolygon() {
-        assertThat(polygon.intersect(new Line(p(1.5, 0.5), p(3, 0.5)))).isTrue() ;
+        assertThat(polygon.intersect(new Line(p(1.5, 0.5), p(3, 0.5)))).isTrue();
     }
 
     @Test
@@ -113,7 +113,7 @@ public class PolygonTest {
 
     @Test
     public void noIntersectionInsideIfLineIsInsideOfPolygon() {
-        assertThat(polygon.intersectInside(new Line(p(1.5, 0.5), p(3, 0.5)))).isFalse() ;
+        assertThat(polygon.intersectInside(new Line(p(1.5, 0.5), p(3, 0.5)))).isFalse();
     }
 
     @Test
@@ -163,8 +163,8 @@ public class PolygonTest {
         // multiple points
         assertThat(polygon.getIntersections(Line.of(-1.0, 1.5, 8, 1.5))).containsExactly(p(6, 1.5), p(3, 1.5), p(2, 1.5), p(0, 1.5));
 
-        // boarders included
-        assertThat(polygon.getIntersections(Line.of(1.0, 0.5, 6, 0.5))).containsExactly(p(1, 0.5), p(6, 0.5));
+        // empty if point is on border
+        assertThat(polygon.getIntersections(Line.of(1.0, 0.5, 6, 0.5))).isEmpty();
 
         // empty on no intersection
         assertThat(polygon.getIntersections(Line.of(0.0, 0.5, 0.5, 0.5))).isEmpty();

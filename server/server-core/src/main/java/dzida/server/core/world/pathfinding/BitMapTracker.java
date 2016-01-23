@@ -22,7 +22,8 @@ public class BitMapTracker {
         List<TreeNode<Polygon>> polygons = new ArrayList<>();
 
         bitMap.forEach((x, y) -> {
-            if (!polygons.stream().anyMatch(p -> p.getData().isInside(x, y))) {
+            // added epsilon since is isInside doesn't count polygon borders
+            if (!polygons.stream().anyMatch(p -> p.getData().isInsideTile(x, y))) {
                 TreeNode<Polygon> polygon = trackPath(bitMap, x, y);
                 polygons.add(polygon);
             }
@@ -135,7 +136,7 @@ public class BitMapTracker {
 
         @Override
         public boolean isSetUnsafe(int x, int y) {
-            return worldBitMap.isSet(x, y) && polygon.isInside(x, y);
+            return worldBitMap.isSet(x, y) && polygon.isInsideTile(x, y);
         }
 
         @Override
