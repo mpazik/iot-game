@@ -1,6 +1,7 @@
 package dzida.server.core.basic.unit;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 public class Geometry2D {
     private Geometry2D() {
@@ -28,6 +29,10 @@ public class Geometry2D {
         return length;
     }
 
+    public static double getLength(double p1x, double p1y, double p2x, double p2y) {
+        return distance(p1x, p1y, p2x, p2y);
+    }
+
     public static double crossProduct(double p1x, double p1y, double p2x, double p2y) {
         return p1x * p2y - p1y * p2x;
     }
@@ -40,12 +45,24 @@ public class Geometry2D {
                 crossProduct(lx2 - lx1, ly2 - ly1, px - lx1, py - ly1) == 0.0;
     }
 
-    public Point interpolate(double lx1, double ly1, double lx2, double ly2, double ratio) {
+    public static OptionalDouble getPointRatioOnLine(double px, double py, double lx1, double ly1, double lx2, double ly2) {
+        double lx = lx2 - lx1;
+        double ly = ly2 - ly1;
+        double pxs = px - lx1;
+        double pys = py - ly1;
+        if (pxs / lx == pys / ly) {
+            return OptionalDouble.of(pys / ly);
+        }
+        return OptionalDouble.empty();
+    }
+
+    public static Point interpolate(double lx1, double ly1, double lx2, double ly2, double ratio) {
         return Point.of(lx1 + ((lx2 - lx1) * ratio), ly1 + ((ly2 - ly1) * ratio));
     }
 
-    // It's based on: http://martin-thoma.com/how-to-check-if-two-line-segments-intersect/
+    // It's based on: http://stackoverflow.com/a/565282/2529540
     // It's 2x faster than getIntersection due to primitives.
+
     /**
      * Checks lines intersect each other. Touching is not intersecting.
      */
@@ -70,7 +87,8 @@ public class Geometry2D {
 
     }
 
-    /// It's based on: http://stackoverflow.com/a/14143738/292237
+    /// It's http://stackoverflow.com/a/565282/2529540
+
     /**
      * Get the intersection point of two lines. Touching is not intersecting.
      */
@@ -108,6 +126,10 @@ public class Geometry2D {
 
     public static boolean isBetweenOrOn(double num, double a, double b) {
         return num == a || num == b || isBetween(num, a, b);
+    }
+
+    public static boolean isBetweenAndNotOn(double num, double a, double b) {
+        return num != a || num != b || isBetween(num, a, b);
     }
 
     /**

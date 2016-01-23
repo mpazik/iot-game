@@ -39,3 +39,50 @@ PathFindingBenchmark.lineIntersection:·stack                            sample 
 Surprisingly despite of lot of inefficiency algorithm perform not so bad.
 As expected most of the time is spend on checking intersections with polygon.
 Huge amount of allocated memory (675 KB) seem to be the most important issue.
+
+## Used primitives for geometry calculation
+List object has been replaced by static function that calculates on primitives.
+
+#### Results
+```
+ 29.5%  29.5% dzida.server.core.world.pathfinding.Polygon.isLineInside
+ 23.7%  23.7% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
+ 16.3%  16.3% dzida.server.core.world.pathfinding.AStar.findShortestPath
+  6.5%   6.5% com.google.common.collect.ImmutableMultimap$Builder.putAll
+  3.9%   3.9% java.util.PriorityQueue.siftDownUsingComparator
+  3.2%   3.2% java.util.PriorityQueue.siftUpUsingComparator
+  2.6%   2.6% java.util.HashMap.hash
+  2.6%   2.6% java.util.HashMap.getNode
+  2.3%   2.3% com.google.common.collect.ImmutableList.copyOf
+  1.2%   1.2% java.util.HashMap.putVal
+  8.2%   8.2% <other>
+
+
+
+# Run complete. Total time: 00:00:40
+
+Benchmark                                                                 Mode    Cnt       Score       Error   Units
+PathFindingBenchmark.lineIntersection                                   sample  23445     854.990 ±     4.276   us/op
+PathFindingBenchmark.lineIntersection:·gc.alloc.rate                    sample     20     763.838 ±    20.179  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.alloc.rate.norm               sample     20  685827.283 ±    21.644    B/op
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Eden_Space           sample     20     764.111 ±    31.368  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Eden_Space.norm      sample     20  685946.034 ± 18690.275    B/op
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Survivor_Space       sample     20       0.219 ±     0.098  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Survivor_Space.norm  sample     20     195.964 ±    85.357    B/op
+PathFindingBenchmark.lineIntersection:·gc.count                         sample     20     331.000              counts
+PathFindingBenchmark.lineIntersection:·gc.time                          sample     20     177.000                  ms
+PathFindingBenchmark.lineIntersection:·stack                            sample                NaN                 ---
+```
+
+
+#### Findings
+Algorithm become slightly faster but amount of allocated memory didn't drop. As it runs out memory is mostly allocated by A* algorithm.
+
+Benchmark of path finding of cached graph (no graph building). 
+```
+Benchmark                                                                 Mode    Cnt       Score       Error   Units
+PathFindingBenchmark.lineIntersection                                   sample  46554     215.050 ±     1.121   us/op
+PathFindingBenchmark.lineIntersection:·gc.alloc.rate                    sample     10    2415.951 ±    59.764  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.alloc.rate.norm               sample     10  545884.002 ±     7.733    B/op
+```
+

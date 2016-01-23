@@ -1,6 +1,5 @@
 package dzida.server.core.world.pathfinding;
 
-import com.google.common.collect.ImmutableSet;
 import de.bechte.junit.runners.context.HierarchicalContextRunner;
 import dzida.server.core.basic.unit.Line;
 import dzida.server.core.basic.unit.Point;
@@ -8,7 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,20 +18,17 @@ public class PolygonTest {
 
     @Test
     public void convexPointsAreReturned() {
-        Set<Point> expectedConvexPoints = ImmutableSet.of(p(1, 0), p(6, 0), p(6, 3), p(3, 3), p(2, 3), p(1, 3), p(0, 2), p(0, 1));
 
-        Set<Point> convexPoints = polygon.getConvexPoints();
-        assertThat(convexPoints).isEqualTo(expectedConvexPoints);
+        List<Point> convexPoints = polygon.getConvexPoints();
+        assertThat(convexPoints).contains(p(1, 0), p(6, 0), p(6, 3), p(3, 3), p(2, 3), p(1, 3), p(0, 2), p(0, 1));
     }
 
     @Test
     public void concavePointsAreReturned() {
-        Set<Point> expectedConcavePoints = ImmutableSet.of(p(3, 1), p(2, 1), p(1, 2), p(1, 1));
 
-        Set<Point> concavePoints = polygon.getConcavePoints();
-        assertThat(concavePoints).isEqualTo(expectedConcavePoints);
+        List<Point> concavePoints = polygon.getConcavePoints();
+        assertThat(concavePoints).contains(p(3, 1), p(2, 1), p(1, 2), p(1, 1));
     }
-
 
     public class IsInside {
         @Test
@@ -51,93 +46,97 @@ public class PolygonTest {
         }
     }
 
-    @Test
-    public void intersection() {
-        assertThat(polygon.intersect(new Line(p(0, 0.5), p(1.5, 0.5)))).isTrue();
-        assertThat(polygon.intersect(new Line(p(2.5, 1.5), p(4, 1.5)))).isTrue();
-        assertThat(polygon.intersect(new Line(p(0, 0), p(1.5, 1.5)))).isTrue();
-        assertThat(polygon.intersect(new Line(p(6, 0), p(2, 3)))).isTrue();
+    public class IsLineOutside {
+        @Test
+        public void lineIsOutside_isTrue() {
+            assertThat(polygon.isLineOutside(2.5, 1.5, 2.5, 3)).isTrue();
+        }
+
+        @Test
+        public void lineTouchBorderFromOutside_isTrue() {
+            assertThat(polygon.isLineOutside(0, 0,1, 0.5)).isTrue();
+            assertThat(polygon.isLineOutside(0, 0, 1, 1)).isTrue();
+            assertThat(polygon.isLineOutside(2.5, 1.5,  2, 1.5)).isTrue();
+        }
+
+        @Test
+        public void lineCrossPolygon_isFalse() {
+            assertThat(polygon.isLineOutside(0, 0.5, 1.5, 0.5)).isFalse();
+            assertThat(polygon.isLineOutside(2.5, 1.5, 4, 1.5)).isFalse();
+            assertThat(polygon.isLineOutside(0, 0, 1.5, 1.5)).isFalse();
+            assertThat(polygon.isLineOutside(6, 0, 2, 3)).isFalse();
+        }
+
+        @Test
+        public void lineIsInside_isFalse() {
+            assertThat(polygon.isLineOutside(1.5, 0.5, 3, 0.5)).isFalse();
+        }
+
+        @Test
+        public void lineTouchBorderFromInside_isFalse() {
+            assertThat(polygon.isLineOutside(1, 0.5, 2, 0.5)).isFalse();
+            assertThat(polygon.isLineOutside(1, 1.5, 0, 1.5)).isFalse();
+
+            // touch from two vertexes
+            assertThat(polygon.isLineOutside(0, 2, 2, 2)).isFalse();
+
+            // touch vertex and line
+            assertThat(polygon.isLineOutside(0, 2, 2, 2)).isFalse();
+        }
+
+        @Test
+        public void lineIsOnBorder_isTrue() {
+            // line to line
+            assertThat(polygon.isLineOutside(1, 0, 6, 0)).isTrue();
+            // point on vertex
+            assertThat(polygon.isLineOutside(1, 1, 1, 1)).isTrue();
+            // point on line
+            assertThat(polygon.isLineOutside(1, 0.5, 1, 0.5)).isTrue();
+        }
     }
 
-    @Test
-    public void noIntersectionIfLineIsOutsideOfPolygon() {
-        assertThat(polygon.intersect(new Line(p(2.5, 1.5), p(2.5, 3)))).isFalse();
-    }
+    public class IsLineInside {
+        @Test
+        public void lineIsInside_isTrue() {
+            assertThat(polygon.isLineInside(1.5, 0.5, 3, 0.5)).isTrue();
+        }
 
-    @Test
-    public void intersectionIfLineIsInsideOfPolygon() {
-        assertThat(polygon.intersect(new Line(p(1.5, 0.5), p(3, 0.5)))).isTrue();
-    }
+        @Test
+        public void lineTouchBorderFromInside_isTrue() {
+            assertThat(polygon.isLineInside(1, 0.5, 2, 0.5)).isTrue();
+            assertThat(polygon.isLineInside(1, 1.5, 0, 1.5)).isTrue();
 
-    @Test
-    public void noIntersectionIfLineTouchBorderFromOutside() {
-        assertThat(polygon.intersect(new Line(p(0, 0), p(1, 0.5)))).isFalse();
-        assertThat(polygon.intersect(new Line(p(0, 0), p(1, 1)))).isFalse();
-        assertThat(polygon.intersect(new Line(p(2.5, 1.5), p(2, 1.5)))).isFalse();
-    }
+            // point on vertex
+            assertThat(polygon.isLineInside(1, 1, 1, 1)).isTrue();
+            // point on line
+            assertThat(polygon.isLineInside(1, 0.5, 1, 0.5)).isTrue();
+        }
 
-    @Test
-    public void noIntersectionIfLineIsOnBorder() {
-        // line to line
-        assertThat(polygon.intersect(new Line(p(1, 0), p(6, 0)))).isFalse();
-        // point on vertex
-        assertThat(polygon.intersect(new Line(p(1, 1), p(1, 1)))).isFalse();
-        // point on line
-        assertThat(polygon.intersect(new Line(p(1, 0.5), p(1, 0.5)))).isFalse();
-    }
+        @Test
+        public void lineCrossPolygon_isFalse() {
+            assertThat(polygon.isLineInside(0, 0.5, 1.5, 0.5)).isFalse();
+            assertThat(polygon.isLineInside(2.5, 1.5, 4, 1.5)).isFalse();
+            assertThat(polygon.isLineInside(0, 0, 1.5, 1.5)).isFalse();
+            assertThat(polygon.isLineInside(6, 0, 2, 3)).isFalse();
+        }
 
-    @Test
-    public void intersectionIfLineTouchBorderFromInside() {
-        assertThat(polygon.intersect(new Line(p(1, 0.5), p(2, 0.5)))).isTrue();
-        assertThat(polygon.intersect(new Line(p(1, 1.5), p(0, 1.5)))).isTrue();
+        @Test
+        public void lineIsOutside_isFalse() {
+            assertThat(polygon.isLineInside(2.5, 1.5, 2.5, 3)).isFalse();
+        }
 
-        // touch from two vertexes
-        assertThat(polygon.intersect(new Line(p(0, 2), p(2, 2)))).isTrue();
+        @Test
+        public void lineTouchBorderFromOutside_isFalse() {
+            assertThat(polygon.isLineInside(0, 0, 1, 0.5)).isFalse();
+            assertThat(polygon.isLineInside(0, 0, 1, 1)).isFalse();
+            assertThat(polygon.isLineInside(2.5, 1.5, 2, 1.5)).isFalse();
 
-        // touch vertex and line
-        assertThat(polygon.intersect(new Line(p(0, 2), p(2, 2)))).isTrue();
-    }
+            // touch from two vertexes
+            assertThat(polygon.isLineInside(2, 1, 3, 3)).isFalse();
 
-    @Test
-    public void intersectionInside() {
-        assertThat(polygon.intersectInside(new Line(p(0, 0.5), p(1.5, 0.5)))).isTrue();
-        assertThat(polygon.intersectInside(new Line(p(2.5, 1.5), p(4, 1.5)))).isTrue();
-        assertThat(polygon.intersectInside(new Line(p(0, 0), p(1.5, 1.5)))).isTrue();
-        assertThat(polygon.intersectInside(new Line(p(6, 0), p(2, 3)))).isTrue();
-    }
-
-    @Test
-    public void intersectionInsideIfLineIsOutsideOfPolygon() {
-        assertThat(polygon.intersectInside(new Line(p(2.5, 1.5), p(2.5, 3)))).isTrue();
-    }
-
-    @Test
-    public void noIntersectionInsideIfLineIsInsideOfPolygon() {
-        assertThat(polygon.intersectInside(new Line(p(1.5, 0.5), p(3, 0.5)))).isFalse();
-    }
-
-    @Test
-    public void intersectionInsideIfLineTouchBorderFromOutside() {
-        assertThat(polygon.intersectInside(new Line(p(0, 0), p(1, 0.5)))).isTrue();
-        assertThat(polygon.intersectInside(new Line(p(0, 0), p(1, 1)))).isTrue();
-        assertThat(polygon.intersectInside(new Line(p(2.5, 1.5), p(2, 1.5)))).isTrue();
-
-        // touch from two vertexes
-        assertThat(polygon.intersectInside(new Line(p(2, 1), p(3, 3)))).isTrue();
-
-        // touch vertex and line
-        assertThat(polygon.intersectInside(new Line(p(2, 1), p(3, 1.5)))).isTrue();
-    }
-
-    @Test
-    public void noIntersectionInsideIfLineTouchBorderFromInside() {
-        assertThat(polygon.intersectInside(new Line(p(1, 0.5), p(2, 0.5)))).isFalse();
-        assertThat(polygon.intersectInside(new Line(p(1, 1.5), p(0, 1.5)))).isFalse();
-
-        // point on vertex
-        assertThat(polygon.intersectInside(new Line(p(1, 1), p(1, 1)))).isFalse();
-        // point on line
-        assertThat(polygon.intersectInside(new Line(p(1, 0.5), p(1, 0.5)))).isFalse();
+            // touch vertex and line
+            assertThat(polygon.isLineInside(2, 1, 3, 1.5)).isFalse();
+        }
     }
 
     @Test

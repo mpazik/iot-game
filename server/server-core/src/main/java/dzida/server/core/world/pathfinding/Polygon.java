@@ -2,16 +2,14 @@ package dzida.server.core.world.pathfinding;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import dzida.server.core.basic.unit.Geometry2D;
 import dzida.server.core.basic.unit.Line;
 import dzida.server.core.basic.unit.Point;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
+import static dzida.server.core.basic.unit.Geometry2D.*;
 import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.*;
 
 class Polygon {
@@ -21,99 +19,61 @@ class Polygon {
         this.points = points;
     }
 
-    public boolean intersect(Line line) {
-        Point point1 = line.getStart();
-        boolean isStartInside = isInside(point1.getX(), point1.getY()) && !isOnBorder(line.getStart());
-        if (isStartInside) {
-            return true;
-        }
-        Point point = line.getEnd();
-        boolean isEndInside = isInside(point.getX(), point.getY()) && !isOnBorder(line.getEnd());
-        if (isEndInside) {
-            return true;
-        }
-
-        int j = points.size() - 1;
-
-        if (intersectionWithPolygonLines(line, j)) {
-            return true;
-        }
-
-        for (int i = 0; i < points.size(); i++) {
-            Point p1 = points.get(i);
-
-            if (line.isPointOnLine(p1)) {
-                double lineLength = line.length();
-                if (lineLength == 0) {
-                    return false;
-                }
-                double pointRatio = line.getStart().distanceTo(p1) / line.length();
-                Point probe1 = line.interpolate(Math.max(0, pointRatio - 0.001));
-                if (pointRatio > 0 && !isOnBorder(probe1) && isInside(probe1.getX(), probe1.getY())) {
-                    return true;
-                }
-                Point probe2 = line.interpolate(Math.min(1, pointRatio + 0.001));
-                if (pointRatio < 1 && !isOnBorder(probe2) && isInside(probe2.getX(), probe2.getY())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    public boolean isLineOutside(double l1x, double l1y, double l2x, double l2y) {
+        return isLineInPolygon( l1x,  l1y,  l2x,  l2y, false);
     }
 
-    public boolean intersectInside(Line line) {
-        Point point1 = line.getStart();
-        boolean isStartOutside = !isInside(point1.getX(), point1.getY()) && !isOnBorder(line.getStart());
-        if (isStartOutside) {
-            return true;
-        }
-        Point point = line.getEnd();
-        boolean isEndOutside = !isInside(point.getX(), point.getY()) && !isOnBorder(line.getEnd());
-        if (isEndOutside) {
-            return true;
-        }
-
-        int j = points.size() - 1;
-
-        if (intersectionWithPolygonLines(line, j)) {
-            return true;
-        }
-
-        for (int i = 0; i < points.size(); i++) {
-            Point p1 = points.get(i);
-
-            if (line.isPointOnLine(p1)) {
-                double lineLength = line.length();
-                if (lineLength == 0) {
-                    return false;
-                }
-                double pointRatio = line.getStart().distanceTo(p1) / lineLength;
-                Point probe1 = line.interpolate(Math.max(0, pointRatio - 0.001));
-                if (pointRatio > 0 && !isOnBorder(probe1) && !isInside(probe1.getX(), probe1.getY())) {
-                    return true;
-                }
-                Point probe2 = line.interpolate(Math.min(1, pointRatio + 0.001));
-                if (pointRatio < 1 && !isOnBorder(probe2) && !isInside(probe2.getX(), probe2.getY())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    public boolean isLineInside(double l1x, double l1y, double l2x, double l2y) {
+        return isLineInPolygon( l1x,  l1y,  l2x,  l2y, true);
     }
 
-    private boolean intersectionWithPolygonLines(Line line, int j) {
-        for (int i = 0; i < points.size(); i++) {
-            Point p1 = points.get(j);
+    /**
+     * Checks if line inside or out side of polygon. Borders are count in to the area.
+     */
+    private boolean isLineInPolygon(double l1x, double l1y, double l2x, double l2y, boolean inside) {
+        if (inside != isInside(l1x, l1y) && !isOnBorder(l1x, l1y)) {
+            return false;
+        }
+        if (inside != isInside(l2x, l2y) && !isOnBorder(l2x, l2y)) {
+            return false;
+        }
 
-            Point p2 = points.get(i);
+        // is intersection with polygon lines
+        int j = points.size() - 1;
+        for (int i = 0; i < points.size(); i++) {
+            Point bp1 = points.get(j);
+
+            Point bp2 = points.get(i);
             j = i;
-            if (line.isIntersecting(new Line(p1, p2))) {
-                return true;
+            if (isIntersecting(bp1.getX(), bp1.getY(), bp2.getX(), bp2.getY(),
+                    l1x, l1y,
+                    l2x, l2y)) {
+                return false;
             }
         }
-        return false;
+
+        // does line touch the corners
+        for (int i = 0; i < points.size(); i++) {
+            Point p = points.get(i);
+
+            if (isPointOnLine(p.getX(), p.getY(), l1x, l1y, l2x, l2y)) {
+                double lineLength = getLength(l1x, l1y, l2x, l2y);
+                if (lineLength == 0) {
+                    return true;
+                }
+                double pointRatio = Geometry2D.distance(l1x, l1y, p.getX(), p.getY()) / lineLength;
+                Point probe1 = interpolate(l1x, l1y, l2x, l2y, Math.max(0, pointRatio - 0.001));
+                if (pointRatio > 0 && !isOnBorder(probe1.getX(), probe1.getY()) && inside != isInside(probe1.getX(), probe1.getY())) {
+                    return false;
+                }
+                Point probe2 = interpolate(l1x, l1y, l2x, l2y, Math.min(1, pointRatio + 0.001));
+                if (pointRatio < 1 && !isOnBorder(probe2.getX(), probe2.getY()) && inside != isInside(probe2.getX(), probe2.getY())) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -147,10 +107,16 @@ class Polygon {
     }
 
     public boolean isOnBorder(Point point) {
+        return isOnBorder(point.getX(), point.getY());
+    }
+
+    public boolean isOnBorder(double x, double y) {
         int j = points.size() - 1;
         for (int i = 0; i < points.size(); i += 1) {
-            Line line = new Line(points.get(j), points.get(i));
-            if (line.isPointOnLine(point)) {
+            Point p1 = points.get(j);
+            Point p2 = points.get(i);
+            if (isPointOnLine(x, y,
+                    p1.getX(), p1.getY(), p2.getX(), p2.getY())) {
                 return true;
             }
             j = i;
@@ -158,8 +124,8 @@ class Polygon {
         return false;
     }
 
-    public Set<Point> getConvexPoints() {
-        ImmutableSet.Builder<Point> builder = ImmutableSet.builder();
+    public List<Point> getConvexPoints() {
+        ImmutableList.Builder<Point> builder = ImmutableList.builder();
 
         int j = points.size() - 1;
         BitMapTracker.Direction direction = points.get(j).getX() > points.get(j - 1).getX() ? RIGHT : LEFT;
@@ -207,10 +173,53 @@ class Polygon {
         return builder.build();
     }
 
-    public Set<Point> getConcavePoints() {
-        Set<Point> points = new HashSet<>(this.points);
-        points.removeAll(getConvexPoints());
-        return ImmutableSet.copyOf(points);
+    public List<Point> getConcavePoints() {
+        ImmutableList.Builder<Point> builder = ImmutableList.builder();
+
+        int j = points.size() - 1;
+        BitMapTracker.Direction direction = points.get(j).getX() > points.get(j - 1).getX() ? RIGHT : LEFT;
+
+        for (int i = 0; i < points.size(); i += 1) {
+            Point point = points.get(j);
+            Point next = points.get(i);
+            j = i;
+            switch (direction) {
+                case TOP:
+                    if (point.getX() < next.getX()) {
+                        direction = RIGHT;
+                    } else {
+                        builder.add(point);
+                        direction = LEFT;
+                    }
+                    break;
+                case RIGHT:
+                    if (point.getY() < next.getY()) {
+                        direction = BOTTOM;
+                    } else {
+                        builder.add(point);
+                        direction = TOP;
+                    }
+                    break;
+                case BOTTOM:
+                    if (point.getX() > next.getX()) {
+                        direction = LEFT;
+                    } else {
+                        builder.add(point);
+                        direction = RIGHT;
+                    }
+                    break;
+                case LEFT:
+                    if (point.getY() > next.getY()) {
+                        direction = TOP;
+                    } else {
+                        builder.add(point);
+                        direction = BOTTOM;
+                    }
+                    break;
+            }
+        }
+
+        return builder.build();
     }
 
     @Override
@@ -242,9 +251,11 @@ class Polygon {
 
         int j = points.size() - 1;
         for (int i = 0; i < points.size(); i += 1) {
-            Line border = new Line(points.get(j), points.get(i));
+            Point p1 = points.get(j);
+            Point p2 = points.get(i);
             j = i;
-            Optional<Point> intersection = border.getIntersection(line);
+            Optional<Point> intersection = Geometry2D.getIntersection(p1.getX(), p1.getY(), p2.getX(), p2.getY(),
+                    line.getStart().getX(), line.getStart().getY(), line.getEnd().getX(), line.getEnd().getY());
             if (intersection.isPresent()) {
                 builder.add(intersection.get());
             }

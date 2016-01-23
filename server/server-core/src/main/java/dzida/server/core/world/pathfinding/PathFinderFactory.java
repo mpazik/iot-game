@@ -3,7 +3,6 @@ package dzida.server.core.world.pathfinding;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import dzida.server.core.basic.unit.BitMap;
-import dzida.server.core.basic.unit.Line;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.basic.unit.TreeNode;
 import dzida.server.core.world.pathfinding.PathFinder.CollisionBlock;
@@ -48,9 +47,6 @@ public class PathFinderFactory {
     }
 
     private Iterable<Point> findPointsInLineOfSight(Point point, List<Point> convexPoints, Polygon polygon, List<Polygon> collisionPolygons) {
-        return convexPoints.stream().filter(p2 -> {
-            Line line = new Line(point, p2);
-            return !polygon.intersectInside(line) && collisionPolygons.stream().allMatch(p -> !p.intersect(line));
-        }).collect(Collectors.toList());
+        return convexPoints.stream().filter(p2 -> polygon.isLineInside(point.getX(), point.getY(), p2.getX(), p2.getY()) && collisionPolygons.stream().allMatch(p -> p.isLineOutside(point.getX(), point.getY(), p2.getX(), p2.getY()))).collect(Collectors.toList());
     }
 }

@@ -77,8 +77,8 @@ public class PathFinder {
     }
 
     private boolean isInLineOfSight(Point begin, Point end, MovableArea polygon) {
-        Line line = new Line(begin, end);
-        return !polygon.getPolygon().intersectInside(line) && polygon.getCollisionBlocks().stream().allMatch(child -> !child.getPolygon().intersect(line));
+        return polygon.getPolygon().isLineInside(begin.getX(), begin.getY(), end.getX(), end.getY()) &&
+                polygon.getCollisionBlocks().stream().allMatch(child -> child.getPolygon().isLineOutside(begin.getX(), begin.getY(), end.getX(), end.getY()));
     }
 
     static class CollisionMap {
