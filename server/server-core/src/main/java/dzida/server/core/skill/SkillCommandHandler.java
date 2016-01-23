@@ -1,5 +1,6 @@
 package dzida.server.core.skill;
 
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.event.CharacterDied;
@@ -31,7 +32,7 @@ public class SkillCommandHandler {
         this.skillService = skillService;
     }
 
-    public List<GameEvent> useSkill(CharacterId casterId, int skillId, CharacterId targetId) {
+    public List<GameEvent> useSkill(CharacterId casterId, Id<Skill> skillId, CharacterId targetId) {
         if (!characterService.isCharacterLive(casterId) || !characterService.isCharacterLive(targetId)) {
             return emptyList();
         }

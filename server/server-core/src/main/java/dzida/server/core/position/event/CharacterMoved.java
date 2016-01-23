@@ -2,7 +2,7 @@ package dzida.server.core.position.event;
 
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.event.GameEvent;
-import dzida.server.core.position.model.Move;
+import dzida.server.core.basic.unit.Move;
 import lombok.Value;
 
 @Value

@@ -5,7 +5,7 @@ import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionService;
-import dzida.server.core.position.model.Move;
+import dzida.server.core.basic.unit.Move;
 
 import java.util.List;
 

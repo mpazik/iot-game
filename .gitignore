@@ -1,3 +1,4 @@
 public/components
 /assets
 .idea
+*.iml
