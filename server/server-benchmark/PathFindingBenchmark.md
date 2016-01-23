@@ -86,3 +86,39 @@ PathFindingBenchmark.lineIntersection:·gc.alloc.rate                    sample 
 PathFindingBenchmark.lineIntersection:·gc.alloc.rate.norm               sample     10  545884.002 ±     7.733    B/op
 ```
 
+## Used arry in graph insead of hash map
+
+#### Results
+```
+....[Thread state: RUNNABLE]........................................................................
+ 43.1%  43.1% dzida.server.core.world.pathfinding.Polygon.isLineInside
+ 37.5%  37.5% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
+  3.4%   3.4% dzida.server.core.basic.unit.Graph.builder
+  3.2%   3.2% dzida.server.core.basic.unit.Graph$Builder.put
+  2.8%   2.8% dzida.server.core.world.pathfinding.AStar.findShortestPath
+  2.8%   2.8% java.util.PriorityQueue.siftDown
+  2.1%   2.1% java.util.PriorityQueue.siftUpUsingComparator
+  1.3%   1.3% dzida.server.core.basic.unit.Graph$Builder.build
+  1.0%   1.0% java.util.PriorityQueue.siftDownUsingComparator
+  0.6%   0.6% dzida.server.core.world.pathfinding.Polygon.isLineOutside
+  2.2%   2.2% <other>
+
+
+
+# Run complete. Total time: 00:01:20
+
+Benchmark                                                                 Mode     Cnt      Score      Error   Units
+PathFindingBenchmark.lineIntersection                                   sample  115166    521.022 ±    1.128   us/op
+PathFindingBenchmark.lineIntersection:·gc.alloc.rate                    sample      20     90.904 ±    1.939  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.alloc.rate.norm               sample      20  49715.974 ±    8.412    B/op
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Eden_Space           sample      20     91.007 ±    3.935  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Eden_Space.norm      sample      20  49764.969 ± 1727.803    B/op
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Survivor_Space       sample      20      0.077 ±    0.023  MB/sec
+PathFindingBenchmark.lineIntersection:·gc.churn.PS_Survivor_Space.norm  sample      20     42.319 ±   12.384    B/op
+PathFindingBenchmark.lineIntersection:·gc.count                         sample      20    177.000             counts
+PathFindingBenchmark.lineIntersection:·gc.time                          sample      20     94.000                 ms
+PathFindingBenchmark.lineIntersection:·stack                            sample                NaN                ---
+```
+
+#### Finding
+WoW!. That was that. Memory usage dropped more than 10 times. Execution time is two time faster. There is still room for improvement in graph building.

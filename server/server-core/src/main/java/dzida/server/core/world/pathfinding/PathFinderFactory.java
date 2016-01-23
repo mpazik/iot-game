@@ -1,8 +1,7 @@
 package dzida.server.core.world.pathfinding;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import dzida.server.core.basic.unit.BitMap;
+import dzida.server.core.basic.unit.Graph;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.basic.unit.TreeNode;
 import dzida.server.core.world.pathfinding.PathFinder.CollisionBlock;
@@ -35,18 +34,18 @@ public class PathFinderFactory {
         return new CollisionBlock(polygonNode.getData(), movableAreas);
     }
 
-    public Multimap<Point, Point> createGraphOfVisibility(Polygon polygon, List<CollisionBlock> collisionBlocks) {
+    public Graph<Point> createGraphOfVisibility(Polygon polygon, List<CollisionBlock> collisionBlocks) {
         Stream<Point> convexPointsOfCollisionBlocks = collisionBlocks.stream()
                 .flatMap(collisionBlock -> collisionBlock.getPolygon().getConvexPoints().stream());
         Stream<Point> convexPointsOfMainBlock = polygon.getConcavePoints().stream();
         List<Polygon> collisionPolygons = collisionBlocks.stream().map(CollisionBlock::getPolygon).collect(Collectors.toList());
         List<Point> convexPoints = Stream.concat(convexPointsOfMainBlock, convexPointsOfCollisionBlocks).collect(Collectors.toList());
-        Multimap<Point, Point> graph = MultimapBuilder.hashKeys().arrayListValues().build();
-        convexPoints.forEach(point -> graph.putAll(point, findPointsInLineOfSight(point, convexPoints, polygon, collisionPolygons)));
-        return graph;
+        Graph.Builder<Point> graphBuilder = Graph.<Point>builder();
+        convexPoints.forEach(point -> graphBuilder.put(point, findPointsInLineOfSight(point, convexPoints, polygon, collisionPolygons)));
+        return graphBuilder.build();
     }
 
-    private Iterable<Point> findPointsInLineOfSight(Point point, List<Point> convexPoints, Polygon polygon, List<Polygon> collisionPolygons) {
+    private List<Point> findPointsInLineOfSight(Point point, List<Point> convexPoints, Polygon polygon, List<Polygon> collisionPolygons) {
         return convexPoints.stream().filter(p2 -> polygon.isLineInside(point.getX(), point.getY(), p2.getX(), p2.getY()) && collisionPolygons.stream().allMatch(p -> p.isLineOutside(point.getX(), point.getY(), p2.getX(), p2.getY()))).collect(Collectors.toList());
     }
 }

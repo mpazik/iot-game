@@ -1,7 +1,6 @@
 package dzida.server.core.world;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
+import dzida.server.core.basic.unit.Graph;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.pathfinding.AStar;
 import org.junit.Test;
@@ -20,12 +19,13 @@ public class AStarTest {
         Point C = new Point(2, 6);
         Point end = new Point(10, 0);
 
-        Multimap<Point, Point> graph = MultimapBuilder.hashKeys().arrayListValues().build();
-        graph.put(start, A);
-        graph.put(start, B);
-        graph.put(A, end);
-        graph.put(B, C);
-        graph.put(C, end);
+        Graph<Point> graph = new Graph.Builder<Point>()
+                .put(start, A)
+                .put(start, B)
+                .put(A, end)
+                .put(B, C)
+                .put(C, end)
+                .build();
 
         List<Point> shortestPath = AStar.findShortestPath(start, end, graph);
         assertThat(shortestPath).containsExactly(start, A, end);
@@ -40,14 +40,15 @@ public class AStarTest {
         Point D = new Point(5, 6); // the shortest path would go through this point if distance to the D wouldn't be recalculated
         Point end = new Point(9, 0);
 
-        Multimap<Point, Point> graph = MultimapBuilder.hashKeys().arrayListValues().build();
-        graph.put(start, A);
-        graph.put(start, B);
-        graph.put(start, D);
-        graph.put(A, C);
-        graph.put(B, C);
-        graph.put(C, end);
-        graph.put(D, end);
+        Graph<Point> graph = new Graph.Builder<Point>()
+                .put(start, A)
+                .put(start, B)
+                .put(start, D)
+                .put(A, C)
+                .put(B, C)
+                .put(C, end)
+                .put(D, end)
+                .build();
 
         List<Point> shortestPath = AStar.findShortestPath(start, end, graph);
         assertThat(shortestPath).containsExactly(start, B, C, end);
@@ -62,11 +63,12 @@ public class AStarTest {
         Point nearEnd2 = new Point(7, 0);
         Point end = new Point(9, 0);
 
-        Multimap<Point, Point> graph = MultimapBuilder.hashKeys().arrayListValues().build();
-        graph.put(start, A);
-        graph.put(A, B);
-        graph.put(B, nearEnd1);
-        graph.put(start, nearEnd2);
+        Graph<Point> graph = new Graph.Builder<Point>()
+                .put(start, A)
+                .put(A, B)
+                .put(B, nearEnd1)
+                .put(start, nearEnd2)
+                .build();
 
         List<Point> shortestPath = AStar.findShortestPath(start, end, graph);
         assertThat(shortestPath).containsExactly(start, A, B, nearEnd1);

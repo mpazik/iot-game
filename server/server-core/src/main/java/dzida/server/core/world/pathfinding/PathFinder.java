@@ -3,6 +3,7 @@ package dzida.server.core.world.pathfinding;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import dzida.server.core.basic.unit.Graph;
 import dzida.server.core.basic.unit.Line;
 import dzida.server.core.basic.unit.Point;
 
@@ -38,22 +39,24 @@ public class PathFinder {
             return ImmutableList.of(begin, reachableDestination);
         }
 
-        Multimap<Point, Point> enrichedLineOfSightGraph = addMoveToGraph(begin, reachableDestination, movableArea);
+        Graph<Point> enrichedLineOfSightGraph = addMoveToGraph(begin, reachableDestination, movableArea);
         return AStar.findShortestPath(begin, reachableDestination, enrichedLineOfSightGraph);
     }
 
-    private Multimap<Point, Point> addMoveToGraph(Point begin, Point end, MovableArea movableArea) {
-        Multimap<Point, Point> lineOfSightGraph = movableArea.getLineOfSightGraph();
-        Set<Point> convexPoints = lineOfSightGraph.keySet();
-        ImmutableMultimap.Builder<Point, Point> enrichedLineOfSightGraphBuilder = ImmutableMultimap.<Point, Point>builder()
-                .putAll(lineOfSightGraph)
-                .putAll(begin, findPointsInLineOfSight(begin, convexPoints, movableArea));
-        findPointsInLineOfSight(end, convexPoints, movableArea).forEach(point -> enrichedLineOfSightGraphBuilder.put(point, end));
+    private Graph<Point> addMoveToGraph(Point begin, Point destination, MovableArea movableArea) {
+        Graph<Point> lineOfSightGraph = movableArea.getLineOfSightGraph();
+        List<Point> convexPoints = lineOfSightGraph.getAllNodes();
 
-        return enrichedLineOfSightGraphBuilder.build();
+        List<Point> pointsFromStart = findPointsInLineOfSight(begin, convexPoints, movableArea);
+        List<Point> pointsToEnd = findPointsInLineOfSight(destination, convexPoints, movableArea);
+        Graph.Builder<Point> builder = Graph.builder(lineOfSightGraph);
+        builder.put(begin, pointsFromStart);
+        pointsToEnd.forEach(point -> builder.put(point, destination));
+
+        return builder.build();
     }
 
-    private Iterable<Point> findPointsInLineOfSight(Point point, Set<Point> convexPoints, MovableArea polygon) {
+    private List<Point> findPointsInLineOfSight(Point point, List<Point> convexPoints, MovableArea polygon) {
         return convexPoints.stream().filter(p2 -> isInLineOfSight(point, p2, polygon)).collect(Collectors.toList());
     }
 
@@ -114,9 +117,9 @@ public class PathFinder {
     static class MovableArea {
         private final Polygon polygon;
         private final List<CollisionBlock> childPolygons;
-        private final Multimap<Point, Point> lineOfSightGraph;
+        private final Graph<Point> lineOfSightGraph;
 
-        MovableArea(Polygon polygon, List<CollisionBlock> childPolygons, Multimap<Point, Point> lineOfSightGraph) {
+        MovableArea(Polygon polygon, List<CollisionBlock> childPolygons, Graph<Point> lineOfSightGraph) {
             this.polygon = polygon;
             this.childPolygons = childPolygons;
             this.lineOfSightGraph = lineOfSightGraph;
@@ -126,7 +129,7 @@ public class PathFinder {
             return polygon;
         }
 
-        Multimap<Point, Point> getLineOfSightGraph() {
+        Graph<Point> getLineOfSightGraph() {
             return lineOfSightGraph;
         }
 

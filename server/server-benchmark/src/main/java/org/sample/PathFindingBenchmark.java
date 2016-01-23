@@ -43,6 +43,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -112,9 +113,10 @@ public class PathFindingBenchmark {
     public static void main(String[] args) throws RunnerException, InterruptedException {
         Options opt = new OptionsBuilder()
                 .include(PathFindingBenchmark.class.getSimpleName())
-                .warmupIterations(10)
-                .measurementIterations(10)
-                .forks(0)
+                .warmupIterations(20)
+                .measurementIterations(20)
+                .measurementTime(TimeValue.seconds(3))
+                .forks(1)
                 .addProfiler(StackProfiler.class)
                 .addProfiler(GCProfiler.class)
                 .build();
