@@ -8,6 +8,9 @@ define(function (require, exports, module) {
             Dispatcher.messageStream.subscribe(MessageIds.InitialData, (event) => {
                 push(event.scenario)
             });
+            Dispatcher.messageStream.subscribe(MessageIds.Disconnected, () => {
+                push(null)
+            });
         }),
         endScenarioData: new Publisher.StatePublisher(null, (push) => {
             Dispatcher.messageStream.subscribe(MessageIds.InitialData, () => {
@@ -15,6 +18,9 @@ define(function (require, exports, module) {
             });
             Dispatcher.messageStream.subscribe(MessageIds.ScenarioEnd, (event) => {
                 push(event)
+            });
+            Dispatcher.messageStream.subscribe(MessageIds.Disconnected, () => {
+                push(null)
             });
         })
     }

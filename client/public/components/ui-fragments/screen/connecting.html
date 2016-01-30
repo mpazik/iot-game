@@ -1,0 +1,16 @@
+<template id="connecting-screen">
+    Connecting...
+</template>
+<script>
+    createUiElement('connecting-screen', {
+        type: 'fragment',
+        properties: {
+            requirements: {
+                applicationState: Predicates.is('connecting')
+            }
+        },
+        created: function () {
+            this.classList.add('game-state')
+        }
+    });
+</script>
