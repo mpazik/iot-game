@@ -17,7 +17,7 @@ define(function (require, exports, module) {
                 push(null)
             });
             Dispatcher.messageStream.subscribe(MessageIds.ScenarioEnd, (event) => {
-                push(event)
+                setTimeout(() => push(event), 1000);
             });
             Dispatcher.messageStream.subscribe(MessageIds.Disconnected, () => {
                 push(null)

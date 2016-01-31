@@ -1,25 +1,21 @@
 package dzida.server.app.scenario;
 
+import com.google.common.collect.ImmutableList;
 import dzida.server.app.GameEventDispatcher;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.Npc;
 import dzida.server.core.Scheduler;
+import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
-import dzida.server.core.character.event.CharacterDied;
-import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;
-import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
-import dzida.server.core.basic.unit.Point;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static dzida.server.core.scenario.ScenarioEnd.Resolution.Defeat;
 import static dzida.server.core.scenario.ScenarioEnd.Resolution.Victory;
@@ -84,10 +80,8 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
                 playerService.updatePlayerData(playerId, newPlayerData);
             }
         });
-        Stream<CharacterDied> characterDiedStream = players.stream().map(Character::getId).map(CharacterDied::new);
-        List<GameEvent> messages = Stream.concat(characterDiedStream, Stream.of(new ScenarioEnd(Victory))).collect(Collectors.toList());
         survivalScenarioState.end = true;
-        gameEventDispatcher.dispatchEvents(messages);
+        gameEventDispatcher.dispatchEvents(ImmutableList.of(new ScenarioEnd(Victory)));
     }
 
     @Override
