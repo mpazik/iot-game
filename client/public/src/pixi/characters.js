@@ -168,7 +168,7 @@ define(function (require, exports, module) {
             const enemyPosition = findCharacterModel(event.targetId).position;
             characterModel.rotatable.rotation = Point.angleFromTo(enemyPosition, characterModel.position)
         }
-        const animation = event.skill.characterAnimation;
+        const animation = SkillStore.characterAnimation(event.skill.id);
         if (animation) {
             characterModel.spine.state.setAnimationByName(0, animation, false);
         }

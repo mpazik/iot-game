@@ -103,7 +103,7 @@ public class NpcBehaviour {
     }
 
     private Id<Skill> getBotAttackSkillId(int npcType) {
-        if (npcType == Npc.Fighter) return Skills.Ids.SWORD_HIT;
+        if (npcType == Npc.Fighter) return Skills.Ids.PUNCH;
         if (npcType == Npc.Archer) return Skills.Ids.BOW_SHOT;
         throw new UnsupportedOperationException("");
     }

@@ -74,10 +74,21 @@ define(function (require, exports, module) {
             const character = state.get(characterId);
             return character.health / character.maxHealth;
         },
-        isOnCooldown: (characterId, time) => {
-            const cooldownTill = state.get(characterId).cooldownTill;
-            return cooldownTill && time < cooldownTill;
+        characterAnimation: (skillId) => {
+            const skill = ResourcesStore.skill(skillId);
+            if (!skill) {
+                return null;
+            }
+            const animation = skill.characterAnimation;
+            if (typeof animation === 'string') {
+                return animation;
+            }
+            if (typeof animation === 'object') {
+                const animationIndex = Math.floor(Math.random() * animation.length);
+                return animation[animationIndex];
+            }
+            return null;
         },
-        skill: id => ResourcesStore.skill(id)
+        skill: skillId => ResourcesStore.skill(skillId)
     };
 });
