@@ -36,12 +36,10 @@ define(function (require, exports, module) {
                 this.playerId = playerId;
             },
 
-            CharacterSpawned: function (characterId, position, characterType, nick) {
-                this.characterId = characterId;
-                this.position = position;
-                //noinspection JSUnusedGlobalSymbols
-                this.characterType = characterType;
-                this.nick = nick;
+            CharacterSpawned: function (character, move, skillData) {
+                this.character = character;
+                this.move = move;
+                this.skillData = skillData;
             },
 
             CharacterDied: function (characterId) {

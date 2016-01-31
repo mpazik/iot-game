@@ -5,13 +5,13 @@ import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.scenario.*;
 import dzida.server.core.Scheduler;
+import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
-import dzida.server.core.position.PositionService;
 import dzida.server.core.position.PositionStore;
 import dzida.server.core.scenario.SurvivalScenarioFactory;
 
@@ -31,7 +31,6 @@ public class GameLogic {
     public GameLogic(
             Scheduler scheduler,
             GameEventDispatcher gameEventDispatcher,
-            PositionService positionService,
             CharacterService characterService,
             PlayerService playerService,
             Optional<SurvivalScenarioFactory.SurvivalScenario> survivalScenario,
@@ -39,7 +38,8 @@ public class GameLogic {
             Runnable send,
             AiService aiService,
             PositionStore positionStore,
-            CommandResolver commandResolver) {
+            CommandResolver commandResolver,
+            CharacterCommandHandler characterCommandHandler) {
         this.gameEventDispatcher = gameEventDispatcher;
         this.characterService = characterService;
         this.playerService = playerService;
@@ -53,7 +53,7 @@ public class GameLogic {
         if (survivalScenario.isPresent()) {
             this.scenarioLogic = new SurvivalScenarioLogic(scheduler, gameEventDispatcher, npcScenarioLogic, (Survival) scenario, survivalScenario.get(), characterService, playerService);
         } else {
-            this.scenarioLogic = new OpenWorldScenarioLogic(positionService, playerService, gameEventScheduler);
+            this.scenarioLogic = new OpenWorldScenarioLogic(playerService, gameEventScheduler, characterCommandHandler);
         }
     }
 
