@@ -116,8 +116,10 @@ define(function (require, exports, module) {
 
     function createCharacterModel(character) {
         const health = SkillStore.percentHealth(character.id);
-        var model = new CharacterModel(character, health);
-        model.position = characterPosition(model, Timer.currentTimeOnServer());
+        const model = new CharacterModel(character, health);
+        const time = Timer.currentTimeOnServer();
+        model.position = characterPosition(model, time);
+        model.rotatable.rotation = MoveStore.angleAtTime(model.id, time);
         characterModels.push(model);
         layer.addChild(model);
         if (character.id === MainPlayer.characterId()) {
@@ -136,6 +138,16 @@ define(function (require, exports, module) {
         }
     }
 
+    function characterPosition(characterModel, time) {
+        return Point.multiplyInPlace(MoveStore.positionAtTime(characterModel.id, time), TileSize);
+    }
+
+    function findCharacterModel(characterId) {
+        return characterModels.find(function (characterModel) {
+            return characterId === characterModel.id;
+        });
+    }
+
     CharacterStore.characterSpawnedStream.subscribe(function (character) {
         deffer(() => createCharacterModel(character));
     });
@@ -145,16 +157,22 @@ define(function (require, exports, module) {
     });
 
     SkillStore.characterGotDamageStream.subscribe(function (event) {
-        const characterModel = characterModels.find(function (charcterModel) {
-            return event.characterId === charcterModel.id;
-        });
+        const characterModel = findCharacterModel(event.characterId);
         startDamagePointsAnimation(characterModel.position, event.damage);
         characterModel.updateHpBar(SkillStore.percentHealth(event.characterId));
     });
 
-    function characterPosition(characterModel, time) {
-        return Point.multiplyInPlace(MoveStore.positionAtTime(characterModel.id, time), TileSize);
-    }
+    SkillStore.characterUsedSkill.subscribe(function (event) {
+        const characterModel = findCharacterModel(event.characterId);
+        if (event.skill.target == Skills.Targets.ENEMIES) {
+            const enemyPosition = findCharacterModel(event.targetId).position;
+            characterModel.rotatable.rotation = Point.angleFromTo(enemyPosition, characterModel.position)
+        }
+        const animation = event.skill.characterAnimation;
+        if (animation) {
+            characterModel.spine.state.setAnimationByName(0, animation, false);
+        }
+    });
 
     module.exports = {
         init: function () {
@@ -170,13 +188,13 @@ define(function (require, exports, module) {
             characterModels.forEach(function (characterModel) {
                 const newPosition = characterPosition(characterModel, time);
                 if (!Point.equal(newPosition, characterModel.position)) {
+                    characterModel.rotatable.rotation = MoveStore.angleAtTime(characterModel.id, time);
+
                     if (characterModel.spine.state.getCurrent(0) == null) {
                         characterModel.spine.state.setAnimationByName(0, 'walk', false);
                     }
                 }
-
                 characterModel.position = newPosition;
-                characterModel.rotatable.rotation = MoveStore.angleAtTime(characterModel.id, time)
             });
             if (mainPlayerModel) {
                 MainPlayer.positionInPixels.x = mainPlayerModel.position.x;

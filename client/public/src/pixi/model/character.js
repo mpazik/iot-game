@@ -27,7 +27,7 @@ define(function (require, exports, module) {
         this.spine = new Pixi.spine.Spine(Resources.spine('player').spineData);
         this.spine.skeleton.setToSetupPose();
         this.rotatable.addChild(this.spine);
-        this.hitArea = new Pixi.Circle(0, 0, 40);
+
         this.createHpBar();
         this.updateHpBar(health);
 
@@ -38,10 +38,15 @@ define(function (require, exports, module) {
             });
         };
 
+        //noinspection JSUnusedGlobalSymbols
+        this.hitArea = new Pixi.Circle(0, 0, 40);
+
+        //noinspection JSUnusedGlobalSymbols
         this.mouseover = function () {
             this.filters = [interactiveFilter, hoverFilter];
         };
 
+        //noinspection JSUnusedGlobalSymbols
         this.mouseout = function () {
             this.filters = [interactiveFilter];
         };
