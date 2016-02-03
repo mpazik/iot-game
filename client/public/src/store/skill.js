@@ -4,10 +4,10 @@ define(function (require, exports, module) {
     const StoreRegistrar = require('../component/store-registrar');
     const CharacterStore = require('./character');
     const ResourcesStore = require('./resources');
+    const Dispatcher = require('../component/dispatcher');
 
     const key = 'skill';
     const state = new Map();
-    var characterGotDamage = null;
 
     function characterInitState(characterType) {
         if (characterType == CharacterStore.CharacterType.Bot) {
@@ -35,7 +35,6 @@ define(function (require, exports, module) {
         },
         [MessageIds.CharacterGotDamage]: (event) => {
             state.get(event.characterId).health -= event.damage;
-            characterGotDamage(event);
         },
         [MessageIds.SkillUsed]: (event) => {
             const skillCooldown = ResourcesStore.skill(event.skillId).cooldown;
@@ -56,16 +55,40 @@ define(function (require, exports, module) {
 
     module.exports = {
         key,
-        characterGotDamageStream: new Publisher.StreamPublisher((push) => characterGotDamage = push),
+        characterGotDamageStream: new Publisher.StreamPublisher((push) => {
+            Dispatcher.messageStream.subscribe(MessageIds.CharacterGotDamage, (event) => {
+                push(event);
+            });
+        }),
+        characterUsedSkill: new Publisher.StreamPublisher((push) => {
+            Dispatcher.messageStream.subscribe(MessageIds.SkillUsed, (event) => {
+                push({
+                    characterId: event.casterId,
+                    skill: ResourcesStore.skill(event.skillId),
+                    targetId: event.targetId
+                })
+            });
+        }),
         health: (characterId) => state.get(characterId).health,
         percentHealth: (characterId) => {
             const character = state.get(characterId);
             return character.health / character.maxHealth;
         },
-        isOnCooldown: (characterId, time) => {
-            const cooldownTill = state.get(characterId).cooldownTill;
-            return cooldownTill && time < cooldownTill;
+        characterAnimation: (skillId) => {
+            const skill = ResourcesStore.skill(skillId);
+            if (!skill) {
+                return null;
+            }
+            const animation = skill.characterAnimation;
+            if (typeof animation === 'string') {
+                return animation;
+            }
+            if (typeof animation === 'object') {
+                const animationIndex = Math.floor(Math.random() * animation.length);
+                return animation[animationIndex];
+            }
+            return null;
         },
-        skill: id => ResourcesStore.skill(id)
+        skill: skillId => ResourcesStore.skill(skillId)
     };
 });

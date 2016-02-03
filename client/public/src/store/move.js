@@ -1,6 +1,5 @@
 define(function (require, exports, module) {
     const MessageIds = require('../common/packet/messages').ids;
-    const Point = require('../unit/point');
     const Move = require('../unit/move');
     const StoreRegistrar = require('../component/store-registrar');
 

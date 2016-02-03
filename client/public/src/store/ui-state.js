@@ -13,7 +13,11 @@ define(function (require, exports, module) {
         playerData: MainPlayerStore.playerData,
         scenarioType: new Publisher.StatePublisher(null, (push) => {
             ScenarioStore.data.subscribe(scenario => {
-               push(scenario.type);
+                if (scenario == null) {
+                    push(null);
+                } else {
+                    push(scenario.type);
+                }
             });
         }),
         endScenario: ScenarioStore.endScenarioData,

@@ -138,6 +138,7 @@ define(function (require, exports, module) {
             });
         } else {
             network.connect(serverAddress + '?nick=' + userNick);
+            setState('connecting');
         }
     }
 

@@ -101,7 +101,7 @@ define(function (require, exports, module) {
             }
         },
         ids: {
-            Disconnected: - 1, // event not sent by server but triggered by client on disconnect
+            Disconnected: -1, // event not sent by server but triggered by client on disconnect
             InstanceStarted: 0,
             PlayerCreated: 1,
             CharacterSpawned: 5,

@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const Pixi = require('lib/pixi');
+    const Pixi = require('pixi');
     const TileSize = require('configuration').tileSize;
     const SkillStore = require('../store/skill');
     const Point = require('../unit/point');

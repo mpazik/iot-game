@@ -1,11 +1,12 @@
 define(function (require, exports, module) {
-    var Pixi = require('lib/pixi');
+    var Pixi = require('pixi');
     var Configuration = require('configuration');
     var assetsPath = Configuration.assetsLocalization + '/';
     var tilesets = {};
     var skills = {};
 
-    const sprites = ["player", "objects"];
+    const sprites = ["objects"];
+    const spines = ["player"];
 
     function loadCss(path) {
         const head = document.getElementsByTagName('head')[0];
@@ -20,22 +21,34 @@ define(function (require, exports, module) {
         files.forEach(function (file) {
             Pixi.loader.add(file);
         });
-        return new Promise(function (resolve, reject) {
-            Pixi.loader.once("complete", resolve);
-            Pixi.loader.load();
+        return new Promise(function (resolve) {
+            Pixi.loader.load(resolve);
         });
     }
 
     function loadImage(name) {
         var absoluteUrl = assetsPath + name;
         Pixi.loader.add(name, absoluteUrl);
-        return new Promise(function (resolve, reject) {
-            Pixi.loader.once('complete', function () {
+        return new Promise((resolve) => {
+            Pixi.loader.load(function () {
                 Pixi.utils.TextureCache[name] = Pixi.utils.TextureCache[absoluteUrl];
                 resolve();
             });
-            Pixi.loader.load();
         });
+    }
+
+    function loadSpines(spines) {
+        spines.forEach(function (file) {
+            const path = assetPath("spines", file);
+            Pixi.loader.add(path);
+        });
+        return new Promise((resolve) => {
+            Pixi.loader.load(resolve);
+        });
+    }
+
+    function assetPath(asset, file) {
+        return assetsPath + asset + "/" + file + ".json";
     }
 
     function loadJson(url) {
@@ -62,20 +75,28 @@ define(function (require, exports, module) {
     module.exports = {
         tileset: function (name) {
             if (tilesets[name] == null) {
-                throw "requested tileset " + name + " some how has not been loaded";
+                throw `Requested tileset ${name} some how has not been loaded.`;
             }
             return tilesets[name];
         },
         skill: function (id) {
             return skills[id];
         },
+        spine: function (name) {
+            const spine = Pixi.loader.resources[assetPath("spines", name)];
+            if (!spine) {
+                throw `Spine: ${name} was not loaded.`;
+            }
+            return spine;
+        },
         load: function () {
             loadCss(assetsPath + "icons/icons.css");
             const spritesPaths = sprites.map(function (file) {
-                return assetsPath + "sprites/" + file + ".json"
+                return assetPath("sprites", file);
             });
 
             return Promise.all([
+                loadSpines(spines),
                 loadAssets(spritesPaths),
                 loadJson('tilesets/basic').then(function (tileset) {
                     tilesets[tileset.key] = tileset;

@@ -3,6 +3,9 @@
   "version": "0.2.0",
   "main": "index.js",
   "scripts": {
+    "start": "http-server public -p 8080",
+    "start-prod": "http-server dist -p 8000",
+    "build": "gulp build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Marek Pazik",
@@ -13,8 +16,9 @@
     "gulp-sequence": "^0.4.4"
   },
   "dependencies": {
-    "pixi.js": "^3.0.8",
-    "requirejs": "^2.1.22",
-    "dzida-assets": "http://assets.dzida-online.pl/assets.tar.gz"
+    "dzida-assets": "../../dzida-assets/assets-latest",
+    "pixi-spine": "^1.0.9",
+    "pixi.js": "^3.0.9",
+    "requirejs": "^2.1.22"
   }
 }
