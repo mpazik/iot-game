@@ -126,6 +126,8 @@ define(function (require, exports, module) {
         this.typeListeners = [];
         this.onceListeners = [];
         this.onceTypeListeners = [];
+        this.lastListeners = [];
+        this.lastTypeListeners = [];
     }
 
     function isValidType(type) {
@@ -145,6 +147,13 @@ define(function (require, exports, module) {
             .forEach(function (listener) {
                 return listener(data);
             });
+        this.lastListeners
+            .filter(function (listener) {
+                return listener != null;
+            })
+            .forEach(function (listener) {
+                return listener(data);
+            });
         this.onceListeners = [];
 
         if (!isValidType(type) && isValidType(data.type)) {
@@ -154,8 +163,16 @@ define(function (require, exports, module) {
         if (isValidType(type)) {
             const typeListeners = this.typeListeners[type] ? this.typeListeners[type] : [];
             const onceTypeListeners = this.onceTypeListeners[type] ? this.onceTypeListeners[type] : [];
+            const lastTypeListeners = this.lastTypeListeners[type] ? this.lastTypeListeners[type] : [];
             typeListeners
                 .concat(onceTypeListeners)
+                .filter(function (listener) {
+                    return listener != null;
+                })
+                .forEach(function (listener) {
+                    return listener(data);
+                });
+            lastTypeListeners
                 .filter(function (listener) {
                     return listener != null;
                 })
@@ -178,6 +195,17 @@ define(function (require, exports, module) {
             this.typeListeners[type].push(listener);
         } else {
             this.listeners.push(listener);
+        }
+    };
+
+    OpenPublisher.prototype.subscribeLast = function (type, listener) {
+        if (isValidType(type)) {
+            if (!this.lastTypeListeners[type]) {
+                this.lastTypeListeners[type] = [];
+            }
+            this.lastTypeListeners[type].push(listener);
+        } else {
+            this.lastListeners.push(listener);
         }
     };
 

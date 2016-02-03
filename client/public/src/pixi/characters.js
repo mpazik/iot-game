@@ -149,11 +149,11 @@ define(function (require, exports, module) {
     }
 
     CharacterStore.characterSpawnedStream.subscribe(function (character) {
-        deffer(() => createCharacterModel(character));
+        createCharacterModel(character);
     });
 
     CharacterStore.characterDiedStream.subscribe(function (characterToRemove) {
-        deffer(() => removeCharacterModel(characterToRemove));
+        removeCharacterModel(characterToRemove);
     });
 
     SkillStore.characterGotDamageStream.subscribe(function (event) {
