@@ -16,13 +16,18 @@ gulp.task('copy-public', function () {
         .pipe(gulp.dest(distPath));
 });
 
+gulp.task('copy-libs', function () {
+    return gulp.src(['node_modules/pixi-spine/bin/pixi-spine.js', 'node_modules/pixi.js/bin/pixi.js'])
+        .pipe(gulp.dest(distPath + '/lib'));
+});
+
 gulp.task('replace-dev-files', function () {
 
     return gulp.src(['prod/**/*'])
         .pipe(gulp.dest(distPath));
 });
 
-gulp.task('build', gulpSequence('clean', 'copy-public', 'replace-dev-files'));
+gulp.task('build', gulpSequence('clean', 'copy-public', 'copy-libs', 'replace-dev-files'));
 
 gulp.task('deploy', ['build'],function () {
         process.env['AWS_PROFILE'] = 's3_deploy';
