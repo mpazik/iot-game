@@ -61,7 +61,7 @@ public class SkillService {
     public void processEvent(GameEvent gameEvent) {
         whenTypeOf(gameEvent).is(CharacterSpawned.class).then(event -> {
             Character character = event.getCharacter();
-            state.put(character.getId(), characterInitState(character.getType()));
+            state.put(character.getId(), event.getSkillData());
         }).is(CharacterDied.class).then(
                 event -> state.remove(event.getCharacterId())
         ).is(SkillUsed.class).then(event -> {
@@ -74,9 +74,9 @@ public class SkillService {
         });
     }
 
-    private SkillData characterInitState(int characterType) {
+    public SkillData getInitialSkillData(int characterType) {
         if (characterType == Character.Type.Bot) {
-            return new SkillData(50, 50, 0);
+            return new SkillData(10, 50, 0);
         }
         if (characterType == Character.Type.Player) {
             return new SkillData(200, 200, 0);

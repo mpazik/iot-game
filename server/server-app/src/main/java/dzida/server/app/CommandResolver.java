@@ -74,11 +74,11 @@ public class CommandResolver {
     }
 
     public List<GameEvent> createCharacter(Character character) {
-        return characterCommandHandler.addCharacter(character);
+        return characterCommandHandler.spawnCharacter(character);
     }
 
     public List<GameEvent> removeCharacter(CharacterId characterId) {
-        return characterCommandHandler.removeCharacter(characterId);
+        return characterCommandHandler.killCharacter(characterId);
     }
 
     public List<GameEvent> dispatchPacket(CharacterId characterId, String payload, Consumer<GameEvent> send) {

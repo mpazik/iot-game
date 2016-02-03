@@ -87,14 +87,14 @@ class Instance {
         PathFinder pathFinder = Profilings.printTime("Collision map built", () -> new PathFinderFactory().createPathFinder(collisionBitMap));
         PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService, pathFinder);
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService);
-        CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService);
+        CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
 
         commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService, characterService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
 
-        this.gameLogic =  new GameLogic(scheduler, gameEventDispatcher, positionService, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver);
+        this.gameLogic =  new GameLogic(scheduler, gameEventDispatcher, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver, characterCommandHandler);
     }
 
     public void start() {
