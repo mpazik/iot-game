@@ -1,3 +1,5 @@
+<script src="../dev/lib/pixi.js/bin/pixi.js"></script>
+<script src="../dev/lib/pixi-spine/bin/pixi-spine.js"></script>
 <script src="../dev/lib/requirejs/require.js"></script>
 <script src="../dev/configuration.js"></script>
 
@@ -6,11 +8,16 @@
         shim: {
             'configuration': {
                 exports: 'Configuration'
+            },
+            'pixi': {
+                exports: 'PIXI'
+            },
+            'pixi-spine': {
+                exports: 'PIXI.spine'
             }
         },
         paths: {
-            "pixi": "../dev/lib/pixi.js/bin/pixi",
-            "pixi-spine": "../dev/lib/pixi-spine/bin/pixi-spine",
+            "pixi": "../src/pixi/value",
             "configuration": "../dev/configuration"
         }
     });

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "http-server public -p 8080",
     "start-prod": "http-server dist -p 8000",
-    "build": "gulp build",
+    "install": "gulp build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Marek Pazik",
