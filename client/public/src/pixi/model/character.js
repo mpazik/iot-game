@@ -1,6 +1,5 @@
 define(function (require, exports, module) {
     const Pixi = require('pixi');
-    require('pixi-spine');
     const Resources = require('../../store/resources');
     const CharacterType = require('../../store/character').CharacterType;
     const Dispatcher = require('../../component/dispatcher');
