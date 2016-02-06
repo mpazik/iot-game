@@ -45,7 +45,7 @@ public final class WebSocketServer {
         NettyHttpService service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())
                 .setPort(Configuration.getContainerRestPort())
-                .addHttpHandlers(ImmutableList.of(new ContainerResource(container), new LeaderboardResource(leaderboard)))
+                .addHttpHandlers(ImmutableList.of(new ContainerResource(container), new LeaderboardResource(leaderboard, playerStore)))
                 .build();
 
         service.startAsync();
@@ -126,7 +126,7 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         } else {
             URI uri = URI.create(req.uri());
             Optional<String> nickOpt = Optional.ofNullable(queryParams(uri).get("nick"));
-            Optional<Player.Id> playerIdOpt = nickOpt.map(connectionHandler::findOrCreatePlayer);
+            Optional<Player.Id> playerIdOpt = nickOpt.flatMap(connectionHandler::findOrCreatePlayer);
             Boolean canPlayerConnect = playerIdOpt.map(connectionHandler::canPlayerConnect).orElse(false);
             if (canPlayerConnect) {
                 Player.Id playerId = playerIdOpt.get();
@@ -185,7 +185,7 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     public interface ConnectionHandler {
-        Player.Id findOrCreatePlayer(String nick);
+        Optional<Player.Id> findOrCreatePlayer(String nick);
 
         boolean canPlayerConnect(Player.Id playerId);
 

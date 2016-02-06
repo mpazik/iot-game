@@ -1,12 +1,9 @@
 package dzida.server.core.basic;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
 public interface Outcome<T> {
-
-    boolean isValid();
-
-    default boolean isInValid() {
-        return !isValid();
-    }
 
     static <T> Outcome<T> ok(T value) {
         return new ValidOutcome<>(value);
@@ -16,7 +13,13 @@ public interface Outcome<T> {
         return new ErrorOutcome<>(error);
     }
 
-    T getValue();
+    static <T> Outcome<T> fromOptional(Optional<T> playerScore, Error error) {
+        return playerScore.map(Outcome::ok).orElseGet(() -> new ErrorOutcome<>(error));
+    }
+
+    void consume(Consumer<T> onValid, Consumer<Error> onError);
+
+    Optional<T> toOptional();
 
     final class ValidOutcome<T> implements Outcome<T> {
         private final T value;
@@ -26,12 +29,13 @@ public interface Outcome<T> {
         }
 
         @Override
-        public boolean isValid() {
-            return true;
+        public void consume(Consumer<T> onValid, Consumer<Error> onError) {
+            onValid.accept(value);
         }
 
-        public T getValue() {
-            return value;
+        @Override
+        public Optional<T> toOptional() {
+            return Optional.of(value);
         }
 
     }
@@ -44,17 +48,13 @@ public interface Outcome<T> {
         }
 
         @Override
-        public boolean isValid() {
-            return false;
+        public void consume(Consumer<T> onValid, Consumer<Error> onError) {
+            onError.accept(error);
         }
 
         @Override
-        public T getValue() {
-            throw new UnsupportedOperationException("Error Outcome does not contain any value");
-        }
-
-        public Error getError() {
-            return error;
+        public Optional<T> toOptional() {
+            return Optional.empty();
         }
     }
 

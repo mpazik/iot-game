@@ -4,12 +4,6 @@ import java.util.function.Consumer;
 
 public interface Result {
 
-    boolean isValid();
-
-    default boolean isInValid() {
-        return !isValid();
-    }
-
     static Result ok() {
         return new ValidResult();
     }
@@ -18,7 +12,7 @@ public interface Result {
         return new ErrorResult(error);
     }
 
-    void consume(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError);
+    void consume(Runnable onValid, Consumer<Error> onError);
 
     final class ValidResult implements Result {
 
@@ -26,13 +20,8 @@ public interface Result {
         }
 
         @Override
-        public boolean isValid() {
-            return true;
-        }
-
-        @Override
-        public void consume(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError) {
-            onValid.accept(this);
+        public void consume(Runnable onValid, Consumer<Error> onError) {
+            onValid.run();
         }
 
     }
@@ -45,17 +34,8 @@ public interface Result {
         }
 
         @Override
-        public boolean isValid() {
-            return false;
-        }
-
-        @Override
-        public void consume(Consumer<ValidResult> onValid, Consumer<ErrorResult> onError) {
-            onError.accept(this);
-        }
-
-        public Error getError() {
-            return error;
+        public void consume(Runnable onValid, Consumer<Error> onError) {
+            onError.accept(error);
         }
     }
 

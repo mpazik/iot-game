@@ -6,6 +6,7 @@ import lombok.Value;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Leaderboard {
     private final PlayerStore playerStore;
@@ -14,19 +15,39 @@ public class Leaderboard {
         this.playerStore = playerStore;
     }
 
-    public List<Record> listOfSurvivalRecords() {
+    public List<PlayerScore> getListOfSurvivalRecords() {
+        int limit = 10;
+        List<Player.Entity> topPlayerData = getTopPlayerData();
+
+        int numOfRecords = Math.min(limit, topPlayerData.size());
+        return IntStream.range(0, numOfRecords).mapToObj(index -> {
+            Player.Data data = topPlayerData.get(index).getData();
+            return new PlayerScore(data.getNick(), data.getHighestDifficultyLevel(), getPositionFromIndex(index));
+        }).collect(Collectors.toList());
+    }
+
+    public PlayerScore getPlayerScore(Player.Id playerId) {
+        Player.Entity player = playerStore.getPlayer(playerId);
+        List<Player.Entity> topPlayerData = getTopPlayerData();
+        int playerPosition = getPositionFromIndex(topPlayerData.indexOf(player));
+        return new PlayerScore(player.getData().getNick(), player.getData().getHighestDifficultyLevel(), playerPosition);
+    }
+
+
+    private List<Player.Entity> getTopPlayerData() {
         return playerStore.getAllPlayers()
-                .map(Player.Entity::getData)
-                .filter(data -> data.getHighestDifficultyLevel() > 0)
-                .sorted((o1, o2) -> o2.getHighestDifficultyLevel() - o1.getHighestDifficultyLevel())
-                .limit(10)
-                .map(data -> new Record(data.getNick(), data.getHighestDifficultyLevel()))
+                .filter(player -> player.getData().getHighestDifficultyLevel() > 0)
                 .collect(Collectors.toList());
     }
 
+    private int getPositionFromIndex(int index) {
+        return index + 1;
+    }
+
     @Value
-    public static final class Record {
+    public static final class PlayerScore {
         String nick;
         int record;
+        int position;
     }
 }
