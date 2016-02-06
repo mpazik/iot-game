@@ -54,8 +54,9 @@ class Instance {
     private final CharacterService characterService;
     private final String instanceKey;
 
-    private final Map<ChannelId, CharacterId> charChannels = new HashMap<>();
+    private final Map<ChannelId, Player.Id> playerChannels = new HashMap<>();
     private final Map<ChannelId, List<Object>> messagesToSend = new HashMap<>();
+    private final Map<Player.Id, CharacterId> characterIds = new HashMap<>();
 
     private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
     private final GameLogic gameLogic;
@@ -89,7 +90,7 @@ class Instance {
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
 
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService, characterService);
+        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
@@ -115,9 +116,9 @@ class Instance {
     public void addPlayer(Channel channel, Player.Id playerId) {
         channels.add(channel);
         CharacterId characterId = new CharacterId((int) Math.round((Math.random() * 100000)));
-
+        characterIds.put(playerId, characterId);
         ChannelId channelId = channel.id();
-        charChannels.put(channelId, characterId);
+        playerChannels.put(channelId, playerId);
         messagesToSend.put(channelId, Lists.newArrayList());
         Player.Entity playerEntity = playerService.getPlayer(playerId);
         String nick = playerEntity.getData().getNick();
@@ -133,8 +134,10 @@ class Instance {
     public void removePlayer(Channel channel) {
         channels.remove(channel);
         ChannelId channelId = channel.id();
-        CharacterId characterId = charChannels.get(channelId);
-        charChannels.remove(channelId);
+        Player.Id playerId = playerChannels.get(channelId);
+        CharacterId characterId = characterIds.get(playerId);
+        characterIds.remove(playerId);
+        playerChannels.remove(channelId);
         messagesToSend.remove(channelId);
         gameEventDispatcher.unregisterCharacter(characterId);
         if (characterService.isCharacterLive(characterId)){
@@ -148,8 +151,9 @@ class Instance {
     }
 
     public void parseMessage(Channel channel, String request) {
-        CharacterId characterId = charChannels.get(channel.id());
-        List<GameEvent> gameEvents = commandResolver.dispatchPacket(characterId, request, addDataToSend(channel));
+        Player.Id playerId = playerChannels.get(channel.id());
+        CharacterId characterId = characterIds.get(playerId);
+        List<GameEvent> gameEvents = commandResolver.dispatchPacket(playerId, characterId, request, addDataToSend(channel));
         gameEventDispatcher.dispatchEvents(gameEvents);
         send();
     }
