@@ -11,6 +11,10 @@ game-ui .window > * {
     display: block;
 }
 
+game-ui .window .window-actions {
+   margin-top: 45px;
+}
+
 game-ui {
     position: absolute;
     top: 0;
@@ -75,13 +79,14 @@ cooldown-bar .progress-bar {
     border-radius: 4px;
 }
 
-survival-end-screen {
-    padding: 10px 100px 20px !IMPORTANT;
+.resolution-window h1 {
+    font-size: 40px;
     text-align: center;
+    margin: 10px;
 }
 
-survival-end-screen h1 {
-    font-size: 50px;
+.resolution-window p {
+    font-size: 16px;
 }
 
 action-bar {

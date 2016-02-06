@@ -8,6 +8,7 @@ import dzida.server.app.store.mapdb.PlayerStoreMapDb;
 import dzida.server.app.store.memory.SkillStoreInMemory;
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Result;
+import dzida.server.core.basic.entity.Entity;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
@@ -135,8 +136,12 @@ public class Container {
 
 
         @Override
-        public Player.Id findOrCreatePlayer(String nick) {
-            return playerService.findPlayer(nick).orElseGet(() -> playerService.createPlayer(nick).getValue().getId());
+        public Optional<Player.Id> findOrCreatePlayer(String nick) {
+            Optional<Player.Id> player = playerService.findPlayer(nick);
+            if (player.isPresent()) {
+                return player;
+            }
+            return playerService.createPlayer(nick).toOptional().map(Entity::getId);
         }
 
         @Override

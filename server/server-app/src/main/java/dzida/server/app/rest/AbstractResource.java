@@ -6,6 +6,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gson.Gson;
 import dzida.server.app.Serializer;
+import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -17,14 +18,26 @@ public abstract class AbstractResource extends AbstractHttpHandler {
     protected ImmutableMultimap<String, String> headers = ImmutableMultimap.of("Access-Control-Allow-Origin", "*");
 
     protected void sendResult(HttpResponder responder, Result result) {
-        result.consume(validResult -> responder.sendStatus(HttpResponseStatus.NO_CONTENT, headers),
-                errorResult -> sendJson(responder, HttpResponseStatus.BAD_REQUEST, serializer.toJson(errorResult))
+        result.consume(
+                () -> responder.sendStatus(HttpResponseStatus.NO_CONTENT, headers),
+                error -> sendObject(responder, HttpResponseStatus.BAD_REQUEST, error)
+        );
+    }
+
+    protected <T> void sendOutcome(HttpResponder responder, Outcome<T> outcome) {
+        outcome.consume(
+                data -> sendObject(responder, data),
+                error -> sendObject(responder, HttpResponseStatus.BAD_REQUEST, error)
         );
     }
 
     protected void sendObject(HttpResponder responder, Object data) {
+        sendObject(responder, HttpResponseStatus.OK, data);
+    }
+
+    protected void sendObject(HttpResponder responder, HttpResponseStatus status, Object data) {
         String json = serializer.toJson(data);
-        sendJson(responder, HttpResponseStatus.OK, json);
+        sendJson(responder, status, json);
     }
 
     protected void sendJson(HttpResponder responder, HttpResponseStatus status, String json) {

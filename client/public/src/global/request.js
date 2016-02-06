@@ -22,8 +22,16 @@ Request.Server = (function () {
         leaderboard: function () {
             return get('leaderboard', function (httpRequest, resolve, reject) {
                 if (httpRequest.status === 200) {
-                    const response = JSON.parse(httpRequest.responseText);
-                    resolve(response);
+                    resolve(JSON.parse(httpRequest.responseText));
+                } else {
+                    reject(httpRequest.responseText)
+                }
+            })
+        },
+        playerLeaderboardResult: function (nick) {
+            return get('leaderboard/player/' + nick, function (httpRequest, resolve, reject) {
+                if (httpRequest.status === 200) {
+                    resolve(JSON.parse(httpRequest.responseText));
                 } else {
                     reject(httpRequest.responseText)
                 }
@@ -36,7 +44,7 @@ Request.Server = (function () {
                     resolve();
                 } else {
                     const response = JSON.parse(httpRequest.responseText);
-                    reject(response.error.message);
+                    reject(response.message);
                 }
             });
         }
