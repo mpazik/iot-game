@@ -1,4 +1,5 @@
 public/components
 /assets
 .idea
+.DS_STORE
 *.iml
