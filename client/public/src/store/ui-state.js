@@ -11,12 +11,22 @@ define(function (require, exports, module) {
         playerAlive: MainPlayerStore.playerLiveState,
         playerRespawnTimeState: MainPlayerStore.playerRespawnTimeState,
         playerData: MainPlayerStore.playerData,
+        scenario: ScenarioStore.data,
         scenarioType: new Publisher.StatePublisher(null, (push) => {
             ScenarioStore.data.subscribe(scenario => {
                 if (scenario == null) {
                     push(null);
                 } else {
                     push(scenario.type);
+                }
+            });
+        }),
+        scenarioResolution: new Publisher.StatePublisher(null, (push) => {
+            ScenarioStore.endScenarioData.subscribe(endScenario => {
+                if (endScenario == null) {
+                    push(null);
+                } else {
+                    push(endScenario.resolution.toLowerCase());
                 }
             });
         }),
