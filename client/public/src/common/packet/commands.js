@@ -29,7 +29,10 @@ define(function (require, exports, module) {
                 this.type = type;
                 this.data = data;
             },
-            GoToHome: function () {}
+            GoToHome: function () {},
+            SendMessage: function (message) {
+                this.message = message;
+            }
         },
         ids: {
             LogIn: 0,
@@ -40,7 +43,8 @@ define(function (require, exports, module) {
             TimeSync: 6,
             JoinBattle: 7,
             Backdoor: 8,
-            GoToHome: 9
+            GoToHome: 9,
+            SendMessage: 10
         },
         forId: []
     };

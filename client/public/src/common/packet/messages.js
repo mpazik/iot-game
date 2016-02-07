@@ -96,6 +96,11 @@ define(function (require, exports, module) {
 
             ScenarioEnd: function (resolution) {
                 this.resolution = resolution;
+            },
+
+            PlayerMessage: function (playerNick, message) {
+                this.playerNick = playerNick;
+                this.message = message;
             }
         },
         ids: {
@@ -115,7 +120,8 @@ define(function (require, exports, module) {
             TimeSync: 16,
             JoinToInstance: 17,
             PlayerWillRespawn: 18,
-            ScenarioEnd: 19
+            ScenarioEnd: 19,
+            PlayerMessage: 20
         },
         forId: []
     };

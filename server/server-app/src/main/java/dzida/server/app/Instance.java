@@ -7,6 +7,7 @@ import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.core.character.CharacterId;
+import dzida.server.core.chat.ChatService;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.Scheduler;
@@ -69,6 +70,7 @@ class Instance {
         this.instanceKey = instanceKey;
         WorldMap worldMap = worldMapStore.getMap(scenario.getWorldMapKey());
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
+        ChatService chatService = new ChatService(playerService);
 
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser();
         TimeService timeService = new TimeService();
@@ -90,7 +92,7 @@ class Instance {
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
 
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService);
+        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService, chatService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
