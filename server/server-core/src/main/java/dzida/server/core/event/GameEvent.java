@@ -21,6 +21,7 @@ public interface GameEvent {
     int InstanceCreated = 17;
     int PlayerWillRespawn = 18;
     int ScenarioEnd = 19;
+    int PlayerMessage = 20;
 
     int getId();
 }

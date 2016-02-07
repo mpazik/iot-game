@@ -10,6 +10,7 @@ import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.model.Character;
+import dzida.server.core.chat.ChatService;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
 import dzida.server.core.player.Player;
@@ -34,6 +35,7 @@ public class CommandResolver {
     private static final int UseSkill = 3;
     private static final int JoinBattle = 7;
     private static final int GoToHome = 9;
+    private static final int SendMessage = 10;
 
     // requests
     private static final int PlayingPlayer = 5;
@@ -48,19 +50,21 @@ public class CommandResolver {
     private final Arbiter arbiter;
     private final BackdoorCommandResolver backdoorCommandResolver;
     private final PlayerService playerService;
+    private final ChatService chatService;
 
     public CommandResolver(
             PositionCommandHandler positionCommandHandler,
             SkillCommandHandler skillCommandHandler,
             CharacterCommandHandler characterCommandHandler,
             TimeSynchroniser timeSynchroniser,
-            Arbiter arbiter, PlayerService playerService) {
+            Arbiter arbiter, PlayerService playerService, ChatService chatService) {
         this.positionCommandHandler = positionCommandHandler;
         this.timeSynchroniser = timeSynchroniser;
         this.skillCommandHandler = skillCommandHandler;
         this.characterCommandHandler = characterCommandHandler;
         this.arbiter = arbiter;
         this.playerService = playerService;
+        this.chatService = chatService;
 
         if (Configuration.isDevMode()) {
             backdoorCommandResolver = new BackdoorCommandResolver(serializer);
@@ -123,6 +127,9 @@ public class CommandResolver {
             case GoToHome:
                 send.accept(new JoinToInstance(arbiter.getHomeInstnceAddress().toString()));
                 return Collections.emptyList();
+            case SendMessage:
+                String message = data.getAsJsonObject().get("message").getAsString();
+                return chatService.handleMessage(playerId, message);
             default:
                 return Collections.emptyList();
         }

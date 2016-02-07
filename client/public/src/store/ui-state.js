@@ -6,6 +6,7 @@ define(function (require, exports, module) {
     const ServerMessagesStore = require('./server-messages');
     const Publisher = require('../common/basic/publisher');
     const Application = require('../component/application');
+    const Chat = require('../component/chat');
 
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
@@ -36,6 +37,7 @@ define(function (require, exports, module) {
         actionBarActiveSkill: ActionBar.activeState,
         profilingStats: ProfilingStore.updateStatsState,
         cooldown: MainPlayerStore.playerCooldown,
-        gameMessage: ServerMessagesStore.messageToShowState
+        gameMessage: ServerMessagesStore.messageToShowState,
+        playerMessage: Chat.playerMessage
     };
 });
