@@ -1,8 +1,8 @@
 package dzida.server.app.store.http.loader;
 
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.world.model.Tileset;
-import dzida.server.core.world.model.WorldMap;
+import dzida.server.core.world.map.Tileset;
+import dzida.server.core.world.map.WorldMap;
 
 public class WorldMapLoader {
     private final StaticDataLoader staticDataLoader;

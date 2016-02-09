@@ -1,4 +1,4 @@
-package dzida.server.core.world.model;
+package dzida.server.core.world.map;
 
 import dzida.server.core.basic.entity.Key;
 import lombok.Value;

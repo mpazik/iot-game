@@ -25,9 +25,9 @@ import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
 import dzida.server.core.skill.SkillStore;
 import dzida.server.core.time.TimeService;
-import dzida.server.core.world.WorldMapStore;
-import dzida.server.core.world.WorldService;
-import dzida.server.core.world.model.WorldMap;
+import dzida.server.core.world.map.WorldMapStore;
+import dzida.server.core.world.map.WorldMapService;
+import dzida.server.core.world.map.WorldMap;
 import dzida.server.core.world.pathfinding.CollisionBitMap;
 import dzida.server.core.world.pathfinding.PathFinder;
 import dzida.server.core.world.pathfinding.PathFinderFactory;
@@ -75,14 +75,14 @@ class Instance {
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser();
         TimeService timeService = new TimeService();
         characterService = CharacterService.create();
-        WorldService worldService = WorldService.create(worldMapStore, scenario.getWorldMapKey());
+        WorldMapService worldMapService = WorldMapService.create(worldMapStore, scenario.getWorldMapKey());
         SkillService skillService = SkillService.create(skillStore, timeService);
         PositionService positionService = PositionService.create(positionStore, timeService);
 
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
         isOnlyScenario = survivalScenario.isPresent();
 
-        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldService, skillService, scenario);
+        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldMapService, skillService, scenario);
 
         Scheduler scheduler = new SchedulerImpl(eventLoop);
 

@@ -10,7 +10,7 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.SkillService;
-import dzida.server.core.world.WorldService;
+import dzida.server.core.world.map.WorldMapService;
 import lombok.Value;
 
 import java.util.HashMap;
@@ -24,19 +24,19 @@ public class GameEventDispatcher {
     private final Publisher<GameEvent> eventPublisherBeforeChanges = new Publisher<>();
     private final Map<CharacterId, Consumer<GameEvent>> listeners = new HashMap<>();
     private final CharacterService characterService;
-    private final WorldService worldService;
+    private final WorldMapService worldMapService;
     private final SkillService skillService;
     private final Scenario scenario;
 
     public GameEventDispatcher(
             PositionService positionService,
             CharacterService characterService,
-            WorldService worldService,
+            WorldMapService worldMapService,
             SkillService skillService,
             Scenario scenario) {
         this.positionService = positionService;
         this.characterService = characterService;
-        this.worldService = worldService;
+        this.worldMapService = worldMapService;
         this.skillService = skillService;
         this.scenario = scenario;
     }
@@ -56,7 +56,7 @@ public class GameEventDispatcher {
         return ImmutableMap.of(
                 positionService.getKey(), positionService.getState(),
                 characterService.getKey(), characterService.getState(),
-                worldService.getKey(), worldService.getState(),
+                worldMapService.getKey(), worldMapService.getState(),
                 skillService.getKey(), skillService.getState()
         );
     }

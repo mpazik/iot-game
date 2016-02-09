@@ -1,8 +1,6 @@
-package dzida.server.core.world;
+package dzida.server.core.world.map;
 
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.world.model.Tileset;
-import dzida.server.core.world.model.WorldMap;
 
 public interface WorldMapStore {
     WorldMap getMap(Key<WorldMap> worldMapKey);

@@ -3,7 +3,7 @@ package dzida.server.app;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.skill.SkillStore;
-import dzida.server.core.world.WorldMapStore;
+import dzida.server.core.world.map.WorldMapStore;
 import io.netty.channel.EventLoop;
 
 import java.util.Optional;
