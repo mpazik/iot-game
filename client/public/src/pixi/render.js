@@ -1,11 +1,12 @@
 define(function (require, exports, module) {
     const Pixi = require('pixi');
     const MainPlayer = require('../store/main-player');
-    const WorldRender = require('./world');
+    const World = require('./world');
     const MainLoop = require('../store/main-loop');
     const Characters = require('./characters');
     const GroundIndicators = require('./ground-indicators');
     const Projectiles = require('./projectiles');
+    const WorldObjects = require('./world-objects');
 
     var width = window.innerWidth;
     var height = window.innerHeight;
@@ -38,22 +39,19 @@ define(function (require, exports, module) {
             renderer.render(stage);
         },
         initWorld: function () {
-            WorldRender.init();
-            container.addChild(WorldRender.tilesLayer);
-            container.addChild(WorldRender.eventLayer);
-
+            World.init();
+            WorldObjects.init();
             GroundIndicators.init();
-            container.addChild(GroundIndicators.layer);
-
-            //container.addChild(Debug.debugLayer)
-            //container.addChild(GameMap.gameObjectLayer)
-
             Characters.init();
+
+            container.addChild(World.tilesLayer);
+            container.addChild(World.eventLayer);
+            container.addChild(GroundIndicators.layer);
+            container.addChild(WorldObjects.lowObjectLayer);
             container.addChild(Characters.layer);
             container.addChild(Characters.pointsLayer);
             container.addChild(Projectiles.layer);
-
-            //container.addChild(GameMap.gameHoveringObjectLayer)
+            container.addChild(WorldObjects.highObjectLayer);
             resize();
             MainLoop.start();
         },

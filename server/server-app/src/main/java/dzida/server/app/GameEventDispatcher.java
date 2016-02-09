@@ -11,6 +11,7 @@ import dzida.server.core.player.Player;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.SkillService;
 import dzida.server.core.world.map.WorldMapService;
+import dzida.server.core.world.object.WorldObjectService;
 import lombok.Value;
 
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class GameEventDispatcher {
     private final CharacterService characterService;
     private final WorldMapService worldMapService;
     private final SkillService skillService;
+    private final WorldObjectService worldObjectService;
     private final Scenario scenario;
 
     public GameEventDispatcher(
@@ -33,11 +35,13 @@ public class GameEventDispatcher {
             CharacterService characterService,
             WorldMapService worldMapService,
             SkillService skillService,
+            WorldObjectService worldObjectService,
             Scenario scenario) {
         this.positionService = positionService;
         this.characterService = characterService;
         this.worldMapService = worldMapService;
         this.skillService = skillService;
+        this.worldObjectService = worldObjectService;
         this.scenario = scenario;
     }
 
@@ -57,7 +61,8 @@ public class GameEventDispatcher {
                 positionService.getKey(), positionService.getState(),
                 characterService.getKey(), characterService.getState(),
                 worldMapService.getKey(), worldMapService.getState(),
-                skillService.getKey(), skillService.getState()
+                skillService.getKey(), skillService.getState(),
+                worldObjectService.getKey(), worldObjectService.getState()
         );
     }
 

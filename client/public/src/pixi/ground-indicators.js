@@ -29,6 +29,8 @@ define(function (require, exports, module) {
             layer.addChild(playerIndicators);
             playerIndicators.position = MainPlayer.positionInPixels;
         },
-        layer: layer
+        get layer() {
+            return layer
+        }
     };
 });

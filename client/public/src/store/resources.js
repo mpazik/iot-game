@@ -4,6 +4,7 @@ define(function (require, exports, module) {
     var assetsPath = Configuration.assetsLocalization + '/';
     var tilesets = {};
     var skills = {};
+    var objectKinds = {};
 
     const sprites = ["objects"];
     const spines = ["player"];
@@ -72,23 +73,18 @@ define(function (require, exports, module) {
         });
     }
 
+    function throwIfNull(id, element, name) {
+        if (!element) {
+            throw `${name}: ${id} has not been loaded.`;
+        }
+        return element;
+    }
+
     module.exports = {
-        tileset: function (name) {
-            if (tilesets[name] == null) {
-                throw `Requested tileset ${name} some how has not been loaded.`;
-            }
-            return tilesets[name];
-        },
-        skill: function (id) {
-            return skills[id];
-        },
-        spine: function (name) {
-            const spine = Pixi.loader.resources[assetPath("spines", name)];
-            if (!spine) {
-                throw `Spine: ${name} was not loaded.`;
-            }
-            return spine;
-        },
+        skill: id => throwIfNull(id, skills[id], 'Skill'),
+        objectKind: id => throwIfNull(id, objectKinds[id], 'WorldObject'),
+        tileset: name => throwIfNull(name, tilesets[name], 'TileSet'),
+        spine: name => throwIfNull(name, Pixi.loader.resources[assetPath("spines", name)], 'Spine'),
         load: function () {
             loadCss(assetsPath + "icons/icons.css");
             const spritesPaths = sprites.map(function (file) {
@@ -101,6 +97,9 @@ define(function (require, exports, module) {
                 loadJson('tilesets/basic').then(function (tileset) {
                     tilesets[tileset.key] = tileset;
                     return loadImage("tilesets/" + tileset.image);
+                }),
+                loadJson('entities/objects').then(function (downloadedObjectKinds) {
+                    downloadedObjectKinds.forEach(obj => objectKinds[obj.id] = obj)
                 }),
                 loadJson('skills').then(function (downloadedSkills) {
                     skills = downloadedSkills;

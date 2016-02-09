@@ -178,9 +178,7 @@ define(function (require, exports, module) {
         init: function () {
             layer.removeChildren();
             characterModels.length = 0;
-            CharacterStore.characters().forEach((character) => {
-                createCharacterModel(character);
-            });
+            CharacterStore.characters().forEach(createCharacterModel);
         },
         recalculatePositions: function () {
             processAnimations();
@@ -203,7 +201,11 @@ define(function (require, exports, module) {
                 MainPlayer.position.y = mainPlayerModel.position.y / TileSize;
             }
         },
-        layer: layer,
-        pointsLayer: pointsLayer
+        get layer() {
+            return layer;
+        },
+        get pointsLayer() {
+            return pointsLayer;
+        }
     };
 });

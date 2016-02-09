@@ -5,6 +5,7 @@ import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
+import dzida.server.app.store.mapdb.WorldObjectStoreMapDb;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.chat.ChatService;
@@ -28,6 +29,7 @@ import dzida.server.core.time.TimeService;
 import dzida.server.core.world.map.WorldMapStore;
 import dzida.server.core.world.map.WorldMapService;
 import dzida.server.core.world.map.WorldMap;
+import dzida.server.core.world.object.WorldObjectService;
 import dzida.server.core.world.pathfinding.CollisionBitMap;
 import dzida.server.core.world.pathfinding.PathFinder;
 import dzida.server.core.world.pathfinding.PathFinderFactory;
@@ -71,6 +73,7 @@ class Instance {
         WorldMap worldMap = worldMapStore.getMap(scenario.getWorldMapKey());
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
         ChatService chatService = new ChatService(playerService);
+        WorldObjectService worldObjectService = WorldObjectService.create(new WorldObjectStoreMapDb());
 
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser();
         TimeService timeService = new TimeService();
@@ -82,7 +85,7 @@ class Instance {
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
         isOnlyScenario = survivalScenario.isPresent();
 
-        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldMapService, skillService, scenario);
+        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldMapService, skillService, worldObjectService, scenario);
 
         Scheduler scheduler = new SchedulerImpl(eventLoop);
 

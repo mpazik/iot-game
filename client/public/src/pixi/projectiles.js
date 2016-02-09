@@ -49,6 +49,8 @@ define(function (require, exports, module) {
     });
 
     module.exports = {
-        layer: layer
+        get layer() {
+            return layer;
+        }
     };
 });

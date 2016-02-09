@@ -86,6 +86,8 @@ define(function (require, exports, module) {
                     tileType: type
                 });
             };
+
+
         },
         get tilesLayer() {
             return tilesLayer;
