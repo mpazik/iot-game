@@ -65,10 +65,10 @@
         },
         _updateActive: function (active) {
             const sockets = this.getElementsByTagName('action-socket');
-            if (this.activeSkill) {
+            if (this.activeSkill != null) {
                 sockets[this.activeSkill].removeAttribute('active');
             }
-            if (active) {
+            if (active != null) {
                 this.activeSkill = active;
                 sockets[active].setAttribute('active', 'active');
             }

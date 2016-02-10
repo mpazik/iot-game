@@ -1,14 +1,18 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const Targeting = require('../component/targeting');
+    const Skills = require('../common/model/skills').Ids;
 
     var publishActive;
     const activeState = new Publisher.StatePublisher(null, function (fn) {
         return publishActive = fn;
     });
 
-    var skills = new Publisher.StatePublisher([0, 1, 2, null, null, null, null, null, null], () => {
-    });
+    var skills = new Publisher.StatePublisher([
+        Skills.PUNCH, Skills.BOW_SHOT, Skills.SWORD_HIT,
+        null, null, null,
+        null, null, null
+    ], () => {});
 
     Targeting.targetingState.subscribe(function (skill) {
         if (skill === null) {
