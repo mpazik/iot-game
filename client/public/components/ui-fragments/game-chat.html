@@ -18,14 +18,27 @@
             this.hideTimeout = null;
 
             document.addEventListener('keydown', function (event) {
+                function isElementClickable(element) {
+                    const tag = element.tagName.toLowerCase();
+                    return ['button', 'a', 'input'].includes(tag)
+                }
                 if (event.keyCode == KEY_CODES.ENTER) {
+                    if (isElementClickable(document.activeElement)) {
+                        return;
+                    }
                     chat.style.display = 'block';
                     input.focus();
                 }
             });
             input.addEventListener('keydown', function (event) {
+                if (event.keyCode == KEY_CODES.ESC) {
+                    input.blur();
+                    event.stopPropagation()
+                }
                 if (event.keyCode == KEY_CODES.ENTER) {
-                    chat.game.sendMessage(input.value);
+                    if (input.value.length > 0) {
+                        chat.game.sendMessage(input.value);
+                    }
                     input.value = '';
                     input.blur();
                 }
