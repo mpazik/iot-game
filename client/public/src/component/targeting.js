@@ -16,16 +16,20 @@ define(function (require, exports, module) {
         publishTargeting(null);
         Dispatcher.userEventStream.unsubscribe('right-click', cancelTargetingImmediate);
         Dispatcher.userEventStream.unsubscribe('left-click', cancelTargetingDeferred);
+        Dispatcher.userEventStream.unsubscribe('esc-down', cancelTargetingImmediate);
     };
 
     const cancelTargetingDeferred = function () {
         // on left click action is performed so the skill in targeting state may be needed by other components.
-        setTimeout(function () {
-            publishTargeting(null);
-        }, 0);
+        deffer(() => publishTargeting(null));
         Dispatcher.userEventStream.unsubscribe('right-click', cancelTargetingImmediate);
         Dispatcher.userEventStream.unsubscribe('left-click', cancelTargetingDeferred);
+        Dispatcher.userEventStream.unsubscribe('esc-down', cancelTargetingImmediate);
     };
+
+    function isTargeting() {
+        return targetingState.value !== null;
+    }
 
     Dispatcher.userEventStream.subscribe('skill-triggered', function (event) {
 
@@ -43,6 +47,7 @@ define(function (require, exports, module) {
             publishTargeting(event.skill);
             Dispatcher.userEventStream.subscribe('right-click', cancelTargetingImmediate);
             Dispatcher.userEventStream.subscribe('left-click', cancelTargetingDeferred);
+            Dispatcher.userEventStream.subscribe('esc-down', cancelTargetingImmediate);
         }
     });
 
@@ -68,7 +73,7 @@ define(function (require, exports, module) {
                 const ratio = (distanceToCreature - skillRange) / distanceToCreature;
                 // there +10% to make sure that player will be in distance to creature.
                 const targetVector = Point.interpolate(ratio * 1.1, playerPos, characterPos);
-                Dispatcher.userEventStream.publish('map-clicked', {x: targetVector.x, y: targetVector.y});
+                Dispatcher.userEventStream.publish('move-to', {x: targetVector.x, y: targetVector.y});
             } else {
                 target.attemptToMove += 1;
             }
@@ -81,7 +86,9 @@ define(function (require, exports, module) {
     }
 
     Dispatcher.userEventStream.subscribe('character-clicked', function (data) {
+        if (!isTargeting()) return; // ignore character clicks if skill is not triggered.
         const skill = targetingState.value;
+
         if (skill.type === Skills.Types.ATTACK) {
             target = {
                 characterId: data.characterId,
@@ -90,16 +97,25 @@ define(function (require, exports, module) {
             };
             huntTarget();
             // deferred because which is invoked by 'left-click' an we want to listen to the next 'left-click'
-            setTimeout(function () {
-                Dispatcher.userEventStream.subscribeOnce('left-click', stopHunting);
-            }, 0);
-        } else {
-            throw 'Not supported skill type used on creature'
+            deffer(() => Dispatcher.userEventStream.subscribeOnce('left-click', stopHunting));
+        }
+    });
+
+    Dispatcher.userEventStream.subscribe('map-clicked', function (data) {
+        if (!isTargeting()) return; // ignore character clicks if skill is not triggered.
+        const skill = targetingState.value;
+        if (skill.type === Skills.Types.BUILDING) {
+            Dispatcher.userEventStream.publish('skill-used-on-world-map', {
+                skillId: skill.id,
+                x: data.x,
+                y: data.y
+            })
         }
     });
 
     module.exports = {
-        targetingState: targetingState
+        targetingState: targetingState,
+        isTargeting
     };
 });
 

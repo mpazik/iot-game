@@ -18,6 +18,7 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const Network = require('./network');
+    const Targeting = require('./targeting');
     const Render = require('./../pixi/render');
     const ResourcesStore = require('../store/resources');
     const Dispatcher = require('./dispatcher');
@@ -68,12 +69,34 @@ define(function (require, exports, module) {
     MainPlayer.playerLiveState.subscribe((live) => {
         if (live) {
             Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
-            Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillCommand);
+            Dispatcher.userEventStream.subscribe('move-to', sendMoveCommand);
+            Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
+            Dispatcher.userEventStream.subscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
             Dispatcher.userEventStream.subscribe('join-battle', sendJoinBattle);
             Dispatcher.userEventStream.subscribe('go-to-home', goToHome);
         } else {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
-            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillCommand);
+            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
+            Dispatcher.userEventStream.unsubscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
+        }
+    });
+
+    const isTargetingState = new Publisher.StatePublisher(false, push => {
+        Targeting.targetingState.subscribe(skill => {
+            if (skill == null && isTargetingState.value == true) {
+                push(false);
+            }
+            if (skill != null && isTargetingState.value == true) {
+                push(true);
+            }
+        });
+    });
+
+    isTargetingState.subscribe(isTargeting => {
+        if (isTargeting) {
+            Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
+        } else {
+            Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
         }
     });
 
@@ -81,8 +104,12 @@ define(function (require, exports, module) {
         network.sendCommands([new Commands.Move(data.x, data.y)]);
     }
 
-    function sendUseSkillCommand(data) {
-        network.sendCommands([new Commands.UseSkill(data.skillId, data.characterId)]);
+    function sendUseSkillOnCharacterCommand(data) {
+        network.sendCommands([new Commands.UseSkillOnCharacter(data.skillId, data.characterId)]);
+    }
+
+    function sendUseSkillOnWorldMapCommand(data) {
+        network.sendCommands([new Commands.UseSkillOnCharacter(data.skillId, data.characterId)]);
     }
 
     function sendJoinBattle(data) {
@@ -147,7 +174,7 @@ define(function (require, exports, module) {
         Render.cleanWorld();
         if (MainPlayer.playerLiveState.state) {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
-            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillCommand);
+            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
         }
         Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
         Dispatcher.userEventStream.unsubscribe('go-to-home', goToHome);

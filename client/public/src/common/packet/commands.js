@@ -11,7 +11,11 @@ define(function (require, exports, module) {
                 this.x = x;
                 this.y = y;
             },
-            UseSkill: function (skillId, target) {
+            UseSkillOnCharacter: function (skillId, target) {
+                this.skillId = skillId;
+                this.target = target;
+            },
+            UseSkillOnWorldMap: function (skillId, target) {
                 this.skillId = skillId;
                 this.target = target;
             },
@@ -38,7 +42,8 @@ define(function (require, exports, module) {
             LogIn: 0,
             LogOut: 1,
             Move: 2,
-            UseSkill: 3,
+            UseSkillOnCharacter: 3,
+            UseSkillOnWorldMap: 4,
             PlayingPlayer: 5,
             TimeSync: 6,
             JoinBattle: 7,

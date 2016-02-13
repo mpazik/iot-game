@@ -32,7 +32,7 @@ public class SkillCommandHandler {
         this.skillService = skillService;
     }
 
-    public List<GameEvent> useSkill(CharacterId casterId, Id<Skill> skillId, CharacterId targetId) {
+    public List<GameEvent> useSkillOnCharacter(CharacterId casterId, Id<Skill> skillId, CharacterId targetId) {
         if (!characterService.isCharacterLive(casterId) || !characterService.isCharacterLive(targetId)) {
             return emptyList();
         }

@@ -19,10 +19,31 @@ define(function (require, exports, module) {
             });
         }
     });
+    const kindDefinition = (kind) => Resources.objectKind(kind);
+
+    function isTileOnObject(tx, ty, object) {
+        const kind = kindDefinition(object.kind);
+        for (var i = 0; i < kind.width; i++) {
+            for (var j = 0; j < kind.height; j++) {
+                var currentTileX = object.x + i;
+                var currentTileY = object.y + j;
+                if (currentTileX == tx && currentTileY == ty) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     module.exports = {
         key,
         objects: () => Array.from(state.values()),
-        kindDefinition: (kind) => Resources.objectKind(kind)
+        kindDefinition,
+        isAnyObjectOnTile: (tx, ty) => {
+            for (var obj of state.values()) {
+                if (isTileOnObject(tx, ty, obj)) return true;
+            }
+            return false;
+        }
     };
 });

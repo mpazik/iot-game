@@ -10,7 +10,7 @@ define(function (require, exports, module) {
 
     var skills = new Publisher.StatePublisher([
         Skills.PUNCH, Skills.BOW_SHOT, Skills.SWORD_HIT,
-        null, null, null,
+        null, Skills.CREATE_TREE, null,
         null, null, null
     ], () => {});
 

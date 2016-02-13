@@ -5,6 +5,7 @@ define(function (require, exports, module) {
     const MainLoop = require('../store/main-loop');
     const Characters = require('./characters');
     const GroundIndicators = require('./ground-indicators');
+    const BuildingIndicator = require('./building-indicator');
     const Projectiles = require('./projectiles');
     const WorldObjects = require('./world-objects');
 
@@ -45,13 +46,15 @@ define(function (require, exports, module) {
             Characters.init();
 
             container.addChild(World.tilesLayer);
-            container.addChild(World.eventLayer);
             container.addChild(GroundIndicators.layer);
             container.addChild(WorldObjects.lowObjectLayer);
+            container.addChild(BuildingIndicator.lowLayer);
+            container.addChild(World.eventLayer);
             container.addChild(Characters.layer);
             container.addChild(Characters.pointsLayer);
             container.addChild(Projectiles.layer);
             container.addChild(WorldObjects.highObjectLayer);
+            container.addChild(BuildingIndicator.highLayer);
             resize();
             MainLoop.start();
         },

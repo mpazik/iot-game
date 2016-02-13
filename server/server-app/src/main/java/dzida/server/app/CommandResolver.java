@@ -32,7 +32,7 @@ import java.util.stream.StreamSupport;
 public class CommandResolver {
     // commands
     private static final int Move = 2;
-    private static final int UseSkill = 3;
+    private static final int UseSkillOnCharacter = 3;
     private static final int JoinBattle = 7;
     private static final int GoToHome = 9;
     private static final int SendMessage = 10;
@@ -103,9 +103,9 @@ public class CommandResolver {
         switch (type) {
             case Move:
                 return positionCommandHandler.move(characterId, serializer.fromJson(data, Point.class), PositionService.PlayerSpeed);
-            case UseSkill:
+            case UseSkillOnCharacter:
                 SkillUse skillUse = serializer.fromJson(data, SkillUse.class);
-                return skillCommandHandler.useSkill(characterId, skillUse.skillId, skillUse.target);
+                return skillCommandHandler.useSkillOnCharacter(characterId, skillUse.skillId, skillUse.target);
             case PlayingPlayer:
                 return Collections.emptyList();
             case TimeSync:

@@ -4,7 +4,7 @@ define(function (require, exports, module) {
     const ResourcesStore = require('../store/resources');
     const Dispatcher = require('../component/dispatcher');
     const tileSize = require('configuration').tileSize;
-    const Targeting = require('../component/targeting');
+    const Publisher = require('../common/basic/publisher');
 
     function createTileTextures(tileset) {
         var fileName = tileset.image;
@@ -27,16 +27,15 @@ define(function (require, exports, module) {
     function createTilesLayer(tileTextures, worldState) {
         var width = worldState.width;
         var height = worldState.height;
-        var tiles = worldState.tiles;
         var tilesLayer = new Pixi.Container();
         for (var tx = 0; tx < width; tx++) {
             for (var ty = 0; ty < height; ty++) {
-                var tileKind = tiles[ty * width + tx];
-                if (tileKind == 0) {
+                var tile = WorldStore.tile(tx, ty);
+                if (tile == 0) {
                     continue;
                 }
                 // tile kinds starts from 1, texture for them starts from 0
-                var sprite = new Pixi.Sprite(tileTextures[tileKind - 1]);
+                var sprite = new Pixi.Sprite(tileTextures[tile - 1]);
                 sprite.position.x = tx * tileSize;
                 sprite.position.y = ty * tileSize;
                 tilesLayer.addChild(sprite);
@@ -48,17 +47,6 @@ define(function (require, exports, module) {
 
     var tilesLayer = new Pixi.Container();
     var eventLayer = new Pixi.Container();
-
-    Targeting.targetingState.subscribe(function (skill) {
-        //noinspection RedundantIfStatementJS
-        if (skill === null) {
-            // skill was deactivated so map is click-able again
-            eventLayer.interactive = true;
-        } else {
-            // targeting on. Map should not be click-able right now.
-            eventLayer.interactive = false;
-        }
-    });
 
     module.exports = {
         init: function () {
@@ -74,21 +62,25 @@ define(function (require, exports, module) {
                 var cords = eventLayer.toLocal(data.data.global);
                 var tileCordX = cords.x / tileSize;
                 var tileCordY = cords.y / tileSize;
-                var tileX = Math.floor(tileCordX);
-                var tileY = Math.floor(tileCordY);
-                var type = tileset.terrains[worldState.tiles[tileX][tileY]];
                 Dispatcher.userEventStream.publish({
                     type: 'map-clicked',
                     x: tileCordX,
-                    y: tileCordY,
-                    tileX,
-                    tileY,
-                    tileType: type
+                    y: tileCordY
                 });
             };
-
-
         },
+        mousePositionStream: new Publisher.StatePublisher({x: 0, y: 0}, push => {
+            eventLayer.mousemove = function (data) {
+                data.stopPropagation();
+                var cords = eventLayer.toLocal(data.data.global);
+                var tileCordX = cords.x / tileSize;
+                var tileCordY = cords.y / tileSize;
+                push({
+                    x: tileCordX,
+                    y: tileCordY
+                });
+            };
+        }),
         get tilesLayer() {
             return tilesLayer;
         },
