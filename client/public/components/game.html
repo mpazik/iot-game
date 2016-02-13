@@ -42,6 +42,12 @@
                             }
                         });
 
+                        window.addEventListener('keydown', function (event) {
+                            if (event.keyCode == KEY_CODES.ESC) {
+                                Dispatcher.userEventStream.publish('esc-down', event);
+                            }
+                        });
+
                         // because element is created asynchronously due to use requireJs we need to emit event when it's has been propertly created.
                         this.dispatchEvent(new CustomEvent('element-attached'))
                     }
