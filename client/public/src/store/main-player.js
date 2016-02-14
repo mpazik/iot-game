@@ -55,13 +55,16 @@ define(function (require, exports, module) {
             });
         }),
         playerCooldown: new Publisher.StatePublisher(null, push => {
-            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnCharacter, function (event) {
+            const checkAndSetCooldown = function (event) {
                 if (event.casterId != characterId) return;
                 const skill = SkillStore.skill(event.skillId);
                 push({cooldown: skill.cooldown});
                 clearTimeout(timeOutToResetCooldown);
                 timeOutToResetCooldown = setTimeout(() => push(null), skill.cooldown)
-            });
+            };
+            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnCharacter, checkAndSetCooldown);
+            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnWorldMap, checkAndSetCooldown);
+            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnWorldObject, checkAndSetCooldown);
 
             Dispatcher.messageStream.subscribe(MessageIds.CharacterDied, function (event) {
                 if (event.characterId != characterId) return;

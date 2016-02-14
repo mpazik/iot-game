@@ -24,6 +24,8 @@ public interface GameEvent {
     int PlayerMessage = 20;
     int SkillUsedOnWorldMap = 21;
     int WorldObjectCreated = 22;
+    int SkillUsedOnWorldObject = 23;
+    int WorldObjectRemoved = 24;
 
     int getId();
 

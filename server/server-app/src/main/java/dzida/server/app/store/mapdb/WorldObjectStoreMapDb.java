@@ -48,6 +48,11 @@ public class WorldObjectStoreMapDb implements WorldObjectStore {
         worldObjects.put(worldObject.getId().getValue(), serializer.toJson(worldObject.getData()));
     }
 
+    @Override
+    public void removeObject(Id<WorldObject> worldObjectId) {
+        worldObjects.remove(worldObjectId.getValue());
+    }
+
     private Long getLastIdFromDb() {
         NavigableSet<Long> keySet = worldObjects.keySet();
         if (keySet.isEmpty()) {

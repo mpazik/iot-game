@@ -9,6 +9,7 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.skill.event.CharacterGotDamage;
 import dzida.server.core.skill.event.SkillUsedOnCharacter;
 import dzida.server.core.skill.event.SkillUsedOnWorldMap;
+import dzida.server.core.skill.event.SkillUsedOnWorldObject;
 import dzida.server.core.time.TimeService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -60,22 +61,25 @@ public class SkillService {
     }
 
     public void processEvent(GameEvent gameEvent) {
-        whenTypeOf(gameEvent).is(CharacterSpawned.class).then(event -> {
+        whenTypeOf(gameEvent)
+                .is(CharacterSpawned.class).then(event -> {
             Character character = event.getCharacter();
             state.put(character.getId(), event.getSkillData());
-        }).is(CharacterDied.class).then(
-                event -> state.remove(event.getCharacterId())
-        ).is(SkillUsedOnCharacter.class).then(event -> {
-            int skillCooldown = getSkill(event.getSkillId()).getCooldown();
-            state.get(event.getCasterId()).setCooldownTill(timeService.getCurrentMillis() + skillCooldown);
-        }).is(SkillUsedOnWorldMap.class).then(event -> {
-            int skillCooldown = getSkill(event.getSkillId()).getCooldown();
-            state.get(event.getCasterId()).setCooldownTill(timeService.getCurrentMillis() + skillCooldown);
-        }).is(CharacterGotDamage.class).then(event -> {
+        })
+                .is(CharacterDied.class).then(event -> state.remove(event.getCharacterId()))
+                .is(SkillUsedOnCharacter.class).then(event -> setCharacterCooldown(event.getCasterId(), event.getSkillId()))
+                .is(SkillUsedOnWorldMap.class).then(event -> setCharacterCooldown(event.getCasterId(), event.getSkillId()))
+                .is(SkillUsedOnWorldObject.class).then(event -> setCharacterCooldown(event.getCasterId(), event.getSkillId()))
+                .is(CharacterGotDamage.class).then(event -> {
             SkillData skillData = state.get(event.getCharacterId());
             int remainHp = skillData.getHealth() - (int) event.getDamage();
             skillData.setHealth(remainHp);
         });
+    }
+
+    private void setCharacterCooldown(CharacterId casterId, Id<Skill> skillId) {
+        int skillCooldown = getSkill(skillId).getCooldown();
+        state.get(casterId).setCooldownTill(timeService.getCurrentMillis() + skillCooldown);
     }
 
     public SkillData getInitialSkillData(int characterType) {

@@ -101,6 +101,18 @@ define(function (require, exports, module) {
         }
     });
 
+    Dispatcher.userEventStream.subscribe('world-object-clicked', function (data) {
+        if (!isTargeting()) return; // ignore character clicks if skill is not triggered.
+        const skill = targetingState.value;
+
+        if (skill.type === Skills.Types.GATHER) {
+            Dispatcher.userEventStream.publish('skill-used-on-world-object', {
+                worldObjectId: data.worldObjectId,
+                skillId: skill.id
+            });
+        }
+    });
+
     module.exports = {
         targetingState: targetingState,
         isTargeting

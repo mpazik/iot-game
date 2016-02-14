@@ -162,7 +162,7 @@ define(function (require, exports, module) {
         characterModel.updateHpBar(SkillStore.percentHealth(event.characterId));
     });
 
-    SkillStore.characterUsedSkill.subscribe(function (event) {
+    SkillStore.characterUsedSkillOnCharacter.subscribe(function (event) {
         const characterModel = findCharacterModel(event.characterId);
         if (event.skill.target == Skills.Targets.ENEMIES) {
             const enemyPosition = findCharacterModel(event.targetId).position;

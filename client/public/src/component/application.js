@@ -72,12 +72,14 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.subscribe('move-to', sendMoveCommand);
             Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
             Dispatcher.userEventStream.subscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
+            Dispatcher.userEventStream.subscribe('skill-used-on-world-object', sendUseSkillOnWorldObjectCommand);
             Dispatcher.userEventStream.subscribe('join-battle', sendJoinBattle);
             Dispatcher.userEventStream.subscribe('go-to-home', goToHome);
         } else {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
+            Dispatcher.userEventStream.unsubscribe('skill-used-on-world-object', sendUseSkillOnWorldObjectCommand);
         }
     });
 
@@ -110,6 +112,10 @@ define(function (require, exports, module) {
 
     function sendUseSkillOnWorldMapCommand(data) {
         network.sendCommands([new Commands.UseSkillOnWorldMap(data.skillId, data.x, data.y)]);
+    }
+
+    function sendUseSkillOnWorldObjectCommand(data) {
+        network.sendCommands([new Commands.UseSkillOnWorldObject(data.skillId, data.worldObjectId)]);
     }
 
     function sendJoinBattle(data) {

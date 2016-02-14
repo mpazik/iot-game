@@ -11,8 +11,10 @@ import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.event.CharacterGotDamage;
 import dzida.server.core.skill.event.SkillUsedOnCharacter;
 import dzida.server.core.skill.event.SkillUsedOnWorldMap;
+import dzida.server.core.skill.event.SkillUsedOnWorldObject;
 import dzida.server.core.time.TimeService;
 import dzida.server.core.world.event.WorldObjectCreated;
+import dzida.server.core.world.event.WorldObjectRemoved;
 import dzida.server.core.world.object.WorldObject;
 import dzida.server.core.world.object.WorldObjectService;
 
@@ -80,6 +82,20 @@ public class SkillCommandHandler {
                 return singletonList(info("You can not build object on that position"));
             }
             return ImmutableList.of(new SkillUsedOnWorldMap(casterId, skill.getId(), x, y), new WorldObjectCreated(worldObject.get()));
+        }
+        return singletonList(error("Server can not understand received message"));
+    }
+
+    public List<GameEvent> useSkillOnWorldObject(CharacterId casterId, Id<Skill> skillId, Id<WorldObject> targetId) {
+        if (!characterService.isCharacterLive(casterId)) {
+            return emptyList();
+        }
+
+        Skill skill = skillService.getSkill(skillId);
+        if (!isReadyForAbility(casterId))
+            return singletonList(info("You are not ready yet to use ability"));
+        if (skill.getType() == Skills.Types.GATHER) {
+            return ImmutableList.of(new SkillUsedOnWorldObject(casterId, skill.getId(), targetId), new WorldObjectRemoved(targetId));
         }
         return singletonList(error("Server can not understand received message"));
     }

@@ -3,6 +3,7 @@ package dzida.server.core.world.object;
 import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.world.event.WorldObjectCreated;
+import dzida.server.core.world.event.WorldObjectRemoved;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,9 @@ public class WorldObjectService {
     }
 
     public void processEvent(GameEvent gameEvent) {
-        whenTypeOf(gameEvent).is(WorldObjectCreated.class).then(event -> worldObjectStore.saveObject(event.getWorldObject()));
+        whenTypeOf(gameEvent)
+                .is(WorldObjectCreated.class).then(event -> worldObjectStore.saveObject(event.getWorldObject()))
+                .is(WorldObjectRemoved.class).then(event -> worldObjectStore.removeObject(event.getWorldObjectId()));
     }
 
     public Optional<GeneralEntity<WorldObject>> createWorldObject(int objectKind, int x, int y) {
