@@ -10,7 +10,8 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.SkillService;
-import dzida.server.core.world.WorldService;
+import dzida.server.core.world.map.WorldMapService;
+import dzida.server.core.world.object.WorldObjectService;
 import lombok.Value;
 
 import java.util.HashMap;
@@ -24,20 +25,23 @@ public class GameEventDispatcher {
     private final Publisher<GameEvent> eventPublisherBeforeChanges = new Publisher<>();
     private final Map<CharacterId, Consumer<GameEvent>> listeners = new HashMap<>();
     private final CharacterService characterService;
-    private final WorldService worldService;
+    private final WorldMapService worldMapService;
     private final SkillService skillService;
+    private final WorldObjectService worldObjectService;
     private final Scenario scenario;
 
     public GameEventDispatcher(
             PositionService positionService,
             CharacterService characterService,
-            WorldService worldService,
+            WorldMapService worldMapService,
             SkillService skillService,
+            WorldObjectService worldObjectService,
             Scenario scenario) {
         this.positionService = positionService;
         this.characterService = characterService;
-        this.worldService = worldService;
+        this.worldMapService = worldMapService;
         this.skillService = skillService;
+        this.worldObjectService = worldObjectService;
         this.scenario = scenario;
     }
 
@@ -56,8 +60,9 @@ public class GameEventDispatcher {
         return ImmutableMap.of(
                 positionService.getKey(), positionService.getState(),
                 characterService.getKey(), characterService.getState(),
-                worldService.getKey(), worldService.getState(),
-                skillService.getKey(), skillService.getState()
+                worldMapService.getKey(), worldMapService.getState(),
+                skillService.getKey(), skillService.getState(),
+                worldObjectService.getKey(), worldObjectService.getState()
         );
     }
 
@@ -71,6 +76,7 @@ public class GameEventDispatcher {
         characterService.processEvent(gameEvent);
         positionService.processEvent(gameEvent);
         skillService.processEvent(gameEvent);
+        worldObjectService.processEvent(gameEvent);
         eventPublisher.notify(gameEvent);
     }
 

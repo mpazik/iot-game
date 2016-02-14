@@ -41,6 +41,7 @@
             const skillBar = this.getElementsByClassName("skill-bar")[0];
             const skillByKey = this.game.skillByKey;
             const skills = this.uiState.actionBarSkills.value.map(function (id) {
+                if (id == null) return;
                 return skillByKey(id);
             });
             skills.forEach(function (skill, index) {
@@ -64,10 +65,10 @@
         },
         _updateActive: function (active) {
             const sockets = this.getElementsByTagName('action-socket');
-            if (this.activeSkill) {
+            if (this.activeSkill != null) {
                 sockets[this.activeSkill].removeAttribute('active');
             }
-            if (active) {
+            if (active != null) {
                 this.activeSkill = active;
                 sockets[active].setAttribute('active', 'active');
             }

@@ -13,7 +13,10 @@ define(function (require, exports, module) {
             playerIndicators.removeChild(rangeIndicator);
             rangeIndicator = null;
         }
-        if (skill !== null && skill.type === Skills.Types.ATTACK) {
+
+        if (skill == null) return;
+
+        if (skill.type === Skills.Types.ATTACK) {
             rangeIndicator = new Pixi.Graphics();
             rangeIndicator.beginFill(0x74C0FF, 0.2);
             rangeIndicator.lineStyle(3, 0x74C0FF, 0.4);
@@ -29,6 +32,8 @@ define(function (require, exports, module) {
             layer.addChild(playerIndicators);
             playerIndicators.position = MainPlayer.positionInPixels;
         },
-        layer: layer
+        get layer() {
+            return layer
+        }
     };
 });

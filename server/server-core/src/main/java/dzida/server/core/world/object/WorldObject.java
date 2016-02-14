@@ -1,0 +1,45 @@
+package dzida.server.core.world.object;
+
+import com.google.common.base.Objects;
+import dzida.server.core.basic.entity.GeneralData;
+import dzida.server.core.basic.entity.Id;
+
+
+public final class WorldObject implements GeneralData<WorldObject> {
+        private final Id<WorldObjectKind> kind;
+        private final int x;
+        private final int y;
+
+        public WorldObject(Id<WorldObjectKind> kind, int x, int y) {
+                this.kind = kind;
+                this.x = x;
+                this.y = y;
+        }
+
+        public Id<WorldObjectKind> getKind() {
+                return kind;
+        }
+
+        public int getX() {
+                return x;
+        }
+
+        public int getY() {
+                return y;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                WorldObject that = (WorldObject) o;
+                return x == that.x &&
+                        y == that.y &&
+                        Objects.equal(kind, that.kind);
+        }
+
+        @Override
+        public int hashCode() {
+                return Objects.hashCode(kind, x, y);
+        }
+}

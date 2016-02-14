@@ -91,7 +91,7 @@ public class NpcBehaviour {
 
     private List<GameEvent> tryAttackPlayer(NpcCharacter npc, CharacterId targetId) {
         if (!skillService.isOnCooldown(npc.getId(), timeService.getCurrentMillis())) {
-            return skillCommandHandler.useSkill(npc.getId(), getBotAttackSkillId(npc.getBotType()), targetId);
+            return skillCommandHandler.useSkillOnCharacter(npc.getId(), getBotAttackSkillId(npc.getBotType()), targetId);
         }
         return Collections.emptyList();
     }

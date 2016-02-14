@@ -55,7 +55,7 @@ define(function (require, exports, module) {
             });
         }),
         playerCooldown: new Publisher.StatePublisher(null, push => {
-            Dispatcher.messageStream.subscribe(MessageIds.SkillUsed, function (event) {
+            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnCharacter, function (event) {
                 if (event.casterId != characterId) return;
                 const skill = SkillStore.skill(event.skillId);
                 push({cooldown: skill.cooldown});

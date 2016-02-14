@@ -34,7 +34,7 @@ define(function (require, exports, module) {
         })
     });
 
-    Dispatcher.messageStream.subscribe(EventIds.SkillUsed, (event) => {
+    Dispatcher.messageStream.subscribe(EventIds.SkillUsedOnCharacter, (event) => {
         const skill = SkillStore.skill(event.skillId);
         if (skill.projectile) {
             const position = MoveStore.positionAtTime(event.casterId, Timer.currentTimeOnServer());
@@ -49,6 +49,8 @@ define(function (require, exports, module) {
     });
 
     module.exports = {
-        layer: layer
+        get layer() {
+            return layer;
+        }
     };
 });

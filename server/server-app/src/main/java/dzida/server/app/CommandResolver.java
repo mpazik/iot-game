@@ -32,7 +32,8 @@ import java.util.stream.StreamSupport;
 public class CommandResolver {
     // commands
     private static final int Move = 2;
-    private static final int UseSkill = 3;
+    private static final int UseSkillOnCharacter = 3;
+    private static final int UseSkillOnWorldMap = 4;
     private static final int JoinBattle = 7;
     private static final int GoToHome = 9;
     private static final int SendMessage = 10;
@@ -103,9 +104,12 @@ public class CommandResolver {
         switch (type) {
             case Move:
                 return positionCommandHandler.move(characterId, serializer.fromJson(data, Point.class), PositionService.PlayerSpeed);
-            case UseSkill:
-                SkillUse skillUse = serializer.fromJson(data, SkillUse.class);
-                return skillCommandHandler.useSkill(characterId, skillUse.skillId, skillUse.target);
+            case UseSkillOnCharacter:
+                SkillUseOnCharacter skillUseOnCharacter = serializer.fromJson(data, SkillUseOnCharacter.class);
+                return skillCommandHandler.useSkillOnCharacter(characterId, skillUseOnCharacter.skillId, skillUseOnCharacter.target);
+            case UseSkillOnWorldMap:
+                SkillUseOnWorldMap skillUseOnWorldMap = serializer.fromJson(data, SkillUseOnWorldMap.class);
+                return skillCommandHandler.useSkillOnWorldMap(characterId, skillUseOnWorldMap.skillId, skillUseOnWorldMap.x, skillUseOnWorldMap.y);
             case PlayingPlayer:
                 return Collections.emptyList();
             case TimeSync:
@@ -136,9 +140,16 @@ public class CommandResolver {
     }
 
     @Value
-    private static class SkillUse {
+    private static class SkillUseOnCharacter {
         Id<Skill> skillId;
         CharacterId target;
+    }
+
+    @Value
+    private static class SkillUseOnWorldMap {
+        Id<Skill> skillId;
+        double x;
+        double y;
     }
 
     @Value

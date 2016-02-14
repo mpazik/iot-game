@@ -5,6 +5,7 @@ import dzida.server.app.store.http.loader.SkillLoader;
 import dzida.server.app.store.http.loader.StaticDataLoader;
 import dzida.server.app.store.http.loader.WorldMapLoader;
 import dzida.server.app.store.mapdb.PlayerStoreMapDb;
+import dzida.server.app.store.mapdb.WorldObjectStoreMapDbFactory;
 import dzida.server.app.store.memory.SkillStoreInMemory;
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Result;
@@ -48,7 +49,7 @@ public class Container {
         Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
         WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
 
-        instanceFactory = new InstanceFactory(playerService, new Arbiter(this), new SkillStoreInMemory(skills), worldMapStore);
+        instanceFactory = new InstanceFactory(playerService, new Arbiter(this), new SkillStoreInMemory(skills), worldMapStore, new WorldObjectStoreMapDbFactory());
         nextPort = startPort;
         this.address = address;
     }

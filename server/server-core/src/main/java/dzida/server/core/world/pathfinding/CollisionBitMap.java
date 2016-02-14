@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableSet;
 import dzida.server.core.basic.unit.BitMap;
 import dzida.server.core.basic.unit.BitMap.ImmutableBitMap;
 import dzida.server.core.basic.unit.Point;
-import dzida.server.core.world.model.Tileset;
-import dzida.server.core.world.model.Tileset.TerrainTypes;
-import dzida.server.core.world.model.WorldMap;
+import dzida.server.core.world.map.Tileset;
+import dzida.server.core.world.map.Tileset.TerrainTypes;
+import dzida.server.core.world.map.WorldMap;
 
 import java.util.Set;
 

@@ -6,7 +6,8 @@ if (typeof exports === 'object' && typeof exports.nodeName !== 'string' && typeo
 define(function (require, exports, module) {
 
     const Types = {
-        ATTACK: 0
+        ATTACK: 0,
+        BUILDING: 1
     };
 
     const Targets = {
@@ -16,7 +17,8 @@ define(function (require, exports, module) {
     const Ids = {
         PUNCH: 0,
         BOW_SHOT: 1,
-        SWORD_HIT: 2
+        SWORD_HIT: 2,
+        CREATE_TREE: 3
     };
 
     module.exports = {

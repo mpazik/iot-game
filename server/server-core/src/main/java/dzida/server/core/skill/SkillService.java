@@ -7,7 +7,8 @@ import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.skill.event.CharacterGotDamage;
-import dzida.server.core.skill.event.SkillUsed;
+import dzida.server.core.skill.event.SkillUsedOnCharacter;
+import dzida.server.core.skill.event.SkillUsedOnWorldMap;
 import dzida.server.core.time.TimeService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -64,7 +65,10 @@ public class SkillService {
             state.put(character.getId(), event.getSkillData());
         }).is(CharacterDied.class).then(
                 event -> state.remove(event.getCharacterId())
-        ).is(SkillUsed.class).then(event -> {
+        ).is(SkillUsedOnCharacter.class).then(event -> {
+            int skillCooldown = getSkill(event.getSkillId()).getCooldown();
+            state.get(event.getCasterId()).setCooldownTill(timeService.getCurrentMillis() + skillCooldown);
+        }).is(SkillUsedOnWorldMap.class).then(event -> {
             int skillCooldown = getSkill(event.getSkillId()).getCooldown();
             state.get(event.getCasterId()).setCooldownTill(timeService.getCurrentMillis() + skillCooldown);
         }).is(CharacterGotDamage.class).then(event -> {
