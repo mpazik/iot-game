@@ -47,7 +47,7 @@
             skills.forEach(function (skill, index) {
                 var socket = document.createElement('action-socket');
                 if (skill) {
-                    socket.setAttribute('icon', skill.icon);
+                    socket.setAttribute('icon', 'icon-' + skill.icon);
                     socket.setAttribute('key', skill.id);
                     socket.addEventListener('action-triggered', function (event) {
                         const skill = skillByKey(event.detail.key);
