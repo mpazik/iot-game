@@ -1,11 +1,17 @@
 define(function (require, exports, module) {
+    const Publisher = require('../common/basic/publisher');
     const StoreRegistrar = require('../component/store-registrar');
     const Resources = require('./resources');
+    const MessageIds = require('../common/packet/messages').ids;
+    const Dispatcher = require('../component/dispatcher');
 
     const key = 'worldObject';
     const state = new Map();
 
     const eventHandlers = {
+        [MessageIds.WorldObjectCreated]: (event) => {
+            state.set(event.worldObject.id, event.worldObject.data);
+        }
     };
 
     StoreRegistrar.registerStore({
@@ -38,6 +44,9 @@ define(function (require, exports, module) {
     module.exports = {
         key,
         objects: () => Array.from(state.values()),
+        objectCreated: new Publisher.StreamPublisher((push) => {
+            Dispatcher.messageStream.subscribeLast(MessageIds.WorldObjectCreated, (event) => push(event.worldObject.data));
+        }),
         kindDefinition,
         isAnyObjectOnTile: (tx, ty) => {
             for (var obj of state.values()) {

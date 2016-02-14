@@ -18,7 +18,12 @@ define(function (require, exports, module) {
         [MessageIds.CharacterGotDamage]: (event) => {
             state.get(event.characterId).health -= event.damage;
         },
-        [MessageIds.SkillUsed]: (event) => {
+        [MessageIds.SkillUsedOnCharacter]: (event) => {
+            const skillCooldown = ResourcesStore.skill(event.skillId).cooldown;
+            const cooldown = skillCooldown ? skillCooldown : 0;
+            state.get(event.casterId).cooldownTill = Date.now() + cooldown;
+        },
+        [MessageIds.SkillUsedOnWorldMap]: (event) => {
             const skillCooldown = ResourcesStore.skill(event.skillId).cooldown;
             const cooldown = skillCooldown ? skillCooldown : 0;
             state.get(event.casterId).cooldownTill = Date.now() + cooldown;
@@ -43,7 +48,7 @@ define(function (require, exports, module) {
             });
         }),
         characterUsedSkill: new Publisher.StreamPublisher((push) => {
-            Dispatcher.messageStream.subscribe(MessageIds.SkillUsed, (event) => {
+            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnCharacter, (event) => {
                 push({
                     characterId: event.casterId,
                     skill: ResourcesStore.skill(event.skillId),

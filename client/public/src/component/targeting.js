@@ -101,18 +101,6 @@ define(function (require, exports, module) {
         }
     });
 
-    Dispatcher.userEventStream.subscribe('map-clicked', function (data) {
-        if (!isTargeting()) return; // ignore character clicks if skill is not triggered.
-        const skill = targetingState.value;
-        if (skill.type === Skills.Types.BUILDING) {
-            Dispatcher.userEventStream.publish('skill-used-on-world-map', {
-                skillId: skill.id,
-                x: data.x,
-                y: data.y
-            })
-        }
-    });
-
     module.exports = {
         targetingState: targetingState,
         isTargeting

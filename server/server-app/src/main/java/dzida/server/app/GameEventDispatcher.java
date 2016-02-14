@@ -76,6 +76,7 @@ public class GameEventDispatcher {
         characterService.processEvent(gameEvent);
         positionService.processEvent(gameEvent);
         skillService.processEvent(gameEvent);
+        worldObjectService.processEvent(gameEvent);
         eventPublisher.notify(gameEvent);
     }
 

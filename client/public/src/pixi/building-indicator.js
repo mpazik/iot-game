@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     const Resources = require('../store/resources');
     const WorldMapStore = require('../store/world');
     const WorldObjectStore = require('../store/world-object');
+    const Dispatcher = require('../component/dispatcher');
 
     const lowLayer = new Pixi.Container();
     const highLayer = new Pixi.Container();
@@ -45,12 +46,25 @@ define(function (require, exports, module) {
         return true;
     }
 
+    function buildOnPosition(data) {
+        const tx = Math.floor(data.x - targetingData.spriteOffset.x);
+        const ty = Math.floor(data.y - targetingData.spriteOffset.y);
+        if (!canObjectBeBuild(tx, ty, targetingData.objectKind)) return;
+
+        Dispatcher.userEventStream.publish('skill-used-on-world-map', {
+            skillId: targetingData.skill.id,
+            x: tx,
+            y: ty
+        })
+    }
+
     Targeting.targetingState.subscribe(function (skill) {
         if (targetingData != null) {
             lowLayer.removeChildren();
             highLayer.removeChildren();
             targetingData = null;
-            WorldMap.mousePositionStream.unsubscribe(recalculateSpritePosition)
+            WorldMap.mousePositionStream.unsubscribe(recalculateSpritePosition);
+            WorldMap.worldMapClicked.unsubscribe(buildOnPosition);
         }
 
         if (skill == null) return;
@@ -59,11 +73,12 @@ define(function (require, exports, module) {
             const objectKind = Resources.objectKind(skill.worldObject);
             const sprite = Pixi.Sprite.fromImage(objectKind.sprite);
             const spriteOffset = {x: (objectKind.width - 1) * 0.5, y: (objectKind.height - 1) * 0.5};
-            targetingData = {objectKind, spriteOffset, sprite};
+            targetingData = {objectKind, spriteOffset, sprite, skill};
             recalculateSpritePosition(WorldMap.mousePositionStream.value);
             WorldMap.mousePositionStream.subscribe(recalculateSpritePosition);
+            WorldMap.worldMapClicked.subscribe(buildOnPosition);
 
-            if(objectKind.isHover)
+            if (objectKind.isHover)
                 highLayer.addChild(sprite);
             else
                 lowLayer.addChild(sprite);

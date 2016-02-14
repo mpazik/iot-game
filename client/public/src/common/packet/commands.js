@@ -15,9 +15,10 @@ define(function (require, exports, module) {
                 this.skillId = skillId;
                 this.target = target;
             },
-            UseSkillOnWorldMap: function (skillId, target) {
+            UseSkillOnWorldMap: function (skillId, x, y) {
                 this.skillId = skillId;
-                this.target = target;
+                this.x = x;
+                this.y = y;
             },
             PlayingPlayer: function (playerId) {
                 this.playerId = playerId;

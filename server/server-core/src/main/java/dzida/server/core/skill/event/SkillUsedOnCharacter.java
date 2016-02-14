@@ -7,13 +7,13 @@ import dzida.server.core.skill.Skill;
 import lombok.Value;
 
 @Value
-public class SkillUsed implements GameEvent {
+public class SkillUsedOnCharacter implements GameEvent {
     CharacterId casterId;
     Id<Skill> skillId;
     CharacterId targetId;
 
     @Override
     public int getId() {
-        return GameEvent.SkillUsed;
+        return GameEvent.SkillUsedOnCharacter;
     }
 }

@@ -51,7 +51,7 @@ define(function (require, exports, module) {
                 this.move = move;
             },
 
-            SkillUsed: function (casterId, skillId, targetId) {
+            SkillUsedOnCharacter: function (casterId, skillId, targetId) {
                 this.casterId = casterId;
                 this.skillId = skillId;
                 this.targetId = targetId;
@@ -101,6 +101,12 @@ define(function (require, exports, module) {
             PlayerMessage: function (playerNick, message) {
                 this.playerNick = playerNick;
                 this.message = message;
+            },
+
+            SkillUsedOnWorldMap: function (casterId, skillId, targetId) {
+                this.casterId = casterId;
+                this.skillId = skillId;
+                this.targetId = targetId;
             }
         },
         ids: {
@@ -110,7 +116,7 @@ define(function (require, exports, module) {
             CharacterSpawned: 5,
             CharacterDied: 6,
             CharacterMoved: 7,
-            SkillUsed: 8,
+            SkillUsedOnCharacter: 8,
             CharacterGotDamage: 9,
             InitialData: 11,
             ServerMessage: 12,
@@ -121,7 +127,9 @@ define(function (require, exports, module) {
             JoinToInstance: 17,
             PlayerWillRespawn: 18,
             ScenarioEnd: 19,
-            PlayerMessage: 20
+            PlayerMessage: 20,
+            SkillUsedOnWorldMap: 21,
+            WorldObjectCreated: 22
         },
         forId: []
     };

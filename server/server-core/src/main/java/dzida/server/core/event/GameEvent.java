@@ -9,7 +9,7 @@ public interface GameEvent {
     int CharacterSpawned = 5;
     int CharacterDied = 6;
     int CharacterMoved = 7;
-    int SkillUsed = 8;
+    int SkillUsedOnCharacter = 8;
     int CharacterGotDamage = 9;
     int Pong = 10;
     int InitialData = 11;
@@ -22,6 +22,9 @@ public interface GameEvent {
     int PlayerWillRespawn = 18;
     int ScenarioEnd = 19;
     int PlayerMessage = 20;
+    int SkillUsedOnWorldMap = 21;
+    int WorldObjectCreated = 22;
 
     int getId();
+
 }

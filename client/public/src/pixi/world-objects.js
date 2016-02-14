@@ -1,7 +1,6 @@
 define(function (require, exports, module) {
     const Pixi = require('pixi');
     const WorldObjectStore = require('../store/world-object');
-    const Resources = require('../store/resources');
     const tileSize = require('configuration').tileSize;
 
     var lowObjectLayer = new Pixi.Container();
@@ -18,6 +17,8 @@ define(function (require, exports, module) {
         else
             lowObjectLayer.addChild(sprite);
     }
+
+    WorldObjectStore.objectCreated.subscribe(createObject);
 
     module.exports = {
         init: function () {

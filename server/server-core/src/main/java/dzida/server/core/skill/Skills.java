@@ -5,6 +5,7 @@ import dzida.server.core.basic.entity.Id;
 public class Skills {
     public static class Types {
         public final static int ATTACK = 0;
+        public final static int BUILDING = 1;
     }
 
     public static class Target {

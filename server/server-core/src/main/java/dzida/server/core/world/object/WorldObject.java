@@ -1,30 +1,45 @@
 package dzida.server.core.world.object;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+import com.google.common.base.Objects;
+import dzida.server.core.basic.entity.GeneralData;
+import dzida.server.core.basic.entity.Id;
 
 
-public class WorldObject {
-    @EqualsAndHashCode(callSuper = false)
-    @Value
-    public static final class Data extends dzida.server.core.basic.entity.Data {
-        WorldObjectKind.Id kind;
-        int x;
-        int y;
-    }
+public final class WorldObject implements GeneralData<WorldObject> {
+        private final Id<WorldObjectKind> kind;
+        private final int x;
+        private final int y;
 
-
-    public static final class Id extends dzida.server.core.basic.entity.Id<WorldObject.Data> {
-        // to do make it private
-        public Id(long id) {
-            super(id);
+        public WorldObject(Id<WorldObjectKind> kind, int x, int y) {
+                this.kind = kind;
+                this.x = x;
+                this.y = y;
         }
-    }
 
-    public static final class Entity extends dzida.server.core.basic.entity.Entity<WorldObject.Id, WorldObject.Data> {
-
-        public Entity(Id id, WorldObject.Data data) {
-            super(id, data);
+        public Id<WorldObjectKind> getKind() {
+                return kind;
         }
-    }
+
+        public int getX() {
+                return x;
+        }
+
+        public int getY() {
+                return y;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                WorldObject that = (WorldObject) o;
+                return x == that.x &&
+                        y == that.y &&
+                        Objects.equal(kind, that.kind);
+        }
+
+        @Override
+        public int hashCode() {
+                return Objects.hashCode(kind, x, y);
+        }
 }

@@ -109,7 +109,7 @@ define(function (require, exports, module) {
     }
 
     function sendUseSkillOnWorldMapCommand(data) {
-        network.sendCommands([new Commands.UseSkillOnCharacter(data.skillId, data.characterId)]);
+        network.sendCommands([new Commands.UseSkillOnWorldMap(data.skillId, data.x, data.y)]);
     }
 
     function sendJoinBattle(data) {

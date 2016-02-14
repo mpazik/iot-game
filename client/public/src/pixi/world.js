@@ -57,6 +57,8 @@ define(function (require, exports, module) {
             tilesLayer.addChild(createTilesLayer(tileTexture, worldState));
             eventLayer.interactive = true;
             eventLayer.hitArea = new Pixi.Rectangle(0, 0, worldState.width * tileSize, worldState.height * tileSize);
+        },
+        worldMapClicked: new Publisher.StatePublisher({x: 0, y: 0}, push => {
             eventLayer.mousedown = function (data) {
                 data.stopPropagation();
                 var cords = eventLayer.toLocal(data.data.global);
@@ -67,8 +69,9 @@ define(function (require, exports, module) {
                     x: tileCordX,
                     y: tileCordY
                 });
+                push({x :tileCordX, y: tileCordY})
             };
-        },
+        }),
         mousePositionStream: new Publisher.StatePublisher({x: 0, y: 0}, push => {
             eventLayer.mousemove = function (data) {
                 data.stopPropagation();
