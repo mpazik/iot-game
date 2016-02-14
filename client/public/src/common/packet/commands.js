@@ -37,6 +37,10 @@ define(function (require, exports, module) {
             GoToHome: function () {},
             SendMessage: function (message) {
                 this.message = message;
+            },
+            UseSkillOnWorldObject: function (skillId, target) {
+                this.skillId = skillId;
+                this.target = target;
             }
         },
         ids: {
@@ -50,7 +54,8 @@ define(function (require, exports, module) {
             JoinBattle: 7,
             Backdoor: 8,
             GoToHome: 9,
-            SendMessage: 10
+            SendMessage: 10,
+            UseSkillOnWorldObject: 11
         },
         forId: []
     };

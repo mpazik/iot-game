@@ -19,6 +19,7 @@ import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
+import dzida.server.core.world.object.WorldObject;
 import lombok.Value;
 
 import java.util.Collections;
@@ -37,6 +38,7 @@ public class CommandResolver {
     private static final int JoinBattle = 7;
     private static final int GoToHome = 9;
     private static final int SendMessage = 10;
+    private static final int UseSkillOnWorldObject = 11;
 
     // requests
     private static final int PlayingPlayer = 5;
@@ -110,6 +112,9 @@ public class CommandResolver {
             case UseSkillOnWorldMap:
                 SkillUseOnWorldMap skillUseOnWorldMap = serializer.fromJson(data, SkillUseOnWorldMap.class);
                 return skillCommandHandler.useSkillOnWorldMap(characterId, skillUseOnWorldMap.skillId, skillUseOnWorldMap.x, skillUseOnWorldMap.y);
+            case UseSkillOnWorldObject:
+                SkillUseOnWorldObject skillUseOnWorldObject = serializer.fromJson(data, SkillUseOnWorldObject.class);
+                return skillCommandHandler.useSkillOnWorldObject(characterId, skillUseOnWorldObject.skillId, skillUseOnWorldObject.getTarget());
             case PlayingPlayer:
                 return Collections.emptyList();
             case TimeSync:
@@ -150,6 +155,12 @@ public class CommandResolver {
         Id<Skill> skillId;
         double x;
         double y;
+    }
+
+    @Value
+    private static class SkillUseOnWorldObject {
+        Id<Skill> skillId;
+        Id<WorldObject> target;
     }
 
     @Value

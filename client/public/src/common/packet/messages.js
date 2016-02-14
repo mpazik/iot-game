@@ -103,10 +103,25 @@ define(function (require, exports, module) {
                 this.message = message;
             },
 
-            SkillUsedOnWorldMap: function (casterId, skillId, targetId) {
+            SkillUsedOnWorldMap: function (casterId, skillId, x, y) {
                 this.casterId = casterId;
                 this.skillId = skillId;
-                this.targetId = targetId;
+                this.x = x;
+                this.y = y;
+            },
+
+            WorldObjectCreated: function (worldObject) {
+                this.worldObject = worldObject
+            },
+
+            SkillUsedOnWorldObject: function (casterId, skillId, worldObjectId) {
+                this.casterId = casterId;
+                this.skillId = skillId;
+                this.worldObjectId = worldObjectId;
+            },
+
+            WorldObjectRemoved: function (worldObjectId) {
+                this.worldObjectId = worldObjectId;
             }
         },
         ids: {
@@ -129,7 +144,9 @@ define(function (require, exports, module) {
             ScenarioEnd: 19,
             PlayerMessage: 20,
             SkillUsedOnWorldMap: 21,
-            WorldObjectCreated: 22
+            WorldObjectCreated: 22,
+            SkillUsedOnWorldObject: 23,
+            WorldObjectRemoved: 24
         },
         forId: []
     };

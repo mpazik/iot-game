@@ -10,9 +10,17 @@ define(function (require, exports, module) {
 
     const eventHandlers = {
         [MessageIds.WorldObjectCreated]: (event) => {
-            state.set(event.worldObject.id, event.worldObject.data);
+            addWorldObject(event.worldObject);
+        },
+        [MessageIds.WorldObjectRemoved]: (event) => {
+            state.delete(event.worldObjectId);
         }
     };
+
+    function addWorldObject(worldObject) {
+        worldObject.data.id = worldObject.id;
+        state.set(worldObject.id, worldObject.data)
+    }
 
     StoreRegistrar.registerStore({
         key,
@@ -20,9 +28,7 @@ define(function (require, exports, module) {
         state: () => Map.toObject(state),
         init: (initialState) => {
             state.clear();
-            initialState.forEach(worldObject => {
-                state.set(worldObject.id, worldObject.data)
-            });
+            initialState.forEach(addWorldObject);
         }
     });
     const kindDefinition = (kind) => Resources.objectKind(kind);
@@ -44,8 +50,11 @@ define(function (require, exports, module) {
     module.exports = {
         key,
         objects: () => Array.from(state.values()),
-        objectCreated: new Publisher.StreamPublisher((push) => {
+        worldObjectCreated: new Publisher.StreamPublisher((push) => {
             Dispatcher.messageStream.subscribeLast(MessageIds.WorldObjectCreated, (event) => push(event.worldObject.data));
+        }),
+        worldObjectRemoved: new Publisher.StreamPublisher((push) => {
+            Dispatcher.messageStream.subscribeLast(MessageIds.WorldObjectRemoved, (event) => push(event.worldObjectId));
         }),
         kindDefinition,
         isAnyObjectOnTile: (tx, ty) => {

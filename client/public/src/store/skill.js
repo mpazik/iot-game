@@ -19,16 +19,21 @@ define(function (require, exports, module) {
             state.get(event.characterId).health -= event.damage;
         },
         [MessageIds.SkillUsedOnCharacter]: (event) => {
-            const skillCooldown = ResourcesStore.skill(event.skillId).cooldown;
-            const cooldown = skillCooldown ? skillCooldown : 0;
-            state.get(event.casterId).cooldownTill = Date.now() + cooldown;
+            setCooldown(event.casterId, event.skillId)
         },
         [MessageIds.SkillUsedOnWorldMap]: (event) => {
-            const skillCooldown = ResourcesStore.skill(event.skillId).cooldown;
-            const cooldown = skillCooldown ? skillCooldown : 0;
-            state.get(event.casterId).cooldownTill = Date.now() + cooldown;
-        }
+            setCooldown(event.casterId, event.skillId)
+        },
+        [MessageIds.SkillUsedOnWorldObject]: (event) => {
+            setCooldown(event.casterId, event.skillId)
+        },
     };
+
+    function setCooldown(casterId, skillId) {
+        const skillCooldown = ResourcesStore.skill(skillId).cooldown;
+        const cooldown = skillCooldown ? skillCooldown : 0;
+        state.get(casterId).cooldownTill = Date.now() + cooldown;
+    }
 
     StoreRegistrar.registerStore({
         key,
@@ -47,7 +52,7 @@ define(function (require, exports, module) {
                 push(event);
             });
         }),
-        characterUsedSkill: new Publisher.StreamPublisher((push) => {
+        characterUsedSkillOnCharacter: new Publisher.StreamPublisher((push) => {
             Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnCharacter, (event) => {
                 push({
                     characterId: event.casterId,
