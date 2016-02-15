@@ -65,6 +65,7 @@ define(function (require, exports, module) {
             Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnCharacter, checkAndSetCooldown);
             Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnWorldMap, checkAndSetCooldown);
             Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnWorldObject, checkAndSetCooldown);
+            Dispatcher.messageStream.subscribe(MessageIds.SkillUsed, checkAndSetCooldown);
 
             Dispatcher.messageStream.subscribe(MessageIds.CharacterDied, function (event) {
                 if (event.characterId != characterId) return;

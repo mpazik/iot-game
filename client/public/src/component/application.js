@@ -25,6 +25,7 @@ define(function (require, exports, module) {
     const Commands = require('../common/packet/commands').constructors;
     const MessagesIds = require('../common/packet/messages').ids;
     const MainPlayer = require('../store/main-player');
+    const ItemStore = require('../store/item');
     const network = new Network();
     var serverAddress;
     var userNick;
@@ -107,14 +108,17 @@ define(function (require, exports, module) {
     }
 
     function sendUseSkillOnCharacterCommand(data) {
+        if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
         network.sendCommands([new Commands.UseSkillOnCharacter(data.skillId, data.characterId)]);
     }
 
     function sendUseSkillOnWorldMapCommand(data) {
+        if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
         network.sendCommands([new Commands.UseSkillOnWorldMap(data.skillId, data.x, data.y)]);
     }
 
     function sendUseSkillOnWorldObjectCommand(data) {
+        if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
         network.sendCommands([new Commands.UseSkillOnWorldObject(data.skillId, data.worldObjectId)]);
     }
 

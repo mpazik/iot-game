@@ -69,7 +69,7 @@ define(function (require, exports, module) {
 
         if (skill == null) return;
 
-        if (skill.type === Skills.Types.BUILDING) {
+        if (skill.type === Skills.Types.BUILD) {
             const objectKind = Resources.objectKind(skill.worldObject);
             const sprite = Pixi.Sprite.fromImage(objectKind.sprite);
             const spriteOffset = {x: (objectKind.width - 1) * 0.5, y: (objectKind.height - 1) * 0.5};

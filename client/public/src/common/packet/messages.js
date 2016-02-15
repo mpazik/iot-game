@@ -5,9 +5,10 @@
  */
 define(function (require, exports, module) {
     const ServerMessage = function () {
-        function ServerMessage(message) {
+        function ServerMessage(message, type) {
             //noinspection JSPotentiallyInvalidUsageOfThis
             this.message = message;
+            this.type = type;
         }
 
         ServerMessage.Kinds = {
@@ -120,6 +121,11 @@ define(function (require, exports, module) {
                 this.worldObjectId = worldObjectId;
             },
 
+            SkillUsed: function (casterId, skillId) {
+                this.casterId = casterId;
+                this.skillId = skillId;
+            },
+
             WorldObjectRemoved: function (worldObjectId) {
                 this.worldObjectId = worldObjectId;
             }
@@ -146,7 +152,8 @@ define(function (require, exports, module) {
             SkillUsedOnWorldMap: 21,
             WorldObjectCreated: 22,
             SkillUsedOnWorldObject: 23,
-            WorldObjectRemoved: 24
+            WorldObjectRemoved: 24,
+            SkillUsed: 25
         },
         forId: []
     };

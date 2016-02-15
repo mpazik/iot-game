@@ -16,9 +16,9 @@
             'src/component/backdoor',
             'src/store/ui-state',
             'src/component/timer',
-            'src/store/skill',
+            'src/store/resources',
             'src/component/chat'
-        ], function (App, Dispatcher, Backdoor, UiStateStore, Timer, Skills, Chat) {
+        ], function (App, Dispatcher, Backdoor, UiStateStore, Timer, Resources, Chat) {
             const GameTag = Object.create(HTMLElement.prototype, {
                 createdCallback: {
                     value: function () {
@@ -59,7 +59,8 @@
                 publishUiAction: {value: Dispatcher.userEventStream.publish.bind(Dispatcher.userEventStream)},
                 backdoor: {value: Backdoor},
                 timer: {value: Timer},
-                skillByKey: {value: Skills.skill},
+                skillByKey: {value: Resources.skill},
+                itemById: {value: Resources.item},
                 sendMessage: {value: Chat.sendMessage}
             });
 

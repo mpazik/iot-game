@@ -6,6 +6,7 @@ define(function (require, exports, module) {
     const ServerMessagesStore = require('./server-messages');
     const Publisher = require('../common/basic/publisher');
     const Application = require('../component/application');
+    const Item = require('./item');
     const Chat = require('../component/chat');
 
     module.exports = {
@@ -38,6 +39,7 @@ define(function (require, exports, module) {
         profilingStats: ProfilingStore.updateStatsState,
         cooldown: MainPlayerStore.playerCooldown,
         gameMessage: ServerMessagesStore.messageToShowState,
-        playerMessage: Chat.playerMessage
+        playerMessage: Chat.playerMessage,
+        playerItems: Item.itemsChange
     };
 });
