@@ -89,7 +89,7 @@ define(function (require, exports, module) {
             if (skill == null && isTargetingState.value == true) {
                 push(false);
             }
-            if (skill != null && isTargetingState.value == true) {
+            if (skill != null && isTargetingState.value == false) {
                 push(true);
             }
         });
@@ -97,9 +97,9 @@ define(function (require, exports, module) {
 
     isTargetingState.subscribe(isTargeting => {
         if (isTargeting) {
-            Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
-        } else {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
+        } else {
+            Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
         }
     });
 
