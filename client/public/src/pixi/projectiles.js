@@ -14,9 +14,17 @@ define(function (require, exports, module) {
     const lengthOfArrow = 1;
     const layer = new Pixi.Container();
 
+    function getAnimationTargetPosition(animation) {
+        if (animation.target) {
+            return MoveStore.positionAtTime(animation.target, Timer.currentTimeOnServer());
+        }
+        return animation.targetPosition;
+    }
+
     MainLoop.renderStream.subscribe(function (delta) {
         animations.remove(function (animation) {
-            const targetPosition = MoveStore.positionAtTime(animation.target, Timer.currentTimeOnServer());
+            const targetPosition = getAnimationTargetPosition(animation);
+            animations.targetPosition = targetPosition;
             // speed is in meters per second but delta is in millis.
             const movedDistance = delta * projectileSpeed / 1000;
             const distanceToMove = Point.distance(animation.position, targetPosition);
@@ -37,15 +45,18 @@ define(function (require, exports, module) {
     Dispatcher.messageStream.subscribe(EventIds.SkillUsedOnCharacter, (event) => {
         const skill = SkillStore.skill(event.skillId);
         if (skill.projectile) {
-            const position = MoveStore.positionAtTime(event.casterId, Timer.currentTimeOnServer());
+            const currentTime = Timer.currentTimeOnServer();
+            const position = MoveStore.positionAtTime(event.casterId, currentTime);
             const projectile = new Pixi.Sprite.fromImage(skill.projectile);
-            animations.push({projectile: projectile, target: event.targetId, position: position});
+            const targetPosition = MoveStore.positionAtTime(event.targetId, currentTime);
+            animations.push({projectile, target: event.targetId, position, targetPosition});
             layer.addChild(projectile);
         }
     });
 
     Dispatcher.messageStream.subscribe(EventIds.CharacterDied, (event) => {
-        animations.remove((animation) => animation.target == event.characterId)
+        const animation = animations.find(animation => animation.target == event.characterId);
+        animation.target = null;
     });
 
     module.exports = {
