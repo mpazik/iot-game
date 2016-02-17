@@ -1,13 +1,18 @@
 package dzida.server.app;
 
 import dzida.server.core.event.GameEvent;
-
-import java.util.Date;
+import dzida.server.core.time.TimeService;
 
 public class TimeSynchroniser {
 
+    private final TimeService timeService;
+
+    public TimeSynchroniser(TimeService timeService) {
+        this.timeService = timeService;
+    }
+
     public TimeSyncResponse timeSync(TimeSyncRequest timeSyncRequest) {
-        return new TimeSyncResponse(timeSyncRequest.clientTime, new Date().getTime());
+        return new TimeSyncResponse(timeSyncRequest.clientTime, timeService.getCurrentMillis());
     }
 
     public static final class TimeSyncRequest {

@@ -75,8 +75,8 @@ class Instance {
         ChatService chatService = new ChatService(playerService);
         WorldObjectService worldObjectService = WorldObjectService.create(worldObjectStore);
 
-        TimeSynchroniser timeSynchroniser = new TimeSynchroniser();
-        TimeService timeService = new TimeService();
+        TimeService timeService = new TimeServiceImpl();
+        TimeSynchroniser timeSynchroniser = new TimeSynchroniser(timeService);
         characterService = CharacterService.create();
         WorldMapService worldMapService = WorldMapService.create(worldMapStore, scenario.getWorldMapKey());
         SkillService skillService = SkillService.create(skillStore, timeService);
@@ -85,7 +85,7 @@ class Instance {
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
         isOnlyScenario = survivalScenario.isPresent();
 
-        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldMapService, skillService, worldObjectService, scenario);
+        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldMapService, skillService, worldObjectService, scenario, timeService);
 
         Scheduler scheduler = new SchedulerImpl(eventLoop);
 

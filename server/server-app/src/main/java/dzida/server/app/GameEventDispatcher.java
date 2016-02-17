@@ -10,6 +10,7 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.SkillService;
+import dzida.server.core.time.TimeService;
 import dzida.server.core.world.map.WorldMapService;
 import dzida.server.core.world.object.WorldObjectService;
 import lombok.Value;
@@ -29,6 +30,7 @@ public class GameEventDispatcher {
     private final SkillService skillService;
     private final WorldObjectService worldObjectService;
     private final Scenario scenario;
+    private final TimeService timeService;
 
     public GameEventDispatcher(
             PositionService positionService,
@@ -36,13 +38,15 @@ public class GameEventDispatcher {
             WorldMapService worldMapService,
             SkillService skillService,
             WorldObjectService worldObjectService,
-            Scenario scenario) {
+            Scenario scenario,
+            TimeService timeService) {
         this.positionService = positionService;
         this.characterService = characterService;
         this.worldMapService = worldMapService;
         this.skillService = skillService;
         this.worldObjectService = worldObjectService;
         this.scenario = scenario;
+        this.timeService = timeService;
     }
 
     public void registerCharacter(Character character, Consumer<GameEvent> send) {
@@ -53,7 +57,7 @@ public class GameEventDispatcher {
 
     // I do not think that this should be here.
     public void sendInitialPacket(CharacterId characterId, Player.Id playerId, Player.Entity playerEntity) {
-        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario, playerEntity.getData()));
+        listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario, playerEntity.getData(), timeService.getCurrentMillis()));
     }
 
     private Map<String, Object> getState() {
@@ -103,6 +107,7 @@ public class GameEventDispatcher {
         Map<String, Object> state;
         Scenario scenario;
         Player.Data playerData;
+        private final long serverTime;
 
         @Override
         public int getId() {
