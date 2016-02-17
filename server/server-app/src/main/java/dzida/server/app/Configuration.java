@@ -24,6 +24,13 @@ public class Configuration {
         return Integer.parseInt(System.getProperty("instancePort", "7001"));
     }
 
+    /**
+     * Return the number of millis that will be added to the Server current time. Required for debuging reasons to simulate client/server time differences.
+     */
+    public static long getServerTimeOffset() {
+        return Long.parseLong(System.getProperty("serverTimeOffset", "0"));
+    }
+
     public static String[] getInitialInstances() {
         return System.getProperty("instances", "eden").split(",");
     }
@@ -41,6 +48,7 @@ public class Configuration {
         System.out.println("container first instance port: " + getFirstInstancePort());
         System.out.println("static server address: " + getStaticServerAddress());
         System.out.println("initial instances: " + String.join(",", getInitialInstances()));
+        System.out.println("server time offset " + getServerTimeOffset());
         System.out.println("---------------------\n");
     }
 }
