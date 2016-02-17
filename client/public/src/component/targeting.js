@@ -7,10 +7,17 @@ define(function (require, exports, module) {
     const MoveStore = require('../store/move');
     const Timer = require('./timer');
 
-    var publishTargeting;
-    const targetingState = new Publisher.StatePublisher(null, function (fn) {
-        publishTargeting = fn;
-    });
+    var pushTargeting;
+    const targetingState = new Publisher.StatePublisher(null, push => pushTargeting = push);
+
+    function publishTargeting(skill) {
+        if (skill != null && skill.type != Skills.Types.CRAFT) {
+            pushTargeting(skill);
+            return;
+        }
+
+        pushTargeting(null);
+    }
 
     const cancelTargetingImmediate = function () {
         publishTargeting(null);

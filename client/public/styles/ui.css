@@ -183,3 +183,10 @@ game-chat .chat-input {
     background: rgba(0, 0, 0, 0.1);
     box-shadow: none;
 }
+
+player-inventory {
+    top: 40px;
+    right: 1px;
+    padding: 10px;
+    min-width: 100px;
+}

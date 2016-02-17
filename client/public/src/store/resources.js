@@ -1,10 +1,15 @@
 define(function (require, exports, module) {
-    var Pixi = require('pixi');
-    var Configuration = require('configuration');
+    const Pixi = require('pixi');
+    const Configuration = require('configuration');
+    const Items = require('../common/model/items').Ids;
     var assetsPath = Configuration.assetsLocalization + '/';
     var tilesets = {};
     var skills = {};
     var objectKinds = {};
+    const items = {
+        [Items.ARROW]: {name: 'Arrow'},
+        [Items.STICK]: {name: 'Stick'}
+    };
 
     const sprites = ["objects"];
     const spines = ["player"];
@@ -82,6 +87,7 @@ define(function (require, exports, module) {
 
     module.exports = {
         skill: id => throwIfNull(id, skills[id], 'Skill'),
+        item: id => throwIfNull(id, items[id], 'Item'),
         objectKind: id => throwIfNull(id, objectKinds[id], 'WorldObject'),
         tileset: name => throwIfNull(name, tilesets[name], 'TileSet'),
         spine: name => throwIfNull(name, Pixi.loader.resources[assetPath("spines", name)], 'Spine'),

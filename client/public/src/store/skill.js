@@ -27,6 +27,9 @@ define(function (require, exports, module) {
         [MessageIds.SkillUsedOnWorldObject]: (event) => {
             setCooldown(event.casterId, event.skillId)
         },
+        [MessageIds.SkillUsed]: (event) => {
+            setCooldown(event.casterId, event.skillId)
+        }
     };
 
     function setCooldown(casterId, skillId) {

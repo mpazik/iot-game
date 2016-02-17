@@ -7,8 +7,9 @@ define(function (require, exports, module) {
 
     const Types = {
         ATTACK: 0,
-        BUILDING: 1,
-        GATHER: 2
+        BUILD: 1,
+        GATHER: 2,
+        CRAFT: 3
     };
 
     const Targets = {
@@ -20,7 +21,8 @@ define(function (require, exports, module) {
         BOW_SHOT: 1,
         SWORD_HIT: 2,
         CREATE_TREE: 3,
-        CUT_TREE: 4
+        CUT_TREE: 4,
+        CREATE_ARROWS: 5
     };
 
     module.exports = {

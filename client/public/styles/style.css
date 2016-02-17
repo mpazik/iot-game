@@ -32,7 +32,6 @@ a:hover {
 }
 
 .area {
-    position: absolute;
     color: #f7d104;
     background: rgba(0, 0, 0, 0.7);
     border: #777 solid 1px;
