@@ -2,6 +2,7 @@ package dzida.server.app;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -11,9 +12,10 @@ import dzida.server.core.character.CharacterId;
 import dzida.server.core.player.Player;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 public final class Serializer {
-    private static final TypeAdapter<CharacterId> characterIdTypeAdapter = new TypeAdapter<CharacterId>() {
+    private final TypeAdapter<CharacterId> characterIdTypeAdapter = new TypeAdapter<CharacterId>() {
         @Override
         public void write(JsonWriter out, CharacterId characterId) throws IOException {
             out.value(characterId.getValue());
@@ -26,7 +28,7 @@ public final class Serializer {
         }
     };
 
-    private static final TypeAdapter<Id<?>> idTypeAdapter = new TypeAdapter<Id<?>>() {
+    private final TypeAdapter<Id<?>> idTypeAdapter = new TypeAdapter<Id<?>>() {
         @Override
         public void write(JsonWriter out, Id<?> characterId) throws IOException {
             out.value(characterId.getValue());
@@ -39,7 +41,7 @@ public final class Serializer {
         }
     };
 
-    private static final TypeAdapter<Key<?>> keyTypeAdapter = new TypeAdapter<Key<?>>() {
+    private final TypeAdapter<Key<?>> keyTypeAdapter = new TypeAdapter<Key<?>>() {
         @Override
         public void write(JsonWriter out, Key<?> key) throws IOException {
             out.value(key.getValue());
@@ -52,7 +54,7 @@ public final class Serializer {
         }
     };
 
-    private static final TypeAdapter<Player.Id> playerIdTypeAdapter = new TypeAdapter<Player.Id>() {
+    private final TypeAdapter<Player.Id> playerIdTypeAdapter = new TypeAdapter<Player.Id>() {
         @Override
         public void write(JsonWriter out, Player.Id characterId) throws IOException {
             out.value(characterId.getValue());
@@ -65,7 +67,7 @@ public final class Serializer {
         }
     };
 
-    private static final TypeAdapter<Packet> packetTypeAdapter = new TypeAdapter<Packet>() {
+    private final TypeAdapter<Packet> packetTypeAdapter = new TypeAdapter<Packet>() {
 
         @Override
         public void write(JsonWriter out, Packet packet) throws IOException {
@@ -81,14 +83,14 @@ public final class Serializer {
         }
     };
 
-    private static final Gson gsonForPacket = new GsonBuilder()
+    private final Gson gsonForPacket = new GsonBuilder()
             .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
             .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
             .create();
 
-    private static final Gson gson = new GsonBuilder()
+    private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
             .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
@@ -97,11 +99,20 @@ public final class Serializer {
             .registerTypeAdapter(Packet.class, packetTypeAdapter)
             .create();
 
-    private Serializer() {
-        //no instance
+
+    public String toJson(Object data) {
+        return gson.toJson(data);
     }
 
-    public static Gson getSerializer() {
-        return gson;
+    public <T> T fromJson(JsonElement data, Class<T> classOfT) {
+        return gson.fromJson(data, classOfT);
+    }
+
+    public <T> T fromJson(String data, Type type) {
+        return gson.fromJson(data, type);
+    }
+
+    public <T> T fromJson(JsonReader reader, Type type) {
+        return gson.fromJson(reader, type);
     }
 }

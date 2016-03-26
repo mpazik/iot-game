@@ -2,6 +2,7 @@ package dzida.server.app.rest;
 
 import co.cask.http.HttpResponder;
 import dzida.server.app.Container;
+import dzida.server.app.Serializer;
 import dzida.server.core.basic.Result;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
@@ -13,7 +14,8 @@ public class ContainerResource extends AbstractResource {
 
     private final Container container;
 
-    public ContainerResource(Container container) {
+    public ContainerResource(Serializer serializer, Container container) {
+        super(serializer);
         this.container = container;
     }
 

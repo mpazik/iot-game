@@ -17,18 +17,20 @@ public class InstanceFactory {
     private final SkillStore skillStore;
     private final WorldMapStore worldMapStore;
     private final WorldObjectStoreMapDbFactory worldObjectStoreFactory;
+    private final Serializer serializer;
 
-    public InstanceFactory(PlayerService playerService, Arbiter arbiter, SkillStore skillStore, WorldMapStore worldMapStore, WorldObjectStoreMapDbFactory worldObjectStoreFactory) {
+    public InstanceFactory(PlayerService playerService, Arbiter arbiter, SkillStore skillStore, WorldMapStore worldMapStore, WorldObjectStoreMapDbFactory worldObjectStoreFactory, Serializer serializer) {
         this.playerService = playerService;
         this.arbiter = arbiter;
         this.skillStore = skillStore;
         this.worldMapStore = worldMapStore;
         this.worldObjectStoreFactory = worldObjectStoreFactory;
+        this.serializer = serializer;
     }
 
     public Optional<Instance> createInstance(String instanceKey, String mapName, EventLoop eventLoop, Integer difficultyLevel) {
         WorldObjectStoreMapDb worldObjectStore= worldObjectStoreFactory.createForInstnace(instanceKey);
         return mapDescriptorStore.getDescriptor(mapName, difficultyLevel)
-                .map(mapDescriptor -> new Instance(instanceKey, mapDescriptor, eventLoop, playerService, arbiter, skillStore, worldMapStore, worldObjectStore));
+                .map(mapDescriptor -> new Instance(instanceKey, mapDescriptor, eventLoop, playerService, arbiter, skillStore, worldMapStore, worldObjectStore, serializer));
     }
 }

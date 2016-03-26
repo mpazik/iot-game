@@ -4,7 +4,6 @@ import co.cask.http.AbstractHttpHandler;
 import co.cask.http.HttpResponder;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.gson.Gson;
 import dzida.server.app.Serializer;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
@@ -14,8 +13,12 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 public abstract class AbstractResource extends AbstractHttpHandler {
 
-    private final Gson serializer = Serializer.getSerializer();
+    private final Serializer serializer;
     protected ImmutableMultimap<String, String> headers = ImmutableMultimap.of("Access-Control-Allow-Origin", "*");
+
+    protected AbstractResource(Serializer serializer) {
+        this.serializer = serializer;
+    }
 
     protected void sendResult(HttpResponder responder, Result result) {
         result.consume(

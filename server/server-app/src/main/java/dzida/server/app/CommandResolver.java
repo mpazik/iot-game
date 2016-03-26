@@ -45,7 +45,7 @@ public class CommandResolver {
     private static final int TimeSync = 6;
     private static final int Backdoor = 8;
 
-    private final Gson serializer = Serializer.getSerializer();
+    private final Serializer serializer;
     private final PositionCommandHandler positionCommandHandler;
     private final TimeSynchroniser timeSynchroniser;
     private final SkillCommandHandler skillCommandHandler;
@@ -56,11 +56,13 @@ public class CommandResolver {
     private final ChatService chatService;
 
     public CommandResolver(
+            Serializer serializer,
             PositionCommandHandler positionCommandHandler,
             SkillCommandHandler skillCommandHandler,
             CharacterCommandHandler characterCommandHandler,
             TimeSynchroniser timeSynchroniser,
             Arbiter arbiter, PlayerService playerService, ChatService chatService) {
+        this.serializer = serializer;
         this.positionCommandHandler = positionCommandHandler;
         this.timeSynchroniser = timeSynchroniser;
         this.skillCommandHandler = skillCommandHandler;
@@ -70,7 +72,7 @@ public class CommandResolver {
         this.chatService = chatService;
 
         if (Configuration.isDevMode()) {
-            backdoorCommandResolver = new BackdoorCommandResolver(serializer);
+            backdoorCommandResolver = new BackdoorCommandResolver(this.serializer);
         } else {
             backdoorCommandResolver = BackdoorCommandResolver.NoOpResolver;
         }

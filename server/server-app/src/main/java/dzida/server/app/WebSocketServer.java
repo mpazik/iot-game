@@ -31,10 +31,10 @@ public final class WebSocketServer {
 
     public static void main(String[] args) throws IOException {
         Configuration.pirnt();
-
+        Serializer serializer = new Serializer();
         int startPort = Configuration.getFirstInstancePort();
-        PlayerStoreMapDb playerStore = new PlayerStoreMapDb();
-        Container container = new Container(startPort, Configuration.getContainerWsAddress(), playerStore);
+        PlayerStoreMapDb playerStore = new PlayerStoreMapDb(serializer);
+        Container container = new Container(startPort, Configuration.getContainerWsAddress(), playerStore, serializer);
 
         for (String instance : Configuration.getInitialInstances()) {
             container.startInstance(instance, instance, (port) -> {
@@ -45,7 +45,9 @@ public final class WebSocketServer {
         NettyHttpService service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())
                 .setPort(Configuration.getContainerRestPort())
-                .addHttpHandlers(ImmutableList.of(new ContainerResource(container), new LeaderboardResource(leaderboard, playerStore)))
+                .addHttpHandlers(ImmutableList.of(
+                        new ContainerResource(serializer, container),
+                        new LeaderboardResource(serializer, leaderboard, playerStore)))
                 .build();
 
         service.startAsync();

@@ -3,6 +3,7 @@ package dzida.server.app.rest;
 import co.cask.http.HttpResponder;
 import dzida.server.app.Leaderboard;
 import dzida.server.app.Leaderboard.PlayerScore;
+import dzida.server.app.Serializer;
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.player.PlayerStore;
@@ -19,7 +20,8 @@ public class LeaderboardResource extends AbstractResource {
     private final Leaderboard leaderboard;
     private final PlayerStore playerStore;
 
-    public LeaderboardResource(Leaderboard leaderboard, PlayerStore playerStore) {
+    public LeaderboardResource(Serializer serializer, Leaderboard leaderboard, PlayerStore playerStore) {
+        super(serializer);
         this.leaderboard = leaderboard;
         this.playerStore = playerStore;
     }

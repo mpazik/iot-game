@@ -41,15 +41,15 @@ public class Container {
     private final Map<ChannelId, Player.Id> players = new HashMap<>();
     private int nextPort;
 
-    Container(int startPort, URI address, PlayerStoreMapDb playerStore) {
+    Container(int startPort, URI address, PlayerStoreMapDb playerStore, Serializer serializer) {
         bossGroup = new NioEventLoopGroup();
         playerService = new PlayerService(playerStore);
-        StaticDataLoader staticDataLoader = new StaticDataLoader();
+        StaticDataLoader staticDataLoader = new StaticDataLoader(serializer);
 
         Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
         WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
 
-        instanceFactory = new InstanceFactory(playerService, new Arbiter(this), new SkillStoreInMemory(skills), worldMapStore, new WorldObjectStoreMapDbFactory());
+        instanceFactory = new InstanceFactory(playerService, new Arbiter(this), new SkillStoreInMemory(skills), worldMapStore, new WorldObjectStoreMapDbFactory(serializer), serializer);
         nextPort = startPort;
         this.address = address;
     }

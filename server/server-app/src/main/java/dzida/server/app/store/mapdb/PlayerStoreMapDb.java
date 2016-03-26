@@ -1,6 +1,5 @@
 package dzida.server.app.store.mapdb;
 
-import com.google.gson.Gson;
 import dzida.server.app.Serializer;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerStore;
@@ -16,11 +15,12 @@ import java.util.stream.Stream;
 
 public class PlayerStoreMapDb implements PlayerStore {
 
-    private final Gson serializer = Serializer.getSerializer();
+    private final Serializer serializer;
     private final ConcurrentNavigableMap<Long, String> players;
     private final ConcurrentNavigableMap<String, Long> playersByNick;
 
-    public PlayerStoreMapDb() {
+    public PlayerStoreMapDb(Serializer serializer) {
+        this.serializer = serializer;
         DB db = DBMaker.fileDB(new File("playersDB"))
                 .transactionDisable()
                 .closeOnJvmShutdown()

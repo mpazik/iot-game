@@ -1,6 +1,5 @@
 package dzida.server.app;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dzida.server.core.character.CharacterId;
@@ -23,9 +22,9 @@ public class BackdoorCommandResolver {
         }
     };
 
-    private final Gson serializer;
+    private final Serializer serializer;
 
-    public BackdoorCommandResolver(Gson serializer) {
+    public BackdoorCommandResolver(Serializer serializer) {
         this.serializer = serializer;
     }
 

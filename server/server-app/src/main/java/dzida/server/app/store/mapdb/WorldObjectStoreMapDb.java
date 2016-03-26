@@ -1,6 +1,5 @@
 package dzida.server.app.store.mapdb;
 
-import com.google.gson.Gson;
 import dzida.server.app.Serializer;
 import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
@@ -15,10 +14,11 @@ import java.util.stream.Collectors;
 
 public class WorldObjectStoreMapDb implements WorldObjectStore {
     long idGenerator = 0;
-    private final Gson serializer = Serializer.getSerializer();
+    private final Serializer serializer;
     private final ConcurrentNavigableMap<Long, String> worldObjects;
 
-    public WorldObjectStoreMapDb(ConcurrentNavigableMap<Long, String> table) {
+    public WorldObjectStoreMapDb(Serializer serializer, ConcurrentNavigableMap<Long, String> table) {
+        this.serializer = serializer;
         worldObjects = table;
         idGenerator = getLastIdFromDb();
     }

@@ -47,8 +47,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static dzida.server.app.Serializer.getSerializer;
-
 class Instance {
 
     private final CommandResolver commandResolver;
@@ -65,11 +63,13 @@ class Instance {
     private final GameLogic gameLogic;
     private final Arbiter arbiter;
     private final boolean isOnlyScenario;
+    private final Serializer serializer;
 
-    public Instance(String instanceKey, Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter, SkillStore skillStore, WorldMapStore worldMapStore, WorldObjectStore worldObjectStore) {
+    public Instance(String instanceKey, Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter, SkillStore skillStore, WorldMapStore worldMapStore, WorldObjectStore worldObjectStore, Serializer serializer) {
         this.playerService = playerService;
         this.arbiter = arbiter;
         this.instanceKey = instanceKey;
+        this.serializer = serializer;
         WorldMap worldMap = worldMapStore.getMap(scenario.getWorldMapKey());
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
         ChatService chatService = new ChatService(playerService);
@@ -95,7 +95,7 @@ class Instance {
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
 
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService, chatService);
+        commandResolver = new CommandResolver(this.serializer, positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService, chatService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
@@ -177,7 +177,7 @@ class Instance {
             if (messagesToSend.isEmpty()) {
                 continue;
             }
-            channel.writeAndFlush(new TextWebSocketFrame(getSerializer().toJson(messagesToSend)));
+            channel.writeAndFlush(new TextWebSocketFrame(serializer.toJson(messagesToSend)));
             messagesToSend.clear();
         }
     }

@@ -14,6 +14,11 @@ import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
 public class StaticDataLoader {
+    private final Serializer serializer;
+
+    public StaticDataLoader(Serializer serializer) {
+        this.serializer = serializer;
+    }
 
     public <T> T loadJsonFromServer(String path, Class<T> clazz) {
         return loadJsonFromServer(path, TypeToken.of(clazz));
@@ -28,7 +33,7 @@ public class StaticDataLoader {
             URLConnection urlConnection = url.openConnection();
             String contentEncoding = urlConnection.getContentEncoding();
             JsonReader jsonReader = new JsonReader(requestInputStream(url.openStream(), contentEncoding));
-            T data = Serializer.getSerializer().fromJson(jsonReader, typeToken.getType());
+            T data = serializer.fromJson(jsonReader, typeToken.getType());
 
             long loadTime = System.currentTimeMillis() - startTime;
             System.out.printf("File %s downloaded in %dms \n", path, loadTime);
