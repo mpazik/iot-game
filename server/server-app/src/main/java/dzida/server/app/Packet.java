@@ -1,19 +1,42 @@
 package dzida.server.app;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class Packet {
-    private final int type;
-    private final Object data;
+    private final List<LegacyWsMessage> legacyWsMessages;
 
-    public Packet(int type, Object data) {
-        this.type = type;
-        this.data = data;
+    private Packet(List<LegacyWsMessage> legacyWsMessages) {
+        this.legacyWsMessages = legacyWsMessages;
     }
 
-    public int getType() {
-        return type;
+    public List<LegacyWsMessage> getLegacyWsMessages() {
+        return legacyWsMessages;
     }
 
-    public Object getData() {
-        return data;
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private boolean empty = true;
+        private final List<LegacyWsMessage> legacyWsMessages = new ArrayList<>(10);
+
+        private Builder() {
+        }
+
+        public boolean isEmpty() {
+            return empty;
+        }
+
+        public Builder addLegacyWsMessage(LegacyWsMessage message) {
+            legacyWsMessages.add(message);
+            empty = false;
+            return this;
+        }
+
+        public Packet build() {
+            return new Packet(legacyWsMessages);
+        }
     }
 }

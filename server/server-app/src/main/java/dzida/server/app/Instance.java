@@ -1,6 +1,5 @@
 package dzida.server.app;
 
-import com.google.common.collect.Lists;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
@@ -56,7 +55,7 @@ class Instance {
     private final String instanceKey;
 
     private final Map<ChannelId, Player.Id> playerChannels = new HashMap<>();
-    private final Map<ChannelId, List<Object>> messagesToSend = new HashMap<>();
+    private final Map<ChannelId, Packet.Builder> packetBuilders = new HashMap<>();
     private final Map<Player.Id, CharacterId> characterIds = new HashMap<>();
 
     private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
@@ -124,7 +123,7 @@ class Instance {
         characterIds.put(playerId, characterId);
         ChannelId channelId = channel.id();
         playerChannels.put(channelId, playerId);
-        messagesToSend.put(channelId, Lists.newArrayList());
+        packetBuilders.put(channelId, Packet.builder());
         Player.Entity playerEntity = playerService.getPlayer(playerId);
         String nick = playerEntity.getData().getNick();
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
@@ -143,7 +142,7 @@ class Instance {
         CharacterId characterId = characterIds.get(playerId);
         characterIds.remove(playerId);
         playerChannels.remove(channelId);
-        messagesToSend.remove(channelId);
+        packetBuilders.remove(channelId);
         gameEventDispatcher.unregisterCharacter(characterId);
         if (characterService.isCharacterLive(characterId)){
             gameEventDispatcher.dispatchEvents(commandResolver.removeCharacter(characterId));
@@ -164,21 +163,21 @@ class Instance {
     }
 
     private Consumer<GameEvent> addDataToSend(Channel channel) {
-        return (data) -> addDataToSend(channel, new Packet(data.getId(), data));
+        return (data) -> addDataToSend(channel, new LegacyWsMessage(data.getId(), data));
     }
 
-    private void addDataToSend(Channel channel, Object data) {
-        messagesToSend.get(channel.id()).add(data);
+    private void addDataToSend(Channel channel, LegacyWsMessage data) {
+        packetBuilders.get(channel.id()).addLegacyWsMessage(data);
     }
 
     private void send() {
         for (Channel channel : channels) {
-            List<Object> messagesToSend = this.messagesToSend.get(channel.id());
-            if (messagesToSend.isEmpty()) {
+            Packet.Builder builder = this.packetBuilders.get(channel.id());
+            if (builder.isEmpty()) {
                 continue;
             }
-            channel.writeAndFlush(new TextWebSocketFrame(serializer.toJson(messagesToSend)));
-            messagesToSend.clear();
+            channel.writeAndFlush(new TextWebSocketFrame(serializer.toJson(builder.build())));
+            packetBuilders.put(channel.id(), Packet.builder());
         }
     }
 }

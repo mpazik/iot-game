@@ -14,9 +14,9 @@ public class SerializerTest {
     private Serializer serializer = new Serializer();
 
     @Test
-    public void packetIsSerializedToListOfIdAndObject() throws Exception {
-        Packet packet = new Packet(1, ImmutableMap.of("test", 5));
-        String json = serializer.toJson(packet);
+    public void legacyWsMessageIsSerializedToListOfIdAndObject() throws Exception {
+        LegacyWsMessage legacyWsMessage = new LegacyWsMessage(1, ImmutableMap.of("test", 5));
+        String json = serializer.toJson(legacyWsMessage);
         assertThat(json).isEqualTo("[1,{\"test\":5}]");
     }
 
@@ -35,14 +35,14 @@ public class SerializerTest {
     }
 
     @Test
-    public void EntityIdIsSerializedToNumber() {
+    public void entityIdIsSerializedToNumber() {
         Id<String> id = new Id<>(5);
         String json = serializer.toJson(id);
         assertThat(json).isEqualTo("5");
     }
 
     @Test
-    public void EntityIdIsDeserializedFromNumber() {
+    public void entityIdIsDeserializedFromNumber() {
         TypeToken<Id<String>> typeToken = new TypeToken<Id<String>>() {
         };
         Id<String> id = serializer.fromJson("6", typeToken.getType());
@@ -50,17 +50,30 @@ public class SerializerTest {
     }
 
     @Test
-    public void EntityKeyIsSerializedToString() {
+    public void entityKeyIsSerializedToString() {
         Key<String> key = new Key<>("something");
         String json = serializer.toJson(key);
         assertThat(json).isEqualTo("\"something\"");
     }
 
     @Test
-    public void EntityKeyIsDeserializedFromString() {
+    public void entityKeyIsDeserializedFromString() {
         TypeToken<Key<String>> typeToken = new TypeToken<Key<String>>() {
         };
         Key<String> key = serializer.fromJson("something", typeToken.getType());
         assertThat(key).isEqualTo(new Key<>("something"));
+    }
+
+    @Test
+    public void packetIsSerializedToJsonArray() {
+        LegacyWsMessage legacyWsMessage1 = new LegacyWsMessage(1, ImmutableMap.of("test", 5));
+        LegacyWsMessage legacyWsMessage2 = new LegacyWsMessage(2, ImmutableMap.of("value", 3));
+        Packet packet = Packet.builder()
+                .addLegacyWsMessage(legacyWsMessage1)
+                .addLegacyWsMessage(legacyWsMessage2)
+                .build();
+        String json = serializer.toJson(packet);
+        assertThat(json).isEqualTo("[[[1,{\"test\":5}],[2,{\"value\":3}]]]");
+
     }
 }

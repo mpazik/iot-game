@@ -67,13 +67,28 @@ public final class Serializer {
         }
     };
 
-    private final TypeAdapter<Packet> packetTypeAdapter = new TypeAdapter<Packet>() {
+    private final TypeAdapter<LegacyWsMessage> legacyWsMessageTypeAdapter = new TypeAdapter<LegacyWsMessage>() {
+
+        @Override
+        public void write(JsonWriter out, LegacyWsMessage legacyWsMessage) throws IOException {
+            out.beginArray()
+                    .value(legacyWsMessage.getType())
+                    .jsonValue(gsonForGameEvent.toJson(legacyWsMessage.getData()))
+                    .endArray();
+        }
+
+        @Override
+        public LegacyWsMessage read(JsonReader in) throws IOException {
+            throw new UnsupportedOperationException();
+        }
+    };
+
+    private final TypeAdapter<Packet> packetAdapter = new TypeAdapter<Packet>() {
 
         @Override
         public void write(JsonWriter out, Packet packet) throws IOException {
             out.beginArray()
-                    .value(packet.getType())
-                    .jsonValue(gsonForPacket.toJson(packet.getData()))
+                    .jsonValue(gsonForLegacyWsMessages.toJson(packet.getLegacyWsMessages()))
                     .endArray();
         }
 
@@ -83,11 +98,19 @@ public final class Serializer {
         }
     };
 
-    private final Gson gsonForPacket = new GsonBuilder()
+    private final Gson gsonForGameEvent = new GsonBuilder()
             .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
             .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
+            .create();
+
+    private final Gson gsonForLegacyWsMessages = new GsonBuilder()
+            .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
+            .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
+            .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
+            .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
+            .registerTypeAdapter(LegacyWsMessage.class, legacyWsMessageTypeAdapter)
             .create();
 
     private final Gson gson = new GsonBuilder()
@@ -95,8 +118,8 @@ public final class Serializer {
             .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
-
-            .registerTypeAdapter(Packet.class, packetTypeAdapter)
+            .registerTypeAdapter(LegacyWsMessage.class, legacyWsMessageTypeAdapter)
+            .registerTypeAdapter(Packet.class, packetAdapter)
             .create();
 
 

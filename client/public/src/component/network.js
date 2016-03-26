@@ -35,12 +35,13 @@ define(function (require, exports, module) {
         var socket = new WebSocket(url);
         this.updateState(State.CONNECTING);
         socket.onmessage = function (evt) {
-            const messages = parseJson(evt.data);
-            if (!messages) {
+            const packet = parseJson(evt.data);
+            const legacyWsMessages = packet[0];
+            if (!legacyWsMessages) {
                 console.error("Received wrong message from sever: " + evt.data);
             } else {
-                messages.forEach(function (message) {
-                    return Dispatcher.messageStream.publish(message[0], message[1]);
+                legacyWsMessages.forEach(function (legacyWsMessage) {
+                    return Dispatcher.messageStream.publish(legacyWsMessage[0], legacyWsMessage[1]);
                 });
             }
         };
