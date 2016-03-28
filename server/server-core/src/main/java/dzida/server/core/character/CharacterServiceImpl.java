@@ -1,6 +1,7 @@
 package dzida.server.core.character;
 
 import com.google.common.collect.FluentIterable;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;

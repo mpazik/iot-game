@@ -25,19 +25,17 @@ public class SkillService {
     public static final String Key = "skill";
 
     private final Map<CharacterId, SkillData> state = new HashMap<>();
-    private final SkillStore skillsStore;
 
     private final TimeService timeService;
 
 
-    private SkillService(SkillStore skillsStore, TimeService timeService) {
-        this.skillsStore = skillsStore;
+    private SkillService(TimeService timeService) {
         this.timeService = timeService;
     }
 
 
-    public static SkillService create(SkillStore skillsStore, TimeService timeService) {
-        return new SkillService(skillsStore, timeService);
+    public static SkillService create(TimeService timeService) {
+        return new SkillService(timeService);
     }
 
     public List<SkillCharacterState> getState() {
@@ -50,10 +48,6 @@ public class SkillService {
 
     public boolean isOnCooldown(CharacterId casterId, long time) {
         return time < state.get(casterId).getCooldownTill();
-    }
-
-    public Skill getSkill(Id<Skill> skillId) {
-        return skillsStore.getSkill(skillId);
     }
 
     public int getHealth(CharacterId characterId) {
@@ -78,7 +72,7 @@ public class SkillService {
     }
 
     private void setCharacterCooldown(CharacterId casterId, Id<Skill> skillId) {
-        int skillCooldown = getSkill(skillId).getCooldown();
+        int skillCooldown = Skills.get(skillId).getCooldown();
         state.get(casterId).setCooldownTill(timeService.getCurrentMillis() + skillCooldown);
     }
 

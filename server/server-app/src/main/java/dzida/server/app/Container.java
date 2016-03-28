@@ -1,19 +1,24 @@
 package dzida.server.app;
 
+import com.google.common.collect.ImmutableList;
 import dzida.server.app.store.http.WorldMapStoreHttp;
 import dzida.server.app.store.http.loader.SkillLoader;
 import dzida.server.app.store.http.loader.StaticDataLoader;
 import dzida.server.app.store.http.loader.WorldMapLoader;
 import dzida.server.app.store.mapdb.PlayerStoreMapDb;
 import dzida.server.app.store.mapdb.WorldObjectStoreMapDbFactory;
-import dzida.server.app.store.memory.SkillStoreInMemory;
+import dzida.server.core.abilities.AbilitiesBuilder;
+import dzida.server.core.abilities.AbilitiesDescriptor;
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.entity.Entity;
-import dzida.server.core.basic.entity.Id;
+import dzida.server.core.character.CharacterService;
+import dzida.server.core.entity.*;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
-import dzida.server.core.skill.Skill;
+import dzida.server.core.skill.SkillService;
+import dzida.server.core.skill.Skills;
+import dzida.server.core.time.TimeService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -43,13 +48,30 @@ public class Container {
 
     Container(int startPort, URI address, PlayerStoreMapDb playerStore, Serializer serializer) {
         bossGroup = new NioEventLoopGroup();
-        playerService = new PlayerService(playerStore);
+
         StaticDataLoader staticDataLoader = new StaticDataLoader(serializer);
 
-        Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
+        Skills.skills = new SkillLoader(staticDataLoader).loadSkills();
+        StateBuilderTypeRegistry stateBuilderTypeRegistry = StateBuilderTypeRegistry.builder()
+                .declareStateBuilder(EntityTypes.abilities, AbilitiesBuilder.class)
+                .build();
+
+        ChangesStore changesStore = new InMemoryChangeStore();
+        GeneralStateStore generalStateStore = new ReconstructingEntityStore(stateBuilderTypeRegistry, changesStore);
         WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
 
-        instanceFactory = new InstanceFactory(playerService, new Arbiter(this), new SkillStoreInMemory(skills), worldMapStore, new WorldObjectStoreMapDbFactory(serializer), serializer);
+        playerService = new PlayerService(playerStore);
+        CharacterService characterService = CharacterService.create();
+        TimeService timeService = new TimeServiceImpl();
+        SkillService skillService = SkillService.create(timeService);
+
+        ImmutableList<EntityDescriptor> entityDescriptors = ImmutableList.<EntityDescriptor>builder()
+                .add(new AbilitiesDescriptor(EntityTypes.abilities, generalStateStore, characterService, skillService, timeService))
+                .build();
+
+        Arbiter arbiter = new Arbiter(this);
+        WorldObjectStoreMapDbFactory worldObjectStoreMapDbFactory = new WorldObjectStoreMapDbFactory(serializer);
+        instanceFactory = new InstanceFactory(playerService, arbiter, worldMapStore, worldObjectStoreMapDbFactory, serializer, timeService, characterService, skillService, entityDescriptors, changesStore);
         nextPort = startPort;
         this.address = address;
     }

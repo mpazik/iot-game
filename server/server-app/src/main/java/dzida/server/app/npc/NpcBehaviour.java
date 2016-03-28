@@ -98,7 +98,7 @@ public class NpcBehaviour {
 
     private boolean isInAttackRange(NpcCharacter npc, CharacterId target) {
         Id<Skill> skillId = getBotAttackSkillId(npc.getBotType());
-        Skill skill = skillService.getSkill(skillId);
+        Skill skill = Skills.get(skillId);
         return positionService.areCharactersInDistance(npc.getId(), target, skill.getRange(), timeService.getCurrentMillis());
     }
 

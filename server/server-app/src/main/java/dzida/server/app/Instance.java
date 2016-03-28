@@ -1,16 +1,20 @@
 package dzida.server.app;
 
+import com.google.common.collect.ImmutableList;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.core.Scheduler;
+import dzida.server.core.abilities.Abilities;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
+import dzida.server.core.character.command.SpawnCharacterCommand;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.chat.ChatService;
+import dzida.server.core.entity.*;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
@@ -22,7 +26,6 @@ import dzida.server.core.scenario.SurvivalScenarioFactory;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
-import dzida.server.core.skill.SkillStore;
 import dzida.server.core.time.TimeService;
 import dzida.server.core.world.map.WorldMap;
 import dzida.server.core.world.map.WorldMapService;
@@ -45,11 +48,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class Instance {
 
     private final CommandResolver commandResolver;
     private final GameEventDispatcher gameEventDispatcher;
+    private final CommandHandler commandHandler;
     private final PlayerService playerService;
     private final CharacterService characterService;
     private final String instanceKey;
@@ -63,22 +69,37 @@ class Instance {
     private final Arbiter arbiter;
     private final boolean isOnlyScenario;
     private final Serializer serializer;
+    private final ChangesStore changesStore;
 
-    public Instance(String instanceKey, Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter, SkillStore skillStore, WorldMapStore worldMapStore, WorldObjectStore worldObjectStore, Serializer serializer) {
+    public Instance(
+            String instanceKey,
+            Scenario scenario,
+            EventLoop eventLoop,
+            Serializer serializer,
+            WorldMapStore worldMapStore,
+            WorldObjectStore worldObjectStore,
+            Arbiter arbiter,
+            PlayerService playerService,
+            TimeService timeService,
+            CharacterService characterService,
+            SkillService skillService,
+            ImmutableList<EntityDescriptor> entityDescriptors, ChangesStore changesStore) {
         this.playerService = playerService;
         this.arbiter = arbiter;
         this.instanceKey = instanceKey;
         this.serializer = serializer;
+        this.characterService = characterService;
+        this.changesStore = changesStore;
+
         WorldMap worldMap = worldMapStore.getMap(scenario.getWorldMapKey());
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
         ChatService chatService = new ChatService(playerService);
         WorldObjectService worldObjectService = WorldObjectService.create(worldObjectStore);
 
-        TimeService timeService = new TimeServiceImpl();
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(timeService);
-        characterService = CharacterService.create();
+
         WorldMapService worldMapService = WorldMapService.create(worldMapStore, scenario.getWorldMapKey());
-        SkillService skillService = SkillService.create(skillStore, timeService);
+
         PositionService positionService = PositionService.create(positionStore, timeService);
 
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
@@ -99,7 +120,22 @@ class Instance {
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
 
-        this.gameLogic =  new GameLogic(scheduler, gameEventDispatcher, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver, characterCommandHandler);
+        gameLogic = new GameLogic(scheduler, gameEventDispatcher, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver, characterCommandHandler);
+
+        Consumer<EntityChangesWithType<?>> changesToSend = changes ->
+                packetBuilders.values().stream().forEach(builder -> builder.addChanges(changes));
+
+        Consumer<EntityChangesWithType<?>> changesStoreUpdater = changes -> {
+            //noinspection unchecked
+            changes.changes.stream()
+                    .map(change -> new ChangeDto(change, changes.entityId, changes.entityType))
+                    .forEach(changesStore::save);
+        };
+
+        commandHandler = new CommandHandler(entityDescriptors, ImmutableList.of(
+                changesStoreUpdater,
+                changesToSend
+        ));
     }
 
     public void start() {
@@ -123,7 +159,10 @@ class Instance {
         characterIds.put(playerId, characterId);
         ChannelId channelId = channel.id();
         playerChannels.put(channelId, playerId);
-        packetBuilders.put(channelId, Packet.builder());
+
+        Packet.Builder packetBuilder = Packet.builder();
+        packetBuilders.put(channelId, packetBuilder);
+
         Player.Entity playerEntity = playerService.getPlayer(playerId);
         String nick = playerEntity.getData().getNick();
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
@@ -131,6 +170,10 @@ class Instance {
         gameEventDispatcher.dispatchEvents(commandResolver.createCharacter(character));
         gameEventDispatcher.registerCharacter(character, addDataToSend(channel));
         gameEventDispatcher.sendInitialPacket(characterId, playerId, playerEntity);
+
+        commandHandler.handle(new SpawnCharacterCommand(characterId.id()));
+        Stream<EntityChangesWithType> instanceEntitiesChanges = getInstanceEntitiesChanges();
+        instanceEntitiesChanges.forEach(packetBuilder::addChanges);
         System.out.println(String.format("Instance: %s - character %s joined", instanceKey, characterId));
         send();
     }
@@ -144,7 +187,7 @@ class Instance {
         playerChannels.remove(channelId);
         packetBuilders.remove(channelId);
         gameEventDispatcher.unregisterCharacter(characterId);
-        if (characterService.isCharacterLive(characterId)){
+        if (characterService.isCharacterLive(characterId)) {
             gameEventDispatcher.dispatchEvents(commandResolver.removeCharacter(characterId));
         }
         System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
@@ -179,6 +222,14 @@ class Instance {
             channel.writeAndFlush(new TextWebSocketFrame(serializer.toJson(builder.build())));
             packetBuilders.put(channel.id(), Packet.builder());
         }
+    }
+
+    public Stream<EntityChangesWithType> getInstanceEntitiesChanges() {
+        Stream<EntityId<Abilities>> abilitiesIds = characterIds.values().stream().map(id -> new EntityId<>(id.getValue()));
+        return abilitiesIds.map(id -> {
+            List<Change<Abilities>> changes = changesStore.getChanges(EntityTypes.abilities, id).collect(Collectors.toList());
+            return new EntityChangesWithType<>(id, EntityTypes.abilities, changes);
+        });
     }
 }
 

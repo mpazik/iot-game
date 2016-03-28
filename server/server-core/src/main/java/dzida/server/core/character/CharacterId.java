@@ -1,14 +1,21 @@
 package dzida.server.core.character;
 
-public final class CharacterId {
-    private final int id;
+import dzida.server.core.basic.entity.Id;
+import dzida.server.core.character.model.Character;
 
-    public CharacterId(int id) {
-        this.id = id;
+public final class CharacterId {
+    private final int value;
+
+    public CharacterId(int value) {
+        this.value = value;
     }
 
     public int getValue() {
-        return id;
+        return value;
+    }
+
+    public Id<Character> id() {
+        return new Id<>(value);
     }
 
     @Override
@@ -18,19 +25,19 @@ public final class CharacterId {
 
         CharacterId that = (CharacterId) o;
 
-        return id == that.id;
+        return value == that.value;
 
     }
 
     @Override
     public int hashCode() {
-        return id;
+        return value;
     }
 
     @Override
     public String toString() {
         return "CharacterId{" +
-                "id=" + id +
+                "value=" + value +
                 '}';
     }
 }

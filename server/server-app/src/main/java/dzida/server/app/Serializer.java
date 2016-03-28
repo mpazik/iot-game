@@ -9,13 +9,16 @@ import com.google.gson.stream.JsonWriter;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.CharacterId;
+import dzida.server.core.entity.EntityChangesWithType;
+import dzida.server.core.entity.EntityId;
+import dzida.server.core.entity.EntityType;
 import dzida.server.core.player.Player;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 
 public final class Serializer {
-    private final TypeAdapter<CharacterId> characterIdTypeAdapter = new TypeAdapter<CharacterId>() {
+    private final TypeAdapter<CharacterId> characterIdAdapter = new TypeAdapter<CharacterId>() {
         @Override
         public void write(JsonWriter out, CharacterId characterId) throws IOException {
             out.value(characterId.getValue());
@@ -28,10 +31,10 @@ public final class Serializer {
         }
     };
 
-    private final TypeAdapter<Id<?>> idTypeAdapter = new TypeAdapter<Id<?>>() {
+    private final TypeAdapter<Id<?>> idAdapter = new TypeAdapter<Id<?>>() {
         @Override
-        public void write(JsonWriter out, Id<?> characterId) throws IOException {
-            out.value(characterId.getValue());
+        public void write(JsonWriter out, Id<?> id) throws IOException {
+            out.value(id.getValue());
         }
 
         @Override
@@ -41,7 +44,33 @@ public final class Serializer {
         }
     };
 
-    private final TypeAdapter<Key<?>> keyTypeAdapter = new TypeAdapter<Key<?>>() {
+    private final TypeAdapter<EntityId> entityIdAdapter = new TypeAdapter<EntityId>() {
+        @Override
+        public void write(JsonWriter out, EntityId entityId) throws IOException {
+            out.value(entityId.getValue());
+        }
+
+        @Override
+        public EntityId read(JsonReader in) throws IOException {
+            long id = in.nextLong();
+            return new EntityId(id);
+        }
+    };
+
+    private final TypeAdapter<EntityType> entityTypeAdapter = new TypeAdapter<EntityType>() {
+        @Override
+        public void write(JsonWriter out, EntityType entityType) throws IOException {
+            out.value(entityType.getValue());
+        }
+
+        @Override
+        public EntityType read(JsonReader in) throws IOException {
+            int id = in.nextInt();
+            return new EntityType(id);
+        }
+    };
+
+    private final TypeAdapter<Key<?>> keyAdapter = new TypeAdapter<Key<?>>() {
         @Override
         public void write(JsonWriter out, Key<?> key) throws IOException {
             out.value(key.getValue());
@@ -54,7 +83,7 @@ public final class Serializer {
         }
     };
 
-    private final TypeAdapter<Player.Id> playerIdTypeAdapter = new TypeAdapter<Player.Id>() {
+    private final TypeAdapter<Player.Id> playerIdAdapter = new TypeAdapter<Player.Id>() {
         @Override
         public void write(JsonWriter out, Player.Id characterId) throws IOException {
             out.value(characterId.getValue());
@@ -73,7 +102,7 @@ public final class Serializer {
         public void write(JsonWriter out, LegacyWsMessage legacyWsMessage) throws IOException {
             out.beginArray()
                     .value(legacyWsMessage.getType())
-                    .jsonValue(gsonForGameEvent.toJson(legacyWsMessage.getData()))
+                    .jsonValue(elementalGson.toJson(legacyWsMessage.getData()))
                     .endArray();
         }
 
@@ -83,12 +112,31 @@ public final class Serializer {
         }
     };
 
+    private final TypeAdapter<EntityChangesWithType> entityChangesWithTypeAdapter = new TypeAdapter<EntityChangesWithType>() {
+
+        @Override
+        public void write(JsonWriter out, EntityChangesWithType changes) throws IOException {
+            out.beginArray()
+                    .jsonValue(elementalGson.toJson(changes.entityId))
+                    .jsonValue(elementalGson.toJson(changes.entityType))
+                    .jsonValue(elementalGson.toJson(changes.changes))
+                    .endArray();
+        }
+
+        @Override
+        public EntityChangesWithType read(JsonReader in) throws IOException {
+            throw new UnsupportedOperationException();
+        }
+    };
+
+
     private final TypeAdapter<Packet> packetAdapter = new TypeAdapter<Packet>() {
 
         @Override
         public void write(JsonWriter out, Packet packet) throws IOException {
             out.beginArray()
-                    .jsonValue(gsonForLegacyWsMessages.toJson(packet.getLegacyWsMessages()))
+                    .jsonValue(packetGson.toJson(packet.getLegacyWsMessages()))
+                    .jsonValue(packetGson.toJson(packet.getChanges()))
                     .endArray();
         }
 
@@ -98,27 +146,25 @@ public final class Serializer {
         }
     };
 
-    private final Gson gsonForGameEvent = new GsonBuilder()
-            .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
-            .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
-            .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
-            .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
+    private final Gson elementalGson = new GsonBuilder()
+            .registerTypeAdapter(CharacterId.class, characterIdAdapter)
+            .registerTypeAdapter(Player.Id.class, playerIdAdapter)
+            .registerTypeHierarchyAdapter(Id.class, idAdapter)
+            .registerTypeHierarchyAdapter(Key.class, keyAdapter)
+            .registerTypeHierarchyAdapter(EntityId.class, entityIdAdapter)
+            .registerTypeHierarchyAdapter(EntityType.class, entityTypeAdapter)
             .create();
 
-    private final Gson gsonForLegacyWsMessages = new GsonBuilder()
-            .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
-            .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
-            .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
-            .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
+    private final Gson packetGson = new GsonBuilder()
             .registerTypeAdapter(LegacyWsMessage.class, legacyWsMessageTypeAdapter)
+            .registerTypeAdapter(EntityChangesWithType.class, entityChangesWithTypeAdapter)
             .create();
 
     private final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
-            .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
-            .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
-            .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
-            .registerTypeAdapter(LegacyWsMessage.class, legacyWsMessageTypeAdapter)
+            .registerTypeAdapter(CharacterId.class, characterIdAdapter)
+            .registerTypeAdapter(Player.Id.class, playerIdAdapter)
+            .registerTypeHierarchyAdapter(Id.class, idAdapter)
+            .registerTypeHierarchyAdapter(Key.class, keyAdapter)
             .registerTypeAdapter(Packet.class, packetAdapter)
             .create();
 

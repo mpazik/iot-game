@@ -12,4 +12,9 @@ public class TimeServiceImpl implements TimeService {
     public long getCurrentMillis() {
         return Instant.now().toEpochMilli() + serverTimeOffset;
     }
+
+    @Override
+    public Instant now() {
+        return Instant.now().plusMillis(serverTimeOffset);
+    }
 }

@@ -53,7 +53,7 @@ public class SkillCommandHandler {
             return emptyList();
         }
 
-        Skill skill = skillService.getSkill(skillId);
+        Skill skill = Skills.get(skillId);
         if (!isReadyForAbility(casterId))
             return singletonList(info("You are not ready yet to use ability"));
         if (skill.getType() == Skills.Types.ATTACK) {
@@ -73,7 +73,7 @@ public class SkillCommandHandler {
             return emptyList();
         }
 
-        Skill skill = skillService.getSkill(skillId);
+        Skill skill = Skills.get(skillId);
         if (!isReadyForAbility(casterId))
             return singletonList(info("You are not ready yet to use ability"));
         if (skill.getType() == Skills.Types.BUILDING) {
@@ -91,7 +91,7 @@ public class SkillCommandHandler {
             return emptyList();
         }
 
-        Skill skill = skillService.getSkill(skillId);
+        Skill skill = Skills.get(skillId);
         if (!isReadyForAbility(casterId))
             return singletonList(info("You are not ready yet to use ability"));
         if (skill.getType() == Skills.Types.GATHER) {

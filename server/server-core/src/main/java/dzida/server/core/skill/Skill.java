@@ -5,13 +5,13 @@ import dzida.server.core.basic.entity.Id;
 public class Skill {
     private final Id<Skill> id;
     private final int type;
-    private final double damage;
+    private final int damage;
     private final double range;
     private final int cooldown;
     private final int target;
     private final int worldObject;
 
-    public Skill(Id<Skill> id, int type, double damage, double range, int cooldown, int target, int worldObject) {
+    public Skill(Id<Skill> id, int type, int damage, double range, int cooldown, int target, int worldObject) {
         this.id = id;
         this.type = type;
         this.damage = damage;
@@ -29,7 +29,7 @@ public class Skill {
         return type;
     }
 
-    public double getDamage() {
+    public int getDamage() {
         return damage;
     }
 
