@@ -14,13 +14,6 @@ public class Player {
         String nick;
         int highestDifficultyLevel;
         int lastDifficultyLevel;
-
-        public Player.Data.DataBuilder toBuilder() {
-            return Player.Data.builder()
-                    .nick(nick)
-                    .highestDifficultyLevel(highestDifficultyLevel)
-                    .lastDifficultyLevel(lastDifficultyLevel);
-        }
     }
 
 
