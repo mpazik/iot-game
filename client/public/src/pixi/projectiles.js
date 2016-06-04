@@ -56,7 +56,9 @@ define(function (require, exports, module) {
 
     Dispatcher.messageStream.subscribe(EventIds.CharacterDied, (event) => {
         const animation = animations.find(animation => animation.target == event.characterId);
-        animation.target = null;
+        if (animation) {
+            animation.target = null;
+        }
     });
 
     module.exports = {
