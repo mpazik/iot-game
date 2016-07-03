@@ -3,7 +3,6 @@ package dzida.server.app.map.descriptor;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.map.WorldMap;
-import lombok.Value;
 
 import java.util.List;
 
@@ -37,8 +36,11 @@ public class Survival implements Scenario {
         return type;
     }
 
-    @Value
     public static class Spawn {
-        private final Point position;
+        public final Point position;
+
+        public Spawn(Point position) {
+            this.position = position;
+        }
     }
 }

@@ -2,11 +2,13 @@ package dzida.server.core.character.event;
 
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.event.GameEvent;
-import lombok.Value;
 
-@Value
 public class CharacterDied implements GameEvent {
-    CharacterId characterId;
+    public final CharacterId characterId;
+
+    public CharacterDied(CharacterId characterId) {
+        this.characterId = characterId;
+    }
 
     @Override
     public int getId() {

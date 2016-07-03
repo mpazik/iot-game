@@ -24,7 +24,6 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Future;
-import lombok.Value;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -100,16 +99,16 @@ public class Container {
 
     public void killInstance(String instanceKey) {
         InstanceData instance = instances.get(instanceKey);
-        instance.getWorkerGroup().shutdownGracefully();
-        System.out.println("Killed instance: " + instance.getInstanceKey());
+        instance.workerGroup.shutdownGracefully();
+        System.out.println("Killed instance: " + instance.instanceKey);
     }
 
     public Future<?> shutdownGracefully() {
         // it won't be closed because instances are blocking.
         instances.values().stream().forEach(instance -> {
             try {
-                instance.getInstanceChannel().closeFuture().sync();
-                instance.getWorkerGroup().shutdownGracefully();
+                instance.instanceChannel.closeFuture().sync();
+                instance.workerGroup.shutdownGracefully();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -121,11 +120,16 @@ public class Container {
         void call(URI address);
     }
 
-    @Value
     private static final class InstanceData {
         String instanceKey;
         Channel instanceChannel;
         EventLoopGroup workerGroup;
+
+        public InstanceData(String instanceKey, Channel instanceChannel, EventLoopGroup workerGroup) {
+            this.instanceKey = instanceKey;
+            this.instanceChannel = instanceChannel;
+            this.workerGroup = workerGroup;
+        }
     }
 
     private class ConnectionHandler implements WebSocketServerHandler.ConnectionHandler {

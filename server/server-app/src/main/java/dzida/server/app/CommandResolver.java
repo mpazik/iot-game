@@ -20,7 +20,6 @@ import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.world.object.WorldObject;
-import lombok.Value;
 
 import java.util.Collections;
 import java.util.List;
@@ -114,7 +113,7 @@ public class CommandResolver {
                 return skillCommandHandler.useSkillOnWorldMap(characterId, skillUseOnWorldMap.skillId, skillUseOnWorldMap.x, skillUseOnWorldMap.y);
             case UseSkillOnWorldObject:
                 SkillUseOnWorldObject skillUseOnWorldObject = serializer.fromJson(data, SkillUseOnWorldObject.class);
-                return skillCommandHandler.useSkillOnWorldObject(characterId, skillUseOnWorldObject.skillId, skillUseOnWorldObject.getTarget());
+                return skillCommandHandler.useSkillOnWorldObject(characterId, skillUseOnWorldObject.skillId, skillUseOnWorldObject.target);
             case PlayingPlayer:
                 return Collections.emptyList();
             case TimeSync:
@@ -126,7 +125,7 @@ public class CommandResolver {
                 String map = data.getAsJsonObject().get("map").getAsString();
                 int difficultyLevel = data.getAsJsonObject().get("difficultyLevel").getAsInt();
                 Player.Data playerData = playerService.getPlayer(playerId).getData();
-                Player.Data updatedPlayerData = playerData.toBuilder().lastDifficultyLevel(difficultyLevel).build();
+                Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), difficultyLevel);
                 playerService.updatePlayerData(playerId, updatedPlayerData);
                 String instanceKey = map + new Random().nextInt();
                 arbiter.startInstance(instanceKey, map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
@@ -144,28 +143,33 @@ public class CommandResolver {
         }
     }
 
-    @Value
     private static class SkillUseOnCharacter {
         Id<Skill> skillId;
         CharacterId target;
     }
 
-    @Value
     private static class SkillUseOnWorldMap {
         Id<Skill> skillId;
         double x;
         double y;
     }
 
-    @Value
     private static class SkillUseOnWorldObject {
-        Id<Skill> skillId;
-        Id<WorldObject> target;
+        final Id<Skill> skillId;
+        final Id<WorldObject> target;
+
+        SkillUseOnWorldObject(Id<Skill> skillId, Id<WorldObject> target) {
+            this.skillId = skillId;
+            this.target = target;
+        }
     }
 
-    @Value
     private static class JoinToInstance implements GameEvent {
-        String address;
+        final String address;
+
+        JoinToInstance(String address) {
+            this.address = address;
+        }
 
         @Override
         public int getId() {

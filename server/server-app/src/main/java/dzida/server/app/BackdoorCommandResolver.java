@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.event.GameEvent;
-import lombok.Value;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ public class BackdoorCommandResolver {
 
     public List<GameEvent> resolveCommand(CharacterId characterId, JsonElement payload, Consumer<GameEvent> send) {
         BackdoorCommand command = serializer.fromJson(payload, BackdoorCommand.class);
-        return dispatchMessage(characterId, command.getType(), command.getData(), send);
+        return dispatchMessage(characterId, command.type, command.data, send);
     }
 
     private List<GameEvent> dispatchMessage(CharacterId characterId, int type, JsonElement data, Consumer<GameEvent> send) {
@@ -46,9 +45,13 @@ public class BackdoorCommandResolver {
         return emptyList();
     }
 
-    @Value
     public static final class BackdoorCommand {
         int type;
         JsonObject data;
+
+        public BackdoorCommand(int type, JsonObject data) {
+            this.type = type;
+            this.data = data;
+        }
     }
 }

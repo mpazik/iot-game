@@ -35,11 +35,7 @@ public class PlayerService {
         if (player.isPresent()) {
             return Outcome.<Player.Entity>error(new Error("player already exists"));
         }
-        Player.Data playerData = Player.Data.builder()
-                .nick(nick)
-                .highestDifficultyLevel(0)
-                .lastDifficultyLevel(1)
-                .build();
+        Player.Data playerData = new Player.Data(nick, 0, 1);
 
         Player.Entity playerEntity = playerStore.createPlayer(playerData);
         return Outcome.ok(playerEntity);

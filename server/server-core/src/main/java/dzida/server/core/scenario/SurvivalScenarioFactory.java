@@ -1,7 +1,5 @@
 package dzida.server.core.scenario;
 
-import lombok.Value;
-
 import java.time.Duration;
 
 public class SurvivalScenarioFactory {
@@ -20,12 +18,18 @@ public class SurvivalScenarioFactory {
         return difficultyLevel;
     }
 
-    @Value
     public final static class SurvivalScenario {
-        int difficultyLevel;
-        int numberOfNpcToKill;
-        int botLevel;
-        Duration botSpawnTime;
+        public final int difficultyLevel;
+        public final int numberOfNpcToKill;
+        public final int botLevel;
+        public final Duration botSpawnTime;
+
+        public SurvivalScenario(int difficultyLevel, int numberOfNpcToKill, int botLevel, Duration botSpawnTime) {
+            this.difficultyLevel = difficultyLevel;
+            this.numberOfNpcToKill = numberOfNpcToKill;
+            this.botLevel = botLevel;
+            this.botSpawnTime = botSpawnTime;
+        }
     }
 }
 
