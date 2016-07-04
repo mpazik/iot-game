@@ -13,7 +13,6 @@
     <script src="src/global/key-codes.js"></script>
     <script src="src/global/request.js"></script>
     <link rel="import" href="components/extra-imports.html">
-    <link rel="import" href="components/game.html">
     <link rel="import" href="components/game-ui.html">
     <style>
         body {
@@ -40,17 +39,18 @@
                 return;
             }
 
-            const game = document.createElement("dzida-game");
-            game.setAttribute("url", Configuration.serverAddress);
-            game.addEventListener('element-attached', function () {
-                const ui = document.createElement("game-ui");
-                ui.addEventListener('element-attached', function () {
-                    ui.init(game);
+            require(['components/game'], function () {
+                const game = document.createElement("dzida-game");
+                game.setAttribute("url", Configuration.serverAddress);
+                game.addEventListener('element-attached', function () {
+                    const ui = document.createElement("game-ui");
+                    ui.addEventListener('element-attached', function () {
+                        ui.init(game);
+                    });
+                    document.body.appendChild(ui);
                 });
-                document.body.appendChild(ui);
+                document.body.appendChild(game);
             });
-            document.body.appendChild(game);
-
         });
     </script>
 </head>
