@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('join-battle-window', {
+    return createUiElement('join-battle-window', {
         type: 'window',
         properties: {
             activateKeyBind: KEY_CODES.fromLetter('J'),

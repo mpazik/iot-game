@@ -8,7 +8,7 @@ define(function (require, exports, module) {
         element.innerText = timeToRespawn;
     }
 
-    createUiElement('respawn-screen', {
+    return createUiElement('respawn-screen', {
         type: 'fragment',
         properties: {
             requirements: {

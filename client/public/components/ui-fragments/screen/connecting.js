@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('connecting-screen', {
+    return createUiElement('connecting-screen', {
         type: 'fragment',
         properties: {
             requirements: {

@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
     require('components/elements/action-socket');
 
-    createUiElement('action-bar', {
+    return createUiElement('action-bar', {
         type: 'fragment',
         properties: {
             requirements: {

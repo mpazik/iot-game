@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('loading-screen', {
+    return createUiElement('loading-screen', {
         type: 'fragment',
         properties: {
             requirements: {

@@ -1,23 +1,27 @@
 define(function (require, exports, module) {
-    const profilingDisplay = require('components/ui-fragments/profiling-display');
-    const respawnScreen = require('components/ui-fragments/respawnScreen');
-    const joinBattleButton = require('components/ui-fragments/join-battle-button');
-    const actionBar = require('components/ui-fragments/action-bar');
-    const cooldownBar = require('components/ui-fragments/cooldown-bar');
-    const gameMessage = require('components/ui-fragments/game-message');
-    const loadingScreen = require('components/ui-fragments/screen/loading-screen');
-    const disconnectedScreen = require('components/ui-fragments/screen/disconnected-screen');
-    const connectingScreen = require('components/ui-fragments/screen/connecting');
-    const gameChat = require('components/ui-fragments/game-chat');
-    const inventory = require('components/ui-fragments/inventory');
-    
-    const joinBattleWindow = require('components/windows/join-battle-window');
-    const survivalEndVictoryWindow = require('components/windows/survival-end-victory-window');
-    const survivalEndDefeatWindow = require('components/windows/survival-end-defeat-window');
-    const loginWindow = require('components/windows/login-window');
-    const settingsWindow = require('components/windows/settings-window');
-    const leaderboardWindow = require('components/windows/leaderboard-window');
     const extraComponents = require('components/extra');
+    const fragments = [
+        require('components/ui-fragments/profiling-display'),
+        require('components/ui-fragments/respawnScreen'),
+        require('components/ui-fragments/join-battle-button'),
+        require('components/ui-fragments/action-bar'),
+        require('components/ui-fragments/cooldown-bar'),
+        require('components/ui-fragments/game-message'),
+        require('components/ui-fragments/screen/loading-screen'),
+        require('components/ui-fragments/screen/disconnected-screen'),
+        require('components/ui-fragments/screen/connecting'),
+        require('components/ui-fragments/game-chat'),
+        require('components/ui-fragments/inventory')
+    ].concat(extraComponents.fragments);
+
+    const windows = [
+        require('components/windows/join-battle-window'),
+        require('components/windows/survival-end-victory-window'),
+        require('components/windows/survival-end-defeat-window'),
+        require('components/windows/login-window'),
+        require('components/windows/settings-window'),
+        require('components/windows/leaderboard-window')
+    ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {
         createdCallback: {
@@ -37,15 +41,11 @@ define(function (require, exports, module) {
 
                 const gameUi = initUi(this, game.uiState);
                 this.gameUi = gameUi;
-                Object.keys(UiElements).forEach(function (elementKey) {
-                    const element = UiElements[elementKey].prototype;
-                    if (element.type == 'fragment') {
-                        gameUi.registerUiFragment(elementKey, element.properties);
-                    } else if (element.type == 'window') {
-                        gameUi.registerWindow(elementKey, element.properties);
-                    } else {
-                        throw `Ui element ${elementKey} has undefined type`;
-                    }
+                fragments.forEach(function (tag) {
+                    gameUi.registerUiFragment(tag.name, tag.prototype.properties);
+                });
+                windows.forEach(function (tag) {
+                    gameUi.registerWindow(tag.name, tag.prototype.properties);
                 });
                 gameUi.updateUi();
             }

@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('game-message', {
+    return createUiElement('game-message', {
         type: 'fragment',
         properties: {
             requirements: {

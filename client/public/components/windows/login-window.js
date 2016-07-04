@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('login-window', {
+    return createUiElement('login-window', {
         type: 'window',
         properties: {
             autoDisplay: true,

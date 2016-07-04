@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('cooldown-bar', {
+    return createUiElement('cooldown-bar', {
         type: 'fragment',
         properties: {
             requirements: {

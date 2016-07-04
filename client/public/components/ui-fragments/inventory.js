@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
     require('components/elements/action-socket');
-    createUiElement('player-inventory', {
+    return createUiElement('player-inventory', {
         type: 'fragment',
         properties: {
             requirements: {

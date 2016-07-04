@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('debug-window', {
+    return createUiElement('debug-window', {
         type: 'window',
         properties: {
             activateKeyBind: KEY_CODES.fromLetter("D"),

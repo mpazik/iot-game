@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('profiling-display', {
+    return createUiElement('profiling-display', {
         type: 'fragment',
         properties: {
             requirements: {

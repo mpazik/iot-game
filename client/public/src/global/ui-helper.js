@@ -1,4 +1,4 @@
-UiElement = Object.create(HTMLElement.prototype, {
+const UiElement = Object.create(HTMLElement.prototype, {
     createdCallback: {
         value: function () {
             if (this.created) {
@@ -52,10 +52,8 @@ UiElement = Object.create(HTMLElement.prototype, {
     }
 });
 
-UiElements = {};
-
 function createUiElement(key, prototype) {
     const fragmentPrototype = Object.create(UiElement);
     Object.extend(fragmentPrototype, prototype);
-    UiElements[key] = document.registerElement(key, {prototype: fragmentPrototype});
+    return document.registerElement(key, {prototype: fragmentPrototype});
 }

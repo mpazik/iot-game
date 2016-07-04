@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('survival-end-defeat-window', {
+    return createUiElement('survival-end-defeat-window', {
         type: 'window',
         properties: {
             autoDisplay: true,

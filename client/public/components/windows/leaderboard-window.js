@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('leaderboard-window', {
+    return createUiElement('leaderboard-window', {
         type: 'window',
         properties: {
             requirements: {

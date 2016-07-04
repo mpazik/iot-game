@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('join-battle-button', {
+    return createUiElement('join-battle-button', {
         type: 'fragment',
         properties: {
             requirements: {

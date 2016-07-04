@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    createUiElement('settings-window', {
+    return createUiElement('settings-window', {
         type: 'window',
         properties: {
             keyBinds: [

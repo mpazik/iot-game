@@ -67,5 +67,5 @@ define(function (require, exports, module) {
             }
         }
     });
-    document.registerElement('action-socket', {prototype: actionSocketTag});
+    return document.registerElement('action-socket', {prototype: actionSocketTag});
 });
