@@ -1,7 +1,4 @@
-<template id="join-battle-button">
-    <button><span class="action-key-shortcut">J</span>oin Battle!</button>
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('join-battle-button', {
         type: 'fragment',
         properties: {
@@ -10,6 +7,9 @@
                 scenarioType: Predicates.is('open-world')
             }
         },
+        created: function () {
+            this.innerHTML = '<button><span class="action-key-shortcut">J</span>oin Battle!</button>';
+        },
         attached: function () {
             const element = this;
             this.getElementsByTagName("button")[0].onclick = function () {
@@ -17,4 +17,4 @@
             };
         }
     });
-</script>
+});

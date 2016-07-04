@@ -1,7 +1,4 @@
-<template id="settings-window">
-    <button class="logout"><span class="action-key-shortcut">L</span>ogout!</button>
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('settings-window', {
         type: 'window',
         properties: {
@@ -11,6 +8,9 @@
             requirements: {
                 applicationState: Predicates.is('running')
             }
+        },
+        created: function () {
+            this.innerHTML = `<button class="logout"><span class="action-key-shortcut">L</span>ogout!</button>`;
         },
         attached: function () {
             const game = this.game;
@@ -23,4 +23,4 @@
             this.getElementsByClassName("logout")[0].click();
         }
     });
-</script>
+});

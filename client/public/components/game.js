@@ -7,7 +7,7 @@ define(function (require, exports, module) {
     const Resources = require('src/store/resources');
     const Chat = require('src/component/chat');
 
-    const GameTag = Object.create(HTMLElement.prototype, {
+    const gameTag = Object.create(HTMLElement.prototype, {
         createdCallback: {
             value: function () {
                 this.innerHTML = `<div id="game-render"></div>`;
@@ -50,8 +50,6 @@ define(function (require, exports, module) {
         sendMessage: {value: Chat.sendMessage}
     });
 
-    document.registerElement('dzida-game', {
-        prototype: GameTag
-    });
+    document.registerElement('dzida-game', {prototype: gameTag});
 });
 

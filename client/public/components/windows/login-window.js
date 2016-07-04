@@ -1,14 +1,4 @@
-<template id="login-window">
-    <form>
-        <label>
-            Nick:
-            <input type="text" class="user-nick" minlength="3" maxlength="20" required>
-        </label>
-        <input type="submit" value="Login!">
-        <div class="error-message error"></div>
-    </form>
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('login-window', {
         type: 'window',
         properties: {
@@ -17,6 +7,18 @@
             requirements: {
                 applicationState: Predicates.is('need-authentication')
             }
+        },
+        created: function () {
+            this.innerHTML = `
+<form>
+    <label>
+        Nick:
+        <input type="text" class="user-nick" minlength="3" maxlength="20" required>
+    </label>
+    <input type="submit" value="Login!">
+    <div class="error-message error"></div>
+</form>
+`;
         },
         attached: function () {
             const game = this.game;
@@ -47,4 +49,4 @@
             }.bind(this);
         }
     });
-</script>
+});

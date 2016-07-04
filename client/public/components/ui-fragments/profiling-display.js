@@ -1,16 +1,18 @@
-<template id="profiling-display">
-    <div class="fps">FPS - <span></span></div>
-    <div class="ping">PING - <span></span></div>
-    <div class="x">x - <span></span></div>
-    <div class="y">y - <span></span></div>
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('profiling-display', {
         type: 'fragment',
         properties: {
             requirements: {
                 applicationState: Predicates.is('running')
             }
+        },
+        created: function () {
+            this.innerHTML =  `
+<div class="fps">FPS - <span></span></div>
+<div class="ping">PING - <span></span></div>
+<div class="x">x - <span></span></div>
+<div class="y">y - <span></span></div>
+`;
         },
         attached: function () {
             const stats = this.uiState.profilingStats.value;
@@ -23,6 +25,7 @@
         },
         _updateStats: function (stats) {
             const element = this;
+
             function setStat(property, value) {
                 element.querySelector(`.${property}>span`).innerHTML = value.toFixed(2);
             }
@@ -33,4 +36,4 @@
             setStat('y', stats.position.y);
         }
     });
-</script>
+});

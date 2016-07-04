@@ -1,22 +1,4 @@
-<template id="respawn-screen">
-    <style>
-        respawn-screen {
-            position: absolute;
-            width: 100%;
-            height: 90%;
-            background: rgba(0, 0, 0, 0.2);
-            text-align: center;
-            padding-top: 10%;
-            top: 0;
-        }
-    </style>
-    <div>
-        <h1>Your character died.</h1>
-        <h3>They will respawn in <span class="time-to-respawn"></span></h3>
-    </div>
-</template>
-<script>
-
+define(function (require, exports, module) {
     function countDown(element, timeToRespawn) {
         if (timeToRespawn > 0) {
             setTimeout(function () {
@@ -35,6 +17,24 @@
                 applicationState: Predicates.is('running')
             }
         },
+        created: function () {
+            this.innerHTML = `
+<style>
+    respawn-screen {
+        position: absolute;
+        width: 100%;
+        height: 90%;
+        background: rgba(0, 0, 0, 0.2);
+        text-align: center;
+        padding-top: 10%;
+        top: 0;
+    }
+</style>
+<div>
+    <h1>Your character died.</h1>
+    <h3>They will respawn in <span class="time-to-respawn"></span></h3>
+</div>`;
+        },
         attached: function () {
             const respawnTime = this.uiState.playerRespawnTimeState.value;
             this.timeToRespawnElement = this.getElementsByClassName('time-to-respawn')[0];
@@ -52,4 +52,4 @@
             countDown(this.timeToRespawnElement, respawnInSeconds);
         }
     });
-</script>
+});

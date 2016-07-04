@@ -1,8 +1,4 @@
-<template id="game-chat">
-    <ul class="chat-messages"></ul>
-    <input class="chat-input" type="text" title="message">
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('game-chat', {
         type: 'fragment',
         properties: {
@@ -10,7 +6,14 @@
                 applicationState: Predicates.is('running')
             }
         },
+        created: function () {
+            this.innerHTML = `
+<ul class="chat-messages"></ul>
+<input class="chat-input" type="text" title="message">
+`;
+        },
         attached: function () {
+
             this.messages = this.getElementsByClassName('chat-messages')[0];
             const input = this.getElementsByClassName('chat-input')[0];
             const chat = this;
@@ -22,6 +25,7 @@
                     const tag = element.tagName.toLowerCase();
                     return ['button', 'a', 'input'].includes(tag)
                 }
+
                 if (event.keyCode == KEY_CODES.ENTER) {
                     if (isElementClickable(document.activeElement)) {
                         return;
@@ -77,4 +81,4 @@
             this._fadeDelayed();
         }
     });
-</script>
+});

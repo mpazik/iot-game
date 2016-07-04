@@ -1,15 +1,19 @@
-<link rel="import" href="../elements/action-socket.html">
-<template id="action-bar">
-    <div class="skill-bar icon-socket-set"></div>
-    <div class="system-bar icon-socket-set"></div>
-</template>
-<script>
+define(function (require, exports, module) {
+    require('components/elements/action-socket');
+
     createUiElement('action-bar', {
         type: 'fragment',
         properties: {
             requirements: {
                 playerAlive: Predicates.is(true)
             }
+        },
+
+        created: function () {
+            this.innerHTML = `
+<div class="skill-bar icon-socket-set"></div>
+<div class="system-bar icon-socket-set"></div>
+`;
         },
 
         attached: function () {
@@ -74,4 +78,5 @@
             }
         }
     });
-</script>
+
+});

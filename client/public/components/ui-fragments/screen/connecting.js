@@ -1,7 +1,4 @@
-<template id="connecting-screen">
-    Connecting...
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('connecting-screen', {
         type: 'fragment',
         properties: {
@@ -10,7 +7,8 @@
             }
         },
         created: function () {
+            this.innerHTML = 'Connecting...';
             this.classList.add('game-state')
         }
     });
-</script>
+});

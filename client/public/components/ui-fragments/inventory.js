@@ -1,8 +1,5 @@
-<link rel="import" href="../elements/action-socket.html">
-<template id="player-inventory">
-    <div class="item-list"></div>
-</template>
-<script>
+define(function (require, exports, module) {
+    require('components/elements/action-socket');
     createUiElement('player-inventory', {
         type: 'fragment',
         properties: {
@@ -10,7 +7,9 @@
                 playerAlive: Predicates.is(true)
             }
         },
-
+        created: function () {
+            this.innerHTML = '<div class="item-list"></div>';
+        },
         attached: function () {
             this._updateActive(this.uiState.playerItems.value);
             this.classList.add('area');
@@ -23,10 +22,9 @@
             const itemList = this.getElementsByClassName('item-list')[0];
 
             const itemById = this.game.itemById;
-            const newHtml = Object.keys(quantities).map(function (itemId) {
+            itemList.innerHTML = Object.keys(quantities).map(function (itemId) {
                 return `<div><span>${itemById(itemId).name}</span> : <span>${quantities[itemId]}</span></div>`
             }).join('');
-            itemList.innerHTML = newHtml;
         }
     });
-</script>
+});

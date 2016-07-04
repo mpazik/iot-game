@@ -1,13 +1,4 @@
-<template id="survival-end-victory-window">
-    <h1 class="victory">Victory</h1>
-    <p>Difficulty level: <span class="level"></span></p>
-    <p>Your are: <span class="ranking">...</span></p>
-    <div class="window-actions">
-        <button class="large go-back">Go back</button>
-        <button class="large next-level">Next level</button>
-    </div>
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('survival-end-victory-window', {
         type: 'window',
         properties: {
@@ -18,6 +9,17 @@
                 scenarioType: Predicates.is('survival'),
                 scenarioResolution: Predicates.is('victory')
             }
+        },
+        created: function () {
+            this.innerHTML = `
+<h1 class="victory">Victory</h1>
+<p>Difficulty level: <span class="level"></span></p>
+<p>Your are: <span class="ranking">...</span></p>
+<div class="window-actions">
+    <button class="large go-back">Go back</button>
+    <button class="large next-level">Next level</button>
+</div>
+`;
         },
         attached: function () {
             this.classList.add('resolution-window');
@@ -40,8 +42,11 @@
                 nextLevelButton.focus();
             });
             nextLevelButton.onclick = function () {
-                this.game.publishUiAction('join-battle', {map: scenario.mapName, difficultyLevel: scenario.difficultyLevel + 1});
+                this.game.publishUiAction('join-battle', {
+                    map: scenario.mapName,
+                    difficultyLevel: scenario.difficultyLevel + 1
+                });
             }.bind(this);
         }
     });
-</script>
+});

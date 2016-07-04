@@ -1,18 +1,4 @@
-<template id="join-battle-window">
-    <form>
-        <label>
-            <select>
-                <option value="small-island">Small Island - Survival</option>
-            </select>
-        </label>
-        <label>
-            Difficulty Level:
-            <input type="number" class="difficulty-level" required="required">
-        </label>
-        <input type="submit" value="Join!">
-    </form>
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('join-battle-window', {
         type: 'window',
         properties: {
@@ -21,6 +7,22 @@
                 playerAlive: Predicates.is(true),
                 scenarioType: Predicates.is('open-world')
             }
+        },
+        created: function () {
+            this.innerHTML = `
+<form>
+    <label>
+        <select>
+            <option value="small-island">Small Island - Survival</option>
+        </select>
+    </label>
+    <label>
+        Difficulty Level:
+        <input type="number" class="difficulty-level" required="required">
+    </label>
+    <input type="submit" value="Join!">
+</form>
+`;
         },
         attached: function () {
             const playerData = this.uiState.playerData.value;
@@ -43,4 +45,4 @@
             }.bind(this)
         }
     });
-</script>
+});

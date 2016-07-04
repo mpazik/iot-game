@@ -1,12 +1,4 @@
-<template id="survival-end-defeat-window">
-    <h1 class="defeat">Defeat</h1>
-    <p>Difficulty level: <span class="level"></span></p>
-    <div class="window-actions">
-        <button class="large go-back">Go back</button>
-        <button class="large try-again">Try again</button>
-    </div>
-</template>
-<script>
+define(function (require, exports, module) {
     createUiElement('survival-end-defeat-window', {
         type: 'window',
         properties: {
@@ -17,6 +9,16 @@
                 scenarioType: Predicates.is('survival'),
                 scenarioResolution: Predicates.is('defeat')
             }
+        },
+        created: function () {
+            this.innerHTML = `
+<h1 class="defeat">Defeat</h1>
+<p>Difficulty level: <span class="level"></span></p>
+<div class="window-actions">
+    <button class="large go-back">Go back</button>
+    <button class="large try-again">Try again</button>
+</div>
+`;
         },
         attached: function () {
             this.classList.add('resolution-window');
@@ -34,8 +36,11 @@
                 tryAgainButton.focus();
             });
             tryAgainButton.onclick = function () {
-                this.game.publishUiAction('join-battle', {map: scenario.mapName, difficultyLevel: scenario.difficultyLevel});
+                this.game.publishUiAction('join-battle', {
+                    map: scenario.mapName,
+                    difficultyLevel: scenario.difficultyLevel
+                });
             }.bind(this);
         }
     });
-</script>
+});

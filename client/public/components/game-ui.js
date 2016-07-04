@@ -1,4 +1,77 @@
-define([], function () {
+define(function (require, exports, module) {
+    const profilingDisplay = require('components/ui-fragments/profiling-display');
+    const respawnScreen = require('components/ui-fragments/respawnScreen');
+    const joinBattleButton = require('components/ui-fragments/join-battle-button');
+    const actionBar = require('components/ui-fragments/action-bar');
+    const cooldownBar = require('components/ui-fragments/cooldown-bar');
+    const gameMessage = require('components/ui-fragments/game-message');
+    const loadingScreen = require('components/ui-fragments/screen/loading-screen');
+    const disconnectedScreen = require('components/ui-fragments/screen/disconnected-screen');
+    const connectingScreen = require('components/ui-fragments/screen/connecting');
+    const gameChat = require('components/ui-fragments/game-chat');
+    const inventory = require('components/ui-fragments/inventory');
+    
+    const joinBattleWindow = require('components/windows/join-battle-window');
+    const survivalEndVictoryWindow = require('components/windows/survival-end-victory-window');
+    const survivalEndDefeatWindow = require('components/windows/survival-end-defeat-window');
+    const loginWindow = require('components/windows/login-window');
+    const settingsWindow = require('components/windows/settings-window');
+    const leaderboardWindow = require('components/windows/leaderboard-window');
+    const extraComponents = require('components/extra');
+
+    var gameUiTag = Object.create(HTMLElement.prototype, {
+        createdCallback: {
+            value: function () {
+                this.innerHTML = `<div class="ui-fragments"></div><div class="window area"></div>`;
+            }
+        },
+        attachedCallback: {
+            value: function () {
+                // because element is created asynchronously due to use requireJs we need to emit event when it's has been propertly created.
+                this.dispatchEvent(new CustomEvent('element-attached'))
+            }
+        },
+        init: {
+            value: function (game) {
+                this.game = game;
+
+                const gameUi = initUi(this, game.uiState);
+                this.gameUi = gameUi;
+                Object.keys(UiElements).forEach(function (elementKey) {
+                    const element = UiElements[elementKey].prototype;
+                    if (element.type == 'fragment') {
+                        gameUi.registerUiFragment(elementKey, element.properties);
+                    } else if (element.type == 'window') {
+                        gameUi.registerWindow(elementKey, element.properties);
+                    } else {
+                        throw `Ui element ${elementKey} has undefined type`;
+                    }
+                });
+                gameUi.updateUi();
+            }
+        },
+        detachedCallback: {
+            value: function () {
+            }
+        },
+        showWindow: {
+            value: function (windowKey) {
+                this.gameUi.showWindow(windowKey)
+            }
+        },
+        hideWindow: {
+            value: function () {
+                this.gameUi.hideWindow()
+            }
+        },
+        toggleWindow: {
+            value: function (windowKey) {
+                this.gameUi.toggleWindow(windowKey)
+            }
+        }
+    });
+    document.registerElement('game-ui', {prototype: gameUiTag});
+
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution', 'endScenario', 'applicationState', 'cooldown', 'gameMessage'];
 
     function initUi(gameUiElement, uiState) {
@@ -155,7 +228,7 @@ define([], function () {
 
             // first check if window is displayed and hide it if it is.
             // displaying of new window won't close  the previous one in case it was not closable
-            if (activeWindow != null){
+            if (activeWindow != null) {
                 const uiWindow = windowRegister.get(activeWindow);
                 if (!shouldDisplay(uiWindow.requirements)) {
                     hideWindow();
@@ -226,8 +299,4 @@ define([], function () {
             updateUi
         }
     }
-
-    return {
-        create: initUi
-    };
 });

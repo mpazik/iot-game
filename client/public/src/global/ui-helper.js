@@ -1,9 +1,6 @@
 UiElement = Object.create(HTMLElement.prototype, {
     createdCallback: {
         value: function () {
-            var mainElement = document.importNode(this._template, true);
-            this.appendChild(mainElement);
-
             if (this.created) {
                 this.created();
             }
@@ -58,10 +55,7 @@ UiElement = Object.create(HTMLElement.prototype, {
 UiElements = {};
 
 function createUiElement(key, prototype) {
-    const ownerDocument = document.currentScript.ownerDocument;
     const fragmentPrototype = Object.create(UiElement);
-    const template = ownerDocument.getElementById(key);
-    fragmentPrototype._template = template.content;
     Object.extend(fragmentPrototype, prototype);
     UiElements[key] = document.registerElement(key, {prototype: fragmentPrototype});
 }

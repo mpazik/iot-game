@@ -5,6 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/ui.css">
+    <link rel="stylesheet" href="styles/icon.css">
     <link rel="shortcut icon" type="image/png" href="images/favicon-experiment.ico">
     <script src="src/global/functions.js"></script>
     <script src="src/global/polyfill.js"></script>
@@ -13,7 +15,6 @@
     <script src="src/global/key-codes.js"></script>
     <script src="src/global/request.js"></script>
     <link rel="import" href="components/extra-imports.html">
-    <link rel="import" href="components/game-ui.html">
     <style>
         body {
             margin: 0;
@@ -39,7 +40,7 @@
                 return;
             }
 
-            require(['components/game'], function () {
+            require(['components/game', 'components/game-ui'], function () {
                 const game = document.createElement("dzida-game");
                 game.setAttribute("url", Configuration.serverAddress);
                 game.addEventListener('element-attached', function () {
