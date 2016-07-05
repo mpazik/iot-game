@@ -8,19 +8,6 @@ const UiElement = Object.create(HTMLElement.prototype, {
     },
     attachedCallback: {
         value: function () {
-            function findUiElement(element) {
-                const parent = element.parentNode;
-                if (parent == null) {
-                    throw 'Ui element has to be defined in the \'game-ui\' element';
-                }
-                if (parent.tagName == 'GAME-UI') {
-                    return parent;
-                }
-                return findUiElement(parent);
-            }
-
-            this.ui = findUiElement(this);
-
             if (this.attached) {
                 this.attached();
             }
@@ -38,11 +25,6 @@ const UiElement = Object.create(HTMLElement.prototype, {
             if (this.attributeChanged) {
                 this.attributeChanged(attrName, oldVal, newVal);
             }
-        }
-    },
-    game: {
-        get: function () {
-            return this.ui.game;
         }
     }
 });

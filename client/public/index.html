@@ -43,14 +43,13 @@
             require(['components/game', 'components/game-ui'], function () {
                 const game = document.createElement("dzida-game");
                 game.setAttribute("url", Configuration.serverAddress);
-                game.addEventListener('element-attached', function () {
-                    const ui = document.createElement("game-ui");
-                    ui.addEventListener('element-attached', function () {
-                        ui.init(game);
-                    });
-                    document.body.appendChild(ui);
-                });
                 document.body.appendChild(game);
+
+                const ui = document.createElement("game-ui");
+                ui.addEventListener('element-attached', function () {
+                    ui.init();
+                });
+                document.body.appendChild(ui);
             });
         });
     </script>
