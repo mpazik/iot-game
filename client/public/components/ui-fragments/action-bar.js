@@ -35,12 +35,12 @@ define(function (require, exports, module) {
             // init system bar
             const systemBar = this.getElementsByClassName("system-bar")[0];
             var settingsButton = createSystemIcon('settings', 'icon-settings', 'S', function () {
-                actionBar.ui.toggleWindow('settings-window');
+                userEventStream.publish('toggle-window', 'settings-window');
             });
             systemBar.appendChild(settingsButton);
 
             var leaderboardButton = createSystemIcon('settings', 'icon-ranking', 'L', function () {
-                actionBar.ui.toggleWindow('leaderboard-window');
+                userEventStream.publish('toggle-window', 'leaderboard-window');
             });
             systemBar.appendChild(leaderboardButton);
 

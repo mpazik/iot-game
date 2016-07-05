@@ -1,5 +1,6 @@
-define(function (require, exports, module) {
+define(function (require) {
     const uiState = require('src/store/ui-state');
+    const userEventStream = require('src/component/dispatcher').userEventStream;
 
     const extraComponents = require('components/extra');
     const fragments = [
@@ -39,8 +40,7 @@ define(function (require, exports, module) {
         },
         init: {
             value: function () {
-                const gameUi = initUi(this, uiState);
-                this.gameUi = gameUi;
+                const gameUi = initUi(this);
                 fragments.forEach(function (tag) {
                     gameUi.registerUiFragment(tag.name, tag.prototype.properties);
                 });
@@ -49,32 +49,13 @@ define(function (require, exports, module) {
                 });
                 gameUi.updateUi();
             }
-        },
-        detachedCallback: {
-            value: function () {
-            }
-        },
-        showWindow: {
-            value: function (windowKey) {
-                this.gameUi.showWindow(windowKey)
-            }
-        },
-        hideWindow: {
-            value: function () {
-                this.gameUi.hideWindow()
-            }
-        },
-        toggleWindow: {
-            value: function (windowKey) {
-                this.gameUi.toggleWindow(windowKey)
-            }
         }
     });
     document.registerElement('game-ui', {prototype: gameUiTag});
 
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution', 'endScenario', 'applicationState', 'cooldown', 'gameMessage'];
 
-    function initUi(gameUiElement, uiState) {
+    function initUi(gameUiElement) {
         const windowRegister = new Map();
         const uiFragmentsRegister = new Map();
         const windowActivateKeyBinds = new Map();
@@ -95,6 +76,8 @@ define(function (require, exports, module) {
         supportableRequirements.forEach(requirements => {
             uiState[requirements].subscribe(updateUi);
         });
+
+        userEventStream.subscribe('toggle-window', toggleWindow);
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -293,9 +276,6 @@ define(function (require, exports, module) {
 
                 uiFragmentsRegister.set(key, params);
             },
-            showWindow,
-            hideWindow,
-            toggleWindow,
             updateUi
         }
     }

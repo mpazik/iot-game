@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const userEventStream = require('src/component/dispatcher').userEventStream;
+    
     return createUiElement('join-battle-button', {
         type: 'fragment',
         properties: {
@@ -11,9 +13,8 @@ define(function (require, exports, module) {
             this.innerHTML = '<button><span class="action-key-shortcut">J</span>oin Battle!</button>';
         },
         attached: function () {
-            const element = this;
-            this.getElementsByTagName("button")[0].onclick = function () {
-                element.ui.toggleWindow("join-battle-window");
+            this.getElementsByTagName('button')[0].onclick = function () {
+                userEventStream.publish('toggle-window', 'join-battle-window');
             };
         }
     });
