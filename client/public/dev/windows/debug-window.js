@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const backdoor = require('src/component/backdoor');
+    const backdoor = require('../../src/component/backdoor');
     
     return createUiElement('debug-window', {
         type: 'window',

@@ -1,29 +1,29 @@
 define(function (require) {
-    const uiState = require('src/store/ui-state');
-    const userEventStream = require('src/component/dispatcher').userEventStream;
+    const uiState = require('../store/ui-state');
+    const userEventStream = require('../component/dispatcher').userEventStream;
 
-    const extraComponents = require('components/extra');
+    const extraComponents = require('./extra');
     const fragments = [
-        require('components/ui-fragments/profiling-display'),
-        require('components/ui-fragments/respawnScreen'),
-        require('components/ui-fragments/join-battle-button'),
-        require('components/ui-fragments/action-bar'),
-        require('components/ui-fragments/cooldown-bar'),
-        require('components/ui-fragments/game-message'),
-        require('components/ui-fragments/screen/loading-screen'),
-        require('components/ui-fragments/screen/disconnected-screen'),
-        require('components/ui-fragments/screen/connecting'),
-        require('components/ui-fragments/game-chat'),
-        require('components/ui-fragments/inventory')
+        require('./ui-fragments/profiling-display'),
+        require('./ui-fragments/respawnScreen'),
+        require('./ui-fragments/join-battle-button'),
+        require('./ui-fragments/action-bar'),
+        require('./ui-fragments/cooldown-bar'),
+        require('./ui-fragments/game-message'),
+        require('./ui-fragments/screen/loading-screen'),
+        require('./ui-fragments/screen/disconnected-screen'),
+        require('./ui-fragments/screen/connecting'),
+        require('./ui-fragments/game-chat'),
+        require('./ui-fragments/inventory')
     ].concat(extraComponents.fragments);
 
     const windows = [
-        require('components/windows/join-battle-window'),
-        require('components/windows/survival-end-victory-window'),
-        require('components/windows/survival-end-defeat-window'),
-        require('components/windows/login-window'),
-        require('components/windows/settings-window'),
-        require('components/windows/leaderboard-window')
+        require('./windows/join-battle-window'),
+        require('./windows/survival-end-victory-window'),
+        require('./windows/survival-end-defeat-window'),
+        require('./windows/login-window'),
+        require('./windows/settings-window'),
+        require('./windows/leaderboard-window')
     ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {

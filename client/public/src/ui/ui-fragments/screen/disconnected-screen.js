@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const app = require('src/component/application');
+    const app = require('../../../component/application');
     
     return createUiElement('disconnected-screen', {
         type: 'fragment',

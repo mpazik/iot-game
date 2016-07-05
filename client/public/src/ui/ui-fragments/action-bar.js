@@ -1,8 +1,8 @@
 define(function (require, exports, module) {
-    require('components/elements/action-socket');
-    const uiState = require('src/store/ui-state');
-    const skillByKey = require('src/store/resources').skill;
-    const userEventStream = require('src/component/dispatcher').userEventStream;
+    require('../elements/action-socket');
+    const uiState = require('../../store/ui-state');
+    const skillByKey = require('../../store/resources').skill;
+    const userEventStream = require('../../component/dispatcher').userEventStream;
 
     return createUiElement('action-bar', {
         type: 'fragment',

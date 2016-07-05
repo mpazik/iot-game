@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const uiState = require('src/store/ui-state');
+    const uiState = require('../../store/ui-state');
     
     return createUiElement('game-message', {
         type: 'fragment',

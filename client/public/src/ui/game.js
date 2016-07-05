@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
-    const App = require('src/component/application');
-    const Dispatcher = require('src/component/dispatcher');
+    const App = require('../component/application');
+    const Dispatcher = require('../component/dispatcher');
 
     const gameTag = Object.create(HTMLElement.prototype, {
         createdCallback: {

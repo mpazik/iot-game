@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
-    const uiState = require('src/store/ui-state');
-    const timer = require('src/component/timer');
+    const uiState = require('../../store/ui-state');
+    const timer = require('../../component/timer');
     
     function countDown(element, timeToRespawn) {
         if (timeToRespawn > 0) {

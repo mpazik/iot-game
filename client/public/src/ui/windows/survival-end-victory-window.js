@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
-    const uiState = require('src/store/ui-state');
-    const userEventStream = require('src/component/dispatcher').userEventStream;
+    const uiState = require('../../store/ui-state');
+    const userEventStream = require('../../component/dispatcher').userEventStream;
     
     return createUiElement('survival-end-victory-window', {
         type: 'window',

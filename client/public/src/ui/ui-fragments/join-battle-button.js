@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const userEventStream = require('src/component/dispatcher').userEventStream;
+    const userEventStream = require('../../component/dispatcher').userEventStream;
     
     return createUiElement('join-battle-button', {
         type: 'fragment',

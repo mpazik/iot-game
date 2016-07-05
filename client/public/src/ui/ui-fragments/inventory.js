@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
-    require('components/elements/action-socket');
-    const uiState = require('src/store/ui-state');
-    const itemById = require('src/store/resources').item;
+    require('../elements/action-socket');
+    const uiState = require('../../store/ui-state');
+    const itemById = require('../../store/resources').item;
     
     return createUiElement('player-inventory', {
         type: 'fragment',

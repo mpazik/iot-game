@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
-    const uiState = require('src/store/ui-state');
-    const chat = require('src/component/chat');
+    const uiState = require('../../store/ui-state');
+    const chat = require('../../component/chat');
 
     return createUiElement('game-chat', {
         type: 'fragment',
