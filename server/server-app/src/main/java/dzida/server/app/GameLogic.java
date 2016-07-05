@@ -64,16 +64,16 @@ public class GameLogic {
 
     public void processEventBeforeChanges(GameEvent gameEvent) {
         whenTypeOf(gameEvent).is(CharacterDied.class).then(event -> {
-            Optional<PlayerCharacter> playerCharacterOpt = characterService.getPlayerCharacter(event.getCharacterId());
+            Optional<PlayerCharacter> playerCharacterOpt = characterService.getPlayerCharacter(event.characterId);
             if (playerCharacterOpt.isPresent()) {
                 Player.Id playerId = playerCharacterOpt.get().getPlayerId();
                 // player may died because logout, so we have to check if he is still logged it.
                 if (playerService.isPlayerPlaying(playerId)) {
-                    scenarioLogic.handlePlayerDead(event.getCharacterId(), playerId);
+                    scenarioLogic.handlePlayerDead(event.characterId, playerId);
                 }
             } else {
-                gameEventDispatcher.unregisterCharacter(event.getCharacterId());
-                scenarioLogic.handleNpcDead(event.getCharacterId());
+                gameEventDispatcher.unregisterCharacter(event.characterId);
+                scenarioLogic.handleNpcDead(event.characterId);
             }
         });
     }

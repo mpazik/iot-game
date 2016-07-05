@@ -2,7 +2,6 @@ package dzida.server.app;
 
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerStore;
-import lombok.Value;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,10 +43,15 @@ public class Leaderboard {
         return index + 1;
     }
 
-    @Value
     public static final class PlayerScore {
         String nick;
         int record;
         int position;
+
+        public PlayerScore(String nick, int record, int position) {
+            this.nick = nick;
+            this.record = record;
+            this.position = position;
+        }
     }
 }

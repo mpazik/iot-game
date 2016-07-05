@@ -4,14 +4,19 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.skill.Skill;
-import lombok.Value;
 
-@Value
 public class SkillUsedOnWorldMap implements GameEvent {
-    CharacterId casterId;
-    Id<Skill> skillId;
+    public final CharacterId casterId;
+    public final Id<Skill> skillId;
     double x;
     double y;
+
+    public SkillUsedOnWorldMap(CharacterId casterId, Id<Skill> skillId, double x, double y) {
+        this.casterId = casterId;
+        this.skillId = skillId;
+        this.x = x;
+        this.y = y;
+    }
 
     @Override
     public int getId() {

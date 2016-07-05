@@ -65,7 +65,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
             return;
         }
         survivalScenarioState.npcDied += 1;
-        if (survivalScenarioState.npcDied == survivalScenario.getNumberOfNpcToKill()) {
+        if (survivalScenarioState.npcDied == survivalScenario.numberOfNpcToKill) {
             victory();
         }
     }
@@ -75,8 +75,8 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
         players.stream().forEach(playerCharacter -> {
             Player.Id playerId = playerCharacter.getPlayerId();
             Player.Data player = playerService.getPlayer(playerId).getData();
-            if (survivalScenario.getDifficultyLevel() > player.getHighestDifficultyLevel()) {
-                Player.Data newPlayerData = player.toBuilder().highestDifficultyLevel(survivalScenario.getDifficultyLevel()).build();
+            if (survivalScenario.difficultyLevel > player.getHighestDifficultyLevel()) {
+                Player.Data newPlayerData = new Player.Data(player.getNick(), survival.getDifficultyLevel(), player.getLastDifficultyLevel());
                 playerService.updatePlayerData(playerId, newPlayerData);
             }
         });
@@ -99,8 +99,8 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
         Point randomNpcSpawnPoint = getRandomNpcSpawnPoint();
         npcScenarioLogic.addNpc(randomNpcSpawnPoint, getRandomNpcType());
 
-        if (survivalScenarioState.spawnedNpc < survivalScenario.getNumberOfNpcToKill()) {
-            scheduler.schedule(this::spawnNpc, survivalScenario.getBotSpawnTime());
+        if (survivalScenarioState.spawnedNpc < survivalScenario.numberOfNpcToKill) {
+            scheduler.schedule(this::spawnNpc, survivalScenario.botSpawnTime);
         }
     }
 
@@ -113,7 +113,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     private Point getRandomNpcSpawnPoint() {
         List<Survival.Spawn> spawns = survival.getSpawns();
         int index = new Random().nextInt(spawns.size());
-        return spawns.get(index).getPosition();
+        return spawns.get(index).position;
     }
 
     private final class SurvivalScenarioState {

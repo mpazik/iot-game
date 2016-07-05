@@ -89,7 +89,7 @@
             if (!source.hasOwnProperty(prop)) {
                 continue;
             }
-            if (typeof source[prop] === 'object' && typeof target[prop] === 'object') {
+            if (typeof source[prop] === 'object'&& target.hasOwnProperty(prop) && (typeof target[prop] === 'object')) {
                 Object.extend(target[prop], source[prop]);
             } else {
                 target[prop] = source[prop];

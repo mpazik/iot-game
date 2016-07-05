@@ -32,8 +32,8 @@ public class WorldObjectService {
 
     public void processEvent(GameEvent gameEvent) {
         whenTypeOf(gameEvent)
-                .is(WorldObjectCreated.class).then(event -> worldObjectStore.saveObject(event.getWorldObject()))
-                .is(WorldObjectRemoved.class).then(event -> worldObjectStore.removeObject(event.getWorldObjectId()));
+                .is(WorldObjectCreated.class).then(event -> worldObjectStore.saveObject(event.worldObject))
+                .is(WorldObjectRemoved.class).then(event -> worldObjectStore.removeObject(event.worldObjectId));
     }
 
     public Optional<GeneralEntity<WorldObject>> createWorldObject(int objectKind, int x, int y) {

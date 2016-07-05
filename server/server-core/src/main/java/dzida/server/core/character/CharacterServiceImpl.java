@@ -38,9 +38,9 @@ class CharacterServiceImpl implements CharacterService {
     @Override
     public void processEvent(GameEvent gameEvent) {
         whenTypeOf(gameEvent).is(CharacterSpawned.class).then(event -> {
-            Character character = event.getCharacter();
+            Character character = event.character;
             state.put(character.getId(), character);
-        }).is(CharacterDied.class).then(event -> state.remove(event.getCharacterId()));
+        }).is(CharacterDied.class).then(event -> state.remove(event.characterId));
     }
 
     @Override

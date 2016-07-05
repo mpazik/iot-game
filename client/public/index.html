@@ -5,6 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/ui.css">
+    <link rel="stylesheet" href="styles/icon.css">
     <link rel="shortcut icon" type="image/png" href="images/favicon-experiment.ico">
     <script src="src/global/functions.js"></script>
     <script src="src/global/polyfill.js"></script>
@@ -12,9 +14,34 @@
     <script src="src/global/predicates.js"></script>
     <script src="src/global/key-codes.js"></script>
     <script src="src/global/request.js"></script>
-    <link rel="import" href="components/extra-imports.html">
-    <link rel="import" href="components/game.html">
-    <link rel="import" href="components/game-ui.html">
+
+    <!-- build:include ../prod/prod-imports.html -->
+    <script src="dev/lib/pixi.js/bin/pixi.js"></script>
+    <script src="dev/lib/pixi-spine/bin/pixi-spine.js"></script>
+    <script src="dev/lib/requirejs/require.js"></script>
+    <script src="dev/configuration.js"></script>
+
+    <script>
+        require.config({
+            shim: {
+                'configuration': {
+                    exports: 'Configuration'
+                },
+                'pixi': {
+                    exports: 'PIXI'
+                },
+                'pixi-spine': {
+                    exports: 'PIXI.spine'
+                }
+            },
+            paths: {
+                "pixi": "src/pixi/value",
+                "configuration": "../dev/configuration"
+            }
+        });
+    </script>
+    <!-- /build -->
+
     <style>
         body {
             margin: 0;
@@ -28,9 +55,21 @@
             setTimeout(func, 0)
         }
 
+        function isArrowFunctionSupported() {
+            try {
+                eval('()=>{}');
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function isCustomElementsSupported() {
+            return document.registerElement && typeof document.registerElement === 'function';
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            var isChrome = !!window.chrome && !!window.chrome.webstore;
-            if (!isChrome) {
+            if (!(isArrowFunctionSupported() && isCustomElementsSupported())) {
                 document.body.innerHTML = '<div id="not-supported-browser" style="' +
                         'background: rgba(0, 0, 0, 0.7); border: #777 solid 1px; border-radius: 5px;' +
                         'width: 400px; margin: 120px auto 0 auto; padding: 20px;' +
@@ -40,17 +79,17 @@
                 return;
             }
 
-            const game = document.createElement("dzida-game");
-            game.setAttribute("url", Configuration.serverAddress);
-            game.addEventListener('element-attached', function () {
+            require(['src/ui/game', 'src/ui/game-ui'], function () {
+                const game = document.createElement("dzida-game");
+                game.setAttribute("url", Configuration.serverAddress);
+                document.body.appendChild(game);
+
                 const ui = document.createElement("game-ui");
                 ui.addEventListener('element-attached', function () {
-                    ui.init(game);
+                    ui.init();
                 });
                 document.body.appendChild(ui);
             });
-            document.body.appendChild(game);
-
         });
     </script>
 </head>

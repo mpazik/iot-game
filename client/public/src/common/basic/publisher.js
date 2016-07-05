@@ -261,4 +261,23 @@ define(function (require, exports, module) {
     };
 
     module.exports.OpenPublisher = OpenPublisher;
+
+    module.exports.map = (publisher, map) => {
+        return new StreamPublisher(push => {
+            publisher.subscribe(value => push(map(value)))
+        });
+    };
+
+    module.exports.merge = (...publishers) => {
+        return new StreamPublisher(push => {
+            const state = new Array(publishers.length).fill(null);
+            const updateValue = (i, value) => {
+                state[i] = value;
+                push(state);
+            };
+            for (let i=0; i < publishers.length; i++) {
+                publishers[i].subscribe(value => updateValue(i, value));
+            }
+        });   
+    }
 });

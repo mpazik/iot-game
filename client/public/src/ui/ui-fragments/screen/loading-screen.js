@@ -1,8 +1,5 @@
-<template id="loading-screen">
-    Loading...
-</template>
-<script>
-    createUiElement('loading-screen', {
+define(function (require, exports, module) {
+    return createUiElement('loading-screen', {
         type: 'fragment',
         properties: {
             requirements: {
@@ -10,7 +7,8 @@
             }
         },
         created: function () {
+            this.innerHTML = 'Loading...';
             this.classList.add('game-state')
         }
     });
-</script>
+});

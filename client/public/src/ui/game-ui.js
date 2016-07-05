@@ -1,7 +1,61 @@
-define([], function () {
+define(function (require) {
+    const uiState = require('../store/ui-state');
+    const userEventStream = require('../component/dispatcher').userEventStream;
+
+    const extraComponents = require('./extra');
+    const fragments = [
+        require('./ui-fragments/profiling-display'),
+        require('./ui-fragments/respawnScreen'),
+        require('./ui-fragments/join-battle-button'),
+        require('./ui-fragments/action-bar'),
+        require('./ui-fragments/cooldown-bar'),
+        require('./ui-fragments/game-message'),
+        require('./ui-fragments/screen/loading-screen'),
+        require('./ui-fragments/screen/disconnected-screen'),
+        require('./ui-fragments/screen/connecting'),
+        require('./ui-fragments/game-chat'),
+        require('./ui-fragments/inventory')
+    ].concat(extraComponents.fragments);
+
+    const windows = [
+        require('./windows/join-battle-window'),
+        require('./windows/survival-end-victory-window'),
+        require('./windows/survival-end-defeat-window'),
+        require('./windows/login-window'),
+        require('./windows/settings-window'),
+        require('./windows/leaderboard-window')
+    ].concat(extraComponents.windows);
+
+    var gameUiTag = Object.create(HTMLElement.prototype, {
+        createdCallback: {
+            value: function () {
+                this.innerHTML = `<div class="ui-fragments"></div><div class="window area"></div>`;
+            }
+        },
+        attachedCallback: {
+            value: function () {
+                // because element is created asynchronously due to use requireJs we need to emit event when it's has been propertly created.
+                this.dispatchEvent(new CustomEvent('element-attached'))
+            }
+        },
+        init: {
+            value: function () {
+                const gameUi = initUi(this);
+                fragments.forEach(function (tag) {
+                    gameUi.registerUiFragment(tag.name, tag.prototype.properties);
+                });
+                windows.forEach(function (tag) {
+                    gameUi.registerWindow(tag.name, tag.prototype.properties);
+                });
+                gameUi.updateUi();
+            }
+        }
+    });
+    document.registerElement('game-ui', {prototype: gameUiTag});
+
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution', 'endScenario', 'applicationState', 'cooldown', 'gameMessage'];
 
-    function initUi(gameUiElement, uiState) {
+    function initUi(gameUiElement) {
         const windowRegister = new Map();
         const uiFragmentsRegister = new Map();
         const windowActivateKeyBinds = new Map();
@@ -22,6 +76,8 @@ define([], function () {
         supportableRequirements.forEach(requirements => {
             uiState[requirements].subscribe(updateUi);
         });
+
+        userEventStream.subscribe('toggle-window', toggleWindow);
 
         function keyListener(event) {
             const binding = currentKeyBinds.get(event.keyCode);
@@ -155,7 +211,7 @@ define([], function () {
 
             // first check if window is displayed and hide it if it is.
             // displaying of new window won't close  the previous one in case it was not closable
-            if (activeWindow != null){
+            if (activeWindow != null) {
                 const uiWindow = windowRegister.get(activeWindow);
                 if (!shouldDisplay(uiWindow.requirements)) {
                     hideWindow();
@@ -220,14 +276,7 @@ define([], function () {
 
                 uiFragmentsRegister.set(key, params);
             },
-            showWindow,
-            hideWindow,
-            toggleWindow,
             updateUi
         }
     }
-
-    return {
-        create: initUi
-    };
 });

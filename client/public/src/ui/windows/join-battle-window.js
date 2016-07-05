@@ -1,19 +1,8 @@
-<template id="join-battle-window">
-    <form>
-        <label>
-            <select>
-                <option value="small-island">Small Island - Survival</option>
-            </select>
-        </label>
-        <label>
-            Difficulty Level:
-            <input type="number" class="difficulty-level" required="required">
-        </label>
-        <input type="submit" value="Join!">
-    </form>
-</template>
-<script>
-    createUiElement('join-battle-window', {
+define(function (require, exports, module) {
+    const uiState = require('../../store/ui-state');
+    const userEventStream = require('../../component/dispatcher').userEventStream;
+    
+    return createUiElement('join-battle-window', {
         type: 'window',
         properties: {
             activateKeyBind: KEY_CODES.fromLetter('J'),
@@ -22,8 +11,24 @@
                 scenarioType: Predicates.is('open-world')
             }
         },
+        created: function () {
+            this.innerHTML = `
+<form>
+    <label>
+        <select>
+            <option value="small-island">Small Island - Survival</option>
+        </select>
+    </label>
+    <label>
+        Difficulty Level:
+        <input type="number" class="difficulty-level" required="required">
+    </label>
+    <input type="submit" value="Join!">
+</form>
+`;
+        },
         attached: function () {
-            const playerData = this.uiState.playerData.value;
+            const playerData = uiState.playerData.value;
             const difficultyLevelInput = this.getElementsByClassName('difficulty-level')[0];
             const select = this.getElementsByTagName('select')[0];
             const form = this.getElementsByTagName('form')[0];
@@ -38,9 +43,9 @@
             form.onsubmit = function () {
                 const map = select.value;
                 const difficultyLevel = difficultyLevelInput.value;
-                this.game.publishUiAction('join-battle', {map, difficultyLevel});
+                userEventStream.publish('join-battle', {map, difficultyLevel});
                 return false;
             }.bind(this)
         }
     });
-</script>
+});

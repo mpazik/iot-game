@@ -13,7 +13,6 @@ import dzida.server.core.skill.SkillService;
 import dzida.server.core.time.TimeService;
 import dzida.server.core.world.map.WorldMapService;
 import dzida.server.core.world.object.WorldObjectService;
-import lombok.Value;
 
 import java.util.HashMap;
 import java.util.List;
@@ -100,14 +99,22 @@ public class GameEventDispatcher {
         return eventPublisher;
     }
 
-    @Value
     public static final class InitialMessage implements GameEvent {
         CharacterId characterId;
         Player.Id playerId;
         Map<String, Object> state;
         Scenario scenario;
         Player.Data playerData;
-        private final long serverTime;
+        long serverTime;
+
+        public InitialMessage(CharacterId characterId, dzida.server.core.player.Player.Id playerId, Map<String, Object> state, Scenario scenario, dzida.server.core.player.Player.Data playerData, long serverTime) {
+            this.characterId = characterId;
+            this.playerId = playerId;
+            this.state = state;
+            this.scenario = scenario;
+            this.playerData = playerData;
+            this.serverTime = serverTime;
+        }
 
         @Override
         public int getId() {

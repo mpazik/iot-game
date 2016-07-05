@@ -50,12 +50,12 @@ final class PositionServiceImpl implements PositionService {
 
     public void processEvent(GameEvent gameEvent) {
         whenTypeOf(gameEvent).is(CharacterSpawned.class).then(event -> {
-            CharacterId characterId = event.getCharacter().getId();
-            state.put(characterId, event.getMove());
+            CharacterId characterId = event.character.getId();
+            state.put(characterId, event.move);
         }).is(CharacterDied.class).then(
-                event -> state.remove(event.getCharacterId())
+                event -> state.remove(event.characterId)
         ).is(CharacterMoved.class).then(
-                event -> state.put(event.getCharacterId(), event.getMove())
+                event -> state.put(event.characterId, event.move)
         );
     }
 

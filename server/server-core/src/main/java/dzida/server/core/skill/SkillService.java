@@ -11,8 +11,6 @@ import dzida.server.core.skill.event.SkillUsedOnCharacter;
 import dzida.server.core.skill.event.SkillUsedOnWorldMap;
 import dzida.server.core.skill.event.SkillUsedOnWorldObject;
 import dzida.server.core.time.TimeService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +47,7 @@ public class SkillService {
     }
 
     public boolean isOnCooldown(CharacterId casterId, long time) {
-        return time < state.get(casterId).getCooldownTill();
+        return time < state.get(casterId).cooldownTill;
     }
 
     public Skill getSkill(Id<Skill> skillId) {
@@ -57,29 +55,29 @@ public class SkillService {
     }
 
     public int getHealth(CharacterId characterId) {
-        return state.get(characterId).getHealth();
+        return state.get(characterId).health;
     }
 
     public void processEvent(GameEvent gameEvent) {
         whenTypeOf(gameEvent)
                 .is(CharacterSpawned.class).then(event -> {
-            Character character = event.getCharacter();
-            state.put(character.getId(), event.getSkillData());
+            Character character = event.character;
+            state.put(character.getId(), event.skillData);
         })
-                .is(CharacterDied.class).then(event -> state.remove(event.getCharacterId()))
-                .is(SkillUsedOnCharacter.class).then(event -> setCharacterCooldown(event.getCasterId(), event.getSkillId()))
-                .is(SkillUsedOnWorldMap.class).then(event -> setCharacterCooldown(event.getCasterId(), event.getSkillId()))
-                .is(SkillUsedOnWorldObject.class).then(event -> setCharacterCooldown(event.getCasterId(), event.getSkillId()))
+                .is(CharacterDied.class).then(event -> state.remove(event.characterId))
+                .is(SkillUsedOnCharacter.class).then(event -> setCharacterCooldown(event.casterId, event.skillId))
+                .is(SkillUsedOnWorldMap.class).then(event -> setCharacterCooldown(event.casterId, event.skillId))
+                .is(SkillUsedOnWorldObject.class).then(event -> setCharacterCooldown(event.casterId, event.skillId))
                 .is(CharacterGotDamage.class).then(event -> {
-            SkillData skillData = state.get(event.getCharacterId());
-            int remainHp = skillData.getHealth() - (int) event.getDamage();
-            skillData.setHealth(remainHp);
+            SkillData skillData = state.get(event.characterId);
+            int remainHp = skillData.health - (int) event.damage;
+            skillData.health = remainHp;
         });
     }
 
     private void setCharacterCooldown(CharacterId casterId, Id<Skill> skillId) {
         int skillCooldown = getSkill(skillId).getCooldown();
-        state.get(casterId).setCooldownTill(timeService.getCurrentMillis() + skillCooldown);
+        state.get(casterId).cooldownTill = timeService.getCurrentMillis() + skillCooldown;
     }
 
     public SkillData getInitialSkillData(int characterType) {
@@ -92,18 +90,25 @@ public class SkillService {
         throw new IllegalStateException("If this is throw that means there is time to change implementation to use enums");
     }
 
-    @Data
-    @AllArgsConstructor
     public final static class SkillData {
         int health;
         int maxHealth;
         long cooldownTill;
+
+        public SkillData(int health, int maxHealth, long cooldownTill) {
+            this.health = health;
+            this.maxHealth = maxHealth;
+            this.cooldownTill = cooldownTill;
+        }
     }
 
-    @Data
-    @AllArgsConstructor
     public final static class SkillCharacterState {
         CharacterId characterId;
         SkillData skillData;
+
+        public SkillCharacterState(CharacterId characterId, SkillData skillData) {
+            this.characterId = characterId;
+            this.skillData = skillData;
+        }
     }
 }

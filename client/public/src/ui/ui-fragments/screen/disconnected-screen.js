@@ -1,9 +1,7 @@
-<template id="disconnected-screen">
-    <p>Disconnected from the server.</p>
-    <p><button class="large" autofocus>Reconnect</button></p>
-</template>
-<script>
-    createUiElement('disconnected-screen', {
+define(function (require, exports, module) {
+    const app = require('../../../component/application');
+    
+    return createUiElement('disconnected-screen', {
         type: 'fragment',
         properties: {
             requirements: {
@@ -11,17 +9,19 @@
             }
         },
         created: function () {
+            this.innerHTML = `
+<p>Disconnected from the server.</p>
+<p><button class="large" autofocus>Reconnect</button></p>`;
             this.classList.add('game-state')
         },
         attached: function () {
-            const game = this.game;
             const button = this.getElementsByTagName("button")[0];
             button.onclick = function () {
-                game.connect();
+                app.connect();
             };
             deffer(function () {
                 button.focus();
             });
         }
     });
-</script>
+});

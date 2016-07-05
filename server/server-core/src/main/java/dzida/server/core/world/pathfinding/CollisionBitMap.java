@@ -49,6 +49,6 @@ public class CollisionBitMap {
     }
 
     private static boolean isTileCollidable(int tile, Tileset tileset) {
-        return COLLISION_TERRAINS.contains(tileset.getTerrains().get(tile));
+        return COLLISION_TERRAINS.contains(tileset.terrains.get(tile));
     }
 }

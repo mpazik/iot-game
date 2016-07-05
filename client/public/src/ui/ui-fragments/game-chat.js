@@ -1,19 +1,25 @@
-<template id="game-chat">
-    <ul class="chat-messages"></ul>
-    <input class="chat-input" type="text" title="message">
-</template>
-<script>
-    createUiElement('game-chat', {
+define(function (require, exports, module) {
+    const uiState = require('../../store/ui-state');
+    const chat = require('../../component/chat');
+
+    return createUiElement('game-chat', {
         type: 'fragment',
         properties: {
             requirements: {
                 applicationState: Predicates.is('running')
             }
         },
+        created: function () {
+            this.innerHTML = `
+<ul class="chat-messages"></ul>
+<input class="chat-input" type="text" title="message">
+`;
+        },
         attached: function () {
+
             this.messages = this.getElementsByClassName('chat-messages')[0];
             const input = this.getElementsByClassName('chat-input')[0];
-            const chat = this;
+            const element = this;
             this.fadeTimeout = null;
             this.hideTimeout = null;
 
@@ -22,11 +28,12 @@
                     const tag = element.tagName.toLowerCase();
                     return ['button', 'a', 'input'].includes(tag)
                 }
+
                 if (event.keyCode == KEY_CODES.ENTER) {
                     if (isElementClickable(document.activeElement)) {
                         return;
                     }
-                    chat.style.display = 'block';
+                    element.style.display = 'block';
                     input.focus();
                 }
             });
@@ -37,7 +44,7 @@
                 }
                 if (event.keyCode == KEY_CODES.ENTER) {
                     if (input.value.length > 0) {
-                        chat.game.sendMessage(input.value);
+                        chat.sendMessage(input.value);
                     }
                     input.value = '';
                     input.blur();
@@ -48,10 +55,10 @@
             input.addEventListener("focus", this._showChat.bind(this));
             input.addEventListener("blur", this._fadeDelayed.bind(this));
 
-            this.uiState.playerMessage.subscribe(this._print.bind(this))
+            uiState.playerMessage.subscribe(this._print.bind(this))
         },
         detached: function () {
-            this.uiState.playerMessage.unsubscribe(this._print.bind(this))
+            uiState.playerMessage.unsubscribe(this._print.bind(this))
         },
         _print: function (data) {
             var line = document.createElement('li');
@@ -77,4 +84,4 @@
             this._fadeDelayed();
         }
     });
-</script>
+});
