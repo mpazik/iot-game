@@ -1,5 +1,7 @@
 define(function (require, exports, module) {
     require('components/elements/action-socket');
+    const uiState = require('src/store/ui-state');
+    
     return createUiElement('player-inventory', {
         type: 'fragment',
         properties: {
@@ -11,12 +13,12 @@ define(function (require, exports, module) {
             this.innerHTML = '<div class="item-list"></div>';
         },
         attached: function () {
-            this._updateActive(this.uiState.playerItems.value);
+            this._updateActive(uiState.playerItems.value);
             this.classList.add('area');
-            this.uiState.playerItems.subscribe(this._updateActive.bind(this));
+            uiState.playerItems.subscribe(this._updateActive.bind(this));
         },
         detached: function () {
-            this.uiState.playerItems.unsubscribe(this._updateActive.bind(this));
+            uiState.playerItems.unsubscribe(this._updateActive.bind(this));
         },
         _updateActive: function (quantities) {
             const itemList = this.getElementsByClassName('item-list')[0];

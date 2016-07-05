@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+    
     return createUiElement('survival-end-defeat-window', {
         type: 'window',
         properties: {
@@ -22,7 +24,7 @@ define(function (require, exports, module) {
         },
         attached: function () {
             this.classList.add('resolution-window');
-            const scenario = this.uiState.scenario.value;
+            const scenario = uiState.scenario.value;
             const level = this.getElementsByClassName('level')[0];
             level.innerText = scenario.difficultyLevel;
 

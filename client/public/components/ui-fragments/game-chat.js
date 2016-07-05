@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+
     return createUiElement('game-chat', {
         type: 'fragment',
         properties: {
@@ -52,10 +54,10 @@ define(function (require, exports, module) {
             input.addEventListener("focus", this._showChat.bind(this));
             input.addEventListener("blur", this._fadeDelayed.bind(this));
 
-            this.uiState.playerMessage.subscribe(this._print.bind(this))
+            uiState.playerMessage.subscribe(this._print.bind(this))
         },
         detached: function () {
-            this.uiState.playerMessage.unsubscribe(this._print.bind(this))
+            uiState.playerMessage.unsubscribe(this._print.bind(this))
         },
         _print: function (data) {
             var line = document.createElement('li');

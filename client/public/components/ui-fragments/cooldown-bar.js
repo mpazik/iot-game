@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+    
     return createUiElement('cooldown-bar', {
         type: 'fragment',
         properties: {
@@ -10,7 +12,7 @@ define(function (require, exports, module) {
             this.innerHTML = '<div class="progress-bar"></div>';
         },
         attached: function () {
-            const cooldown = this.uiState.cooldown.value.cooldown;
+            const cooldown = uiState.cooldown.value.cooldown;
             this.getElementsByClassName('progress-bar')[0].style.animationDuration = cooldown + 'ms';
         }
     });

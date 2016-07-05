@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+    
     function countDown(element, timeToRespawn) {
         if (timeToRespawn > 0) {
             setTimeout(function () {
@@ -36,15 +38,15 @@ define(function (require, exports, module) {
 </div>`;
         },
         attached: function () {
-            const respawnTime = this.uiState.playerRespawnTimeState.value;
+            const respawnTime = uiState.playerRespawnTimeState.value;
             this.timeToRespawnElement = this.getElementsByClassName('time-to-respawn')[0];
             if (respawnTime) {
                 this._updateRespawnTime(respawnTime);
             }
-            this.uiState.playerRespawnTimeState.subscribe(this._updateRespawnTime)
+            uiState.playerRespawnTimeState.subscribe(this._updateRespawnTime)
         },
         detached: function () {
-            this.uiState.playerRespawnTimeState.unsubscribe(this._updateRespawnTime)
+            uiState.playerRespawnTimeState.unsubscribe(this._updateRespawnTime)
         },
         _updateRespawnTime: function (respawnTime) {
             const respawnInMillis = respawnTime - this.game.timer.currentTimeOnServer();

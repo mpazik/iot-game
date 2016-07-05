@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+    
     return createUiElement('profiling-display', {
         type: 'fragment',
         properties: {
@@ -15,13 +17,13 @@ define(function (require, exports, module) {
 `;
         },
         attached: function () {
-            const stats = this.uiState.profilingStats.value;
+            const stats = uiState.profilingStats.value;
             this._updateStats(stats);
-            this.uiState.profilingStats.subscribe(this._updateStats.bind(this))
+            uiState.profilingStats.subscribe(this._updateStats.bind(this))
             this.classList.add('area');
         },
         detached: function () {
-            this.uiState.profilingStats.unsubscribe(this._updateStats.bind(this))
+            uiState.profilingStats.unsubscribe(this._updateStats.bind(this))
         },
         _updateStats: function (stats) {
             const element = this;

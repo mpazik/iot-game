@@ -2,7 +2,6 @@ define(function (require, exports, module) {
     const App = require('src/component/application');
     const Dispatcher = require('src/component/dispatcher');
     const Backdoor = require('src/component/backdoor');
-    const UiStateStore = require('src/store/ui-state');
     const Timer = require('src/component/timer');
     const Resources = require('src/store/resources');
     const Chat = require('src/component/chat');
@@ -41,7 +40,6 @@ define(function (require, exports, module) {
         logout: {value: App.logout},
         setUser: {value: App.setUser},
         connect: {value: App.connect},
-        uiState: {value: UiStateStore},
         publishUiAction: {value: Dispatcher.userEventStream.publish.bind(Dispatcher.userEventStream)},
         backdoor: {value: Backdoor},
         timer: {value: Timer},

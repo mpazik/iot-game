@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+    
     return createUiElement('join-battle-window', {
         type: 'window',
         properties: {
@@ -25,7 +27,7 @@ define(function (require, exports, module) {
 `;
         },
         attached: function () {
-            const playerData = this.uiState.playerData.value;
+            const playerData = uiState.playerData.value;
             const difficultyLevelInput = this.getElementsByClassName('difficulty-level')[0];
             const select = this.getElementsByTagName('select')[0];
             const form = this.getElementsByTagName('form')[0];

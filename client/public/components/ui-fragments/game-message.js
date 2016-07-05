@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+    
     return createUiElement('game-message', {
         type: 'fragment',
         properties: {
@@ -10,7 +12,7 @@ define(function (require, exports, module) {
             this.innerHTML = '<span></span>';
         },
         attached: function () {
-            this.getElementsByTagName('span')[0].innerText = this.uiState.gameMessage.value;
+            this.getElementsByTagName('span')[0].innerText = uiState.gameMessage.value;
         }
     });
 });

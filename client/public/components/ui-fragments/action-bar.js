@@ -1,5 +1,6 @@
 define(function (require, exports, module) {
     require('components/elements/action-socket');
+    const uiState = require('src/store/ui-state');
 
     return createUiElement('action-bar', {
         type: 'fragment',
@@ -44,7 +45,7 @@ define(function (require, exports, module) {
             // init skill bar
             const skillBar = this.getElementsByClassName("skill-bar")[0];
             const skillByKey = this.game.skillByKey;
-            const skills = this.uiState.actionBarSkills.value.map(function (id) {
+            const skills = uiState.actionBarSkills.value.map(function (id) {
                 if (id == null) return;
                 return skillByKey(id);
             });
@@ -61,11 +62,11 @@ define(function (require, exports, module) {
                 socket.setAttribute('keyBind', keyBinds[index]);
                 skillBar.appendChild(socket);
             });
-            this._updateActive(this.uiState.actionBarActiveSkill.value);
-            this.uiState.actionBarActiveSkill.subscribe(this._updateActive.bind(this));
+            this._updateActive(uiState.actionBarActiveSkill.value);
+            uiState.actionBarActiveSkill.subscribe(this._updateActive.bind(this));
         },
         detached: function () {
-            this.uiState.actionBarActiveSkill.unsubscribe(this._updateActive.bind(this));
+            uiState.actionBarActiveSkill.unsubscribe(this._updateActive.bind(this));
         },
         _updateActive: function (active) {
             const sockets = this.getElementsByTagName('action-socket');

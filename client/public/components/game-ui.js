@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+
     const extraComponents = require('components/extra');
     const fragments = [
         require('components/ui-fragments/profiling-display'),
@@ -39,7 +41,7 @@ define(function (require, exports, module) {
             value: function (game) {
                 this.game = game;
 
-                const gameUi = initUi(this, game.uiState);
+                const gameUi = initUi(this, uiState);
                 this.gameUi = gameUi;
                 fragments.forEach(function (tag) {
                     gameUi.registerUiFragment(tag.name, tag.prototype.properties);

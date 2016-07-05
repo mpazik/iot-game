@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const uiState = require('src/store/ui-state');
+    
     return createUiElement('survival-end-victory-window', {
         type: 'window',
         properties: {
@@ -23,12 +25,12 @@ define(function (require, exports, module) {
         },
         attached: function () {
             this.classList.add('resolution-window');
-            const scenario = this.uiState.scenario.value;
+            const scenario = uiState.scenario.value;
             const level = this.getElementsByClassName('level')[0];
             level.innerText = scenario.difficultyLevel;
 
             const ranking = this.getElementsByClassName('ranking')[0];
-            Request.Server.playerLeaderboardResult(this.uiState.playerData.value.nick).then(function (data) {
+            Request.Server.playerLeaderboardResult(uiState.playerData.value.nick).then(function (data) {
                 ranking.innerText = ordinalSuffixOf(data.value.position);
             });
 
