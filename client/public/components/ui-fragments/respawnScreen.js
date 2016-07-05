@@ -1,5 +1,6 @@
 define(function (require, exports, module) {
     const uiState = require('src/store/ui-state');
+    const timer = require('src/component/timer');
     
     function countDown(element, timeToRespawn) {
         if (timeToRespawn > 0) {
@@ -49,7 +50,7 @@ define(function (require, exports, module) {
             uiState.playerRespawnTimeState.unsubscribe(this._updateRespawnTime)
         },
         _updateRespawnTime: function (respawnTime) {
-            const respawnInMillis = respawnTime - this.game.timer.currentTimeOnServer();
+            const respawnInMillis = respawnTime - timer.currentTimeOnServer();
             const respawnInSeconds = (Math.floor(respawnInMillis / 100) / 10).toFixed(1);
             countDown(this.timeToRespawnElement, respawnInSeconds);
         }

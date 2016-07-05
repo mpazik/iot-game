@@ -38,9 +38,7 @@ define(function (require, exports, module) {
             }
         },
         init: {
-            value: function (game) {
-                this.game = game;
-
+            value: function () {
                 const gameUi = initUi(this, uiState);
                 this.gameUi = gameUi;
                 fragments.forEach(function (tag) {

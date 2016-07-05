@@ -1,5 +1,6 @@
 define(function (require, exports, module) {
     const uiState = require('src/store/ui-state');
+    const chat = require('src/component/chat');
 
     return createUiElement('game-chat', {
         type: 'fragment',
@@ -18,7 +19,7 @@ define(function (require, exports, module) {
 
             this.messages = this.getElementsByClassName('chat-messages')[0];
             const input = this.getElementsByClassName('chat-input')[0];
-            const chat = this;
+            const element = this;
             this.fadeTimeout = null;
             this.hideTimeout = null;
 
@@ -32,7 +33,7 @@ define(function (require, exports, module) {
                     if (isElementClickable(document.activeElement)) {
                         return;
                     }
-                    chat.style.display = 'block';
+                    element.style.display = 'block';
                     input.focus();
                 }
             });
@@ -43,7 +44,7 @@ define(function (require, exports, module) {
                 }
                 if (event.keyCode == KEY_CODES.ENTER) {
                     if (input.value.length > 0) {
-                        chat.game.sendMessage(input.value);
+                        chat.sendMessage(input.value);
                     }
                     input.value = '';
                     input.blur();

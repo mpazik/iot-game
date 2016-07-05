@@ -1,10 +1,6 @@
 define(function (require, exports, module) {
     const App = require('src/component/application');
     const Dispatcher = require('src/component/dispatcher');
-    const Backdoor = require('src/component/backdoor');
-    const Timer = require('src/component/timer');
-    const Resources = require('src/store/resources');
-    const Chat = require('src/component/chat');
 
     const gameTag = Object.create(HTMLElement.prototype, {
         createdCallback: {
@@ -36,16 +32,7 @@ define(function (require, exports, module) {
                 // because element is created asynchronously due to use requireJs we need to emit event when it's has been propertly created.
                 this.dispatchEvent(new CustomEvent('element-attached'))
             }
-        },
-        logout: {value: App.logout},
-        setUser: {value: App.setUser},
-        connect: {value: App.connect},
-        publishUiAction: {value: Dispatcher.userEventStream.publish.bind(Dispatcher.userEventStream)},
-        backdoor: {value: Backdoor},
-        timer: {value: Timer},
-        skillByKey: {value: Resources.skill},
-        itemById: {value: Resources.item},
-        sendMessage: {value: Chat.sendMessage}
+        }
     });
 
     document.registerElement('dzida-game', {prototype: gameTag});

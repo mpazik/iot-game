@@ -1,6 +1,7 @@
 define(function (require, exports, module) {
     require('components/elements/action-socket');
     const uiState = require('src/store/ui-state');
+    const itemById = require('src/store/resources').item;
     
     return createUiElement('player-inventory', {
         type: 'fragment',
@@ -23,7 +24,6 @@ define(function (require, exports, module) {
         _updateActive: function (quantities) {
             const itemList = this.getElementsByClassName('item-list')[0];
 
-            const itemById = this.game.itemById;
             itemList.innerHTML = Object.keys(quantities).map(function (itemId) {
                 return `<div><span>${itemById(itemId).name}</span> : <span>${quantities[itemId]}</span></div>`
             }).join('');

@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const app = require('src/component/application');
+    
     return createUiElement('settings-window', {
         type: 'window',
         properties: {
@@ -13,10 +15,8 @@ define(function (require, exports, module) {
             this.innerHTML = `<button class="logout"><span class="action-key-shortcut">L</span>ogout!</button>`;
         },
         attached: function () {
-            const game = this.game;
-
             this.getElementsByClassName("logout")[0].onclick = function () {
-                game.logout();
+                app.logout();
             };
         },
         logout: function () {

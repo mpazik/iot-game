@@ -1,5 +1,6 @@
 define(function (require, exports, module) {
     const uiState = require('src/store/ui-state');
+    const userEventStream = require('src/component/dispatcher').userEventStream;
     
     return createUiElement('join-battle-window', {
         type: 'window',
@@ -42,7 +43,7 @@ define(function (require, exports, module) {
             form.onsubmit = function () {
                 const map = select.value;
                 const difficultyLevel = difficultyLevelInput.value;
-                this.game.publishUiAction('join-battle', {map, difficultyLevel});
+                userEventStream.publish('join-battle', {map, difficultyLevel});
                 return false;
             }.bind(this)
         }

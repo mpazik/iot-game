@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const backdoor = require('src/component/backdoor');
+    
     return createUiElement('debug-window', {
         type: 'window',
         properties: {
@@ -14,7 +16,7 @@ define(function (require, exports, module) {
             this.innerHTML = `<button id="kill-character"><b>K</b> - kill character</button>`;
         },
         killCharacter: function () {
-            this.game.backdoor.killCharacter();
+            backdoor.killCharacter();
         },
         attached: function () {
             document.getElementById("kill-character").addEventListener("click", this.killCharacter.bind(this));

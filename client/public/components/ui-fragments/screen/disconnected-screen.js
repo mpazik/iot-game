@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const app = require('src/component/application');
+    
     return createUiElement('disconnected-screen', {
         type: 'fragment',
         properties: {
@@ -13,10 +15,9 @@ define(function (require, exports, module) {
             this.classList.add('game-state')
         },
         attached: function () {
-            const game = this.game;
             const button = this.getElementsByTagName("button")[0];
             button.onclick = function () {
-                game.connect();
+                app.connect();
             };
             deffer(function () {
                 button.focus();

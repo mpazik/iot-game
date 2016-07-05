@@ -1,6 +1,8 @@
 define(function (require, exports, module) {
     require('components/elements/action-socket');
     const uiState = require('src/store/ui-state');
+    const skillByKey = require('src/store/resources').skill;
+    const userEventStream = require('src/component/dispatcher').userEventStream;
 
     return createUiElement('action-bar', {
         type: 'fragment',
@@ -44,7 +46,6 @@ define(function (require, exports, module) {
 
             // init skill bar
             const skillBar = this.getElementsByClassName("skill-bar")[0];
-            const skillByKey = this.game.skillByKey;
             const skills = uiState.actionBarSkills.value.map(function (id) {
                 if (id == null) return;
                 return skillByKey(id);
@@ -56,7 +57,7 @@ define(function (require, exports, module) {
                     socket.setAttribute('key', skill.id);
                     socket.addEventListener('action-triggered', function (event) {
                         const skill = skillByKey(event.detail.key);
-                        actionBar.game.publishUiAction('skill-triggered', {skill});
+                        userEventStream.publish('skill-triggered', {skill});
                     });
                 }
                 socket.setAttribute('keyBind', keyBinds[index]);

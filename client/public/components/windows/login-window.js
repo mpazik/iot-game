@@ -1,4 +1,6 @@
 define(function (require, exports, module) {
+    const app = require('src/component/application');
+    
     return createUiElement('login-window', {
         type: 'window',
         properties: {
@@ -21,7 +23,6 @@ define(function (require, exports, module) {
 `;
         },
         attached: function () {
-            const game = this.game;
             const form = this.getElementsByTagName("form")[0];
             const userNickElement = form.getElementsByClassName('user-nick')[0];
             const errorMessage = form.getElementsByClassName('error-message')[0];
@@ -40,8 +41,8 @@ define(function (require, exports, module) {
                 const nick = userNickElement.value;
                 Request.Server.canPlayerLogin(nick).then(function () {
                     errorMessage.style.display = 'none';
-                    game.setUser(nick);
-                    game.connect();
+                    app.setUser(nick);
+                    app.connect();
                 }).catch(function (error) {
                     showError(error);
                 });

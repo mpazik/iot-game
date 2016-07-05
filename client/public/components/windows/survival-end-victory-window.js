@@ -1,5 +1,6 @@
 define(function (require, exports, module) {
     const uiState = require('src/store/ui-state');
+    const userEventStream = require('src/component/dispatcher').userEventStream;
     
     return createUiElement('survival-end-victory-window', {
         type: 'window',
@@ -36,7 +37,7 @@ define(function (require, exports, module) {
 
             const goBackButton = this.getElementsByClassName('go-back')[0];
             goBackButton.onclick = function () {
-                this.game.publishUiAction('go-to-home', {});
+                userEventStream.publish('go-to-home', {});
             }.bind(this);
 
             const nextLevelButton = this.getElementsByClassName('next-level')[0];
@@ -44,7 +45,7 @@ define(function (require, exports, module) {
                 nextLevelButton.focus();
             });
             nextLevelButton.onclick = function () {
-                this.game.publishUiAction('join-battle', {
+                userEventStream.publish('join-battle', {
                     map: scenario.mapName,
                     difficultyLevel: scenario.difficultyLevel + 1
                 });
