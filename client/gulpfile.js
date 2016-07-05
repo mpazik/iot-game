@@ -1,14 +1,14 @@
 const gulp = require('gulp');
-const clean = require('gulp-clean');
+const del = require('del');
 const gulpSequence = require('gulp-sequence');
+const processHtml = require('gulp-processhtml')
 const AwsPublish = require('gulp-awspublish');
 
 const distPath = 'dist';
 
 
 gulp.task('clean', function () {
-    return gulp.src(distPath, {read: false})
-        .pipe(clean());
+    return del([distPath]);
 });
 
 gulp.task('copy-public', function () {
@@ -17,19 +17,24 @@ gulp.task('copy-public', function () {
 });
 
 gulp.task('copy-libs', function () {
-    return gulp.src(['node_modules/pixi-spine/bin/pixi-spine.js', 'node_modules/pixi.js/bin/pixi.js'])
+    return gulp.src(['node_modules/pixi-spine/bin/pixi-spine.js'])
         .pipe(gulp.dest(distPath + '/lib'));
 });
 
-gulp.task('replace-dev-files', function () {
+gulp.task('process-html', function () {
+    return gulp.src('public/index.html')
+        .pipe(processHtml({}))
+        .pipe(gulp.dest('dist'));
+});
 
+gulp.task('replace-dev-files', function () {
     return gulp.src(['prod/**/*'])
         .pipe(gulp.dest(distPath));
 });
 
-gulp.task('build', gulpSequence('clean', 'copy-public', 'copy-libs', 'replace-dev-files'));
+gulp.task('build-prod', gulpSequence('clean', 'copy-public', 'copy-libs', 'process-html', 'replace-dev-files'));
 
-gulp.task('deploy', ['build'],function () {
+gulp.task('deploy', ['build-prod'],function () {
         process.env['AWS_PROFILE'] = 's3_deploy';
 
         const publisher = AwsPublish.create({
@@ -58,5 +63,5 @@ gulp.task('deploy', ['build'],function () {
             .pipe(AwsPublish.reporter());
 });
 
-gulp.task('default', ['build'], function () {
+gulp.task('default', ['build-prod'], function () {
 });
