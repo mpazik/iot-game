@@ -1,12 +1,13 @@
 package dzida.server.core.character.event;
 
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.event.GameEvent;
+import dzida.server.core.character.model.Character;
 
 public class CharacterDied implements GameEvent {
-    public final CharacterId characterId;
+    public final Id<Character> characterId;
 
-    public CharacterDied(CharacterId characterId) {
+    public CharacterDied(Id<Character> characterId) {
         this.characterId = characterId;
     }
 

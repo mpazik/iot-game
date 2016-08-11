@@ -1,7 +1,7 @@
 package dzida.server.app.npc;
 
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.NpcCharacter;
@@ -53,9 +53,9 @@ public class NpcBehaviour {
     }
 
     public List<GameEvent> processTick(NpcImpl npc) {
-        Stream<CharacterId> players = characterService.getCharactersOfType(PlayerCharacter.class).stream().map(Character::getId);
+        Stream<Id<Character>> players = characterService.getCharactersOfType(PlayerCharacter.class).stream().map(Character::getId);
         NpcCharacter npcCharacter = npc.getCharacter();
-        Optional<CharacterId> target = players.filter(player -> positionService.areCharactersInDistance(npcCharacter.getId(), player, AggroRange, timeService.getCurrentMillis())).findAny();
+        Optional<Id<Character>> target = players.filter(player -> positionService.areCharactersInDistance(npcCharacter.getId(), player, AggroRange, timeService.getCurrentMillis())).findAny();
         if (target.isPresent()) {
             if (isInAttackRange(npcCharacter, target.get())) {
                 return tryAttackPlayer(npcCharacter, target.get());
@@ -70,7 +70,7 @@ public class NpcBehaviour {
         return Collections.emptyList();
     }
 
-    private List<GameEvent> gotToRandomPosition(CharacterId id) {
+    private List<GameEvent> gotToRandomPosition(Id<Character> id) {
         Point pos = positionService.getPosition(id, timeService.getCurrentMillis());
         Point direction = Point.of(randomCord(pos.getX()), randomCord(pos.getY()));
         return positionCommandHandler.move(id, direction, PositionService.BotSpeed);
@@ -84,19 +84,19 @@ public class NpcBehaviour {
         return positionService.isStanding(npc.getId(), timeService.getCurrentMillis());
     }
 
-    private List<GameEvent> gotToPlayer(NpcCharacter npc, CharacterId targetId) {
+    private List<GameEvent> gotToPlayer(NpcCharacter npc, Id<Character> targetId) {
         Point direction = positionService.getPosition(targetId, timeService.getCurrentMillis());
         return positionCommandHandler.move(npc.getId(), direction, PositionService.BotSpeed);
     }
 
-    private List<GameEvent> tryAttackPlayer(NpcCharacter npc, CharacterId targetId) {
+    private List<GameEvent> tryAttackPlayer(NpcCharacter npc, Id<Character> targetId) {
         if (!skillService.isOnCooldown(npc.getId(), timeService.getCurrentMillis())) {
             return skillCommandHandler.useSkillOnCharacter(npc.getId(), getBotAttackSkillId(npc.getBotType()), targetId);
         }
         return Collections.emptyList();
     }
 
-    private boolean isInAttackRange(NpcCharacter npc, CharacterId target) {
+    private boolean isInAttackRange(NpcCharacter npc, Id<Character> target) {
         Id<Skill> skillId = getBotAttackSkillId(npc.getBotType());
         Skill skill = skillService.getSkill(skillId);
         return positionService.areCharactersInDistance(npc.getId(), target, skill.getRange(), timeService.getCurrentMillis());

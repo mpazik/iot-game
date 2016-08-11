@@ -3,9 +3,9 @@ package dzida.server.core.skill;
 import com.google.common.collect.ImmutableList;
 import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.event.CharacterDied;
+import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.event.CharacterGotDamage;
@@ -48,7 +48,7 @@ public class SkillCommandHandler {
         this.worldObjectService = worldObjectService;
     }
 
-    public List<GameEvent> useSkillOnCharacter(CharacterId casterId, Id<Skill> skillId, CharacterId targetId) {
+    public List<GameEvent> useSkillOnCharacter(Id<Character> casterId, Id<Skill> skillId, Id<Character> targetId) {
         if (!characterService.isCharacterLive(casterId) || !characterService.isCharacterLive(targetId)) {
             return emptyList();
         }
@@ -68,7 +68,7 @@ public class SkillCommandHandler {
         return singletonList(error("Server can not understand received message"));
     }
 
-    public List<GameEvent> useSkillOnWorldMap(CharacterId casterId, Id<Skill> skillId, double x, double y) {
+    public List<GameEvent> useSkillOnWorldMap(Id<Character> casterId, Id<Skill> skillId, double x, double y) {
         if (!characterService.isCharacterLive(casterId)) {
             return emptyList();
         }
@@ -86,7 +86,7 @@ public class SkillCommandHandler {
         return singletonList(error("Server can not understand received message"));
     }
 
-    public List<GameEvent> useSkillOnWorldObject(CharacterId casterId, Id<Skill> skillId, Id<WorldObject> targetId) {
+    public List<GameEvent> useSkillOnWorldObject(Id<Character> casterId, Id<Skill> skillId, Id<WorldObject> targetId) {
         if (!characterService.isCharacterLive(casterId)) {
             return emptyList();
         }
@@ -100,7 +100,7 @@ public class SkillCommandHandler {
         return singletonList(error("Server can not understand received message"));
     }
 
-    private List<GameEvent> handleAttackOnCreature(CharacterId casterId, Skill skill, CharacterId targetId) {
+    private List<GameEvent> handleAttackOnCreature(Id<Character> casterId, Skill skill, Id<Character> targetId) {
         double damage = skill.getDamage();
         List<GameEvent> events = new ArrayList<>();
         events.add(new CharacterGotDamage(targetId, damage));
@@ -112,7 +112,7 @@ public class SkillCommandHandler {
         return events;
     }
 
-    private boolean canTargetBeTargeted(Skill skill, CharacterId casterId, CharacterId targetId) {
+    private boolean canTargetBeTargeted(Skill skill, Id<Character> casterId, Id<Character> targetId) {
         switch (skill.getTarget()) {
             case Skills.Target.ENEMIES:
                 return characterService.isCharacterEnemyFor(casterId, targetId);
@@ -121,7 +121,7 @@ public class SkillCommandHandler {
         }
     }
 
-    private boolean isReadyForAbility(CharacterId casterId) {
+    private boolean isReadyForAbility(Id<Character> casterId) {
         return !skillService.isOnCooldown(casterId, timeService.getCurrentMillis());
     }
 }

@@ -1,5 +1,6 @@
 package dzida.server.core.character;
 
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
@@ -27,7 +28,7 @@ public class CharacterCommandHandler {
         return singletonList(new CharacterSpawned(character, initialMove, initialSkillData));
     }
 
-    public List<GameEvent> killCharacter(CharacterId characterId) {
+    public List<GameEvent> killCharacter(Id<Character> characterId) {
         return singletonList(new CharacterDied(characterId));
     }
 }

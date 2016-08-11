@@ -3,7 +3,8 @@ package dzida.server.app.scenario;
 import dzida.server.app.CommandResolver;
 import dzida.server.app.GameEventDispatcher;
 import dzida.server.app.npc.AiService;
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
+import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.NpcCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionStore;
@@ -25,7 +26,7 @@ public class NpcScenarioLogic {
     }
 
     public void addNpc(Point position, int npcType) {
-        CharacterId characterId = new CharacterId((int) Math.round((Math.random() * 100000)));
+        Id<Character> characterId = new Id<>((int) Math.round((Math.random() * 100000)));
         NpcCharacter character = new NpcCharacter(characterId, npcType);
         positionStore.setPosition(characterId, position);
         aiService.createNpc(npcType, character);
@@ -36,7 +37,7 @@ public class NpcScenarioLogic {
         });
     }
 
-    public void removeNpc(CharacterId characterId) {
+    public void removeNpc(Id<Character> characterId) {
         aiService.removeNpc(characterId);
     }
 }

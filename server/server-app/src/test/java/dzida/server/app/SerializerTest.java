@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.character.model.Character;
 import org.junit.Test;
 
 import static dzida.server.app.Serializer.getSerializer;
@@ -22,16 +22,9 @@ public class SerializerTest {
 
     @Test
     public void characterIdIsSerializedToNumber() {
-        CharacterId characterId = new CharacterId(4);
+        Id<Character> characterId = new Id<>(4);
         String json = getSerializer().toJson(characterId);
         assertThat(json).isEqualTo("4");
-    }
-
-    @Test
-    public void numberCanBeSerializedToCharacterId() {
-        String json = "4";
-        CharacterId characterId = getSerializer().fromJson(json, CharacterId.class);
-        assertThat(characterId).isEqualTo(new CharacterId(4));
     }
 
     @Test
@@ -43,9 +36,9 @@ public class SerializerTest {
 
     @Test
     public void EntityIdIsDeserializedFromNumber() {
-        TypeToken<Id<String>> typeToken = new TypeToken<Id<String>>() {
+        TypeToken<Id<Character>> typeToken = new TypeToken<Id<Character>>() {
         };
-        Id<String> id = getSerializer().fromJson("6", typeToken.getType());
+        Id<Character> id = getSerializer().fromJson("6", typeToken.getType());
         assertThat(id).isEqualTo(new Id<>(6));
     }
 

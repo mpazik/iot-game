@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.core.basic.Publisher;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
@@ -24,7 +24,7 @@ public class GameEventDispatcher {
     private final PositionService positionService;
     private final Publisher<GameEvent> eventPublisher = new Publisher<>();
     private final Publisher<GameEvent> eventPublisherBeforeChanges = new Publisher<>();
-    private final Map<CharacterId, Consumer<GameEvent>> listeners = new HashMap<>();
+    private final Map<Id<Character>, Consumer<GameEvent>> listeners = new HashMap<>();
     private final CharacterService characterService;
     private final WorldMapService worldMapService;
     private final SkillService skillService;
@@ -50,13 +50,12 @@ public class GameEventDispatcher {
     }
 
     public void registerCharacter(Character character, Consumer<GameEvent> send) {
-        Consumer<GameEvent> listener = send::accept;
-        eventPublisher.subscribe(listener);
-        listeners.put(character.getId(), listener);
+        eventPublisher.subscribe(send);
+        listeners.put(character.getId(), send);
     }
 
     // I do not think that this should be here.
-    public void sendInitialPacket(CharacterId characterId, Id<Player> playerId, Player playerEntity) {
+    public void sendInitialPacket(Id<Character> characterId, Id<Player> playerId, Player playerEntity) {
         listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario, playerEntity.getData(), timeService.getCurrentMillis()));
     }
 
@@ -70,7 +69,7 @@ public class GameEventDispatcher {
         );
     }
 
-    public void unregisterCharacter(CharacterId characterId) {
+    public void unregisterCharacter(Id<Character> characterId) {
         eventPublisher.unsubscribe(listeners.get(characterId));
         listeners.remove(characterId);
     }
@@ -85,10 +84,10 @@ public class GameEventDispatcher {
     }
 
     public void dispatchEvents(List<GameEvent> gameEvents) {
-        gameEvents.stream().forEach(this::dispatchEvent);
+        gameEvents.forEach(this::dispatchEvent);
     }
 
-    public void sendEvent(CharacterId characterId, GameEvent gameEvent) {
+    public void sendEvent(Id<Character> characterId, GameEvent gameEvent) {
         listeners.get(characterId).accept(gameEvent);
     }
 
@@ -101,14 +100,14 @@ public class GameEventDispatcher {
     }
 
     public static final class InitialMessage implements GameEvent {
-        CharacterId characterId;
+        Id<Character> characterId;
         Id<Player> playerId;
         Map<String, Object> state;
         Scenario scenario;
         Player.Data playerData;
         long serverTime;
 
-        public InitialMessage(CharacterId characterId, Id<Player> playerId, Map<String, Object> state, Scenario scenario, dzida.server.core.player.Player.Data playerData, long serverTime) {
+        public InitialMessage(Id<Character> characterId, Id<Player> playerId, Map<String, Object> state, Scenario scenario, dzida.server.core.player.Player.Data playerData, long serverTime) {
             this.characterId = characterId;
             this.playerId = playerId;
             this.state = state;

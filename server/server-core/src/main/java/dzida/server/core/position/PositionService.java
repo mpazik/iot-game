@@ -1,6 +1,7 @@
 package dzida.server.core.position;
 
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
+import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.basic.unit.Move;
@@ -21,15 +22,15 @@ public interface PositionService {
 
     String getKey();
 
-    boolean areCharactersInDistance(CharacterId character1, CharacterId character2, double distance, long time);
+    boolean areCharactersInDistance(Id<Character> character1, Id<Character> character2, double distance, long time);
 
     void processEvent(GameEvent gameEvent);
 
-    Move getMove(CharacterId characterId);
+    Move getMove(Id<Character> characterId);
 
-    Move getInitialMove(CharacterId characterId);
+    Move getInitialMove(Id<Character> characterId);
 
-    Point getPosition(CharacterId characterId, long currentMillis);
+    Point getPosition(Id<Character> characterId, long currentMillis);
 
-    boolean isStanding(CharacterId characterId, long currentMillis);
+    boolean isStanding(Id<Character> characterId, long currentMillis);
 }

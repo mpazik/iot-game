@@ -8,7 +8,6 @@ import com.google.gson.JsonSyntaxException;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.CharacterCommandHandler;
-import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.chat.ChatService;
 import dzida.server.core.event.GameEvent;
@@ -79,14 +78,14 @@ public class CommandResolver {
         return characterCommandHandler.spawnCharacter(character);
     }
 
-    public List<GameEvent> removeCharacter(CharacterId characterId) {
+    public List<GameEvent> removeCharacter(Id<Character> characterId) {
         return characterCommandHandler.killCharacter(characterId);
     }
 
-    public List<GameEvent> dispatchPacket(Id<Player> playerId, CharacterId characterId, String payload, Consumer<GameEvent> send) {
+    public List<GameEvent> dispatchPacket(Id<Player> playerId, Id<Character> characterId, String payload, Consumer<GameEvent> send) {
         try {
             JsonArray messages = new Gson().fromJson(payload, JsonArray.class);
-            Stream<JsonElement> stream = StreamSupport.stream(((Iterable<JsonElement>) messages::iterator).spliterator(), false);
+            Stream<JsonElement> stream = StreamSupport.stream(messages.spliterator(), false);
             return stream.flatMap(element -> {
                 JsonArray message = element.getAsJsonArray();
                 int type = message.get(0).getAsNumber().intValue();
@@ -101,7 +100,7 @@ public class CommandResolver {
         }
     }
 
-    private List<GameEvent> dispatchMessage(Id<Player> playerId, CharacterId characterId, int type, JsonElement data, Consumer<GameEvent> send) {
+    private List<GameEvent> dispatchMessage(Id<Player> playerId, Id<Character> characterId, int type, JsonElement data, Consumer<GameEvent> send) {
         switch (type) {
             case Move:
                 return positionCommandHandler.move(characterId, serializer.fromJson(data, Point.class), PositionService.PlayerSpeed);
@@ -145,7 +144,7 @@ public class CommandResolver {
 
     private static class SkillUseOnCharacter {
         Id<Skill> skillId;
-        CharacterId target;
+        Id<Character> target;
     }
 
     private static class SkillUseOnWorldMap {

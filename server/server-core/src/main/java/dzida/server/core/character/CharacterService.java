@@ -1,5 +1,6 @@
 package dzida.server.core.character;
 
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
@@ -16,15 +17,15 @@ public interface CharacterService {
 
     String getKey();
 
-    boolean isCharacterEnemyFor(CharacterId character1, CharacterId character2);
+    boolean isCharacterEnemyFor(Id<Character> character1, Id<Character> character2);
 
     void processEvent(GameEvent gameEvent);
 
     <T extends Character> List<T> getCharactersOfType(Class<T> clazz);
 
-    int getCharacterType(CharacterId characterId);
+    int getCharacterType(Id<Character> characterId);
 
-    Optional<PlayerCharacter> getPlayerCharacter(CharacterId characterId);
+    Optional<PlayerCharacter> getPlayerCharacter(Id<Character> characterId);
 
-    boolean isCharacterLive(CharacterId characterId);
+    boolean isCharacterLive(Id<Character> characterId);
 }

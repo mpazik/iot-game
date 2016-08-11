@@ -7,25 +7,10 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.character.CharacterId;
-import dzida.server.core.player.Player;
 
 import java.io.IOException;
 
 public final class Serializer {
-    private static final TypeAdapter<CharacterId> characterIdTypeAdapter = new TypeAdapter<CharacterId>() {
-        @Override
-        public void write(JsonWriter out, CharacterId characterId) throws IOException {
-            out.value(characterId.getValue());
-        }
-
-        @Override
-        public CharacterId read(JsonReader in) throws IOException {
-            int id = in.nextInt();
-            return new CharacterId(id);
-        }
-    };
-
     private static final TypeAdapter<Id<?>> idTypeAdapter = new TypeAdapter<Id<?>>() {
         @Override
         public void write(JsonWriter out, Id<?> characterId) throws IOException {
@@ -69,16 +54,13 @@ public final class Serializer {
     };
 
     private static final Gson gsonForPacket = new GsonBuilder()
-            .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
             .create();
 
     private static final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
-
             .registerTypeAdapter(Packet.class, packetTypeAdapter)
             .create();
 

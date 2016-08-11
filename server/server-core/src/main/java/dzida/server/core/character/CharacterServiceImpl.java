@@ -1,6 +1,7 @@
 package dzida.server.core.character;
 
 import com.google.common.collect.FluentIterable;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
@@ -18,7 +19,7 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 class CharacterServiceImpl implements CharacterService {
 
     public static final String Key = "character";
-    private final Map<CharacterId, Character> state = new HashMap<>();
+    private final Map<Id<Character>, Character> state = new HashMap<>();
 
     @Override
     public List<Character> getState() {
@@ -31,7 +32,7 @@ class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public boolean isCharacterEnemyFor(CharacterId character1, CharacterId character2) {
+    public boolean isCharacterEnemyFor(Id<Character> character1, Id<Character> character2) {
         return state.get(character1).getType() != state.get(character2).getType();
     }
 
@@ -45,18 +46,19 @@ class CharacterServiceImpl implements CharacterService {
 
     @Override
     public <T extends Character> List<T> getCharactersOfType(Class<T> clazz) {
+        //noinspection Guava
         return FluentIterable.from(state.values())
                 .filter(clazz)
                 .toList();
     }
 
     @Override
-    public int getCharacterType(CharacterId characterId) {
+    public int getCharacterType(Id<Character> characterId) {
         return state.get(characterId).getType();
     }
 
     @Override
-    public Optional<PlayerCharacter> getPlayerCharacter(CharacterId characterId) {
+    public Optional<PlayerCharacter> getPlayerCharacter(Id<Character> characterId) {
         Character character = state.get(characterId);
         if (character.getType() == Character.Type.Player) {
             return Optional.of((PlayerCharacter) character);
@@ -65,7 +67,7 @@ class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public boolean isCharacterLive(CharacterId characterId) {
+    public boolean isCharacterLive(Id<Character> characterId) {
         return state.containsKey(characterId);
     }
 }

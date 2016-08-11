@@ -1,7 +1,8 @@
 package dzida.server.core.position;
 
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterService;
+import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.basic.unit.Move;
@@ -25,7 +26,7 @@ public class PositionCommandHandler {
         this.pathFinder = pathFinder;
     }
 
-    public List<GameEvent> move(CharacterId characterId, Point destination, double velocity) {
+    public List<GameEvent> move(Id<Character> characterId, Point destination, double velocity) {
         if (!characterService.isCharacterLive(characterId)) {
             return Collections.emptyList();
         }

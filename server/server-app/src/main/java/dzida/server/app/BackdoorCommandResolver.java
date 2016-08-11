@@ -3,8 +3,9 @@ package dzida.server.app;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.event.CharacterDied;
+import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 
 import java.util.Collections;
@@ -17,7 +18,7 @@ import static java.util.Collections.singletonList;
 public class BackdoorCommandResolver {
     public static BackdoorCommandResolver NoOpResolver = new BackdoorCommandResolver(null) {
         @Override
-        public List<GameEvent> resolveCommand(CharacterId characterId, JsonElement command, Consumer<GameEvent> send) {
+        public List<GameEvent> resolveCommand(Id<Character> characterId, JsonElement command, Consumer<GameEvent> send) {
             return Collections.emptyList();
         }
     };
@@ -32,12 +33,12 @@ public class BackdoorCommandResolver {
         int KillCharacter = 0;
     }
 
-    public List<GameEvent> resolveCommand(CharacterId characterId, JsonElement payload, Consumer<GameEvent> send) {
+    public List<GameEvent> resolveCommand(Id<Character> characterId, JsonElement payload, Consumer<GameEvent> send) {
         BackdoorCommand command = serializer.fromJson(payload, BackdoorCommand.class);
         return dispatchMessage(characterId, command.type, command.data, send);
     }
 
-    private List<GameEvent> dispatchMessage(CharacterId characterId, int type, JsonElement data, Consumer<GameEvent> send) {
+    private List<GameEvent> dispatchMessage(Id<Character> characterId, int type, JsonElement data, Consumer<GameEvent> send) {
         switch (type) {
             case Commands.KillCharacter:
                 return singletonList(new CharacterDied(characterId));

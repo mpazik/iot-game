@@ -1,7 +1,6 @@
 package dzida.server.core.skill;
 
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
@@ -22,7 +21,7 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 public class SkillService {
     public static final String Key = "skill";
 
-    private final Map<CharacterId, SkillData> state = new HashMap<>();
+    private final Map<Id<Character>, SkillData> state = new HashMap<>();
     private final SkillStore skillsStore;
 
     private final TimeService timeService;
@@ -46,7 +45,7 @@ public class SkillService {
         return Key;
     }
 
-    public boolean isOnCooldown(CharacterId casterId, long time) {
+    public boolean isOnCooldown(Id<Character> casterId, long time) {
         return time < state.get(casterId).cooldownTill;
     }
 
@@ -54,7 +53,7 @@ public class SkillService {
         return skillsStore.getSkill(skillId);
     }
 
-    public int getHealth(CharacterId characterId) {
+    public int getHealth(Id<Character> characterId) {
         return state.get(characterId).health;
     }
 
@@ -70,12 +69,11 @@ public class SkillService {
                 .is(SkillUsedOnWorldObject.class).then(event -> setCharacterCooldown(event.casterId, event.skillId))
                 .is(CharacterGotDamage.class).then(event -> {
             SkillData skillData = state.get(event.characterId);
-            int remainHp = skillData.health - (int) event.damage;
-            skillData.health = remainHp;
+            skillData.health = skillData.health - (int) event.damage;
         });
     }
 
-    private void setCharacterCooldown(CharacterId casterId, Id<Skill> skillId) {
+    private void setCharacterCooldown(Id<Character> casterId, Id<Skill> skillId) {
         int skillCooldown = getSkill(skillId).getCooldown();
         state.get(casterId).cooldownTill = timeService.getCurrentMillis() + skillCooldown;
     }
@@ -103,10 +101,10 @@ public class SkillService {
     }
 
     public final static class SkillCharacterState {
-        CharacterId characterId;
+        Id<Character> characterId;
         SkillData skillData;
 
-        public SkillCharacterState(CharacterId characterId, SkillData skillData) {
+        public SkillCharacterState(Id<Character> characterId, SkillData skillData) {
             this.characterId = characterId;
             this.skillData = skillData;
         }

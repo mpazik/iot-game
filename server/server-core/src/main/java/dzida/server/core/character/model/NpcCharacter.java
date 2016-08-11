@@ -1,19 +1,19 @@
 package dzida.server.core.character.model;
 
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
 
 public class NpcCharacter implements Character {
-    private final CharacterId id;
+    private final Id<Character> id;
     private final int type;
     private final int botType;
 
-    public NpcCharacter(CharacterId id, int botType) {
+    public NpcCharacter(Id<Character> id, int botType) {
         this.id = id;
         this.type = Character.Type.Bot;
         this.botType = botType;
     }
 
-    public CharacterId getId() {
+    public Id<Character> getId() {
         return id;
     }
 

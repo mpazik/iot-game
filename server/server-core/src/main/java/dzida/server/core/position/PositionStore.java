@@ -1,10 +1,11 @@
 package dzida.server.core.position;
 
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.unit.Point;
+import dzida.server.core.character.model.Character;
 
 public interface PositionStore {
-    Point getCharacterPosition(CharacterId characterId);
+    Point getCharacterPosition(Id<Character> characterId);
 
-    void setPosition(CharacterId characterId, Point position);
+    void setPosition(Id<Character> characterId, Point position);
 }

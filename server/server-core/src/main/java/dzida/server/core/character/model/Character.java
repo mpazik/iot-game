@@ -1,6 +1,6 @@
 package dzida.server.core.character.model;
 
-import dzida.server.core.character.CharacterId;
+import dzida.server.core.basic.entity.Id;
 
 public interface Character {
     interface Type {
@@ -8,8 +8,7 @@ public interface Character {
         int Bot = 1;
     }
 
-
-    CharacterId getId();
+    Id<Character> getId();
 
     int getType();
 }

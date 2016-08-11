@@ -9,8 +9,8 @@ import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterCommandHandler;
-import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
+import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.chat.ChatService;
 import dzida.server.core.event.GameEvent;
@@ -60,7 +60,7 @@ public class Instance {
 
     private final Map<ChannelId, Id<Player>> playerChannels = new HashMap<>();
     private final Map<ChannelId, List<Object>> messagesToSend = new HashMap<>();
-    private final Map<Id<Player>, CharacterId> characterIds = new HashMap<>();
+    private final Map<Id<Player>, Id<Character>> characterIds = new HashMap<>();
 
     private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
     private final GameLogic gameLogic;
@@ -121,7 +121,7 @@ public class Instance {
 
     public void addPlayer(Channel channel, Id<Player> playerId) {
         channels.add(channel);
-        CharacterId characterId = new CharacterId((int) Math.round((Math.random() * 100000)));
+        Id<Character> characterId = new Id<>((int) Math.round((Math.random() * 100000)));
         characterIds.put(playerId, characterId);
         ChannelId channelId = channel.id();
         playerChannels.put(channelId, playerId);
@@ -141,7 +141,7 @@ public class Instance {
         channels.remove(channel);
         ChannelId channelId = channel.id();
         Id<Player> playerId = playerChannels.get(channelId);
-        CharacterId characterId = characterIds.get(playerId);
+        Id<Character> characterId = characterIds.get(playerId);
         characterIds.remove(playerId);
         playerChannels.remove(channelId);
         messagesToSend.remove(channelId);
@@ -158,7 +158,7 @@ public class Instance {
 
     public void parseMessage(Channel channel, String request) {
         Id<Player> playerId = playerChannels.get(channel.id());
-        CharacterId characterId = characterIds.get(playerId);
+        Id<Character> characterId = characterIds.get(playerId);
         List<GameEvent> gameEvents = commandResolver.dispatchPacket(playerId, characterId, request, addDataToSend(channel));
         gameEventDispatcher.dispatchEvents(gameEvents);
         send();
