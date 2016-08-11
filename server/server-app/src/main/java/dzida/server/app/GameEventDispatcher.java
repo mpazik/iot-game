@@ -3,6 +3,7 @@ package dzida.server.app;
 import com.google.common.collect.ImmutableMap;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.core.basic.Publisher;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
@@ -55,7 +56,7 @@ public class GameEventDispatcher {
     }
 
     // I do not think that this should be here.
-    public void sendInitialPacket(CharacterId characterId, Player.Id playerId, Player.Entity playerEntity) {
+    public void sendInitialPacket(CharacterId characterId, Id<Player> playerId, Player playerEntity) {
         listeners.get(characterId).accept(new InitialMessage(characterId, playerId, getState(), scenario, playerEntity.getData(), timeService.getCurrentMillis()));
     }
 
@@ -101,13 +102,13 @@ public class GameEventDispatcher {
 
     public static final class InitialMessage implements GameEvent {
         CharacterId characterId;
-        Player.Id playerId;
+        Id<Player> playerId;
         Map<String, Object> state;
         Scenario scenario;
         Player.Data playerData;
         long serverTime;
 
-        public InitialMessage(CharacterId characterId, dzida.server.core.player.Player.Id playerId, Map<String, Object> state, Scenario scenario, dzida.server.core.player.Player.Data playerData, long serverTime) {
+        public InitialMessage(CharacterId characterId, Id<Player> playerId, Map<String, Object> state, Scenario scenario, dzida.server.core.player.Player.Data playerData, long serverTime) {
             this.characterId = characterId;
             this.playerId = playerId;
             this.state = state;

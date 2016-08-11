@@ -1,17 +1,19 @@
 package dzida.server.core.player;
 
 
+import dzida.server.core.basic.entity.Id;
+
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface PlayerStore {
-    Stream<Player.Entity> getAllPlayers();
+    Stream<Player> getAllPlayers();
 
-    Player.Entity createPlayer(Player.Data playerData);
+    Player createPlayer(Player.Data playerData);
 
-    Optional<Player.Id> findPlayerByNick(String nick);
+    Optional<Id<Player>> findPlayerByNick(String nick);
 
-    Player.Entity getPlayer(Player.Id playerId);
+    Player getPlayer(Id<Player> playerId);
 
-    void updatePlayer(Player.Id playerId, Player.Data player);
+    void updatePlayer(Id<Player> playerId, Player.Data player);
 }

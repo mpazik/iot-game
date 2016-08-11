@@ -7,6 +7,7 @@ import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.core.Scheduler;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
@@ -49,7 +50,7 @@ import java.util.function.Consumer;
 
 import static dzida.server.app.Serializer.getSerializer;
 
-class Instance {
+public class Instance {
 
     private final CommandResolver commandResolver;
     private final GameEventDispatcher gameEventDispatcher;
@@ -57,9 +58,9 @@ class Instance {
     private final CharacterService characterService;
     private final String instanceKey;
 
-    private final Map<ChannelId, Player.Id> playerChannels = new HashMap<>();
+    private final Map<ChannelId, Id<Player>> playerChannels = new HashMap<>();
     private final Map<ChannelId, List<Object>> messagesToSend = new HashMap<>();
-    private final Map<Player.Id, CharacterId> characterIds = new HashMap<>();
+    private final Map<Id<Player>, CharacterId> characterIds = new HashMap<>();
 
     private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
     private final GameLogic gameLogic;
@@ -118,14 +119,14 @@ class Instance {
         return Optional.empty();
     }
 
-    public void addPlayer(Channel channel, Player.Id playerId) {
+    public void addPlayer(Channel channel, Id<Player> playerId) {
         channels.add(channel);
         CharacterId characterId = new CharacterId((int) Math.round((Math.random() * 100000)));
         characterIds.put(playerId, characterId);
         ChannelId channelId = channel.id();
         playerChannels.put(channelId, playerId);
         messagesToSend.put(channelId, Lists.newArrayList());
-        Player.Entity playerEntity = playerService.getPlayer(playerId);
+        Player playerEntity = playerService.getPlayer(playerId);
         String nick = playerEntity.getData().getNick();
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
         gameLogic.playerJoined(character);
@@ -139,7 +140,7 @@ class Instance {
     public void removePlayer(Channel channel) {
         channels.remove(channel);
         ChannelId channelId = channel.id();
-        Player.Id playerId = playerChannels.get(channelId);
+        Id<Player> playerId = playerChannels.get(channelId);
         CharacterId characterId = characterIds.get(playerId);
         characterIds.remove(playerId);
         playerChannels.remove(channelId);
@@ -156,7 +157,7 @@ class Instance {
     }
 
     public void parseMessage(Channel channel, String request) {
-        Player.Id playerId = playerChannels.get(channel.id());
+        Id<Player> playerId = playerChannels.get(channel.id());
         CharacterId characterId = characterIds.get(playerId);
         List<GameEvent> gameEvents = commandResolver.dispatchPacket(playerId, characterId, request, addDataToSend(channel));
         gameEventDispatcher.dispatchEvents(gameEvents);

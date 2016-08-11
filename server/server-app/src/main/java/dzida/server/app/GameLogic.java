@@ -5,6 +5,7 @@ import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.scenario.*;
 import dzida.server.core.Scheduler;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.event.CharacterDied;
@@ -66,7 +67,7 @@ public class GameLogic {
         whenTypeOf(gameEvent).is(CharacterDied.class).then(event -> {
             Optional<PlayerCharacter> playerCharacterOpt = characterService.getPlayerCharacter(event.characterId);
             if (playerCharacterOpt.isPresent()) {
-                Player.Id playerId = playerCharacterOpt.get().getPlayerId();
+                Id<Player> playerId = playerCharacterOpt.get().getPlayerId();
                 // player may died because logout, so we have to check if he is still logged it.
                 if (playerService.isPlayerPlaying(playerId)) {
                     scenarioLogic.handlePlayerDead(event.characterId, playerId);

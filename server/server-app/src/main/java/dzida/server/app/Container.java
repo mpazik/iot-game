@@ -37,7 +37,7 @@ public class Container {
     private final InstanceFactory instanceFactory;
     private final PlayerService playerService;
     private final Map<String, InstanceData> instances = new HashMap<>();
-    private final Map<ChannelId, Player.Id> players = new HashMap<>();
+    private final Map<ChannelId, Id<Player>> players = new HashMap<>();
     private int nextPort;
 
     Container(int startPort, URI address, PlayerStoreMapDb playerStore) {
@@ -141,21 +141,21 @@ public class Container {
 
 
         @Override
-        public Optional<Player.Id> findOrCreatePlayer(String nick) {
-            Optional<Player.Id> player = playerService.findPlayer(nick);
+        public Optional<Id<Player>> findOrCreatePlayer(String nick) {
+            Optional<Id<Player>> player = playerService.findPlayer(nick);
             if (player.isPresent()) {
                 return player;
             }
-            return playerService.createPlayer(nick).toOptional().map(Entity::getId);
+            return playerService.createPlayer(nick).toOptional().map(Player::getId);
         }
 
         @Override
-        public boolean canPlayerConnect(Player.Id playerId) {
+        public boolean canPlayerConnect(Id<Player> playerId) {
             return !playerService.isPlayerPlaying(playerId);
         }
 
         @Override
-        public void handleConnection(Channel channel, Player.Id playerId) {
+        public void handleConnection(Channel channel, Id<Player> playerId) {
             players.put(channel.id(), playerId);
             playerService.loginPlayer(playerId);
             instance.addPlayer(channel, playerId);
@@ -169,7 +169,7 @@ public class Container {
         @Override
         public void handleDisconnection(Channel channel) {
             ChannelId channelId = channel.id();
-            Player.Id playerId = players.get(channelId);
+            Id<Player> playerId = players.get(channelId);
             players.remove(channelId);
             playerService.logoutPlayer(playerId);
             instance.removePlayer(channel);

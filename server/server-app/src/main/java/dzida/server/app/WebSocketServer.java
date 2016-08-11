@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import dzida.server.app.rest.ContainerResource;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.store.mapdb.PlayerStoreMapDb;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.player.Player;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -126,10 +127,10 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
         } else {
             URI uri = URI.create(req.uri());
             Optional<String> nickOpt = Optional.ofNullable(queryParams(uri).get("nick"));
-            Optional<Player.Id> playerIdOpt = nickOpt.flatMap(connectionHandler::findOrCreatePlayer);
+            Optional<Id<Player>> playerIdOpt = nickOpt.flatMap(connectionHandler::findOrCreatePlayer);
             Boolean canPlayerConnect = playerIdOpt.map(connectionHandler::canPlayerConnect).orElse(false);
             if (canPlayerConnect) {
-                Player.Id playerId = playerIdOpt.get();
+                Id<Player> playerId = playerIdOpt.get();
                 ChannelFuture channelFuture = handshaker.handshake(ctx.channel(), req);
                 connectionHandler.handleConnection(channelFuture.channel(), playerId);
                 System.out.println(String.format("Player <[%s]> <[%s]> connected", nickOpt.get(), playerIdOpt.get()));
@@ -185,11 +186,11 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     public interface ConnectionHandler {
-        Optional<Player.Id> findOrCreatePlayer(String nick);
+        Optional<Id<Player>> findOrCreatePlayer(String nick);
 
-        boolean canPlayerConnect(Player.Id playerId);
+        boolean canPlayerConnect(Id<Player> playerId);
 
-        void handleConnection(Channel channel, Player.Id playerId);
+        void handleConnection(Channel channel, Id<Player> playerId);
 
         void handleMessage(Channel channel, String request);
 

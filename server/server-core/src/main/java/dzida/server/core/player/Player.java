@@ -1,8 +1,39 @@
 package dzida.server.core.player;
 
+import dzida.server.core.basic.entity.Id;
+
 import java.util.Objects;
 
 public class Player {
+    private final Id<Player> id;
+    private final Data data;
+
+    public Player(Id<Player> id, Player.Data data) {
+        this.id = id;
+        this.data = data;
+    }
+
+    public Id<Player> getId() {
+        return id;
+    }
+
+    public Data getData() {
+        return data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(id, player.id) &&
+                Objects.equals(data, player.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, data);
+    }
 
     public static final class Data extends dzida.server.core.basic.entity.Data {
         private final String nick;
@@ -40,21 +71,6 @@ public class Player {
         @Override
         public int hashCode() {
             return Objects.hash(nick, highestDifficultyLevel, lastDifficultyLevel);
-        }
-    }
-
-
-    public static final class Id extends dzida.server.core.basic.entity.Id<Player.Data> {
-        // to do make it private
-        public Id(long id) {
-            super(id);
-        }
-    }
-
-    public static final class Entity extends dzida.server.core.basic.entity.Entity<Player.Id, Player.Data> {
-
-        public Entity(Id id, Player.Data data) {
-            super(id, data);
         }
     }
 }

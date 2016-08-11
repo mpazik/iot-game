@@ -2,6 +2,7 @@ package dzida.server.app.store.mapdb;
 
 import com.google.gson.Gson;
 import dzida.server.app.Serializer;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerStore;
 import org.mapdb.BTreeKeySerializer;
@@ -30,38 +31,38 @@ public class PlayerStoreMapDb implements PlayerStore {
     }
 
     @Override
-    public Stream<Player.Entity> getAllPlayers() {
+    public Stream<Player> getAllPlayers() {
         return players.entrySet().stream()
                 .map(entry -> {
                     Player.Data data = serializer.fromJson(entry.getValue(), Player.Data.class);
-                    Player.Id id = new Player.Id(entry.getKey());
-                    return new Player.Entity(id, data);
+                    Id<Player> id = new Id<Player>(entry.getKey());
+                    return new Player(id, data);
                 });
     }
 
     @Override
-    public Player.Entity createPlayer(Player.Data playerData) {
+    public Player createPlayer(Player.Data playerData) {
         Long newId = createNewId();
-        Player.Id id = new Player.Id(newId);
-        Player.Entity entity = new Player.Entity(id, playerData);
+        Id<Player> id = new Id<Player>(newId);
+        Player entity = new Player(id, playerData);
         players.put(newId, serializer.toJson(playerData));
         playersByNick.put(playerData.getNick(), newId);
         return entity;
     }
 
     @Override
-    public Optional<Player.Id> findPlayerByNick(String nick) {
-        return Optional.ofNullable(playersByNick.get(nick)).map(Player.Id::new);
+    public Optional<Id<Player>> findPlayerByNick(String nick) {
+        return Optional.ofNullable(playersByNick.get(nick)).map(Id<Player>::new);
     }
 
     @Override
-    public Player.Entity getPlayer(Player.Id playerId) {
+    public Player getPlayer(Id<Player> playerId) {
         Player.Data data = serializer.fromJson(players.get(playerId.getValue()), Player.Data.class);
-        return new Player.Entity(playerId, data);
+        return new Player(playerId, data);
     }
 
     @Override
-    public void updatePlayer(Player.Id playerId, Player.Data player) {
+    public void updatePlayer(Id<Player> playerId, Player.Data player) {
         players.put(playerId.getValue(), serializer.toJson(player));
     }
 

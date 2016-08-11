@@ -1,5 +1,6 @@
 package dzida.server.app;
 
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerStore;
 
@@ -16,7 +17,7 @@ public class Leaderboard {
 
     public List<PlayerScore> getListOfSurvivalRecords() {
         int limit = 10;
-        List<Player.Entity> topPlayerData = getTopPlayerData();
+        List<Player> topPlayerData = getTopPlayerData();
 
         int numOfRecords = Math.min(limit, topPlayerData.size());
         return IntStream.range(0, numOfRecords).mapToObj(index -> {
@@ -25,15 +26,15 @@ public class Leaderboard {
         }).collect(Collectors.toList());
     }
 
-    public PlayerScore getPlayerScore(Player.Id playerId) {
-        Player.Entity player = playerStore.getPlayer(playerId);
-        List<Player.Entity> topPlayerData = getTopPlayerData();
+    public PlayerScore getPlayerScore(Id<Player> playerId) {
+        Player player = playerStore.getPlayer(playerId);
+        List<Player> topPlayerData = getTopPlayerData();
         int playerPosition = getPositionFromIndex(topPlayerData.indexOf(player));
         return new PlayerScore(player.getData().getNick(), player.getData().getHighestDifficultyLevel(), playerPosition);
     }
 
 
-    private List<Player.Entity> getTopPlayerData() {
+    private List<Player> getTopPlayerData() {
         return playerStore.getAllPlayers()
                 .filter(player -> player.getData().getHighestDifficultyLevel() > 0)
                 .collect(Collectors.toList());

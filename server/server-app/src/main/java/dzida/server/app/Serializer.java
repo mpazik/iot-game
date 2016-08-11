@@ -52,19 +52,6 @@ public final class Serializer {
         }
     };
 
-    private static final TypeAdapter<Player.Id> playerIdTypeAdapter = new TypeAdapter<Player.Id>() {
-        @Override
-        public void write(JsonWriter out, Player.Id characterId) throws IOException {
-            out.value(characterId.getValue());
-        }
-
-        @Override
-        public Player.Id read(JsonReader in) throws IOException {
-            int id = in.nextInt();
-            return new Player.Id(id);
-        }
-    };
-
     private static final TypeAdapter<Packet> packetTypeAdapter = new TypeAdapter<Packet>() {
 
         @Override
@@ -83,14 +70,12 @@ public final class Serializer {
 
     private static final Gson gsonForPacket = new GsonBuilder()
             .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
-            .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
             .create();
 
     private static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(CharacterId.class, characterIdTypeAdapter)
-            .registerTypeAdapter(Player.Id.class, playerIdTypeAdapter)
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
 

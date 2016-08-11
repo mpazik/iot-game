@@ -5,6 +5,7 @@ import dzida.server.app.GameEventDispatcher;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.Npc;
 import dzida.server.core.Scheduler;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.CharacterId;
 import dzida.server.core.character.CharacterService;
@@ -50,7 +51,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     }
 
     @Override
-    public void handlePlayerDead(CharacterId characterId, Player.Id playerId) {
+    public void handlePlayerDead(CharacterId characterId, Id<Player> playerId) {
         if (survivalScenarioState.end) {
             return;
         }
@@ -73,7 +74,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     private void victory() {
         List<PlayerCharacter> players = characterService.getCharactersOfType(PlayerCharacter.class);
         players.stream().forEach(playerCharacter -> {
-            Player.Id playerId = playerCharacter.getPlayerId();
+            Id<Player> playerId = playerCharacter.getPlayerId();
             Player.Data player = playerService.getPlayer(playerId).getData();
             if (survivalScenario.difficultyLevel > player.getHighestDifficultyLevel()) {
                 Player.Data newPlayerData = new Player.Data(player.getNick(), survival.getDifficultyLevel(), player.getLastDifficultyLevel());

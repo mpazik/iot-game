@@ -2,6 +2,7 @@ package dzida.server.core.player;
 
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Outcome;
+import dzida.server.core.basic.entity.Id;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,47 +10,47 @@ import java.util.Optional;
 
 public class PlayerService {
     private final PlayerStore playerStore;
-    private final Map<Player.Id, Player.Entity> playingPlayers = new HashMap<>();
+    private final Map<Id<Player>, Player> playingPlayers = new HashMap<>();
 
     public PlayerService(PlayerStore playerStore) {
         this.playerStore = playerStore;
     }
 
 
-    public Player.Entity getPlayer(Player.Id playerId) {
+    public Player getPlayer(Id<Player> playerId) {
         return playingPlayers.get(playerId);
     }
 
-    public Optional<Player.Id> findPlayer(String nick) {
+    public Optional<Id<Player>> findPlayer(String nick) {
         return playerStore.findPlayerByNick(nick);
     }
 
-    public void loginPlayer(Player.Id playerId) {
-        Player.Entity player = playerStore.getPlayer(playerId);
+    public void loginPlayer(Id<Player> playerId) {
+        Player player = playerStore.getPlayer(playerId);
         playingPlayers.put(playerId, player);
 
     }
 
-    public Outcome<Player.Entity> createPlayer(String nick) {
-        Optional<Player.Id> player = findPlayer(nick);
+    public Outcome<Player> createPlayer(String nick) {
+        Optional<Id<Player>> player = findPlayer(nick);
         if (player.isPresent()) {
-            return Outcome.<Player.Entity>error(new Error("player already exists"));
+            return Outcome.error(new Error("player already exists"));
         }
         Player.Data playerData = new Player.Data(nick, 0, 1);
 
-        Player.Entity playerEntity = playerStore.createPlayer(playerData);
+        Player playerEntity = playerStore.createPlayer(playerData);
         return Outcome.ok(playerEntity);
     }
 
-    public boolean isPlayerPlaying(Player.Id playerId) {
+    public boolean isPlayerPlaying(Id<Player> playerId) {
         return playingPlayers.containsKey(playerId);
     }
 
-    public void logoutPlayer(Player.Id playerId) {
+    public void logoutPlayer(Id<Player> playerId) {
         playingPlayers.remove(playerId);
     }
 
-    public void updatePlayerData(Player.Id playerId, Player.Data playerData) {
+    public void updatePlayerData(Id<Player> playerId, Player.Data playerData) {
         playerStore.updatePlayer(playerId, playerData);
     }
 }

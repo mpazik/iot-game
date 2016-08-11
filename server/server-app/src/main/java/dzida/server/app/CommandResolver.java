@@ -83,7 +83,7 @@ public class CommandResolver {
         return characterCommandHandler.killCharacter(characterId);
     }
 
-    public List<GameEvent> dispatchPacket(Player.Id playerId, CharacterId characterId, String payload, Consumer<GameEvent> send) {
+    public List<GameEvent> dispatchPacket(Id<Player> playerId, CharacterId characterId, String payload, Consumer<GameEvent> send) {
         try {
             JsonArray messages = new Gson().fromJson(payload, JsonArray.class);
             Stream<JsonElement> stream = StreamSupport.stream(((Iterable<JsonElement>) messages::iterator).spliterator(), false);
@@ -101,7 +101,7 @@ public class CommandResolver {
         }
     }
 
-    private List<GameEvent> dispatchMessage(Player.Id playerId, CharacterId characterId, int type, JsonElement data, Consumer<GameEvent> send) {
+    private List<GameEvent> dispatchMessage(Id<Player> playerId, CharacterId characterId, int type, JsonElement data, Consumer<GameEvent> send) {
         switch (type) {
             case Move:
                 return positionCommandHandler.move(characterId, serializer.fromJson(data, Point.class), PositionService.PlayerSpeed);
