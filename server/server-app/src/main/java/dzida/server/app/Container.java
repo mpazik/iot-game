@@ -4,175 +4,100 @@ import dzida.server.app.store.http.WorldMapStoreHttp;
 import dzida.server.app.store.http.loader.SkillLoader;
 import dzida.server.app.store.http.loader.StaticDataLoader;
 import dzida.server.app.store.http.loader.WorldMapLoader;
-import dzida.server.app.store.mapdb.PlayerStoreMapDb;
 import dzida.server.app.store.mapdb.WorldObjectStoreMapDbFactory;
 import dzida.server.app.store.memory.SkillStoreInMemory;
-import dzida.server.core.basic.Error;
-import dzida.server.core.basic.Result;
-import dzida.server.core.basic.entity.Entity;
+import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
+import dzida.server.core.basic.entity.Key;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 import dzida.server.core.skill.Skill;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.concurrent.Future;
 
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 public class Container {
-    private final URI address;
-    private final EventLoopGroup bossGroup;
+    private final Scheduler scheduler;
     private final InstanceFactory instanceFactory;
-    private final PlayerService playerService;
-    private final Map<String, InstanceData> instances = new HashMap<>();
-    private final Map<ChannelId, Id<Player>> players = new HashMap<>();
-    private int nextPort;
+    private final Map<Key<Instance>, Instance> instances = new HashMap<>();
+    private final Map<Id<Player>, dzida.server.app.network.ConnectionHandler.ConnectionController> connectionControllers = new HashMap<>();
+    private final Map<Id<Player>, Key<Instance>> playersInstances = new HashMap<>();
 
-    Container(int startPort, URI address, PlayerStoreMapDb playerStore) {
-        bossGroup = new NioEventLoopGroup();
-        playerService = new PlayerService(playerStore);
+    private final InstanceConnectionHandler connectionHandler;
+
+    Container(PlayerService playerService, Scheduler scheduler, Gate gate) {
+        this.scheduler = scheduler;
         StaticDataLoader staticDataLoader = new StaticDataLoader();
 
         Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
         WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
 
-        instanceFactory = new InstanceFactory(playerService, new Arbiter(this), new SkillStoreInMemory(skills), worldMapStore, new WorldObjectStoreMapDbFactory());
-        nextPort = startPort;
-        this.address = address;
+        instanceFactory = new InstanceFactory(playerService, gate, new SkillStoreInMemory(skills), worldMapStore, new WorldObjectStoreMapDbFactory(), this);
+        connectionHandler = new InstanceConnectionHandler() {
+
+            @Override
+            public void playerConnected(Id<Player> playerId, dzida.server.app.network.ConnectionHandler.ConnectionController connectionController) {
+                connectionControllers.put(playerId, connectionController);
+                playerService.loginPlayer(playerId);
+            }
+
+            @Override
+            public void playerDisconnected(Id<Player> playerId) {
+                Key<Instance> instanceKey = gate.playerInstance(playerId);
+                Instance instance = instances.get(instanceKey);
+                playerService.logoutPlayer(playerId);
+                instance.removePlayer(playerId);
+                playersInstances.remove(playerId);
+                connectionControllers.remove(playerId);
+            }
+
+            @Override
+            public void playerJoinedToInstance(Id<Player> playerId, Key<Instance> instanceKey) {
+                if (playersInstances.containsKey(playerId)) {
+                    Instance playerPreviousInstance = instances.get(playersInstances.get(playerId));
+                    playerPreviousInstance.removePlayer(playerId);
+                }
+                playersInstances.put(playerId, instanceKey);
+                instances.get(instanceKey).addPlayer(playerId, connectionControllers.get(playerId)::send);
+            }
+
+            @Override
+            public void handleCommand(Id<Player> playerId, String message) {
+                Key<Instance> instanceKey = playersInstances.get(playerId);
+                instances.get(instanceKey).receiveMessage(playerId, message);
+            }
+        };
     }
 
-    public Result canPlayerLogIn(String nick) {
-        // since there is auto account creator if player does not exist it can log in.
-        Boolean isPlayerPlaying = playerService.findPlayer(nick).map(playerService::isPlayerPlaying).orElse(false);
-        if (isPlayerPlaying) {
-            return Result.error(new Error("Player is already logged in."));
-        }
-        return Result.ok();
-    }
 
-    public void startInstance(String instanceKey, String instanceType, StartInstanceCallback callback, Integer difficultyLevel) {
-        EventLoopGroup workerGroup = new NioEventLoopGroup(1);
-        EventLoop eventLoop = workerGroup.next();
-        Optional<Instance> instance = instanceFactory.createInstance(instanceKey, instanceType, eventLoop, difficultyLevel);
+    public Key<Instance> startInstance(String instanceType, Integer difficultyLevel) {
+        Key<Instance> instanceKey = generateInstanceKey(instanceType, difficultyLevel);
+        Optional<Instance> instance = instanceFactory.createInstance(instanceKey.getValue(), instanceType, scheduler, difficultyLevel);
         if (!instance.isPresent()) {
             System.err.println("map descriptor is not valid: " + instanceType);
-            return;
+            return instanceKey;
         }
         instance.get().start();
-        try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        public void initChannel(SocketChannel ch) {
-                            ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new HttpServerCodec());
-                            pipeline.addLast(new HttpObjectAggregator(65536));
-                            pipeline.addLast(new WebSocketServerHandler(new ConnectionHandler(instance.get())));
-                        }
-                    });
-            int instancePort = nextPort;
-            Channel instanceChannel = b.bind(instancePort).sync().channel();
-            instances.put(instanceKey, new InstanceData(instanceKey, instanceChannel, workerGroup));
-            URI instanceUri = UriBuilder.fromUri(address).port(instancePort).build();
-            callback.call(instanceUri);
-            this.nextPort += 1;
-            System.out.println(String.format("Started instance:%s on port:%s", instanceKey, instancePort));
-        } catch (InterruptedException e) {
-            System.err.println(e.toString());
-        }
+        instances.put(instanceKey, instance.get());
+        return instanceKey;
     }
 
-    public void killInstance(String instanceKey) {
-        InstanceData instance = instances.get(instanceKey);
-        instance.workerGroup.shutdownGracefully();
-        System.out.println("Killed instance: " + instance.instanceKey);
+    private Key<Instance> generateInstanceKey(String instanceType, Integer difficultyLevel) {
+        if (difficultyLevel == null) {
+            return new Key<>(instanceType);
+        }
+        return new Key<>(instanceType + '_' + difficultyLevel + '_' + new Random().nextLong());
     }
 
-    public Future<?> shutdownGracefully() {
-        // it won't be closed because instances are blocking.
-        instances.values().stream().forEach(instance -> {
-            try {
-                instance.instanceChannel.closeFuture().sync();
-                instance.workerGroup.shutdownGracefully();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        return bossGroup.shutdownGracefully();
+    public void killInstance(Key<Instance> instanceKey) {
+        Instance instance = instances.get(instanceKey);
+        instance.shutdown();
+        instances.remove(instanceKey);
     }
 
-    public interface StartInstanceCallback {
-        void call(URI address);
-    }
-
-    private static final class InstanceData {
-        String instanceKey;
-        Channel instanceChannel;
-        EventLoopGroup workerGroup;
-
-        public InstanceData(String instanceKey, Channel instanceChannel, EventLoopGroup workerGroup) {
-            this.instanceKey = instanceKey;
-            this.instanceChannel = instanceChannel;
-            this.workerGroup = workerGroup;
-        }
-    }
-
-    private class ConnectionHandler implements WebSocketServerHandler.ConnectionHandler {
-        private final Instance instance;
-
-        ConnectionHandler(Instance instance) {
-            this.instance = instance;
-        }
-
-
-        @Override
-        public Optional<Id<Player>> findOrCreatePlayer(String nick) {
-            Optional<Id<Player>> player = playerService.findPlayer(nick);
-            if (player.isPresent()) {
-                return player;
-            }
-            return playerService.createPlayer(nick).toOptional().map(Player::getId);
-        }
-
-        @Override
-        public boolean canPlayerConnect(Id<Player> playerId) {
-            return !playerService.isPlayerPlaying(playerId);
-        }
-
-        @Override
-        public void handleConnection(Channel channel, Id<Player> playerId) {
-            players.put(channel.id(), playerId);
-            playerService.loginPlayer(playerId);
-            instance.addPlayer(channel, playerId);
-        }
-
-        @Override
-        public void handleMessage(Channel channel, String request) {
-            instance.parseMessage(channel, request);
-        }
-
-        @Override
-        public void handleDisconnection(Channel channel) {
-            ChannelId channelId = channel.id();
-            Id<Player> playerId = players.get(channelId);
-            players.remove(channelId);
-            playerService.logoutPlayer(playerId);
-            instance.removePlayer(channel);
-        }
+    public InstanceConnectionHandler getConnectionHandler() {
+        return connectionHandler;
     }
 }

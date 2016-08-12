@@ -12,6 +12,10 @@ public interface Result {
         return new ErrorResult(error);
     }
 
+    static Result error(String errorMessage) {
+        return error(new Error(errorMessage));
+    }
+
     void consume(Runnable onValid, Consumer<Error> onError);
 
     final class ValidResult implements Result {

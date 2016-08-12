@@ -27,7 +27,7 @@ define(function (require, exports, module) {
     const MainPlayer = require('../store/main-player');
     const ItemStore = require('../store/item');
     const network = new Network();
-    var serverAddress;
+    var instanceKey = Configuration.defaultInstance;
     var userNick;
 
     var setState = null;
@@ -59,7 +59,7 @@ define(function (require, exports, module) {
             switch (networkState) {
                 case Network.State.DISCONNECTED:
                     network.state.unsubscribe(listener);
-                    serverAddress = data.address;
+                    instanceKey = data.instanceKey;
                     connect();
                     break;
             }
@@ -127,7 +127,9 @@ define(function (require, exports, module) {
     }
 
     function goToHome() {
-        network.sendCommands([new Commands.GoToHome()]);
+        disconnect();
+        instanceKey = Configuration.defaultInstance;
+        connect();
     }
 
     function getCookie(cname) {
@@ -160,9 +162,6 @@ define(function (require, exports, module) {
     }
 
     function connect() {
-        if (serverAddress == null) {
-            throw '<[serverAddress]> has to be defined before game can connect to the server';
-        }
         if (userNick == null) {
             getAndCheckUserNick().then(nick=> {
                 userNick = nick;
@@ -174,7 +173,7 @@ define(function (require, exports, module) {
                 setState('need-authentication');
             });
         } else {
-            network.connect(serverAddress + '?nick=' + userNick);
+            network.connect(`${Configuration.serverAddress}?authToken=${userNick}:${instanceKey}`);
             setState('connecting');
         }
     }
@@ -215,9 +214,6 @@ define(function (require, exports, module) {
         init: function (gameElement) {
             loadGameAssets();
             Render.init(gameElement);
-        },
-        setAddress: function (address) {
-            serverAddress = address;
         },
         setUser: function (nick) {
             document.cookie = "nick=" + nick;

@@ -24,7 +24,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>dzida.server.app.WebSocketServer</mainClass>
+                            <mainClass>dzida.server.app.GameServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -43,7 +43,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.5.0</version>
                 <configuration>
-                    <mainClass>dzida.server.app.WebSocketServer</mainClass>
+                    <mainClass>dzida.server.app.GameServer</mainClass>
                 </configuration>
             </plugin>
         </plugins>

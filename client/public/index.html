@@ -81,7 +81,6 @@
 
             require(['src/ui/game', 'src/ui/game-ui'], function () {
                 const game = document.createElement("dzida-game");
-                game.setAttribute("url", Configuration.serverAddress);
                 document.body.appendChild(game);
 
                 const ui = document.createElement("game-ui");

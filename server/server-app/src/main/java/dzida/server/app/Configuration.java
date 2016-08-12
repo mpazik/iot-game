@@ -20,8 +20,8 @@ public class Configuration {
         return Integer.parseInt(System.getProperty("restPort", "7000"));
     }
 
-    public static int getFirstInstancePort() {
-        return Integer.parseInt(System.getProperty("instancePort", "7001"));
+    public static int getGameServerPort() {
+        return Integer.parseInt(System.getProperty("gameServerPort", "7001"));
     }
 
     /**
@@ -45,8 +45,9 @@ public class Configuration {
         System.out.println("dev mode: " + isDevMode());
         System.out.println("container host: " + getContainerHost());
         System.out.println("container rest port: " + getContainerRestPort());
-        System.out.println("container first instance port: " + getFirstInstancePort());
-        System.out.println("static server address: " + getStaticServerAddress());
+        System.out.println("container first instance port: " + getGameServerPort());
+        System.out.println("static server instanceKey: " + getStaticServerAddress());
+        //noinspection ConfusingArgumentToVarargsMethod
         System.out.println("initial instances: " + String.join(",", getInitialInstances()));
         System.out.println("server time offset " + getServerTimeOffset());
         System.out.println("---------------------\n");

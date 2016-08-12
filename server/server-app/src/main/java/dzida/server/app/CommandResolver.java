@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import dzida.server.core.basic.entity.Id;
+import dzida.server.core.basic.entity.Key;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.model.Character;
@@ -22,7 +23,6 @@ import dzida.server.core.world.object.WorldObject;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,7 +34,6 @@ public class CommandResolver {
     private static final int UseSkillOnCharacter = 3;
     private static final int UseSkillOnWorldMap = 4;
     private static final int JoinBattle = 7;
-    private static final int GoToHome = 9;
     private static final int SendMessage = 10;
     private static final int UseSkillOnWorldObject = 11;
 
@@ -48,7 +47,8 @@ public class CommandResolver {
     private final TimeSynchroniser timeSynchroniser;
     private final SkillCommandHandler skillCommandHandler;
     private final CharacterCommandHandler characterCommandHandler;
-    private final Arbiter arbiter;
+    private final Gate gate;
+    private final Container container;
     private final BackdoorCommandResolver backdoorCommandResolver;
     private final PlayerService playerService;
     private final ChatService chatService;
@@ -58,12 +58,13 @@ public class CommandResolver {
             SkillCommandHandler skillCommandHandler,
             CharacterCommandHandler characterCommandHandler,
             TimeSynchroniser timeSynchroniser,
-            Arbiter arbiter, PlayerService playerService, ChatService chatService) {
+            Gate gate, Container container, PlayerService playerService, ChatService chatService) {
         this.positionCommandHandler = positionCommandHandler;
         this.timeSynchroniser = timeSynchroniser;
         this.skillCommandHandler = skillCommandHandler;
         this.characterCommandHandler = characterCommandHandler;
-        this.arbiter = arbiter;
+        this.gate = gate;
+        this.container = container;
         this.playerService = playerService;
         this.chatService = chatService;
 
@@ -126,14 +127,10 @@ public class CommandResolver {
                 Player.Data playerData = playerService.getPlayer(playerId).getData();
                 Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), difficultyLevel);
                 playerService.updatePlayerData(playerId, updatedPlayerData);
-                String instanceKey = map + new Random().nextInt();
-                arbiter.startInstance(instanceKey, map, address -> send.accept(new JoinToInstance(address.toString())), difficultyLevel);
-                return Collections.emptyList();
+                Key<Instance> instanceKey = container.startInstance(map, difficultyLevel);
+                return Collections.singletonList(new JoinToInstance(instanceKey));
             case Backdoor:
                 return backdoorCommandResolver.resolveCommand(characterId, data, send);
-            case GoToHome:
-                send.accept(new JoinToInstance(arbiter.getHomeInstnceAddress().toString()));
-                return Collections.emptyList();
             case SendMessage:
                 String message = data.getAsJsonObject().get("message").getAsString();
                 return chatService.handleMessage(playerId, message);
@@ -164,10 +161,10 @@ public class CommandResolver {
     }
 
     private static class JoinToInstance implements GameEvent {
-        final String address;
+        final Key<Instance> instanceKey;
 
-        JoinToInstance(String address) {
-            this.address = address;
+        JoinToInstance(Key<Instance> instanceKey) {
+            this.instanceKey = instanceKey;
         }
 
         @Override

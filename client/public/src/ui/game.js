@@ -11,7 +11,6 @@ define(function (require, exports, module) {
         attachedCallback: {
             value: function () {
                 const gameRender = document.getElementById('game-render');
-                App.setAddress(this.getAttribute("url"));
                 App.init(gameRender);
 
                 window.addEventListener('mousedown', function (event) {

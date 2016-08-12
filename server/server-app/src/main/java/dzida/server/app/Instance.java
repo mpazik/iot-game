@@ -34,13 +34,6 @@ import dzida.server.core.world.object.WorldObjectStore;
 import dzida.server.core.world.pathfinding.CollisionBitMap;
 import dzida.server.core.world.pathfinding.PathFinder;
 import dzida.server.core.world.pathfinding.PathFinderFactory;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelId;
-import io.netty.channel.DefaultEventLoop;
-import io.netty.channel.EventLoop;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,18 +51,14 @@ public class Instance {
     private final CharacterService characterService;
     private final String instanceKey;
 
-    private final Map<ChannelId, Id<Player>> playerChannels = new HashMap<>();
-    private final Map<ChannelId, List<Object>> messagesToSend = new HashMap<>();
+    private final Map<Id<Player>, Consumer<String>> playerSends = new HashMap<>();
+    private final Map<Id<Player>, List<Object>> messagesToSend = new HashMap<>();
     private final Map<Id<Player>, Id<Character>> characterIds = new HashMap<>();
 
-    private final ChannelGroup channels = new DefaultChannelGroup(new DefaultEventLoop());
     private final GameLogic gameLogic;
-    private final Arbiter arbiter;
-    private final boolean isOnlyScenario;
 
-    public Instance(String instanceKey, Scenario scenario, EventLoop eventLoop, PlayerService playerService, Arbiter arbiter, SkillStore skillStore, WorldMapStore worldMapStore, WorldObjectStore worldObjectStore) {
+    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler, PlayerService playerService, Gate gate, SkillStore skillStore, WorldMapStore worldMapStore, WorldObjectStore worldObjectStore, Container container) {
         this.playerService = playerService;
-        this.arbiter = arbiter;
         this.instanceKey = instanceKey;
         WorldMap worldMap = worldMapStore.getMap(scenario.getWorldMapKey());
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
@@ -84,11 +73,8 @@ public class Instance {
         PositionService positionService = PositionService.create(positionStore, timeService);
 
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
-        isOnlyScenario = survivalScenario.isPresent();
 
         gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldMapService, skillService, worldObjectService, scenario, timeService);
-
-        Scheduler scheduler = new SchedulerImpl(eventLoop);
 
         CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, worldMapStore.getTileset(worldMap.getTileset()));
         PathFinder pathFinder = Profilings.printTime("Collision map built", () -> new PathFinderFactory().createPathFinder(collisionBitMap));
@@ -96,7 +82,7 @@ public class Instance {
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
 
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, arbiter, playerService, chatService);
+        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, gate, container, playerService, chatService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
@@ -119,68 +105,66 @@ public class Instance {
         return Optional.empty();
     }
 
-    public void addPlayer(Channel channel, Id<Player> playerId) {
-        channels.add(channel);
+    public void addPlayer(Id<Player> playerId, Consumer<String> sendToPlayer) {
         Id<Character> characterId = new Id<>((int) Math.round((Math.random() * 100000)));
         characterIds.put(playerId, characterId);
-        ChannelId channelId = channel.id();
-        playerChannels.put(channelId, playerId);
-        messagesToSend.put(channelId, Lists.newArrayList());
+        messagesToSend.put(playerId, Lists.newArrayList());
+        playerSends.put(playerId, sendToPlayer);
         Player playerEntity = playerService.getPlayer(playerId);
         String nick = playerEntity.getData().getNick();
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
         gameLogic.playerJoined(character);
         gameEventDispatcher.dispatchEvents(commandResolver.createCharacter(character));
-        gameEventDispatcher.registerCharacter(character, addDataToSend(channel));
+        gameEventDispatcher.registerCharacter(character, addDataToSend(playerId));
         gameEventDispatcher.sendInitialPacket(characterId, playerId, playerEntity);
         System.out.println(String.format("Instance: %s - character %s joined", instanceKey, characterId));
         send();
     }
 
-    public void removePlayer(Channel channel) {
-        channels.remove(channel);
-        ChannelId channelId = channel.id();
-        Id<Player> playerId = playerChannels.get(channelId);
+    public void removePlayer(Id<Player> playerId) {
         Id<Character> characterId = characterIds.get(playerId);
+        playerSends.remove(playerId);
         characterIds.remove(playerId);
-        playerChannels.remove(channelId);
-        messagesToSend.remove(channelId);
+        messagesToSend.remove(playerId);
         gameEventDispatcher.unregisterCharacter(characterId);
         if (characterService.isCharacterLive(characterId)){
             gameEventDispatcher.dispatchEvents(commandResolver.removeCharacter(characterId));
         }
         System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
         send();
-        if (channels.size() == 0 && isOnlyScenario) {
-            arbiter.killInstance(instanceKey);
-        }
     }
 
-    public void parseMessage(Channel channel, String request) {
-        Id<Player> playerId = playerChannels.get(channel.id());
+    public void receiveMessage(Id<Player> playerId, String message) {
         Id<Character> characterId = characterIds.get(playerId);
-        List<GameEvent> gameEvents = commandResolver.dispatchPacket(playerId, characterId, request, addDataToSend(channel));
+        List<GameEvent> gameEvents = commandResolver.dispatchPacket(playerId, characterId, message, addDataToSend(playerId));
         gameEventDispatcher.dispatchEvents(gameEvents);
         send();
     }
 
-    private Consumer<GameEvent> addDataToSend(Channel channel) {
-        return (data) -> addDataToSend(channel, new Packet(data.getId(), data));
+    private Consumer<GameEvent> addDataToSend(Id<Player> playerId) {
+        return (data) -> addDataToSend(playerId, new Packet(data.getId(), data));
     }
 
-    private void addDataToSend(Channel channel, Object data) {
-        messagesToSend.get(channel.id()).add(data);
+    private void addDataToSend(Id<Player> playerId, Object data) {
+        messagesToSend.get(playerId).add(data);
     }
 
     private void send() {
-        for (Channel channel : channels) {
-            List<Object> messagesToSend = this.messagesToSend.get(channel.id());
+        for (Id<Player> playerId: messagesToSend.keySet()) {
+            List<Object> messagesToSend = this.messagesToSend.get(playerId);
             if (messagesToSend.isEmpty()) {
                 continue;
             }
-            channel.writeAndFlush(new TextWebSocketFrame(getSerializer().toJson(messagesToSend)));
+            playerSends.get(playerId).accept(getSerializer().toJson(messagesToSend));
             messagesToSend.clear();
         }
+    }
+
+    public void shutdown() {
+    }
+
+    public boolean isEmpty() {
+        return playerSends.isEmpty();
     }
 }
 
