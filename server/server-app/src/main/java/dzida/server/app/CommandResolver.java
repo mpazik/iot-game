@@ -65,13 +65,7 @@ public class CommandResolver {
         return characterCommandHandler.killCharacter(characterId);
     }
 
-    public List<GameEvent> doCommands(Id<Player> playerId, Id<Character> characterId, List<Command> commands, Consumer<GameEvent> send) {
-        return commands.stream()
-                .flatMap(command -> doCommand(command, playerId, characterId, send).stream())
-                .collect(Collectors.toList());
-    }
-
-    private List<GameEvent> doCommand(Command commandToProcess, Id<Player> playerId, Id<Character> characterId, Consumer<GameEvent> send) {
+    public List<GameEvent> handleCommand(Command commandToProcess, Id<Player> playerId, Id<Character> characterId, Consumer<GameEvent> send) {
         return whenTypeOf(commandToProcess)
 
                 .is(MoveCommand.class)

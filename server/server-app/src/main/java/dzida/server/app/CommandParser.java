@@ -37,9 +37,9 @@ public class CommandParser {
     public CommandParser() {
     }
 
-    public List<Command> readPacket(String payload) {
+    public List<Command> readPacket(String packet) {
         try {
-            JsonArray messages = new Gson().fromJson(payload, JsonArray.class);
+            JsonArray messages = new Gson().fromJson(packet, JsonArray.class);
             Stream<JsonElement> stream = StreamSupport.stream(messages.spliterator(), false);
             return stream.map(element -> {
                 JsonArray message = element.getAsJsonArray();

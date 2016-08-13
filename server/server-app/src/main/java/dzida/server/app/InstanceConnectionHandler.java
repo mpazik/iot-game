@@ -1,5 +1,6 @@
 package dzida.server.app;
 
+import dzida.server.app.command.Command;
 import dzida.server.app.network.ConnectionHandler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
@@ -13,5 +14,5 @@ public interface InstanceConnectionHandler {
 
     void playerJoinedToInstance(Id<Player> playerId, Key<Instance> instanceKey);
 
-    void handleCommand(Id<Player> playerId, String message);
+    void handleCommand(Id<Player> playerId, Command command);
 }

@@ -1,5 +1,6 @@
 package dzida.server.app;
 
+import dzida.server.app.command.Command;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
@@ -56,9 +57,9 @@ public class Container {
             }
 
             @Override
-            public void handleCommand(Id<Player> playerId, String message) {
+            public void handleCommand(Id<Player> playerId, Command command) {
                 Key<Instance> instanceKey = playersInstances.get(playerId);
-                instances.get(instanceKey).receiveMessage(playerId, message);
+                instances.get(instanceKey).handleCommand(playerId, command);
             }
         };
     }

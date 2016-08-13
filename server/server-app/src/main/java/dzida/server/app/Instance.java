@@ -56,7 +56,6 @@ public class Instance {
     private final PlayerService playerService;
     private final CharacterService characterService;
     private final String instanceKey;
-    private final CommandParser commandParser;
 
     private final Map<Id<Player>, Consumer<String>> playerSends = new HashMap<>();
     private final Map<Id<Player>, List<Object>> messagesToSend = new HashMap<>();
@@ -97,7 +96,6 @@ public class Instance {
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
 
-        commandParser = new CommandParser();
         commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, container, playerService, chatService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
@@ -150,10 +148,9 @@ public class Instance {
         send();
     }
 
-    public void receiveMessage(Id<Player> playerId, String message) {
+    public void handleCommand(Id<Player> playerId, Command command) {
         Id<Character> characterId = characterIds.get(playerId);
-        List<Command> commands = commandParser.readPacket(message);
-        List<GameEvent> gameEvents = commandResolver.doCommands(playerId, characterId, commands, addDataToSend(playerId));
+        List<GameEvent> gameEvents = commandResolver.handleCommand(command, playerId, characterId, addDataToSend(playerId));
         gameEventDispatcher.dispatchEvents(gameEvents);
         send();
     }

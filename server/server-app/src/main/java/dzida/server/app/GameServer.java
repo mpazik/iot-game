@@ -51,11 +51,13 @@ public final class GameServer {
     private static final class ConnectionHandlerImpl implements ConnectionHandler<Id<Player>> {
         private final Gate gate;
         private final InstanceConnectionHandler instanceConnectionHandler;
+        private final CommandParser commandParser;
 
         private ConnectionHandlerImpl(Gate gate, InstanceConnectionHandler instanceConnectionHandler) {
             this.gate = gate;
             this.instanceConnectionHandler = instanceConnectionHandler;
             gate.subscribePlayerJoinedToInstance(instanceConnectionHandler::playerJoinedToInstance);
+            commandParser = new CommandParser();
         }
 
         @Override
@@ -70,8 +72,8 @@ public final class GameServer {
         }
 
         @Override
-        public void handleMessage(Id<Player> playerId, String message) {
-            instanceConnectionHandler.handleCommand(playerId, message);
+        public void handleMessage(Id<Player> playerId, String packet) {
+            commandParser.readPacket(packet).forEach(command -> instanceConnectionHandler.handleCommand(playerId, command));
         }
 
         @Override
