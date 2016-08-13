@@ -1,6 +1,7 @@
 package dzida.server.app;
 
 import com.google.common.collect.Lists;
+import dzida.server.app.command.Command;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
@@ -55,6 +56,7 @@ public class Instance {
     private final PlayerService playerService;
     private final CharacterService characterService;
     private final String instanceKey;
+    private final CommandParser commandParser;
 
     private final Map<Id<Player>, Consumer<String>> playerSends = new HashMap<>();
     private final Map<Id<Player>, List<Object>> messagesToSend = new HashMap<>();
@@ -62,7 +64,7 @@ public class Instance {
 
     private final GameLogic gameLogic;
 
-    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler, PlayerService playerService, Gate gate, Container container) {
+    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler, PlayerService playerService, Container container) {
         this.playerService = playerService;
         this.instanceKey = instanceKey;
 
@@ -95,7 +97,8 @@ public class Instance {
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
 
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, gate, container, playerService, chatService);
+        commandParser = new CommandParser();
+        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, container, playerService, chatService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
@@ -149,7 +152,8 @@ public class Instance {
 
     public void receiveMessage(Id<Player> playerId, String message) {
         Id<Character> characterId = characterIds.get(playerId);
-        List<GameEvent> gameEvents = commandResolver.dispatchPacket(playerId, characterId, message, addDataToSend(playerId));
+        List<Command> commands = commandParser.readPacket(message);
+        List<GameEvent> gameEvents = commandResolver.doCommands(playerId, characterId, commands, addDataToSend(playerId));
         gameEventDispatcher.dispatchEvents(gameEvents);
         send();
     }

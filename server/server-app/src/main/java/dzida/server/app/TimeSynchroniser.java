@@ -1,5 +1,6 @@
 package dzida.server.app;
 
+import dzida.server.app.command.Command;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.time.TimeService;
 
@@ -15,7 +16,7 @@ public class TimeSynchroniser {
         return new TimeSyncResponse(timeSyncRequest.clientTime, timeService.getCurrentMillis());
     }
 
-    public static final class TimeSyncRequest {
+    public static final class TimeSyncRequest implements Command {
         private final long clientTime;
 
         public TimeSyncRequest(long clientTime) {

@@ -18,7 +18,6 @@ public class Container {
     private final Map<Id<Player>, dzida.server.app.network.ConnectionHandler.ConnectionController> connectionControllers = new HashMap<>();
     private final Map<Id<Player>, Key<Instance>> playersInstances = new HashMap<>();
     private final MapDescriptorStore mapDescriptorStore;
-    private final Gate gate;
     private final PlayerService playerService;
 
     private final InstanceConnectionHandler connectionHandler;
@@ -26,7 +25,6 @@ public class Container {
     Container(PlayerService playerService, Scheduler scheduler, Gate gate) {
         this.scheduler = scheduler;
         this.mapDescriptorStore = new MapDescriptorStore();
-        this.gate = gate;
         this.playerService = playerService;
 
         connectionHandler = new InstanceConnectionHandler() {
@@ -71,7 +69,7 @@ public class Container {
         String instanceKey1 = instanceKey.getValue();
 
         Optional<Instance> instance = mapDescriptorStore.getDescriptor(instanceType, difficultyLevel)
-                .map(mapDescriptor -> new Instance(instanceKey1, mapDescriptor, scheduler, playerService, gate, this));
+                .map(mapDescriptor -> new Instance(instanceKey1, mapDescriptor, scheduler, playerService, this));
 
         if (!instance.isPresent()) {
             System.err.println("map descriptor is not valid: " + instanceType);
