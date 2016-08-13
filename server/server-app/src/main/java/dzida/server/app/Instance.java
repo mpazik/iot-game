@@ -5,7 +5,13 @@ import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
 import dzida.server.app.npc.NpcBehaviour;
+import dzida.server.app.store.http.WorldMapStoreHttp;
+import dzida.server.app.store.http.loader.SkillLoader;
+import dzida.server.app.store.http.loader.StaticDataLoader;
+import dzida.server.app.store.http.loader.WorldMapLoader;
+import dzida.server.app.store.mapdb.WorldObjectStoreMapDb;
 import dzida.server.app.store.memory.PositionStoreInMemory;
+import dzida.server.app.store.memory.SkillStoreInMemory;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterCommandHandler;
@@ -22,15 +28,14 @@ import dzida.server.core.position.PositionStore;
 import dzida.server.core.profiling.Profilings;
 import dzida.server.core.scenario.SurvivalScenarioFactory;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
+import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
 import dzida.server.core.skill.SkillStore;
 import dzida.server.core.time.TimeService;
 import dzida.server.core.world.map.WorldMap;
 import dzida.server.core.world.map.WorldMapService;
-import dzida.server.core.world.map.WorldMapStore;
 import dzida.server.core.world.object.WorldObjectService;
-import dzida.server.core.world.object.WorldObjectStore;
 import dzida.server.core.world.pathfinding.CollisionBitMap;
 import dzida.server.core.world.pathfinding.PathFinder;
 import dzida.server.core.world.pathfinding.PathFinderFactory;
@@ -57,9 +62,17 @@ public class Instance {
 
     private final GameLogic gameLogic;
 
-    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler, PlayerService playerService, Gate gate, SkillStore skillStore, WorldMapStore worldMapStore, WorldObjectStore worldObjectStore, Container container) {
+    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler, PlayerService playerService, Gate gate, Container container) {
         this.playerService = playerService;
         this.instanceKey = instanceKey;
+
+        StaticDataLoader staticDataLoader = new StaticDataLoader();
+
+        Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
+        WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
+        SkillStore skillStore = new SkillStoreInMemory(skills);
+        WorldObjectStoreMapDb worldObjectStore = new WorldObjectStoreMapDb(instanceKey);
+
         WorldMap worldMap = worldMapStore.getMap(scenario.getWorldMapKey());
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
         ChatService chatService = new ChatService(playerService);

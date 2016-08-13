@@ -7,7 +7,11 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.world.object.WorldObject;
 import dzida.server.core.world.object.WorldObjectKind;
 import dzida.server.core.world.object.WorldObjectStore;
+import org.mapdb.BTreeKeySerializer;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 
+import java.io.File;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentNavigableMap;
@@ -18,8 +22,12 @@ public class WorldObjectStoreMapDb implements WorldObjectStore {
     private final Gson serializer = Serializer.getSerializer();
     private final ConcurrentNavigableMap<Long, String> worldObjects;
 
-    public WorldObjectStoreMapDb(ConcurrentNavigableMap<Long, String> table) {
-        worldObjects = table;
+    public WorldObjectStoreMapDb(String instanceKey) {
+        DB db = DBMaker.fileDB(new File("worldObjectsDB-" + instanceKey))
+                .transactionDisable()
+                .closeOnJvmShutdown()
+                .make();
+        worldObjects = db.treeMap("objects", BTreeKeySerializer.LONG, org.mapdb.Serializer.STRING);
         idGenerator = getLastIdFromDb();
     }
 

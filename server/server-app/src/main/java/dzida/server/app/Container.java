@@ -1,17 +1,11 @@
 package dzida.server.app;
 
-import dzida.server.app.store.http.WorldMapStoreHttp;
-import dzida.server.app.store.http.loader.SkillLoader;
-import dzida.server.app.store.http.loader.StaticDataLoader;
-import dzida.server.app.store.http.loader.WorldMapLoader;
-import dzida.server.app.store.mapdb.WorldObjectStoreMapDbFactory;
-import dzida.server.app.store.memory.SkillStoreInMemory;
+import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
-import dzida.server.core.skill.Skill;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,21 +14,21 @@ import java.util.Random;
 
 public class Container {
     private final Scheduler scheduler;
-    private final InstanceFactory instanceFactory;
     private final Map<Key<Instance>, Instance> instances = new HashMap<>();
     private final Map<Id<Player>, dzida.server.app.network.ConnectionHandler.ConnectionController> connectionControllers = new HashMap<>();
     private final Map<Id<Player>, Key<Instance>> playersInstances = new HashMap<>();
+    private final MapDescriptorStore mapDescriptorStore;
+    private final Gate gate;
+    private final PlayerService playerService;
 
     private final InstanceConnectionHandler connectionHandler;
 
     Container(PlayerService playerService, Scheduler scheduler, Gate gate) {
         this.scheduler = scheduler;
-        StaticDataLoader staticDataLoader = new StaticDataLoader();
+        this.mapDescriptorStore = new MapDescriptorStore();
+        this.gate = gate;
+        this.playerService = playerService;
 
-        Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
-        WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
-
-        instanceFactory = new InstanceFactory(playerService, gate, new SkillStoreInMemory(skills), worldMapStore, new WorldObjectStoreMapDbFactory(), this);
         connectionHandler = new InstanceConnectionHandler() {
 
             @Override
@@ -74,7 +68,11 @@ public class Container {
 
     public Key<Instance> startInstance(String instanceType, Integer difficultyLevel) {
         Key<Instance> instanceKey = generateInstanceKey(instanceType, difficultyLevel);
-        Optional<Instance> instance = instanceFactory.createInstance(instanceKey.getValue(), instanceType, scheduler, difficultyLevel);
+        String instanceKey1 = instanceKey.getValue();
+
+        Optional<Instance> instance = mapDescriptorStore.getDescriptor(instanceType, difficultyLevel)
+                .map(mapDescriptor -> new Instance(instanceKey1, mapDescriptor, scheduler, playerService, gate, this));
+
         if (!instance.isPresent()) {
             System.err.println("map descriptor is not valid: " + instanceType);
             return instanceKey;
