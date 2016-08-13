@@ -24,7 +24,6 @@ public class GameLogic {
     private final CharacterService characterService;
     private final PlayerService playerService;
     private final InstanceStateManager instanceStateManager;
-    private final Runnable send;
     private final AiService aiService;
     private final ScenarioLogic scenarioLogic;
     private final Scheduler scheduler;
@@ -36,7 +35,6 @@ public class GameLogic {
             PlayerService playerService,
             Optional<SurvivalScenarioFactory.SurvivalScenario> survivalScenario,
             Scenario scenario,
-            Runnable send,
             AiService aiService,
             PositionStore positionStore,
             CommandResolver commandResolver,
@@ -44,7 +42,6 @@ public class GameLogic {
         this.instanceStateManager = instanceStateManager;
         this.characterService = characterService;
         this.playerService = playerService;
-        this.send = send;
         this.aiService = aiService;
         this.scheduler = scheduler;
 
@@ -73,7 +70,6 @@ public class GameLogic {
                     scenarioLogic.handlePlayerDead(event.characterId, playerId);
                 }
             } else {
-                instanceStateManager.unregisterCharacter(event.characterId);
                 scenarioLogic.handleNpcDead(event.characterId);
             }
         });
@@ -81,7 +77,6 @@ public class GameLogic {
 
     private void aiTick() {
         instanceStateManager.dispatchEvents(aiService.processTick());
-        send.run();
     }
 
     public void playerJoined(PlayerCharacter character) {

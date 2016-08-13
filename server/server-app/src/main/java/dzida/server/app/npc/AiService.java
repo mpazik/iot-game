@@ -40,7 +40,10 @@ public class AiService {
         return npcs.values().stream().flatMap(npc -> npc.processTick().stream()).collect(Collectors.toList());
     }
 
-    public List<GameEvent> processPacket(Id<Character> characterId, GameEvent event) {
-        return npcs.get(characterId).processGameEvent(event);
+    public List<GameEvent> processChange(GameEvent event) {
+        return npcs.values()
+                .stream()
+                .flatMap(npc -> npc.processGameEvent(event).stream())
+                .collect(Collectors.toList());
     }
 }

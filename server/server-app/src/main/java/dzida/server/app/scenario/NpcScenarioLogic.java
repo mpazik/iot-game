@@ -23,6 +23,10 @@ public class NpcScenarioLogic {
         this.positionStore = positionStore;
         this.commandResolver = commandResolver;
         this.instanceStateManager = instanceStateManager;
+        instanceStateManager.getEventPublisher().subscribe(event -> {
+            List<GameEvent> gameEvents = aiService.processChange(event);
+            instanceStateManager.dispatchEvents(gameEvents);
+        });
     }
 
     public void addNpc(Point position, int npcType) {
@@ -31,10 +35,6 @@ public class NpcScenarioLogic {
         positionStore.setPosition(characterId, position);
         aiService.createNpc(npcType, character);
         instanceStateManager.dispatchEvents(commandResolver.createCharacter(character));
-        instanceStateManager.registerCharacter(character, event -> {
-            List<GameEvent> gameEvents = aiService.processPacket(characterId, event);
-            instanceStateManager.dispatchEvents(gameEvents);
-        });
     }
 
     public void removeNpc(Id<Character> characterId) {

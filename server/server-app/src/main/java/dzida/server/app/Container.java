@@ -1,5 +1,6 @@
 package dzida.server.app;
 
+import com.google.gson.Gson;
 import dzida.server.app.command.Command;
 import dzida.server.app.command.InstanceCommand;
 import dzida.server.app.command.JoinBattleCommand;
@@ -34,6 +35,8 @@ public class Container {
         this.scheduler = scheduler;
         this.mapDescriptorStore = new MapDescriptorStore();
         this.playerService = playerService;
+
+        Gson serializer = getSerializer();
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         connectionHandler = new InstanceConnectionHandler() {
@@ -61,7 +64,7 @@ public class Container {
                     playerPreviousInstance.removePlayer(playerId);
                 }
                 playersInstances.put(playerId, instanceKey);
-                instances.get(instanceKey).addPlayer(playerId, connectionControllers.get(playerId)::send);
+                instances.get(instanceKey).addPlayer(playerId, gameEvent -> sendMessageToPlayer(playerId, gameEvent));
             }
 
             @Override
@@ -88,7 +91,7 @@ public class Container {
             }
 
             public void sendMessageToPlayer(Id<Player> playerId, GameEvent data) {
-                connectionControllers.get(playerId).send(getSerializer().toJson(Collections.singleton(new Packet(data.getId(), data))));
+                connectionControllers.get(playerId).send(serializer.toJson(Collections.singleton(new Packet(data.getId(), data))));
             }
         };
     }
