@@ -23,7 +23,7 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 public class GameLogic {
     private final CharacterService characterService;
     private final PlayerService playerService;
-    private final GameEventDispatcher gameEventDispatcher;
+    private final InstanceStateManager instanceStateManager;
     private final Runnable send;
     private final AiService aiService;
     private final ScenarioLogic scenarioLogic;
@@ -31,7 +31,7 @@ public class GameLogic {
 
     public GameLogic(
             Scheduler scheduler,
-            GameEventDispatcher gameEventDispatcher,
+            InstanceStateManager instanceStateManager,
             CharacterService characterService,
             PlayerService playerService,
             Optional<SurvivalScenarioFactory.SurvivalScenario> survivalScenario,
@@ -41,18 +41,18 @@ public class GameLogic {
             PositionStore positionStore,
             CommandResolver commandResolver,
             CharacterCommandHandler characterCommandHandler) {
-        this.gameEventDispatcher = gameEventDispatcher;
+        this.instanceStateManager = instanceStateManager;
         this.characterService = characterService;
         this.playerService = playerService;
         this.send = send;
         this.aiService = aiService;
         this.scheduler = scheduler;
 
-        NpcScenarioLogic npcScenarioLogic = new NpcScenarioLogic(aiService, positionStore, commandResolver, gameEventDispatcher);
-        GameEventScheduler gameEventScheduler = new GameEventScheduler(gameEventDispatcher, scheduler);
+        NpcScenarioLogic npcScenarioLogic = new NpcScenarioLogic(aiService, positionStore, commandResolver, instanceStateManager);
+        GameEventScheduler gameEventScheduler = new GameEventScheduler(instanceStateManager, scheduler);
 
         if (survivalScenario.isPresent()) {
-            this.scenarioLogic = new SurvivalScenarioLogic(scheduler, gameEventDispatcher, npcScenarioLogic, (Survival) scenario, survivalScenario.get(), characterService, playerService);
+            this.scenarioLogic = new SurvivalScenarioLogic(scheduler, instanceStateManager, npcScenarioLogic, (Survival) scenario, survivalScenario.get(), characterService, playerService);
         } else {
             this.scenarioLogic = new OpenWorldScenarioLogic(playerService, gameEventScheduler, characterCommandHandler);
         }
@@ -73,14 +73,14 @@ public class GameLogic {
                     scenarioLogic.handlePlayerDead(event.characterId, playerId);
                 }
             } else {
-                gameEventDispatcher.unregisterCharacter(event.characterId);
+                instanceStateManager.unregisterCharacter(event.characterId);
                 scenarioLogic.handleNpcDead(event.characterId);
             }
         });
     }
 
     private void aiTick() {
-        gameEventDispatcher.dispatchEvents(aiService.processTick());
+        instanceStateManager.dispatchEvents(aiService.processTick());
         send.run();
     }
 

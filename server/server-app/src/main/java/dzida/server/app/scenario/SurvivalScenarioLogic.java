@@ -1,7 +1,7 @@
 package dzida.server.app.scenario;
 
 import com.google.common.collect.ImmutableList;
-import dzida.server.app.GameEventDispatcher;
+import dzida.server.app.InstanceStateManager;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.Npc;
 import dzida.server.core.Scheduler;
@@ -26,7 +26,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     private final NpcScenarioLogic npcScenarioLogic;
     private final Survival survival;
     private final SurvivalScenario survivalScenario;
-    private final GameEventDispatcher gameEventDispatcher;
+    private final InstanceStateManager instanceStateManager;
     private final SurvivalScenarioState survivalScenarioState;
     private final CharacterService characterService;
     private final PlayerService playerService;
@@ -34,7 +34,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
 
     public SurvivalScenarioLogic(
             Scheduler scheduler,
-            GameEventDispatcher gameEventDispatcher,
+            InstanceStateManager instanceStateManager,
             NpcScenarioLogic npcScenarioLogic,
             Survival survival,
             SurvivalScenario survivalScenario,
@@ -44,7 +44,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
         this.npcScenarioLogic = npcScenarioLogic;
         this.survival = survival;
         this.survivalScenario = survivalScenario;
-        this.gameEventDispatcher =gameEventDispatcher;
+        this.instanceStateManager = instanceStateManager;
         this.characterService = characterService;
         this.playerService = playerService;
         survivalScenarioState = new SurvivalScenarioState();
@@ -55,7 +55,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
         if (survivalScenarioState.end) {
             return;
         }
-        gameEventDispatcher.dispatchEvent(new ScenarioEnd(Defeat));
+        instanceStateManager.dispatchEvent(new ScenarioEnd(Defeat));
         survivalScenarioState.end = true;
     }
 
@@ -82,7 +82,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
             }
         });
         survivalScenarioState.end = true;
-        gameEventDispatcher.dispatchEvents(ImmutableList.of(new ScenarioEnd(Victory)));
+        instanceStateManager.dispatchEvents(ImmutableList.of(new ScenarioEnd(Victory)));
     }
 
     @Override

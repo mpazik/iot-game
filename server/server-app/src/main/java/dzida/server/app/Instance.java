@@ -52,7 +52,7 @@ import static dzida.server.app.Serializer.getSerializer;
 public class Instance {
 
     private final CommandResolver commandResolver;
-    private final GameEventDispatcher gameEventDispatcher;
+    private final InstanceStateManager instanceStateManager;
     private final PlayerService playerService;
     private final CharacterService characterService;
     private final String instanceKey;
@@ -87,7 +87,7 @@ public class Instance {
 
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
 
-        gameEventDispatcher = new GameEventDispatcher(positionService, characterService, worldMapService, skillService, worldObjectService, scenario, timeService);
+        instanceStateManager = new InstanceStateManager(positionService, characterService, worldMapService, skillService, worldObjectService, scenario, timeService);
 
         CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, worldMapStore.getTileset(worldMap.getTileset()));
         PathFinder pathFinder = Profilings.printTime("Collision map built", () -> new PathFinderFactory().createPathFinder(collisionBitMap));
@@ -100,11 +100,11 @@ public class Instance {
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
 
-        this.gameLogic =  new GameLogic(scheduler, gameEventDispatcher, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver, characterCommandHandler);
+        this.gameLogic =  new GameLogic(scheduler, instanceStateManager, characterService, playerService, survivalScenario, scenario, this::send, aiService, positionStore, commandResolver, characterCommandHandler);
     }
 
     public void start() {
-        gameEventDispatcher.getEventPublisherBeforeChanges().subscribe(gameLogic::processEventBeforeChanges);
+        instanceStateManager.getEventPublisherBeforeChanges().subscribe(gameLogic::processEventBeforeChanges);
 
         gameLogic.start();
     }
@@ -127,9 +127,9 @@ public class Instance {
         String nick = playerEntity.getData().getNick();
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
         gameLogic.playerJoined(character);
-        gameEventDispatcher.dispatchEvents(commandResolver.createCharacter(character));
-        gameEventDispatcher.registerCharacter(character, addDataToSend(playerId));
-        gameEventDispatcher.sendInitialPacket(characterId, playerId, playerEntity);
+        instanceStateManager.dispatchEvents(commandResolver.createCharacter(character));
+        instanceStateManager.registerCharacter(character, addDataToSend(playerId));
+        instanceStateManager.sendInitialPacket(characterId, playerId, playerEntity);
         System.out.println(String.format("Instance: %s - character %s joined", instanceKey, characterId));
         send();
     }
@@ -139,9 +139,9 @@ public class Instance {
         playerSends.remove(playerId);
         characterIds.remove(playerId);
         messagesToSend.remove(playerId);
-        gameEventDispatcher.unregisterCharacter(characterId);
+        instanceStateManager.unregisterCharacter(characterId);
         if (characterService.isCharacterLive(characterId)){
-            gameEventDispatcher.dispatchEvents(commandResolver.removeCharacter(characterId));
+            instanceStateManager.dispatchEvents(commandResolver.removeCharacter(characterId));
         }
         System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
         send();
@@ -150,7 +150,7 @@ public class Instance {
     public void handleCommand(Id<Player> playerId, InstanceCommand command) {
         Id<Character> characterId = characterIds.get(playerId);
         List<GameEvent> gameEvents = commandResolver.handleCommand(command, playerId, characterId);
-        gameEventDispatcher.dispatchEvents(gameEvents);
+        instanceStateManager.dispatchEvents(gameEvents);
         send();
     }
 

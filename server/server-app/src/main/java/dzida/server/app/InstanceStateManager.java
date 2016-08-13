@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.core.basic.Publisher;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class GameEventDispatcher {
+public class InstanceStateManager {
     private final PositionService positionService;
     private final Publisher<GameEvent> eventPublisher = new Publisher<>();
     private final Publisher<GameEvent> eventPublisherBeforeChanges = new Publisher<>();
@@ -32,7 +31,7 @@ public class GameEventDispatcher {
     private final Scenario scenario;
     private final TimeService timeService;
 
-    public GameEventDispatcher(
+    public InstanceStateManager(
             PositionService positionService,
             CharacterService characterService,
             WorldMapService worldMapService,

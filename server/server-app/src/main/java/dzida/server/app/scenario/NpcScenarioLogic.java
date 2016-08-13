@@ -1,7 +1,7 @@
 package dzida.server.app.scenario;
 
 import dzida.server.app.CommandResolver;
-import dzida.server.app.GameEventDispatcher;
+import dzida.server.app.InstanceStateManager;
 import dzida.server.app.npc.AiService;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
@@ -16,13 +16,13 @@ public class NpcScenarioLogic {
     private final AiService aiService;
     private final PositionStore positionStore;
     private final CommandResolver commandResolver;
-    private final GameEventDispatcher gameEventDispatcher;
+    private final InstanceStateManager instanceStateManager;
 
-    public NpcScenarioLogic(AiService aiService, PositionStore positionStore, CommandResolver commandResolver, GameEventDispatcher gameEventDispatcher) {
+    public NpcScenarioLogic(AiService aiService, PositionStore positionStore, CommandResolver commandResolver, InstanceStateManager instanceStateManager) {
         this.aiService = aiService;
         this.positionStore = positionStore;
         this.commandResolver = commandResolver;
-        this.gameEventDispatcher = gameEventDispatcher;
+        this.instanceStateManager = instanceStateManager;
     }
 
     public void addNpc(Point position, int npcType) {
@@ -30,10 +30,10 @@ public class NpcScenarioLogic {
         NpcCharacter character = new NpcCharacter(characterId, npcType);
         positionStore.setPosition(characterId, position);
         aiService.createNpc(npcType, character);
-        gameEventDispatcher.dispatchEvents(commandResolver.createCharacter(character));
-        gameEventDispatcher.registerCharacter(character, event -> {
+        instanceStateManager.dispatchEvents(commandResolver.createCharacter(character));
+        instanceStateManager.registerCharacter(character, event -> {
             List<GameEvent> gameEvents = aiService.processPacket(characterId, event);
-            gameEventDispatcher.dispatchEvents(gameEvents);
+            instanceStateManager.dispatchEvents(gameEvents);
         });
     }
 
