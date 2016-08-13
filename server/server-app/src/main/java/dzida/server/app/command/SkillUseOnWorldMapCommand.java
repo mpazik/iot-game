@@ -3,7 +3,7 @@ package dzida.server.app.command;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.skill.Skill;
 
-public class SkillUseOnWorldMapCommand implements Command {
+public class SkillUseOnWorldMapCommand implements InstanceCommand {
     public final Id<Skill> skillId;
     public final double x;
     public final double y;

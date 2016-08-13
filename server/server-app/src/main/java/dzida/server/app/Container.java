@@ -1,17 +1,24 @@
 package dzida.server.app;
 
 import dzida.server.app.command.Command;
+import dzida.server.app.command.InstanceCommand;
+import dzida.server.app.command.JoinBattleCommand;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
+import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+
+import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
+import static dzida.server.app.Serializer.getSerializer;
 
 public class Container {
     private final Scheduler scheduler;
@@ -27,6 +34,7 @@ public class Container {
         this.scheduler = scheduler;
         this.mapDescriptorStore = new MapDescriptorStore();
         this.playerService = playerService;
+        TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         connectionHandler = new InstanceConnectionHandler() {
 
@@ -57,9 +65,30 @@ public class Container {
             }
 
             @Override
-            public void handleCommand(Id<Player> playerId, Command command) {
+            public void handleCommand(Id<Player> playerId, Command commandToProcess) {
                 Key<Instance> instanceKey = playersInstances.get(playerId);
-                instances.get(instanceKey).handleCommand(playerId, command);
+                whenTypeOf(commandToProcess)
+                        .is(InstanceCommand.class)
+                        .then(command -> instances.get(instanceKey).handleCommand(playerId, command))
+
+                        .is(JoinBattleCommand.class)
+                        .then(command -> {
+                            Player.Data playerData = playerService.getPlayer(playerId).getData();
+                            Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
+                            playerService.updatePlayerData(playerId, updatedPlayerData);
+                            Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
+                            sendMessageToPlayer(playerId, new JoinToInstance(newInstanceKey));
+                        })
+
+                        .is(TimeSynchroniser.TimeSyncRequest.class)
+                        .then(command -> {
+                            TimeSynchroniser.TimeSyncResponse timeSyncResponse = timeSynchroniser.timeSync(command);
+                            sendMessageToPlayer(playerId, timeSyncResponse);
+                        });
+            }
+
+            public void sendMessageToPlayer(Id<Player> playerId, GameEvent data) {
+                connectionControllers.get(playerId).send(getSerializer().toJson(Collections.singleton(new Packet(data.getId(), data))));
             }
         };
     }
@@ -67,10 +96,10 @@ public class Container {
 
     public Key<Instance> startInstance(String instanceType, Integer difficultyLevel) {
         Key<Instance> instanceKey = generateInstanceKey(instanceType, difficultyLevel);
-        String instanceKey1 = instanceKey.getValue();
+        String instanceKeyValue = instanceKey.getValue();
 
         Optional<Instance> instance = mapDescriptorStore.getDescriptor(instanceType, difficultyLevel)
-                .map(mapDescriptor -> new Instance(instanceKey1, mapDescriptor, scheduler, playerService, this));
+                .map(mapDescriptor -> new Instance(instanceKeyValue, mapDescriptor, scheduler, playerService));
 
         if (!instance.isPresent()) {
             System.err.println("map descriptor is not valid: " + instanceType);
@@ -96,5 +125,18 @@ public class Container {
 
     public InstanceConnectionHandler getConnectionHandler() {
         return connectionHandler;
+    }
+
+    private static class JoinToInstance implements GameEvent {
+        final Key<Instance> instanceKey;
+
+        JoinToInstance(Key<Instance> instanceKey) {
+            this.instanceKey = instanceKey;
+        }
+
+        @Override
+        public int getId() {
+            return InstanceCreated;
+        }
     }
 }

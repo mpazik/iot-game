@@ -1,7 +1,7 @@
 package dzida.server.app;
 
 import com.google.common.collect.Lists;
-import dzida.server.app.command.Command;
+import dzida.server.app.command.InstanceCommand;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
@@ -63,7 +63,7 @@ public class Instance {
 
     private final GameLogic gameLogic;
 
-    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler, PlayerService playerService, Container container) {
+    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler, PlayerService playerService) {
         this.playerService = playerService;
         this.instanceKey = instanceKey;
 
@@ -80,7 +80,6 @@ public class Instance {
         WorldObjectService worldObjectService = WorldObjectService.create(worldObjectStore);
 
         TimeService timeService = new TimeServiceImpl();
-        TimeSynchroniser timeSynchroniser = new TimeSynchroniser(timeService);
         characterService = CharacterService.create();
         WorldMapService worldMapService = WorldMapService.create(worldMapStore, scenario.getWorldMapKey());
         SkillService skillService = SkillService.create(skillStore, timeService);
@@ -96,7 +95,7 @@ public class Instance {
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
 
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, timeSynchroniser, container, playerService, chatService);
+        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, chatService);
 
         NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
         AiService aiService = new AiService(npcBehaviour);
@@ -148,9 +147,9 @@ public class Instance {
         send();
     }
 
-    public void handleCommand(Id<Player> playerId, Command command) {
+    public void handleCommand(Id<Player> playerId, InstanceCommand command) {
         Id<Character> characterId = characterIds.get(playerId);
-        List<GameEvent> gameEvents = commandResolver.handleCommand(command, playerId, characterId, addDataToSend(playerId));
+        List<GameEvent> gameEvents = commandResolver.handleCommand(command, playerId, characterId);
         gameEventDispatcher.dispatchEvents(gameEvents);
         send();
     }

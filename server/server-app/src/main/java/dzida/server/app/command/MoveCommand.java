@@ -1,8 +1,9 @@
 package dzida.server.app.command;
 
+import dzida.server.app.Instance;
 import dzida.server.core.basic.unit.Point;
 
-public class MoveCommand implements Command {
+public class MoveCommand implements InstanceCommand {
     public final double x;
     public final double y;
 
