@@ -7,11 +7,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import dzida.server.app.command.Command;
 import dzida.server.app.command.JoinBattleCommand;
-import dzida.server.app.command.MoveCommand;
+import dzida.server.app.command.MoveRawCommand;
 import dzida.server.app.command.SendMessageCommand;
-import dzida.server.app.command.SkillUseOnCharacterCommand;
-import dzida.server.app.command.SkillUseOnWorldMapCommand;
-import dzida.server.app.command.SkillUseOnWorldObjectCommand;
+import dzida.server.app.command.SkillUseOnCharacterRawCommand;
+import dzida.server.app.command.SkillUseOnWorldMapRawCommand;
+import dzida.server.app.command.SkillUseOnWorldObjectRawCommand;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,13 +57,13 @@ public class CommandParser {
     private Command readCommand(int type, JsonElement data) {
         switch (type) {
             case Move:
-                return serializer.fromJson(data, MoveCommand.class);
+                return serializer.fromJson(data, MoveRawCommand.class);
             case UseSkillOnCharacter:
-                return serializer.fromJson(data, SkillUseOnCharacterCommand.class);
+                return serializer.fromJson(data, SkillUseOnCharacterRawCommand.class);
             case UseSkillOnWorldMap:
-                return serializer.fromJson(data, SkillUseOnWorldMapCommand.class);
+                return serializer.fromJson(data, SkillUseOnWorldMapRawCommand.class);
             case UseSkillOnWorldObject:
-                return serializer.fromJson(data, SkillUseOnWorldObjectCommand.class);
+                return serializer.fromJson(data, SkillUseOnWorldObjectRawCommand.class);
             case TimeSync:
                 return serializer.fromJson(data, TimeSynchroniser.TimeSyncRequest.class);
             case JoinBattle:

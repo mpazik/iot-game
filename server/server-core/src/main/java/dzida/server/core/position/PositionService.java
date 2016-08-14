@@ -28,7 +28,7 @@ public interface PositionService {
 
     Move getMove(Id<Character> characterId);
 
-    Move getInitialMove(Id<Character> characterId);
+    Move getInitialMove(Id<Character> characterId, Point spawnPoint);
 
     Point getPosition(Id<Character> characterId, long currentMillis);
 

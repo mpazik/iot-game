@@ -1,5 +1,6 @@
 package dzida.server.app.npc;
 
+import dzida.server.app.command.InstanceCommand;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.NpcCharacter;
@@ -36,11 +37,11 @@ public class AiService {
         npcs.remove(characterId);
     }
 
-    public List<GameEvent> processTick() {
+    public List<InstanceCommand> processTick() {
         return npcs.values().stream().flatMap(npc -> npc.processTick().stream()).collect(Collectors.toList());
     }
 
-    public List<GameEvent> processChange(GameEvent event) {
+    public List<InstanceCommand> processChange(GameEvent event) {
         return npcs.values()
                 .stream()
                 .flatMap(npc -> npc.processGameEvent(event).stream())

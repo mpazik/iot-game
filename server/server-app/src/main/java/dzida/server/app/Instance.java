@@ -1,6 +1,9 @@
 package dzida.server.app;
 
+import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.command.InstanceCommand;
+import dzida.server.app.command.KillCharacterCommand;
+import dzida.server.app.command.SpawnCharacterCommand;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.AiService;
@@ -14,11 +17,11 @@ import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.app.store.memory.SkillStoreInMemory;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
+import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;
-import dzida.server.core.chat.ChatService;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
@@ -50,8 +53,8 @@ public class Instance {
 
     private final CommandResolver commandResolver;
     private final InstanceStateManager instanceStateManager;
+
     private final PlayerService playerService;
-    private final CharacterService characterService;
     private final String instanceKey;
     private final StateSynchroniser stateSynchroniser;
 
@@ -63,6 +66,7 @@ public class Instance {
         this.playerService = playerService;
         this.instanceKey = instanceKey;
 
+        Key<WorldMap> worldMapKey = scenario.getWorldMapKey();
         StaticDataLoader staticDataLoader = new StaticDataLoader();
 
         Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
@@ -70,41 +74,37 @@ public class Instance {
         SkillStore skillStore = new SkillStoreInMemory(skills);
         WorldObjectStoreMapDb worldObjectStore = new WorldObjectStoreMapDb(instanceKey);
 
-        WorldMap worldMap = worldMapStore.getMap(scenario.getWorldMapKey());
+        WorldMap worldMap = worldMapStore.getMap(worldMapKey);
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
-        ChatService chatService = new ChatService(playerService);
         WorldObjectService worldObjectService = WorldObjectService.create(worldObjectStore);
 
         TimeService timeService = new TimeServiceImpl();
-        characterService = CharacterService.create();
-        WorldMapService worldMapService = WorldMapService.create(worldMapStore, scenario.getWorldMapKey());
+        CharacterService characterService = CharacterService.create();
+        WorldMapService worldMapService = WorldMapService.create(worldMapStore, worldMapKey);
         SkillService skillService = SkillService.create(skillStore, timeService);
         PositionService positionService = PositionService.create(positionStore, timeService);
-
-        Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
-
-        instanceStateManager = new InstanceStateManager(positionService, characterService, worldMapService, skillService, worldObjectService);
-        stateSynchroniser = new StateSynchroniser(instanceStateManager, scenario, timeService);
-
-        instanceStateManager.getEventPublisher().subscribe(stateSynchroniser::syncStateChange);
 
         CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, worldMapStore.getTileset(worldMap.getTileset()));
         PathFinder pathFinder = Profilings.printTime("Collision map built", () -> new PathFinderFactory().createPathFinder(collisionBitMap));
         PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService, pathFinder);
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
-        CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService);
+        CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService, characterService);
 
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, chatService);
+        instanceStateManager = new InstanceStateManager(positionService, characterService, worldMapService, skillService, worldObjectService);
+        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler);
 
-        NpcBehaviour npcBehaviour = new NpcBehaviour(positionService, characterService, skillService, timeService, skillCommandHandler, positionCommandHandler);
+
+        stateSynchroniser = new StateSynchroniser(instanceStateManager, scenario, timeService);
+        instanceStateManager.getEventPublisher().subscribe(stateSynchroniser::syncStateChange);
+        Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
+        NpcBehaviour npcBehaviour = new NpcBehaviour(timeService, instanceStateManager);
         AiService aiService = new AiService(npcBehaviour);
 
-        this.gameLogic =  new GameLogic(scheduler, instanceStateManager, characterService, playerService, survivalScenario, scenario, aiService, positionStore, commandResolver, characterCommandHandler);
+        this.gameLogic = new GameLogic(scheduler, instanceStateManager, playerService, survivalScenario, scenario, aiService, commandResolver::handleCommand);
     }
 
     public void start() {
         instanceStateManager.getEventPublisherBeforeChanges().subscribe(gameLogic::processEventBeforeChanges);
-
         gameLogic.start();
     }
 
@@ -124,7 +124,7 @@ public class Instance {
         String nick = playerEntity.getData().getNick();
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
         gameLogic.playerJoined(character);
-        instanceStateManager.dispatchEvents(commandResolver.createCharacter(character));
+        handleCommand(new SpawnCharacterCommand(character));
         stateSynchroniser.registerCharacter(playerId, sendToPlayer);
         stateSynchroniser.sendInitialPacket(characterId, playerId, playerEntity);
         System.out.println(String.format("Instance: %s - character %s joined", instanceKey, characterId));
@@ -134,16 +134,19 @@ public class Instance {
         Id<Character> characterId = characterIds.get(playerId);
         characterIds.remove(playerId);
         stateSynchroniser.unregisterListener(playerId);
-        if (characterService.isCharacterLive(characterId)){
-            instanceStateManager.dispatchEvents(commandResolver.removeCharacter(characterId));
-        }
+        handleCommand(new KillCharacterCommand(characterId));
         System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
     }
 
-    public void handleCommand(Id<Player> playerId, InstanceCommand command) {
+    public void handleCommand(Id<Player> playerId, CharacterCommand characterCommand) {
         Id<Character> characterId = characterIds.get(playerId);
-        List<GameEvent> gameEvents = commandResolver.handleCommand(command, playerId, characterId);
-        instanceStateManager.dispatchEvents(gameEvents);
+        InstanceCommand instanceCommand = characterCommand.getInstanceCommand(characterId);
+        handleCommand(instanceCommand);
+    }
+
+    public void handleCommand(InstanceCommand command) {
+        List<GameEvent> gameEvents = commandResolver.handleCommand(command);
+        instanceStateManager.updateState(gameEvents);
     }
 
     public void shutdown() {

@@ -1,6 +1,7 @@
 package dzida.server.app;
 
 import com.google.gson.Gson;
+import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.command.Command;
 import dzida.server.app.command.InstanceCommand;
 import dzida.server.app.command.JoinBattleCommand;
@@ -71,8 +72,11 @@ public class Container {
             public void handleCommand(Id<Player> playerId, Command commandToProcess) {
                 Key<Instance> instanceKey = playersInstances.get(playerId);
                 whenTypeOf(commandToProcess)
-                        .is(InstanceCommand.class)
+                        .is(CharacterCommand.class)
                         .then(command -> instances.get(instanceKey).handleCommand(playerId, command))
+
+                        .is(InstanceCommand.class)
+                        .then(command -> instances.get(instanceKey).handleCommand(command))
 
                         .is(JoinBattleCommand.class)
                         .then(command -> {

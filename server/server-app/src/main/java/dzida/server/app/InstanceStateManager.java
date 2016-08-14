@@ -54,7 +54,7 @@ public class InstanceStateManager {
         eventPublisher.notify(gameEvent);
     }
 
-    public void dispatchEvents(List<GameEvent> gameEvents) {
+    public void updateState(List<GameEvent> gameEvents) {
         gameEvents.forEach(this::dispatchEvent);
     }
 
@@ -64,5 +64,25 @@ public class InstanceStateManager {
 
     public Publisher<GameEvent> getEventPublisher() {
         return eventPublisher;
+    }
+
+    public PositionService getPositionService() {
+        return positionService;
+    }
+
+    public CharacterService getCharacterService() {
+        return characterService;
+    }
+
+    public WorldMapService getWorldMapService() {
+        return worldMapService;
+    }
+
+    public SkillService getSkillService() {
+        return skillService;
+    }
+
+    public WorldObjectService getWorldObjectService() {
+        return worldObjectService;
     }
 }

@@ -1,5 +1,6 @@
 package dzida.server.app.npc;
 
+import dzida.server.app.command.InstanceCommand;
 import dzida.server.core.event.GameEvent;
 
 import java.util.Collections;
@@ -9,11 +10,11 @@ public interface Npc {
     int Fighter = 0;
     int Archer = 1;
 
-    default List<GameEvent> processTick() {
+    default List<InstanceCommand> processTick() {
         return Collections.emptyList();
     }
 
-    default List<GameEvent> processGameEvent(GameEvent gameEvent) {
+    default List<InstanceCommand> processGameEvent(GameEvent gameEvent) {
         return Collections.emptyList();
     }
 }

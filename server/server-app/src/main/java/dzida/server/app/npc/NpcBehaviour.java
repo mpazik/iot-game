@@ -1,18 +1,17 @@
 package dzida.server.app.npc;
 
+import dzida.server.app.InstanceStateManager;
+import dzida.server.app.command.InstanceCommand;
+import dzida.server.app.command.MoveCommand;
+import dzida.server.app.command.SkillUseOnCharacterCommand;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.NpcCharacter;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
-import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.skill.Skill;
-import dzida.server.core.skill.SkillCommandHandler;
-import dzida.server.core.skill.SkillService;
 import dzida.server.core.skill.Skills;
 import dzida.server.core.time.TimeService;
 
@@ -22,58 +21,39 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class NpcBehaviour {
-    private static int MoveRadius = 10;
-    private static int AggroRange = 8;
+    public static int MoveRadius = 10;
+    public static int AggroRange = 8;
 
-    private final PositionService positionService;
-    private final CharacterService characterService;
-    private final SkillService skillService;
     private final TimeService timeService;
-    private final SkillCommandHandler skillCommandHandler;
-    private final PositionCommandHandler positionCommandHandler;
+    private final InstanceStateManager state;
 
-    public NpcBehaviour(
-            PositionService positionService,
-            CharacterService characterService,
-            SkillService skillService,
-            TimeService timeService,
-            SkillCommandHandler skillCommandHandler,
-            PositionCommandHandler positionCommandHandler
-    ) {
-        this.positionService = positionService;
-        this.characterService = characterService;
-        this.skillService = skillService;
+    public NpcBehaviour(TimeService timeService, InstanceStateManager state) {
         this.timeService = timeService;
-        this.skillCommandHandler = skillCommandHandler;
-        this.positionCommandHandler = positionCommandHandler;
+        this.state = state;
     }
 
-    public List<GameEvent> processGameEvent(NpcImpl npc, GameEvent gameEvent) {
-        return Collections.emptyList();
-    }
-
-    public List<GameEvent> processTick(NpcImpl npc) {
-        Stream<Id<Character>> players = characterService.getCharactersOfType(PlayerCharacter.class).stream().map(Character::getId);
+    public List<InstanceCommand> processTick(NpcImpl npc) {
+        Stream<Id<Character>> players = state.getCharacterService().getCharactersOfType(PlayerCharacter.class).stream().map(Character::getId);
         NpcCharacter npcCharacter = npc.getCharacter();
-        Optional<Id<Character>> target = players.filter(player -> positionService.areCharactersInDistance(npcCharacter.getId(), player, AggroRange, timeService.getCurrentMillis())).findAny();
+        Optional<Id<Character>> target = players.filter(player -> state.getPositionService().areCharactersInDistance(npcCharacter.getId(), player, AggroRange, timeService.getCurrentMillis())).findAny();
         if (target.isPresent()) {
             if (isInAttackRange(npcCharacter, target.get())) {
                 return tryAttackPlayer(npcCharacter, target.get());
             } else {
-                return gotToPlayer(npcCharacter, target.get());
+                return Collections.singletonList(gotToPlayer(npcCharacter, target.get()));
             }
         } else {
             if (isStanding(npcCharacter)) {
-                return gotToRandomPosition(npcCharacter.getId());
+                return Collections.singletonList(gotToRandomPosition(npcCharacter.getId()));
             }
         }
         return Collections.emptyList();
     }
 
-    private List<GameEvent> gotToRandomPosition(Id<Character> id) {
-        Point pos = positionService.getPosition(id, timeService.getCurrentMillis());
+    private InstanceCommand gotToRandomPosition(Id<Character> id) {
+        Point pos = state.getPositionService().getPosition(id, timeService.getCurrentMillis());
         Point direction = Point.of(randomCord(pos.getX()), randomCord(pos.getY()));
-        return positionCommandHandler.move(id, direction, PositionService.BotSpeed);
+        return new MoveCommand(id, direction.getX(), direction.getY(), PositionService.BotSpeed);
     }
 
     private double randomCord(double cord) {
@@ -81,30 +61,35 @@ public class NpcBehaviour {
     }
 
     private boolean isStanding(NpcCharacter npc) {
-        return positionService.isStanding(npc.getId(), timeService.getCurrentMillis());
+        return state.getPositionService().isStanding(npc.getId(), timeService.getCurrentMillis());
     }
 
-    private List<GameEvent> gotToPlayer(NpcCharacter npc, Id<Character> targetId) {
-        Point direction = positionService.getPosition(targetId, timeService.getCurrentMillis());
-        return positionCommandHandler.move(npc.getId(), direction, PositionService.BotSpeed);
+    private InstanceCommand gotToPlayer(NpcCharacter npc, Id<Character> targetId) {
+        Point direction = state.getPositionService().getPosition(targetId, timeService.getCurrentMillis());
+        return new MoveCommand(npc.getId(), direction.getX(), direction.getY(), PositionService.BotSpeed);
     }
 
-    private List<GameEvent> tryAttackPlayer(NpcCharacter npc, Id<Character> targetId) {
-        if (!skillService.isOnCooldown(npc.getId(), timeService.getCurrentMillis())) {
-            return skillCommandHandler.useSkillOnCharacter(npc.getId(), getBotAttackSkillId(npc.getBotType()), targetId);
+    private List<InstanceCommand> tryAttackPlayer(NpcCharacter npc, Id<Character> targetId) {
+        if (!state.getSkillService().isOnCooldown(npc.getId(), timeService.getCurrentMillis())) {
+            Id<Skill> skillId = getBotAttackSkillId(npc.getBotType());
+            return Collections.singletonList(new SkillUseOnCharacterCommand(npc.getId(), skillId, targetId));
         }
         return Collections.emptyList();
     }
 
     private boolean isInAttackRange(NpcCharacter npc, Id<Character> target) {
         Id<Skill> skillId = getBotAttackSkillId(npc.getBotType());
-        Skill skill = skillService.getSkill(skillId);
-        return positionService.areCharactersInDistance(npc.getId(), target, skill.getRange(), timeService.getCurrentMillis());
+        Skill skill = state.getSkillService().getSkill(skillId);
+        return state.getPositionService().areCharactersInDistance(npc.getId(), target, skill.getRange(), timeService.getCurrentMillis());
     }
 
     private Id<Skill> getBotAttackSkillId(int npcType) {
         if (npcType == Npc.Fighter) return Skills.Ids.PUNCH;
         if (npcType == Npc.Archer) return Skills.Ids.BOW_SHOT;
         throw new UnsupportedOperationException("");
+    }
+
+    public List<InstanceCommand> processGameEvent(NpcImpl npc, GameEvent gameEvent) {
+        return Collections.emptyList();
     }
 }

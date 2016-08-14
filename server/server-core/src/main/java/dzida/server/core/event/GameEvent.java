@@ -19,7 +19,6 @@ public interface GameEvent {
     int PlayingPlayers = 15;
     int TimeSyncRes = 16;
     int InstanceCreated = 17;
-    int PlayerWillRespawn = 18;
     int ScenarioEnd = 19;
     int PlayerMessage = 20;
     int SkillUsedOnWorldMap = 21;

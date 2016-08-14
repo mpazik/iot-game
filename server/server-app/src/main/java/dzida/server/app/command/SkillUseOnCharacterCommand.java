@@ -7,9 +7,11 @@ import dzida.server.core.skill.Skill;
 public class SkillUseOnCharacterCommand implements InstanceCommand {
     public final Id<Skill> skillId;
     public final Id<Character> target;
+    public final Id<Character> characterId;
 
-    public SkillUseOnCharacterCommand(Id<Skill> skillId, Id<Character> target) {
+    public SkillUseOnCharacterCommand(Id<Character> characterId, Id<Skill> skillId, Id<Character> target) {
         this.skillId = skillId;
         this.target = target;
+        this.characterId = characterId;
     }
 }

@@ -5,14 +5,17 @@ import dzida.server.core.character.model.Character;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.world.object.WorldObject;
 
-public class SkillUseOnWorldObjectCommand implements InstanceCommand {
+public class SkillUseOnWorldObjectRawCommand implements CharacterCommand {
     public final Id<Skill> skillId;
     public final Id<WorldObject> target;
-    public final Id<Character> characterId;
 
-    SkillUseOnWorldObjectCommand(Id<Character> characterId, Id<Skill> skillId, Id<WorldObject> target) {
+    SkillUseOnWorldObjectRawCommand(Id<Skill> skillId, Id<WorldObject> target) {
         this.skillId = skillId;
         this.target = target;
-        this.characterId = characterId;
+    }
+
+    @Override
+    public InstanceCommand getInstanceCommand(Id<Character> characterId) {
+        return new SkillUseOnWorldObjectCommand(characterId, skillId, target);
     }
 }

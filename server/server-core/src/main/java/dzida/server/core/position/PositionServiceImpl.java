@@ -76,7 +76,10 @@ final class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public Move getInitialMove(Id<Character> characterId) {
+    public Move getInitialMove(Id<Character> characterId, Point spawnPoint) {
+        if (spawnPoint != null) {
+            positionStore.setPosition(characterId, spawnPoint);
+        }
         return Move.of(timeService.getCurrentMillis(), PlayerSpeed, positionStore.getCharacterPosition(characterId));
     }
 }

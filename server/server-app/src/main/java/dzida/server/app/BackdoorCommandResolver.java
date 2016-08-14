@@ -41,6 +41,7 @@ public class BackdoorCommandResolver {
     public static final class BackdoorCommand implements InstanceCommand {
         int type;
         JsonObject data;
+        public Id<Character> characterId;
 
         public BackdoorCommand(int type, JsonObject data) {
             this.type = type;

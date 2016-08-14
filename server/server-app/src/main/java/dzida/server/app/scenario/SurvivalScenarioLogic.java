@@ -2,13 +2,14 @@ package dzida.server.app.scenario;
 
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.InstanceStateManager;
+import dzida.server.app.command.InstanceCommand;
+import dzida.server.app.command.SpawnCharacterCommand;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.npc.Npc;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.model.Character;
-import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
@@ -17,6 +18,7 @@ import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import static dzida.server.core.scenario.ScenarioEnd.Resolution.Defeat;
 import static dzida.server.core.scenario.ScenarioEnd.Resolution.Victory;
@@ -28,9 +30,9 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     private final SurvivalScenario survivalScenario;
     private final InstanceStateManager instanceStateManager;
     private final SurvivalScenarioState survivalScenarioState;
-    private final CharacterService characterService;
     private final PlayerService playerService;
     private final Scheduler scheduler;
+    private final Consumer<InstanceCommand> commandConsumer;
 
     public SurvivalScenarioLogic(
             Scheduler scheduler,
@@ -38,15 +40,15 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
             NpcScenarioLogic npcScenarioLogic,
             Survival survival,
             SurvivalScenario survivalScenario,
-            CharacterService characterService,
-            PlayerService playerService) {
+            PlayerService playerService,
+            Consumer<InstanceCommand> commandConsumer) {
         this.scheduler = scheduler;
         this.npcScenarioLogic = npcScenarioLogic;
         this.survival = survival;
         this.survivalScenario = survivalScenario;
         this.instanceStateManager = instanceStateManager;
-        this.characterService = characterService;
         this.playerService = playerService;
+        this.commandConsumer = commandConsumer;
         survivalScenarioState = new SurvivalScenarioState();
     }
 
@@ -72,7 +74,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     }
 
     private void victory() {
-        List<PlayerCharacter> players = characterService.getCharactersOfType(PlayerCharacter.class);
+        List<PlayerCharacter> players = instanceStateManager.getCharacterService().getCharactersOfType(PlayerCharacter.class);
         players.forEach(playerCharacter -> {
             Id<Player> playerId = playerCharacter.getPlayerId();
             Player.Data player = playerService.getPlayer(playerId).getData();
@@ -82,13 +84,12 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
             }
         });
         survivalScenarioState.end = true;
-        instanceStateManager.dispatchEvents(ImmutableList.of(new ScenarioEnd(Victory)));
+        instanceStateManager.updateState(ImmutableList.of(new ScenarioEnd(Victory)));
     }
 
     @Override
     public void start() {
         spawnNpc();
-
     }
 
     private void spawnNpc() {
@@ -98,7 +99,9 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
 
         survivalScenarioState.spawnedNpc += 1;
         Point randomNpcSpawnPoint = getRandomNpcSpawnPoint();
-        npcScenarioLogic.addNpc(randomNpcSpawnPoint, getRandomNpcType());
+        Character npcCharacter = npcScenarioLogic.addNpc(getRandomNpcType());
+        SpawnCharacterCommand spawnCharacterCommand = new SpawnCharacterCommand(npcCharacter, randomNpcSpawnPoint);
+        commandConsumer.accept(spawnCharacterCommand);
 
         if (survivalScenarioState.spawnedNpc < survivalScenario.numberOfNpcToKill) {
             scheduler.schedule(this::spawnNpc, survivalScenario.botSpawnTime);

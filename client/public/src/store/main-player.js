@@ -49,10 +49,6 @@ define(function (require, exports, module) {
                 if (event.character.id != characterId) return;
                 push(null);
             });
-            Dispatcher.messageStream.subscribe(MessageIds.PlayerWillRespawn, (event) => {
-                if (event.playerId != playerId) return;
-                push(event.respawnTime);
-            });
         }),
         playerCooldown: new Publisher.StatePublisher(null, push => {
             const checkAndSetCooldown = function (event) {

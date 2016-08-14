@@ -1,31 +1,23 @@
 package dzida.server.app.scenario;
 
+import dzida.server.app.command.SpawnCharacterCommand;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
-import dzida.server.core.player.PlayerWillRespawn;
-
-import java.time.Instant;
-
-import static java.util.Collections.singletonList;
 
 public class OpenWorldScenarioLogic implements ScenarioLogic {
     private static final int SPAWN_TIME = 4000;
 
     private final PlayerService playerService;
-    private final GameEventScheduler gameEventScheduler;
-    private final CharacterCommandHandler characterCommandHandler;
+    private final InstanceCommandScheduler instanceCommandScheduler;
 
     public OpenWorldScenarioLogic(
             PlayerService playerService,
-            GameEventScheduler gameEventScheduler,
-            CharacterCommandHandler characterCommandHandler) {
+            InstanceCommandScheduler instanceCommandScheduler) {
         this.playerService = playerService;
-        this.gameEventScheduler = gameEventScheduler;
-        this.characterCommandHandler = characterCommandHandler;
+        this.instanceCommandScheduler = instanceCommandScheduler;
     }
 
     @Override
@@ -41,8 +33,7 @@ public class OpenWorldScenarioLogic implements ScenarioLogic {
 
     private void respawnPlayer(Id<Character> characterId, String nick, Id<Player> playerId) {
         PlayerCharacter newPlayerCharacter = new PlayerCharacter(characterId, nick, playerId);
-        long respawnTime = Instant.now().plusMillis(SPAWN_TIME).toEpochMilli();
-        gameEventScheduler.dispatch(singletonList(new PlayerWillRespawn(playerId, respawnTime)));
-        gameEventScheduler.schedule(characterCommandHandler.spawnCharacter(newPlayerCharacter), SPAWN_TIME);
+//        long respawnTime = Instant.now().plusMillis(SPAWN_TIME).toEpochMilli();
+        instanceCommandScheduler.schedule(new SpawnCharacterCommand(newPlayerCharacter, null), SPAWN_TIME);
     }
 }

@@ -90,11 +90,6 @@ define(function (require, exports, module) {
                 this.serverTime = serverTime;
             },
 
-            PlayerWillRespawn: function (playerId, respawnTime) {
-                this.playerId = playerId;
-                this.respawnTime = respawnTime;
-            },
-
             ScenarioEnd: function (resolution) {
                 this.resolution = resolution;
             },
@@ -146,7 +141,6 @@ define(function (require, exports, module) {
             PlayingPlayers: 15,
             TimeSync: 16,
             JoinToInstance: 17,
-            PlayerWillRespawn: 18,
             ScenarioEnd: 19,
             PlayerMessage: 20,
             SkillUsedOnWorldMap: 21,

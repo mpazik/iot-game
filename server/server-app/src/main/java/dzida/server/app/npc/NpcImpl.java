@@ -1,5 +1,6 @@
 package dzida.server.app.npc;
 
+import dzida.server.app.command.InstanceCommand;
 import dzida.server.core.character.model.NpcCharacter;
 import dzida.server.core.event.GameEvent;
 
@@ -16,12 +17,12 @@ class NpcImpl implements Npc {
     }
 
     @Override
-    public List<GameEvent> processTick() {
+    public List<InstanceCommand> processTick() {
         return npcBehaviour.processTick(this);
     }
 
     @Override
-    public List<GameEvent> processGameEvent(GameEvent gameEvent) {
+    public List<InstanceCommand> processGameEvent(GameEvent gameEvent) {
         return npcBehaviour.processGameEvent(this, gameEvent);
     }
 
