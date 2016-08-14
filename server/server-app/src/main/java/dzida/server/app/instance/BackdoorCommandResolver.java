@@ -1,8 +1,8 @@
-package dzida.server.app;
+package dzida.server.app.instance;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dzida.server.app.command.InstanceCommand;
+import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.model.Character;
@@ -22,10 +22,6 @@ public class BackdoorCommandResolver {
         }
     };
 
-    private interface Commands {
-        int KillCharacter = 0;
-    }
-
     public List<GameEvent> resolveCommand(Id<Character> characterId, BackdoorCommand command) {
         return dispatchMessage(characterId, command.type, command.data);
     }
@@ -38,10 +34,14 @@ public class BackdoorCommandResolver {
         return emptyList();
     }
 
+    private interface Commands {
+        int KillCharacter = 0;
+    }
+
     public static final class BackdoorCommand implements InstanceCommand {
+        public Id<Character> characterId;
         int type;
         JsonObject data;
-        public Id<Character> characterId;
 
         public BackdoorCommand(int type, JsonObject data) {
             this.type = type;

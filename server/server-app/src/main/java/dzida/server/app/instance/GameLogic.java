@@ -1,10 +1,14 @@
-package dzida.server.app;
+package dzida.server.app.instance;
 
-import dzida.server.app.command.InstanceCommand;
+import dzida.server.app.instance.command.InstanceCommand;
+import dzida.server.app.instance.npc.AiService;
+import dzida.server.app.instance.scenario.InstanceCommandScheduler;
+import dzida.server.app.instance.scenario.NpcScenarioLogic;
+import dzida.server.app.instance.scenario.OpenWorldScenarioLogic;
+import dzida.server.app.instance.scenario.ScenarioLogic;
+import dzida.server.app.instance.scenario.SurvivalScenarioLogic;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
-import dzida.server.app.npc.AiService;
-import dzida.server.app.scenario.*;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.event.CharacterDied;

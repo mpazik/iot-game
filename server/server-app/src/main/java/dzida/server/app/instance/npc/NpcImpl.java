@@ -1,6 +1,6 @@
-package dzida.server.app.npc;
+package dzida.server.app.instance.npc;
 
-import dzida.server.app.command.InstanceCommand;
+import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.core.character.model.NpcCharacter;
 import dzida.server.core.event.GameEvent;
 

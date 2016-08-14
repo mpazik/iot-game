@@ -1,12 +1,13 @@
-package dzida.server.app;
+package dzida.server.app.instance;
 
-import dzida.server.app.command.SpawnCharacterCommand;
-import dzida.server.app.command.InstanceCommand;
-import dzida.server.app.command.MoveCommand;
-import dzida.server.app.command.KillCharacterCommand;
-import dzida.server.app.command.SkillUseOnCharacterCommand;
-import dzida.server.app.command.SkillUseOnWorldMapCommand;
-import dzida.server.app.command.SkillUseOnWorldObjectCommand;
+import dzida.server.app.Configuration;
+import dzida.server.app.instance.command.InstanceCommand;
+import dzida.server.app.instance.command.KillCharacterCommand;
+import dzida.server.app.instance.command.MoveCommand;
+import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
+import dzida.server.app.instance.command.SkillUseOnWorldMapCommand;
+import dzida.server.app.instance.command.SkillUseOnWorldObjectCommand;
+import dzida.server.app.instance.command.SpawnCharacterCommand;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;

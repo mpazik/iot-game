@@ -1,4 +1,4 @@
-package dzida.server.app;
+package dzida.server.app.instance;
 
 import com.google.common.collect.ImmutableMap;
 import dzida.server.core.basic.Publisher;

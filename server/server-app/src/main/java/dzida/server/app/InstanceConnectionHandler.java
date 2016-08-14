@@ -1,6 +1,7 @@
 package dzida.server.app;
 
 import dzida.server.app.command.Command;
+import dzida.server.app.instance.Instance;
 import dzida.server.app.network.ConnectionHandler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;

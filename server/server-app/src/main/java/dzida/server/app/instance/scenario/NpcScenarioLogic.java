@@ -1,15 +1,11 @@
-package dzida.server.app.scenario;
+package dzida.server.app.instance.scenario;
 
-import dzida.server.app.InstanceStateManager;
-import dzida.server.app.command.SpawnCharacterCommand;
-import dzida.server.app.command.InstanceCommand;
-import dzida.server.app.command.KillCharacterCommand;
-import dzida.server.app.npc.AiService;
+import dzida.server.app.instance.InstanceStateManager;
+import dzida.server.app.instance.command.InstanceCommand;
+import dzida.server.app.instance.npc.AiService;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.NpcCharacter;
-import dzida.server.core.event.GameEvent;
 
 import java.util.List;
 import java.util.function.Consumer;

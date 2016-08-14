@@ -1,11 +1,11 @@
-package dzida.server.app.scenario;
+package dzida.server.app.instance.scenario;
 
 import com.google.common.collect.ImmutableList;
-import dzida.server.app.InstanceStateManager;
-import dzida.server.app.command.InstanceCommand;
-import dzida.server.app.command.SpawnCharacterCommand;
+import dzida.server.app.instance.InstanceStateManager;
+import dzida.server.app.instance.command.InstanceCommand;
+import dzida.server.app.instance.command.SpawnCharacterCommand;
+import dzida.server.app.instance.npc.Npc;
 import dzida.server.app.map.descriptor.Survival;
-import dzida.server.app.npc.Npc;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.unit.Point;

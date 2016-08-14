@@ -1,5 +1,7 @@
 package dzida.server.app.command;
 
+import dzida.server.app.instance.command.InstanceCommand;
+import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
 

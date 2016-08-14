@@ -1,6 +1,6 @@
-package dzida.server.app.scenario;
+package dzida.server.app.instance.scenario;
 
-import dzida.server.app.command.SpawnCharacterCommand;
+import dzida.server.app.instance.command.SpawnCharacterCommand;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;

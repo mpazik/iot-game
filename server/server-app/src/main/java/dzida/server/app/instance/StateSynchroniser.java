@@ -1,4 +1,4 @@
-package dzida.server.app;
+package dzida.server.app.instance;
 
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.core.basic.entity.Id;

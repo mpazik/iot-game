@@ -1,5 +1,6 @@
 package dzida.server.app;
 
+import dzida.server.app.instance.Instance;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;

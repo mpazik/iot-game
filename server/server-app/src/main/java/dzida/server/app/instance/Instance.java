@@ -1,13 +1,14 @@
-package dzida.server.app;
+package dzida.server.app.instance;
 
+import dzida.server.app.TimeServiceImpl;
 import dzida.server.app.command.CharacterCommand;
-import dzida.server.app.command.InstanceCommand;
-import dzida.server.app.command.KillCharacterCommand;
-import dzida.server.app.command.SpawnCharacterCommand;
+import dzida.server.app.instance.command.InstanceCommand;
+import dzida.server.app.instance.command.KillCharacterCommand;
+import dzida.server.app.instance.command.SpawnCharacterCommand;
+import dzida.server.app.instance.npc.AiService;
+import dzida.server.app.instance.npc.NpcBehaviour;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
-import dzida.server.app.npc.AiService;
-import dzida.server.app.npc.NpcBehaviour;
 import dzida.server.app.store.http.WorldMapStoreHttp;
 import dzida.server.app.store.http.loader.SkillLoader;
 import dzida.server.app.store.http.loader.StaticDataLoader;

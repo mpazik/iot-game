@@ -12,6 +12,7 @@ import dzida.server.app.command.SendMessageCommand;
 import dzida.server.app.command.SkillUseOnCharacterRawCommand;
 import dzida.server.app.command.SkillUseOnWorldMapRawCommand;
 import dzida.server.app.command.SkillUseOnWorldObjectRawCommand;
+import dzida.server.app.instance.BackdoorCommandResolver;
 
 import java.util.Collections;
 import java.util.List;

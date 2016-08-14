@@ -1,6 +1,6 @@
-package dzida.server.app.scenario;
+package dzida.server.app.instance.scenario;
 
-import dzida.server.app.command.InstanceCommand;
+import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.core.Scheduler;
 
 import java.util.function.Consumer;

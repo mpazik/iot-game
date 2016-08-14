@@ -1,4 +1,4 @@
-package dzida.server.app.command;
+package dzida.server.app.instance.command;
 
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.model.Character;
