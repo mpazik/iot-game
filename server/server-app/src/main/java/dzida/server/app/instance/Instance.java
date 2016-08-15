@@ -156,5 +156,9 @@ public class Instance {
     public boolean isEmpty() {
         return stateSynchroniser.areAnyListeners();
     }
+
+    public String getKey() {
+        return instanceKey;
+    }
 }
 

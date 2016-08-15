@@ -34,13 +34,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Random;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
@@ -73,7 +67,7 @@ public class WebSocketServer {
                             pipeline.addLast("decoder", new HttpRequestDecoder());
                             pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
                             //noinspection unchecked
-                            pipeline.addLast("handler", new WebSocketHandler<>(connectionHandler));
+                            pipeline.addLast("handler", new WebSocketHandler(connectionHandler));
                         }
                     });
 
@@ -92,14 +86,14 @@ public class WebSocketServer {
         workerGroup.shutdownGracefully();
     }
 
-    private static class WebSocketHandler<UserId> extends SimpleChannelInboundHandler<Object> {
+    private static class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
 
         private static final String WEBSOCKET_PATH = "/websocket";
-        private final ConnectionHandler<UserId> connectionHandler;
+        private final ConnectionHandler connectionHandler;
         private WebSocketServerHandshaker handshaker;
-        private UserId userId;
+        private int connectionId = 0;
 
-        public WebSocketHandler(ConnectionHandler<UserId> connectionHandler) {
+        public WebSocketHandler(ConnectionHandler connectionHandler) {
             this.connectionHandler = connectionHandler;
         }
 
@@ -126,13 +120,13 @@ public class WebSocketServer {
         @Override
         protected void messageReceived(ChannelHandlerContext ctx, Object msg) {
             if (msg instanceof FullHttpRequest) {
-                if (userId != null) {
+                if (connectionId != 0) {
                     fail(ctx, "Can not handle http request if connection is already established");
                     return;
                 }
                 handleHttpRequest(ctx, (FullHttpRequest) msg);
             } else if (msg instanceof WebSocketFrame) {
-                if (userId == null) {
+                if (connectionId == 0) {
                     fail(ctx, "Can not handle websocket packet if connection is not already established");
                     return;
                 }
@@ -142,8 +136,8 @@ public class WebSocketServer {
 
         @Override
         public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-            if (userId != null) {
-                connectionHandler.handleDisconnection(userId);
+            if (connectionId != 0) {
+                connectionHandler.handleDisconnection(connectionId);
             }
         }
 
@@ -172,17 +166,10 @@ public class WebSocketServer {
             if (handshaker == null) {
                 WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
             } else {
-                URI uri = URI.create(req.uri());
-                String authToken = queryParams(uri).getOrDefault("authToken", "");
-                Optional<UserId> optionalUserId = connectionHandler.authenticateUser(authToken);
-                if (optionalUserId.isPresent()) {
-                    this.userId = optionalUserId.get();
-                    Channel channel = handshaker.handshake(ctx.channel(), req).channel();
-                    connectionHandler.handleConnection(userId, new ChannelConnectController(channel));
-                    System.out.println(String.format("Player <[%s]> connected", userId));
-                } else {
-                    handshaker.close(ctx.channel(), new CloseWebSocketFrame(401, "Not valid authentication token"));
-                }
+                connectionId = new Random().nextInt();
+                Channel channel = handshaker.handshake(ctx.channel(), req).channel();
+                connectionHandler.handleConnection(connectionId, new ChannelConnect(channel));
+                System.out.println(String.format("Received new connection: <[%s]>", connectionId));
             }
         }
 
@@ -204,7 +191,7 @@ public class WebSocketServer {
 
             // Send the uppercase string back.
             String request = ((TextWebSocketFrame) frame).text();
-            connectionHandler.handleMessage(userId, request);
+            connectionHandler.handleMessage(connectionId, request);
         }
 
         @Override
@@ -218,28 +205,10 @@ public class WebSocketServer {
             ctx.close();
         }
 
-        private static Map<String, String> queryParams(URI url) {
-            Map<String, String> query_pairs = new LinkedHashMap<>();
-            String query = url.getQuery();
-            if (query == null) {
-                return Collections.emptyMap();
-            }
-            String[] pairs = query.split("&");
-            for (String pair : pairs) {
-                int idx = pair.indexOf("=");
-                try {
-                    query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return query_pairs;
-        }
-
-        private final static class ChannelConnectController implements ConnectionHandler.ConnectionController {
+        private final static class ChannelConnect implements Connection {
             private final Channel channel;
 
-            private ChannelConnectController(Channel channel) {
+            private ChannelConnect(Channel channel) {
                 this.channel = channel;
             }
 

@@ -31,18 +31,8 @@ public class Gate {
         this.defaultInstance = defaultInstance;
     }
 
-    public Optional<Id<Player>> authenticate(String authToken) {
-        String[] tokenSplit = authToken.split(":");
-        if (tokenSplit.length != 2) {
-            return Optional.empty();
-        }
-        String nick = tokenSplit[0];
-        Key<Instance> instanceKey = new Key<>(tokenSplit[1]);
-        Optional<Id<Player>> playerIdOpt = findOrCreatePlayer(nick);
-        playerIdOpt.ifPresent(playerId -> {
-            playersInstances.put(playerId, instanceKey);
-        });
-        return playerIdOpt;
+    public Optional<Id<Player>> authenticate(String nick) {
+        return findOrCreatePlayer(nick);
     }
 
     public boolean isPlayerPlaying(String nick) {

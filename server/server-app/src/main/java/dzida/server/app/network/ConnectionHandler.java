@@ -1,23 +1,10 @@
 package dzida.server.app.network;
 
-import java.util.Optional;
+public interface ConnectionHandler {
 
-public interface ConnectionHandler<UserId> {
+    void handleConnection(int connectionId, Connection connectionController);
 
-    /**
-     * @return None if user can not connect to the system, long user id if the user successfully pass authentication.
-     */
-    Optional<UserId> authenticateUser(String authToken);
+    void handleMessage(int connectionId, String message);
 
-    void handleConnection(UserId userId, ConnectionController connectionController);
-
-    void handleMessage(UserId userId, String message);
-
-    void handleDisconnection(UserId userId);
-
-    interface ConnectionController {
-        void disconnect();
-
-        void send(String data);
-    }
+    void handleDisconnection(int connectionId);
 }

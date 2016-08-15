@@ -2,12 +2,14 @@ package dzida.server.app;
 
 import com.google.gson.Gson;
 import dzida.server.app.command.CharacterCommand;
-import dzida.server.app.command.Command;
 import dzida.server.app.command.JoinBattleCommand;
+import dzida.server.app.dispatcher.ClientConnection;
+import dzida.server.app.dispatcher.Server;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.core.Scheduler;
+import dzida.server.core.basic.Result;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.event.GameEvent;
@@ -23,82 +25,30 @@ import java.util.Random;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 import static dzida.server.app.Serializer.getSerializer;
 
-public class Container {
+public class Container implements Server {
     private final Scheduler scheduler;
     private final Map<Key<Instance>, Instance> instances = new HashMap<>();
-    private final Map<Id<Player>, dzida.server.app.network.ConnectionHandler.ConnectionController> connectionControllers = new HashMap<>();
+    private final Map<Integer, ClientConnection> connections = new HashMap<>();
+    private final Map<Integer, Id<Player>> connectionPlayers = new HashMap<>();
     private final Map<Id<Player>, Key<Instance>> playersInstances = new HashMap<>();
     private final MapDescriptorStore mapDescriptorStore;
     private final PlayerService playerService;
-
-    private final InstanceConnectionHandler connectionHandler;
+    private final Gate gate;
+    private final CommandParser commandParser;
+    private final TimeSynchroniser timeSynchroniser;
+    private final Gson serializer;
 
     Container(PlayerService playerService, Scheduler scheduler, Gate gate) {
         this.scheduler = scheduler;
-        this.mapDescriptorStore = new MapDescriptorStore();
         this.playerService = playerService;
+        this.gate = gate;
 
-        Gson serializer = getSerializer();
-        TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
+        mapDescriptorStore = new MapDescriptorStore();
+        commandParser = new CommandParser();
+        serializer = getSerializer();
+        timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
-        connectionHandler = new InstanceConnectionHandler() {
-
-            @Override
-            public void playerConnected(Id<Player> playerId, dzida.server.app.network.ConnectionHandler.ConnectionController connectionController) {
-                connectionControllers.put(playerId, connectionController);
-                playerService.loginPlayer(playerId);
-            }
-
-            @Override
-            public void playerDisconnected(Id<Player> playerId) {
-                Key<Instance> instanceKey = gate.playerInstance(playerId);
-                Instance instance = instances.get(instanceKey);
-                playerService.logoutPlayer(playerId);
-                instance.removePlayer(playerId);
-                playersInstances.remove(playerId);
-                connectionControllers.remove(playerId);
-            }
-
-            @Override
-            public void playerJoinedToInstance(Id<Player> playerId, Key<Instance> instanceKey) {
-                if (playersInstances.containsKey(playerId)) {
-                    Instance playerPreviousInstance = instances.get(playersInstances.get(playerId));
-                    playerPreviousInstance.removePlayer(playerId);
-                }
-                playersInstances.put(playerId, instanceKey);
-                instances.get(instanceKey).addPlayer(playerId, gameEvent -> sendMessageToPlayer(playerId, gameEvent));
-            }
-
-            @Override
-            public void handleCommand(Id<Player> playerId, Command commandToProcess) {
-                Key<Instance> instanceKey = playersInstances.get(playerId);
-                whenTypeOf(commandToProcess)
-                        .is(CharacterCommand.class)
-                        .then(command -> instances.get(instanceKey).handleCommand(playerId, command))
-
-                        .is(InstanceCommand.class)
-                        .then(command -> instances.get(instanceKey).handleCommand(command))
-
-                        .is(JoinBattleCommand.class)
-                        .then(command -> {
-                            Player.Data playerData = playerService.getPlayer(playerId).getData();
-                            Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
-                            playerService.updatePlayerData(playerId, updatedPlayerData);
-                            Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
-                            sendMessageToPlayer(playerId, new JoinToInstance(newInstanceKey));
-                        })
-
-                        .is(TimeSynchroniser.TimeSyncRequest.class)
-                        .then(command -> {
-                            TimeSynchroniser.TimeSyncResponse timeSyncResponse = timeSynchroniser.timeSync(command);
-                            sendMessageToPlayer(playerId, timeSyncResponse);
-                        });
-            }
-
-            public void sendMessageToPlayer(Id<Player> playerId, GameEvent data) {
-                connectionControllers.get(playerId).send(serializer.toJson(Collections.singleton(new Packet(data.getId(), data))));
-            }
-        };
+        gate.subscribePlayerJoinedToInstance(this::playerJoinedToInstance);
     }
 
 
@@ -131,8 +81,80 @@ public class Container {
         instances.remove(instanceKey);
     }
 
-    public InstanceConnectionHandler getConnectionHandler() {
-        return connectionHandler;
+    public void playerJoinedToInstance(Id<Player> playerId, Key<Instance> instanceKey) {
+        if (playersInstances.containsKey(playerId)) {
+            Instance playerPreviousInstance = instances.get(playersInstances.get(playerId));
+            playerPreviousInstance.removePlayer(playerId);
+        }
+        playersInstances.put(playerId, instanceKey);
+        Integer connectionId = connectionPlayers.entrySet().stream().filter(entry -> entry.getValue().equals(playerId)).findAny().get().getKey();
+        instances.get(instanceKey).addPlayer(playerId, gameEvent -> sendMessageToPlayer(connectionId, gameEvent));
+    }
+
+    private void sendMessageToPlayer(int connectionId, GameEvent data) {
+        connections.get(connectionId).send(serializer.toJson(Collections.singleton(new Packet(data.getId(), data))));
+    }
+
+    @Override
+    public String getKey() {
+        return "instance";
+    }
+
+    @Override
+    public void handleMessage(int connectionId, String message) {
+        Id<Player> playerId = connectionPlayers.get(connectionId);
+        Key<Instance> instanceKey = playersInstances.get(playerId);
+        commandParser.readPacket(message).forEach(commandToProcess -> {
+            whenTypeOf(commandToProcess)
+                    .is(CharacterCommand.class)
+                    .then(command -> instances.get(instanceKey).handleCommand(playerId, command))
+
+                    .is(InstanceCommand.class)
+                    .then(command -> instances.get(instanceKey).handleCommand(command))
+
+                    .is(JoinBattleCommand.class)
+                    .then(command -> {
+                        Player.Data playerData = playerService.getPlayer(playerId).getData();
+                        Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
+                        playerService.updatePlayerData(playerId, updatedPlayerData);
+                        Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
+                        sendMessageToPlayer(connectionId, new JoinToInstance(newInstanceKey));
+                    })
+
+                    .is(TimeSynchroniser.TimeSyncRequest.class)
+                    .then(command -> {
+                        TimeSynchroniser.TimeSyncResponse timeSyncResponse = timeSynchroniser.timeSync(command);
+                        sendMessageToPlayer(connectionId, timeSyncResponse);
+                    });
+        });
+    }
+
+    @Override
+    public Result handleConnection(int connectionId, ClientConnection clientConnection, String connectionData) {
+        Optional<Id<Player>> playerIdOpt = gate.authenticate(connectionData);
+        if (!playerIdOpt.isPresent()) {
+            return Result.error("Can not authenticate player");
+        }
+        Id<Player> playerId = playerIdOpt.get();
+        connections.put(connectionId, clientConnection);
+        connectionPlayers.put(connectionId, playerId);
+        playerService.loginPlayer(playerId);
+        gate.loginPlayer(playerId);
+        return Result.ok();
+    }
+
+    @Override
+    public void handleDisconnection(int connectionId) {
+        Id<Player> playerId = connectionPlayers.get(connectionId);
+        Key<Instance> instanceKey = gate.playerInstance(playerId);
+        Instance instance = instances.get(instanceKey);
+        playerService.logoutPlayer(playerId);
+        instance.removePlayer(playerId);
+        playersInstances.remove(playerId);
+
+        connections.remove(connectionId);
+        connectionPlayers.remove(connectionId);
+        gate.logoutPlayer(playerId);
     }
 
     private static class JoinToInstance implements GameEvent {

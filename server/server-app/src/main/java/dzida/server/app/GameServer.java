@@ -2,18 +2,17 @@ package dzida.server.app;
 
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
+import dzida.server.app.dispatcher.ClientConnection;
+import dzida.server.app.network.Connection;
 import dzida.server.app.network.ConnectionHandler;
 import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.ContainerResource;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.store.mapdb.PlayerStoreMapDb;
-import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 
 import java.io.IOException;
-import java.util.Optional;
 
 public final class GameServer {
 
@@ -29,7 +28,7 @@ public final class GameServer {
 
         Container container = new Container(playerService, new SchedulerImpl(webSocketServer.getEventLoop()), gate);
 
-        ConnectionHandler<Id<Player>> connectionHandler = new ConnectionHandlerImpl(gate, container.getConnectionHandler());
+        ConnectionHandler connectionHandler = new ConnectionHandlerImpl(container);
         webSocketServer.start(gameServerPort, connectionHandler);
 
         for (String instance : Configuration.getInitialInstances()) {
@@ -48,38 +47,35 @@ public final class GameServer {
         webSocketServer.shootDown();
     }
 
-    private static final class ConnectionHandlerImpl implements ConnectionHandler<Id<Player>> {
-        private final Gate gate;
-        private final InstanceConnectionHandler instanceConnectionHandler;
-        private final CommandParser commandParser;
+    private static final class ConnectionHandlerImpl implements ConnectionHandler {
+        private final Container container;
 
-        private ConnectionHandlerImpl(Gate gate, InstanceConnectionHandler instanceConnectionHandler) {
-            this.gate = gate;
-            this.instanceConnectionHandler = instanceConnectionHandler;
-            gate.subscribePlayerJoinedToInstance(instanceConnectionHandler::playerJoinedToInstance);
-            commandParser = new CommandParser();
+        private ConnectionHandlerImpl(Container container) {
+            this.container = container;
+        }
+
+        public void handleConnection(int connectionId, Connection connectionController) {
+            container.handleConnection(connectionId, new ClientConnection() {
+                @Override
+                public void disconnect() {
+                    connectionController.disconnect();
+                }
+
+                @Override
+                public void send(String data) {
+                    connectionController.send(data);
+                }
+            }, "test");
         }
 
         @Override
-        public Optional<Id<Player>> authenticateUser(String authToken) {
-            return gate.authenticate(authToken);
+        public void handleMessage(int connectionId, String message) {
+            container.handleMessage(connectionId, message);
         }
 
         @Override
-        public void handleConnection(Id<Player> playerId, ConnectionController connectionController) {
-            instanceConnectionHandler.playerConnected(playerId, connectionController);
-            gate.loginPlayer(playerId);
-        }
-
-        @Override
-        public void handleMessage(Id<Player> playerId, String packet) {
-            commandParser.readPacket(packet).forEach(command -> instanceConnectionHandler.handleCommand(playerId, command));
-        }
-
-        @Override
-        public void handleDisconnection(Id<Player> playerId) {
-            instanceConnectionHandler.playerDisconnected(playerId);
-            gate.logoutPlayer(playerId);
+        public void handleDisconnection(int connectionId) {
+            container.handleDisconnection(connectionId);
         }
     }
 }
