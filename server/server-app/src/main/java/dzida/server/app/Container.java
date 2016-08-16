@@ -130,17 +130,25 @@ public class Container implements Server {
     }
 
     @Override
-    public Result handleConnection(int connectionId, ClientConnection clientConnection, String connectionData) {
+    public Result verifyConnection(int connectionId, String connectionData) {
         Optional<Id<Player>> playerIdOpt = gate.authenticate(connectionData);
         if (!playerIdOpt.isPresent()) {
             return Result.error("Can not authenticate player");
+        }
+        return Result.ok();
+    }
+
+    @Override
+    public void handleConnection(int connectionId, ClientConnection clientConnection, String connectionData) {
+        Optional<Id<Player>> playerIdOpt = gate.authenticate(connectionData);
+        if (!playerIdOpt.isPresent()) {
+            throw new RuntimeException("player id should be verified by the verifyConnection method at this point");
         }
         Id<Player> playerId = playerIdOpt.get();
         connections.put(connectionId, clientConnection);
         connectionPlayers.put(connectionId, playerId);
         playerService.loginPlayer(playerId);
         gate.loginPlayer(playerId);
-        return Result.ok();
     }
 
     @Override

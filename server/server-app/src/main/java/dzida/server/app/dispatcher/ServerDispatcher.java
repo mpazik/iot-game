@@ -10,7 +10,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import dzida.server.core.basic.Result;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class ServerDispatcher {
         }).create();
     }
 
-    public Result handleConnection(int connectionId, ClientConnection clientConnection, @Nullable String connectionData) {
+    public Result handleConnection(int connectionId, ClientConnection clientConnection) {
         connectionHandlers.put(connectionId, clientConnection);
         connectionsToServers.put(connectionId, new HashSet<>());
         return Result.ok();
@@ -76,11 +75,11 @@ public class ServerDispatcher {
         servers.add(server);
     }
 
-    public void handlePacket(int connectionId, String packet) {
+    public void handleMessage(int connectionId, String packet) {
         List<ServerMessage> serverMessages = serializer.fromJson(packet, packetType);
         serverMessages.forEach(serverMessage -> {
             if (serverMessage.serverId == dispatcherServerId) {
-                handleMessage(connectionId, serverMessage.data);
+                handleCommand(connectionId, serverMessage.data);
                 return;
             }
             if (!connectionsToServers.get(connectionId).contains(serverMessage.serverId)) return;
@@ -88,15 +87,15 @@ public class ServerDispatcher {
         });
     }
 
-    void handleMessage(int connectionId, String message) {
+    void handleCommand(int connectionId, String message) {
         JsonArray data = serializer.fromJson(message, JsonArray.class);
         int messageType = data.get(0).getAsInt();
         if (messageType == ConnectToServerMessage.id) {
             ConnectToServerMessage connectToServerMessage = serializer.fromJson(data.get(1), ConnectToServerMessage.class);
             connectToServer(connectionId, connectToServerMessage.serverKey, connectToServerMessage.connectionData);
-        } else if (messageType == DisconnectFromServer.id) {
-            DisconnectFromServer disconnectFromServer = serializer.fromJson(data.get(1), DisconnectFromServer.class);
-            disconnectFromServer(connectionId, disconnectFromServer.serverId);
+        } else if (messageType == DisconnectFromServerMessage.id) {
+            DisconnectFromServerMessage disconnectFromServerMessage = serializer.fromJson(data.get(1), DisconnectFromServerMessage.class);
+            disconnectFromServer(connectionId, disconnectFromServerMessage.serverId);
         }
     }
 
@@ -104,7 +103,8 @@ public class ServerDispatcher {
         Optional<Server> serverOptional = servers.stream().filter(server -> server != null && server.getKey().equals(serverKey)).findAny();
 
         if (!serverOptional.isPresent()) {
-            sendDispatcherMessageToClient(connectionId, new NotConnectedToServerMessage(serverKey, "Could not find an server with that key to connect"));
+            String errorMessage = "Could not find a server with the key: " + serverKey + ".";
+            sendDispatcherMessageToClient(connectionId, new NotConnectedToServerMessage(serverKey, errorMessage));
             return;
         }
 
@@ -120,11 +120,12 @@ public class ServerDispatcher {
                 sendToClient(connectionId, serverIndex, data);
             }
         };
-        Result connectionResult = servers.get(serverIndex).handleConnection(connectionId, clientConnection, connectionData);
+        Result connectionResult = servers.get(serverIndex).verifyConnection(connectionId, connectionData);
 
         connectionResult.consume(() -> {
-            connectionsToServers.get(connectionId).add(serverIndex);
             sendDispatcherMessageToClient(connectionId, new ConnectedToServerMessage(serverKey, serverIndex));
+            connectionsToServers.get(connectionId).add(serverIndex);
+            servers.get(serverIndex).handleConnection(connectionId, clientConnection, connectionData);
         }, error -> {
             sendDispatcherMessageToClient(connectionId, new NotConnectedToServerMessage(serverKey, error.getMessage()));
         });
@@ -174,11 +175,11 @@ public class ServerDispatcher {
         }
     }
 
-    private final static class DisconnectFromServer {
+    private final static class DisconnectFromServerMessage {
         private static final int id = 2;
         private final int serverId;
 
-        private DisconnectFromServer(int serverId) {
+        private DisconnectFromServerMessage(int serverId) {
             this.serverId = serverId;
         }
     }

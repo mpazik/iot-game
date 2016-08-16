@@ -6,9 +6,13 @@ public interface Server {
 
     String getKey();
 
+    default Result verifyConnection(int connectionId, String connectionData) {
+        return Result.ok();
+    }
+
     void handleMessage(int connectionId, String message);
 
-    Result handleConnection(int connectionId, ClientConnection clientConnection, String connectionData);
+    void handleConnection(int connectionId, ClientConnection clientConnection, String connectionData);
 
     void handleDisconnection(int connectionId);
 }

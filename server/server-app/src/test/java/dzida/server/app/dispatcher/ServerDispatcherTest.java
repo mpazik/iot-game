@@ -35,8 +35,8 @@ public class ServerDispatcherTest {
 
     @Test
     public void clientIsConnectedToSelectedServers() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[" +
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[" +
                 "[0, " + escapeJson("[1, {\"serverKey\":\"serverA\",\"connectionData\":\"test\"}]") + "], " +
                 "[0, " + escapeJson("[1, {\"serverKey\":\"serverB\"}]") + "]" +
                 "]");
@@ -55,38 +55,47 @@ public class ServerDispatcherTest {
 
     @Test
     public void clientReceiveMessageWithServerIdToWhichItWasConnected() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[" +
+        ProbeServer serverD = new ProbeServer("serverD") {
+            public void handleConnection(int connectionId, ClientConnection connectionController, String connectionData) {
+                // This message should be send after the message about connecting to the server D.
+                connectionController.send("Initial data from server D");
+            }
+        };
+        serverDispatcher.addServer(serverD);
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[" +
                 "[0, " + escapeJson("[1, {\"serverKey\":\"serverA\",\"connectionData\":\"test\"}]") + "], " +
-                "[0, " + escapeJson("[1, {\"serverKey\":\"serverB\"}]") + "]" +
+                "[0, " + escapeJson("[1, {\"serverKey\":\"serverD\"}]") + "]" +
                 "]");
 
         assertThat(connection.getMessages()).containsExactly(
                 "[[0," + escapeJson("[1,{\"serverKey\":\"serverA\",\"serverId\":1}]") + "]]",
-                "[[0," + escapeJson("[1,{\"serverKey\":\"serverB\",\"serverId\":2}]") + "]]"
+                "[[0," + escapeJson("[1,{\"serverKey\":\"serverD\",\"serverId\":4}]") + "]]",
+                "[[4," + escapeJson("Initial data from server D") + "]]"
         );
     }
 
     @Test
     public void clientReceiveMessageWithErrorIfThereIsNoServerToWhichItWantedToConnect() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverD\"}]") + "]]");
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverD\"}]") + "]]");
 
         assertThat(connection.getMessages()).containsExactly(
-                "[[0," + escapeJson("[3,{\"serverKey\":\"serverD\",\"errorMessage\":\"Could not find an server with that key to connect\"}]") + "]]"
+                "[[0," + escapeJson("[3,{\"serverKey\":\"serverD\",\"errorMessage\":\"Could not find a server with the key: serverD.\"}]") + "]]"
         );
     }
 
     @Test
     public void clientReceiveMessageWithErrorIfServerDoNotAcceptClient() {
         ProbeServer serverD = new ProbeServer("serverD") {
-            public Result handleConnection(int connectionId, ClientConnection connectionController, String connectionData) {
+            @Override
+            public Result verifyConnection(int connectionId, String connectionData) {
                 return Result.error("You shall not pass.");
             }
         };
         serverDispatcher.addServer(serverD);
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverD\"}]") + "]]");
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverD\"}]") + "]]");
 
         assertThat(connection.getMessages()).containsExactly(
                 "[[0," + escapeJson("[3,{\"serverKey\":\"serverD\",\"errorMessage\":\"You shall not pass.\"}]") + "]]"
@@ -95,8 +104,8 @@ public class ServerDispatcherTest {
 
     @Test
     public void messagesAreDispatchedToCorrectServer() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[" +
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[" +
                 "[0, " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]," +
                 "[0, " + escapeJson("[1, {\"serverKey\":\"serverB\"}]") + "]," +
                 "[2, " + escapeJson("messageToServerB") + "]," +
@@ -116,8 +125,8 @@ public class ServerDispatcherTest {
 
     @Test
     public void messageIsNotDispatchedToServerIfClientIsNotConnectedToServer() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[" +
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[" +
                 "[1, " + escapeJson("messageToServerA") + "]" +
                 "]");
 
@@ -128,19 +137,19 @@ public class ServerDispatcherTest {
 
     @Test
     public void clientDisconnectionFromServerIsDispatchedToServer() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
         ProbeServer.assertThat(serverA).hasConnection(connectionId);
 
-        serverDispatcher.handlePacket(connectionId, "[[0, " + escapeJson("[2, {\"serverId\":1}]") + "]]");
+        serverDispatcher.handleMessage(connectionId, "[[0, " + escapeJson("[2, {\"serverId\":1}]") + "]]");
 
         ProbeServer.assertThat(serverA).hasNotConnection(connectionId);
     }
 
     @Test
     public void clientDisconnectionFromDispatcherIsDispatchedToAllConnectedServers() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[" +
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[" +
                 "[0, " + escapeJson("[1, {\"serverId\":1}]") + "]," +
                 "[0, " + escapeJson("[1, {\"serverId\":2}]") + "]" +
                 "]");
@@ -152,8 +161,8 @@ public class ServerDispatcherTest {
 
     @Test
     public void clientDisconnectionFromServerDoesNothingIfClientWasNotConnected() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[[0, " + escapeJson("[2, {\"serverId\":1}]") + "]]");
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[[0, " + escapeJson("[2, {\"serverId\":1}]") + "]]");
 
         ProbeServer.assertThat(serverA).hasNotConnection(connectionId);
     }
@@ -161,8 +170,8 @@ public class ServerDispatcherTest {
 
     @Test
     public void serverCanSendMessageToClient() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
         serverA.send(connectionId, "Test message");
 
         assertThat(connection.getMessages()).containsExactly(
@@ -173,8 +182,8 @@ public class ServerDispatcherTest {
 
     @Test
     public void serverCanDisconnectClient() {
-        serverDispatcher.handleConnection(connectionId, connection, null);
-        serverDispatcher.handlePacket(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
+        serverDispatcher.handleConnection(connectionId, connection);
+        serverDispatcher.handleMessage(connectionId, "[[0, " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
         serverA.disconnect(connectionId);
 
         assertThat(connection.getMessages()).containsExactly(
@@ -232,11 +241,10 @@ class ProbeServer implements Server {
     }
 
     @Override
-    public Result handleConnection(int connectionId, ClientConnection clientConnection, String connectionData) {
+    public void handleConnection(int connectionId, ClientConnection clientConnection, String connectionData) {
         this.connectionData.put(connectionId, connectionData);
         connectionControllers.put(connectionId, clientConnection);
         messages.put(connectionId, new ArrayList<>());
-        return Result.ok();
     }
 
     @Override
