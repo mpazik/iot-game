@@ -1,8 +1,6 @@
 define(function (require, exports, module) {
 
-    const dispatcherServerId = 0;
-    const serverIds = new Map();
-    const serverKeys = new Map();
+    const dispatcherServerKey = 'dispatcher';
     const connections = new Map();
     const packetQueue = [];
     var socket = null;
@@ -19,12 +17,12 @@ define(function (require, exports, module) {
         CLOSED: 3
     };
 
-    function close(serverId) {
-        send(dispatcherServerId, disconnectFromServerMessage(serverId));
+    function close(serverKey) {
+        send(dispatcherServerKey, disconnectFromServerMessage(serverKey));
     }
 
-    function send(serverId, message) {
-        const packetToServer = [serverId, message];
+    function send(serverKey, message) {
+        const packetToServer = [serverKey, message];
         if (isConnected()) {
             sendServerPackets([packetToServer]);
         } else {
@@ -40,16 +38,8 @@ define(function (require, exports, module) {
         return JSON.stringify([1, {serverKey, connectionData}]);
     }
 
-    function disconnectFromServerMessage(serverId) {
-        return JSON.stringify([2, {serverId}]);
-    }
-
-    function getServerId(serverKey) {
-        const serverId = serverIds.get(serverKey);
-        if (serverId == null) {
-            throw new Error(`Connection with ${serverKey} not established yat`);
-        }
-        return serverId;
+    function disconnectFromServerMessage(serverKey) {
+        return JSON.stringify([2, {serverKey}]);
     }
 
     function disconnectAll() {
@@ -65,21 +55,16 @@ define(function (require, exports, module) {
         const messageId = message[0];
         const obj = message[1];
         if (messageId === 1) {
-            serverKeys.set(obj.serverId, obj.serverKey);
-            serverIds.set(obj.serverKey, obj.serverId);
             const connection = connections.get(obj.serverKey);
             connection.onOpen();
             connection.readyState = connectionState.OPEN;
         } else if (messageId === 2) {
-            const serverKey = serverKeys.get(obj.serverId);
-            const connection = connections.get(serverKey);
+            const connection = connections.get(obj.serverKey);
             connection.readyState = connectionState.CLOSING;
             connection.onClose();
             connection.readyState = connectionState.CLOSED;
 
-            serverKeys.delete(obj.serverId);
-            serverIds.delete(serverKey);
-            connections.delete(serverKey);
+            connections.delete(obj.serverKey);
         } else if (messageId === 3) {
             const connection = connections.get(obj.serverKey);
             connection.readyState = connectionState.CLOSING;
@@ -100,15 +85,14 @@ define(function (require, exports, module) {
         socket.onmessage = (event) => {
             const serverPackages = JSON.parse(event.data);
             for (const serverPackage of serverPackages) {
-                const serverId = serverPackage[0];
+                const serverKey = serverPackage[0];
                 const data = serverPackage[1];
-                if (serverId == dispatcherServerId) {
+                if (serverKey == dispatcherServerKey) {
                     handleDispatcherMessage(data);
-                } else if (serverKeys.has(serverId)) {
-                    const serverKey = serverKeys.get(serverId);
+                } else if (connections.has(serverKey)) {
                     connections.get(serverKey).onMessage(data);
                 } else {
-                    console.error(`Message from server ${serverId} to which there is no connection`)
+                    console.error(`Message from server ${serverKey} to which there is no connection`)
                 }
             }
         };
@@ -130,10 +114,10 @@ define(function (require, exports, module) {
             }
             const connection = {
                 send(data) {
-                    send(getServerId(serverKey), data);
+                    send(serverKey, data);
                 },
                 close() {
-                    close(getServerId(serverKey));
+                    close(serverKey);
                 },
                 readyState: connectionState.CONNECTING,
                 onMessage: () => {
@@ -149,7 +133,7 @@ define(function (require, exports, module) {
             if (socket == null) {
                 connect()
             }
-            send(dispatcherServerId, connectToServerMessage(serverKey, connectionData));
+            send(dispatcherServerKey, connectToServerMessage(serverKey, connectionData));
             return connection;
         }
     };

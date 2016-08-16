@@ -3,7 +3,6 @@ package dzida.server.app;
 import com.google.gson.Gson;
 import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.command.JoinBattleCommand;
-import dzida.server.app.dispatcher.Server;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
@@ -11,6 +10,7 @@ import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.ClientConnection;
 import dzida.server.core.basic.connection.ServerConnection;
+import dzida.server.core.basic.connection.VerifyingConnectionServer;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.event.GameEvent;
@@ -26,7 +26,7 @@ import java.util.Random;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 import static dzida.server.app.Serializer.getSerializer;
 
-public class Container implements Server {
+public class Container implements VerifyingConnectionServer<String, String> {
     private final Scheduler scheduler;
     private final Map<Key<Instance>, Instance> instances = new HashMap<>();
     private final Map<Id<Player>, ClientConnection<String>> connections = new HashMap<>();
@@ -92,11 +92,6 @@ public class Container implements Server {
 
     private void sendMessageToPlayer(Id<Player> playerId, GameEvent data) {
         connections.get(playerId).onMessage(serializer.toJson(Collections.singleton(new Packet(data.getId(), data))));
-    }
-
-    @Override
-    public String getKey() {
-        return "instance";
     }
 
     public void handleMessage(Id<Player> playerId, String message) {

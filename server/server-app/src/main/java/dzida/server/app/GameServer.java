@@ -25,7 +25,7 @@ public final class GameServer {
 
         Container container = new Container(playerService, new SchedulerImpl(webSocketServer.getEventLoop()), gate);
         ServerDispatcher serverDispatcher = new ServerDispatcher();
-        serverDispatcher.addServer(container);
+        serverDispatcher.addServer("instance", container);
 
         webSocketServer.start(gameServerPort, serverDispatcher);
 
