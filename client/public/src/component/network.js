@@ -2,6 +2,7 @@ define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const PacketSerialization = require('../common/packet/packet-serialization');
     const Dispatcher = require('./dispatcher');
+    const NetworkDispatcher = require('./network-dispatcher');
 
     const State = {
         CREATED: 0,
@@ -30,31 +31,31 @@ define(function (require, exports, module) {
     }
 
     Network.State = State;
-    Network.prototype.connect = function (url) {
+    Network.prototype.connect = function (userNick) {
         var _this = this;
-        var socket = new WebSocket(url);
+        var socket = NetworkDispatcher.newSocket('instance', userNick);
         this.updateState(State.CONNECTING);
-        socket.onmessage = function (evt) {
-            const messages = parseJson(evt.data);
+        socket.onMessage = function (data) {
+            const messages = parseJson(data);
             if (!messages) {
-                console.error("Received wrong message from sever: " + evt.data);
+                console.error("Received wrong message from sever: " + data);
             } else {
                 messages.forEach(function (message) {
                     return Dispatcher.messageStream.publish(message[0], message[1]);
                 });
             }
         };
-        socket.onclose = function () {
+        socket.onClose = function () {
             _this.updateState(State.DISCONNECTED);
         };
         var self = this;
         var connectionPromise = new Promise(function (resolve, reject) {
-            socket.onopen = function () {
+            socket.onOpen = function () {
                 //_this.sendRequests([new Requests.TimeSync(Date.now())]);
                 self.updateState(State.CONNECTED);
                 resolve();
             };
-            socket.onerror = function (error) {
+            socket.onError = function (error) {
                 if (self.state.value === State.CONNECTING) {
                     reject(error);
                 }

@@ -3,6 +3,7 @@ package dzida.server.app;
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.dispatcher.ClientConnection;
+import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.network.Connection;
 import dzida.server.app.network.ConnectionHandler;
 import dzida.server.app.network.WebSocketServer;
@@ -25,10 +26,11 @@ public final class GameServer {
         Gate gate = new Gate(playerService, new Key<>(Configuration.getInitialInstances()[0]));
         WebSocketServer webSocketServer = new WebSocketServer();
 
-
         Container container = new Container(playerService, new SchedulerImpl(webSocketServer.getEventLoop()), gate);
+        ServerDispatcher serverDispatcher = new ServerDispatcher();
+        serverDispatcher.addServer(container);
 
-        ConnectionHandler connectionHandler = new ConnectionHandlerImpl(container);
+        ConnectionHandler connectionHandler = new ConnectionHandlerImpl(serverDispatcher);
         webSocketServer.start(gameServerPort, connectionHandler);
 
         for (String instance : Configuration.getInitialInstances()) {
@@ -48,14 +50,14 @@ public final class GameServer {
     }
 
     private static final class ConnectionHandlerImpl implements ConnectionHandler {
-        private final Container container;
+        private final ServerDispatcher serverDispatcher;
 
-        private ConnectionHandlerImpl(Container container) {
-            this.container = container;
+        private ConnectionHandlerImpl(ServerDispatcher serverDispatcher) {
+            this.serverDispatcher = serverDispatcher;
         }
 
         public void handleConnection(int connectionId, Connection connectionController) {
-            container.handleConnection(connectionId, new ClientConnection() {
+            serverDispatcher.handleConnection(connectionId, new ClientConnection() {
                 @Override
                 public void disconnect() {
                     connectionController.disconnect();
@@ -65,17 +67,17 @@ public final class GameServer {
                 public void send(String data) {
                     connectionController.send(data);
                 }
-            }, "test");
+            });
         }
 
         @Override
         public void handleMessage(int connectionId, String message) {
-            container.handleMessage(connectionId, message);
+            serverDispatcher.handleMessage(connectionId, message);
         }
 
         @Override
         public void handleDisconnection(int connectionId) {
-            container.handleDisconnection(connectionId);
+            serverDispatcher.handleDisconnection(connectionId);
         }
     }
 }

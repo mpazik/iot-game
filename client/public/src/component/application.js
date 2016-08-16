@@ -168,12 +168,12 @@ define(function (require, exports, module) {
                 connect();
             }).catch(error => {
                 if (error) {
-                    alert(error);
+                    console.error(error);
                 }
                 setState('need-authentication');
             });
         } else {
-            network.connect(`${Configuration.serverAddress}?authToken=${userNick}:${instanceKey}`);
+            network.connect(userNick);
             setState('connecting');
         }
     }
