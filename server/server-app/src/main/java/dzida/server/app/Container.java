@@ -3,13 +3,14 @@ package dzida.server.app;
 import com.google.gson.Gson;
 import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.command.JoinBattleCommand;
-import dzida.server.app.dispatcher.ClientConnection;
 import dzida.server.app.dispatcher.Server;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Result;
+import dzida.server.core.basic.connection.ClientConnection;
+import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.event.GameEvent;
@@ -28,8 +29,7 @@ import static dzida.server.app.Serializer.getSerializer;
 public class Container implements Server {
     private final Scheduler scheduler;
     private final Map<Key<Instance>, Instance> instances = new HashMap<>();
-    private final Map<Integer, ClientConnection> connections = new HashMap<>();
-    private final Map<Integer, Id<Player>> connectionPlayers = new HashMap<>();
+    private final Map<Id<Player>, ClientConnection<String>> connections = new HashMap<>();
     private final Map<Id<Player>, Key<Instance>> playersInstances = new HashMap<>();
     private final MapDescriptorStore mapDescriptorStore;
     private final PlayerService playerService;
@@ -87,12 +87,11 @@ public class Container implements Server {
             playerPreviousInstance.removePlayer(playerId);
         }
         playersInstances.put(playerId, instanceKey);
-        Integer connectionId = connectionPlayers.entrySet().stream().filter(entry -> entry.getValue().equals(playerId)).findAny().get().getKey();
-        instances.get(instanceKey).addPlayer(playerId, gameEvent -> sendMessageToPlayer(connectionId, gameEvent));
+        instances.get(instanceKey).addPlayer(playerId, gameEvent -> sendMessageToPlayer(playerId, gameEvent));
     }
 
-    private void sendMessageToPlayer(int connectionId, GameEvent data) {
-        connections.get(connectionId).send(serializer.toJson(Collections.singleton(new Packet(data.getId(), data))));
+    private void sendMessageToPlayer(Id<Player> playerId, GameEvent data) {
+        connections.get(playerId).onMessage(serializer.toJson(Collections.singleton(new Packet(data.getId(), data))));
     }
 
     @Override
@@ -100,9 +99,7 @@ public class Container implements Server {
         return "instance";
     }
 
-    @Override
-    public void handleMessage(int connectionId, String message) {
-        Id<Player> playerId = connectionPlayers.get(connectionId);
+    public void handleMessage(Id<Player> playerId, String message) {
         Key<Instance> instanceKey = playersInstances.get(playerId);
         commandParser.readPacket(message).forEach(commandToProcess -> {
             whenTypeOf(commandToProcess)
@@ -118,19 +115,19 @@ public class Container implements Server {
                         Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
                         playerService.updatePlayerData(playerId, updatedPlayerData);
                         Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
-                        sendMessageToPlayer(connectionId, new JoinToInstance(newInstanceKey));
+                        sendMessageToPlayer(playerId, new JoinToInstance(newInstanceKey));
                     })
 
                     .is(TimeSynchroniser.TimeSyncRequest.class)
                     .then(command -> {
                         TimeSynchroniser.TimeSyncResponse timeSyncResponse = timeSynchroniser.timeSync(command);
-                        sendMessageToPlayer(connectionId, timeSyncResponse);
+                        sendMessageToPlayer(playerId, timeSyncResponse);
                     });
         });
     }
 
     @Override
-    public Result verifyConnection(int connectionId, String connectionData) {
+    public Result verifyConnection(String connectionData) {
         Optional<Id<Player>> playerIdOpt = gate.authenticate(connectionData);
         if (!playerIdOpt.isPresent()) {
             return Result.error("Can not authenticate player");
@@ -139,29 +136,27 @@ public class Container implements Server {
     }
 
     @Override
-    public void handleConnection(int connectionId, ClientConnection clientConnection, String connectionData) {
+    public void onConnection(ClientConnection<String> clientConnection, String connectionData) {
         Optional<Id<Player>> playerIdOpt = gate.authenticate(connectionData);
         if (!playerIdOpt.isPresent()) {
             throw new RuntimeException("player id should be verified by the verifyConnection method at this point");
         }
         Id<Player> playerId = playerIdOpt.get();
-        connections.put(connectionId, clientConnection);
-        connectionPlayers.put(connectionId, playerId);
+
+        clientConnection.onOpen(new ContainerConnection(playerId));
+        connections.put(playerId, clientConnection);
         playerService.loginPlayer(playerId);
         gate.loginPlayer(playerId);
     }
 
-    @Override
-    public void handleDisconnection(int connectionId) {
-        Id<Player> playerId = connectionPlayers.get(connectionId);
+    public void handleDisconnection(Id<Player> playerId) {
         Key<Instance> instanceKey = gate.playerInstance(playerId);
         Instance instance = instances.get(instanceKey);
         playerService.logoutPlayer(playerId);
         instance.removePlayer(playerId);
         playersInstances.remove(playerId);
 
-        connections.remove(connectionId);
-        connectionPlayers.remove(connectionId);
+        connections.remove(playerId);
         gate.logoutPlayer(playerId);
     }
 
@@ -175,6 +170,24 @@ public class Container implements Server {
         @Override
         public int getId() {
             return InstanceCreated;
+        }
+    }
+
+    private final class ContainerConnection implements ServerConnection<String> {
+        private final Id<Player> playerId;
+
+        private ContainerConnection(Id<Player> playerId) {
+            this.playerId = playerId;
+        }
+
+        @Override
+        public void send(String message) {
+            handleMessage(playerId, message);
+        }
+
+        @Override
+        public void close() {
+            handleDisconnection(playerId);
         }
     }
 }

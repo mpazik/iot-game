@@ -2,10 +2,7 @@ package dzida.server.app;
 
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
-import dzida.server.app.dispatcher.ClientConnection;
 import dzida.server.app.dispatcher.ServerDispatcher;
-import dzida.server.app.network.Connection;
-import dzida.server.app.network.ConnectionHandler;
 import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.ContainerResource;
 import dzida.server.app.rest.LeaderboardResource;
@@ -30,8 +27,7 @@ public final class GameServer {
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         serverDispatcher.addServer(container);
 
-        ConnectionHandler connectionHandler = new ConnectionHandlerImpl(serverDispatcher);
-        webSocketServer.start(gameServerPort, connectionHandler);
+        webSocketServer.start(gameServerPort, serverDispatcher);
 
         for (String instance : Configuration.getInitialInstances()) {
             container.startInstance(instance, null);
@@ -47,37 +43,5 @@ public final class GameServer {
         service.startAsync();
         service.awaitTerminated();
         webSocketServer.shootDown();
-    }
-
-    private static final class ConnectionHandlerImpl implements ConnectionHandler {
-        private final ServerDispatcher serverDispatcher;
-
-        private ConnectionHandlerImpl(ServerDispatcher serverDispatcher) {
-            this.serverDispatcher = serverDispatcher;
-        }
-
-        public void handleConnection(int connectionId, Connection connectionController) {
-            serverDispatcher.handleConnection(connectionId, new ClientConnection() {
-                @Override
-                public void disconnect() {
-                    connectionController.disconnect();
-                }
-
-                @Override
-                public void send(String data) {
-                    connectionController.send(data);
-                }
-            });
-        }
-
-        @Override
-        public void handleMessage(int connectionId, String message) {
-            serverDispatcher.handleMessage(connectionId, message);
-        }
-
-        @Override
-        public void handleDisconnection(int connectionId) {
-            serverDispatcher.handleDisconnection(connectionId);
-        }
     }
 }

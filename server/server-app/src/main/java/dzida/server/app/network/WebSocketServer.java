@@ -1,5 +1,8 @@
 package dzida.server.app.network;
 
+import dzida.server.core.basic.connection.ClientConnection;
+import dzida.server.core.basic.connection.ConnectionServer;
+import dzida.server.core.basic.connection.ServerConnection;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -34,8 +37,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
 
-import java.util.Random;
-
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
@@ -52,7 +53,7 @@ public class WebSocketServer {
         eventLoop = workerGroup.next();
     }
 
-    public void start(int port, ConnectionHandler connectionHandler) {
+    public void start(int port, ConnectionServer<String> connectionServer) {
 
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -67,7 +68,7 @@ public class WebSocketServer {
                             pipeline.addLast("decoder", new HttpRequestDecoder());
                             pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
                             //noinspection unchecked
-                            pipeline.addLast("handler", new WebSocketHandler(connectionHandler));
+                            pipeline.addLast("handler", new WebSocketHandler(connectionServer));
                         }
                     });
 
@@ -89,12 +90,12 @@ public class WebSocketServer {
     private static class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
 
         private static final String WEBSOCKET_PATH = "/websocket";
-        private final ConnectionHandler connectionHandler;
+        private final ConnectionServer<String> connectionServer;
         private WebSocketServerHandshaker handshaker;
-        private int connectionId = 0;
+        private ServerConnection<String> serverConnection;
 
-        public WebSocketHandler(ConnectionHandler connectionHandler) {
-            this.connectionHandler = connectionHandler;
+        public WebSocketHandler(ConnectionServer<String> connectionServer) {
+            this.connectionServer = connectionServer;
         }
 
         private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
@@ -120,13 +121,13 @@ public class WebSocketServer {
         @Override
         protected void messageReceived(ChannelHandlerContext ctx, Object msg) {
             if (msg instanceof FullHttpRequest) {
-                if (connectionId != 0) {
+                if (serverConnection != null) {
                     fail(ctx, "Can not handle http request if connection is already established");
                     return;
                 }
                 handleHttpRequest(ctx, (FullHttpRequest) msg);
             } else if (msg instanceof WebSocketFrame) {
-                if (connectionId == 0) {
+                if (serverConnection == null) {
                     fail(ctx, "Can not handle websocket packet if connection is not already established");
                     return;
                 }
@@ -136,8 +137,8 @@ public class WebSocketServer {
 
         @Override
         public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-            if (connectionId != 0) {
-                connectionHandler.handleDisconnection(connectionId);
+            if (serverConnection != null) {
+                serverConnection.close();
             }
         }
 
@@ -166,10 +167,27 @@ public class WebSocketServer {
             if (handshaker == null) {
                 WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
             } else {
-                connectionId = new Random().nextInt();
-                Channel channel = handshaker.handshake(ctx.channel(), req).channel();
-                connectionHandler.handleConnection(connectionId, new ChannelConnect(channel));
-                System.out.println(String.format("Received new connection: <[%s]>", connectionId));
+                ClientConnection<String> clientConnection = new ClientConnection<String>() {
+                    private Channel channel;
+
+                    @Override
+                    public void onOpen(ServerConnection<String> serverConnection) {
+                        setServerConnection(serverConnection);
+                        channel = handshaker.handshake(ctx.channel(), req).channel();
+                    }
+
+                    @Override
+                    public void onClose() {
+                        channel.disconnect();
+                    }
+
+                    @Override
+                    public void onMessage(String data) {
+                        channel.writeAndFlush(new TextWebSocketFrame(data));
+                    }
+                };
+                connectionServer.onConnection(clientConnection);
+                System.out.println("Received new connection");
             }
         }
 
@@ -191,7 +209,7 @@ public class WebSocketServer {
 
             // Send the uppercase string back.
             String request = ((TextWebSocketFrame) frame).text();
-            connectionHandler.handleMessage(connectionId, request);
+            serverConnection.send(request);
         }
 
         @Override
@@ -205,22 +223,8 @@ public class WebSocketServer {
             ctx.close();
         }
 
-        private final static class ChannelConnect implements Connection {
-            private final Channel channel;
-
-            private ChannelConnect(Channel channel) {
-                this.channel = channel;
-            }
-
-            @Override
-            public void disconnect() {
-                channel.disconnect();
-            }
-
-            @Override
-            public void send(String data) {
-                channel.writeAndFlush(new TextWebSocketFrame(data));
-            }
+        public void setServerConnection(ServerConnection<String> serverConnection) {
+            this.serverConnection = serverConnection;
         }
     }
 
