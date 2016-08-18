@@ -8,6 +8,7 @@ import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.ContainerResource;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.store.mapdb.PlayerStoreMapDb;
+import dzida.server.app.timesync.TimeSynchroniser;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.player.PlayerService;
 
@@ -26,10 +27,12 @@ public final class GameServer {
 
         Container container = new Container(playerService, new SchedulerImpl(webSocketServer.getEventLoop()), gate);
         Chat chat = new Chat();
+        TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         serverDispatcher.addServer("instance", container);
         serverDispatcher.addServer("chat", chat);
+        serverDispatcher.addServer("time", timeSynchroniser);
 
         webSocketServer.start(gameServerPort, serverDispatcher);
 

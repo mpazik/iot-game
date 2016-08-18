@@ -5,7 +5,6 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
-import dzida.server.core.time.TimeService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,12 +15,10 @@ public class StateSynchroniser {
 
     private final InstanceStateManager instanceStateManager;
     private final Scenario scenario;
-    private final TimeService timeService;
 
-    public StateSynchroniser(InstanceStateManager instanceStateManager, Scenario scenario, TimeService timeService) {
+    public StateSynchroniser(InstanceStateManager instanceStateManager, Scenario scenario) {
         this.instanceStateManager = instanceStateManager;
         this.scenario = scenario;
-        this.timeService = timeService;
     }
 
     public void registerCharacter(Id<Player> listenerId, Consumer<GameEvent> send) {
@@ -34,7 +31,7 @@ public class StateSynchroniser {
 
 
     public void sendInitialPacket(Id<Character> characterId, Id<Player> playerId, Player playerEntity) {
-        InitialMessage initialMessage = new InitialMessage(characterId, playerId, instanceStateManager.getState(), scenario, playerEntity.getData(), timeService.getCurrentMillis());
+        InitialMessage initialMessage = new InitialMessage(characterId, playerId, instanceStateManager.getState(), scenario, playerEntity.getData());
         listeners.get(playerId).accept(initialMessage);
     }
 
@@ -52,15 +49,13 @@ public class StateSynchroniser {
         Map<String, Object> state;
         Scenario scenario;
         Player.Data playerData;
-        long serverTime;
 
-        public InitialMessage(Id<Character> characterId, Id<Player> playerId, Map<String, Object> state, Scenario scenario, dzida.server.core.player.Player.Data playerData, long serverTime) {
+        public InitialMessage(Id<Character> characterId, Id<Player> playerId, Map<String, Object> state, Scenario scenario, dzida.server.core.player.Player.Data playerData) {
             this.characterId = characterId;
             this.playerId = playerId;
             this.state = state;
             this.scenario = scenario;
             this.playerData = playerData;
-            this.serverTime = serverTime;
         }
     }
 }

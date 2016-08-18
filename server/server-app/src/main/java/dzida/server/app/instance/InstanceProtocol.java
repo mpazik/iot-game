@@ -2,7 +2,6 @@ package dzida.server.app.instance;
 
 import dzida.server.app.BasicJsonSerializer;
 import dzida.server.app.Container;
-import dzida.server.app.TimeSynchroniser;
 import dzida.server.app.command.JoinBattleCommand;
 import dzida.server.app.command.MoveRawCommand;
 import dzida.server.app.command.SkillUseOnCharacterRawCommand;
@@ -25,7 +24,7 @@ import dzida.server.core.world.event.WorldObjectRemoved;
 
 import static dzida.server.app.BasicJsonSerializer.keyTypeAdapter;
 
-public class InstanceSerializer {
+public class InstanceProtocol {
 
     public static JsonProtocol createSerializer() {
         return new JsonProtocol.Builder()
@@ -34,7 +33,6 @@ public class InstanceSerializer {
                 .registerParsingMessageType(2, MoveRawCommand.class)
                 .registerParsingMessageType(3, SkillUseOnCharacterRawCommand.class)
                 .registerParsingMessageType(4, SkillUseOnWorldMapRawCommand.class)
-                .registerParsingMessageType(6, TimeSynchroniser.TimeSyncRequest.class)
                 .registerParsingMessageType(7, JoinBattleCommand.class)
                 .registerParsingMessageType(8, BackdoorCommandResolver.BackdoorCommand.class)
                 .registerParsingMessageType(11, SkillUseOnWorldObjectRawCommand.class)
@@ -45,7 +43,6 @@ public class InstanceSerializer {
                 .registerSerializationMessageType(9, CharacterGotDamage.class)
                 .registerSerializationMessageType(11, StateSynchroniser.InitialMessage.class)
                 .registerSerializationMessageType(12, ServerMessage.class)
-                .registerSerializationMessageType(16, TimeSynchroniser.TimeSyncResponse.class)
                 .registerSerializationMessageType(17, Container.JoinToInstance.class)
                 .registerSerializationMessageType(19, ScenarioEnd.class)
                 .registerSerializationMessageType(21, SkillUsedOnWorldMap.class)

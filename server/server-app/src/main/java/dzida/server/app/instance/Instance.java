@@ -95,7 +95,7 @@ public class Instance {
         commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler);
 
 
-        stateSynchroniser = new StateSynchroniser(instanceStateManager, scenario, timeService);
+        stateSynchroniser = new StateSynchroniser(instanceStateManager, scenario);
         instanceStateManager.getEventPublisher().subscribe(stateSynchroniser::syncStateChange);
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
         NpcBehaviour npcBehaviour = new NpcBehaviour(timeService, instanceStateManager);

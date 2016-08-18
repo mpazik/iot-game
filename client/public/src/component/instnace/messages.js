@@ -46,10 +46,6 @@ define(function (require, exports, module) {
         Player: function (player) {
             this.player = player;
         },
-        TimeSync: function (clientTime, serverTime) {
-            this.clientTime = clientTime;
-            this.serverTime = serverTime;
-        },
         ScenarioEnd: function (resolution) {
             this.resolution = resolution;
         },

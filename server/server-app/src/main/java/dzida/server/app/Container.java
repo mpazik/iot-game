@@ -3,7 +3,7 @@ package dzida.server.app;
 import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.command.JoinBattleCommand;
 import dzida.server.app.instance.Instance;
-import dzida.server.app.instance.InstanceSerializer;
+import dzida.server.app.instance.InstanceProtocol;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.app.protocol.json.JsonProtocol;
@@ -34,7 +34,6 @@ public class Container implements VerifyingConnectionServer<String, String> {
     private final PlayerService playerService;
     private final Gate gate;
     private final JsonProtocol serializer;
-    private final TimeSynchroniser timeSynchroniser;
 
     Container(PlayerService playerService, Scheduler scheduler, Gate gate) {
         this.scheduler = scheduler;
@@ -42,8 +41,7 @@ public class Container implements VerifyingConnectionServer<String, String> {
         this.gate = gate;
 
         mapDescriptorStore = new MapDescriptorStore();
-        serializer = InstanceSerializer.createSerializer();
-        timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
+        serializer = InstanceProtocol.createSerializer();
 
         gate.subscribePlayerJoinedToInstance(this::playerJoinedToInstance);
     }
@@ -108,12 +106,6 @@ public class Container implements VerifyingConnectionServer<String, String> {
                     playerService.updatePlayerData(playerId, updatedPlayerData);
                     Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
                     sendMessageToPlayer(playerId, new JoinToInstance(newInstanceKey));
-                })
-
-                .is(TimeSynchroniser.TimeSyncRequest.class)
-                .then(command -> {
-                    TimeSynchroniser.TimeSyncResponse timeSyncResponse = timeSynchroniser.timeSync(command);
-                    sendMessageToPlayer(playerId, timeSyncResponse);
                 });
     }
 
