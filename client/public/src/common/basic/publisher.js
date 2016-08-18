@@ -82,23 +82,23 @@ define(function (require, exports, module) {
 
 
     function publishType(type, event) {
-        if (!this.listeners[type]) return;
-        this.listeners[type].forEach(function (listener) {
+        if (!this.listeners.has(type)) return;
+        this.listeners.get(type).forEach(function (listener) {
             return listener(event);
         });
     }
 
     function TypePublisher(callback) {
-        this.listeners = [];
+        this.listeners = new Map();
         callback(publishType.bind(this));
     }
 
     TypePublisher.prototype = {
         subscribe: function (type, listener) {
-            if (!this.listeners[type]) {
-                this.listeners[type] = [];
+            if (!this.listeners.has(type)) {
+                this.listeners.set(type, []);
             }
-            this.listeners[type].push(listener);
+            this.listeners.get(type).push(listener);
         },
         subscribeOnce: function (type, listener) {
             this.subscribe(type, function (event) {
@@ -107,15 +107,15 @@ define(function (require, exports, module) {
             }.bind(this));
         },
         unsubscribe: function (type, listener) {
-            if (!this.listeners[type]) return;
-            var index = this.listeners[type].indexOf(listener);
-            this.listeners[type].splice(index, 1);
+            if (!this.listeners.has(type)) return;
+            var index = this.listeners.get(type).indexOf(listener);
+            this.listeners.get(type).splice(index, 1);
         }
     };
     module.exports.TypePublisher = TypePublisher;
 
     function OpenTypePublisher() {
-        this.listeners = [];
+        this.listeners = new Map();
     }
     OpenTypePublisher.prototype = TypePublisher.prototype;
     OpenTypePublisher.prototype.publish = publishType;
@@ -123,15 +123,15 @@ define(function (require, exports, module) {
 
     function OpenPublisher() {
         this.listeners = [];
-        this.typeListeners = [];
+        this.typeListeners = new Map();
         this.onceListeners = [];
-        this.onceTypeListeners = [];
+        this.onceTypeListeners = new Map();
         this.lastListeners = [];
-        this.lastTypeListeners = [];
+        this.lastTypeListeners = new Map();
     }
 
     function isValidType(type) {
-        return typeof type === 'string' || typeof type === 'number';
+        return typeof type === 'string' || typeof type === 'number' || typeof type === 'function';
     }
 
     OpenPublisher.prototype.publish = function (type, data) {
@@ -161,9 +161,9 @@ define(function (require, exports, module) {
         }
 
         if (isValidType(type)) {
-            const typeListeners = this.typeListeners[type] ? this.typeListeners[type] : [];
-            const onceTypeListeners = this.onceTypeListeners[type] ? this.onceTypeListeners[type] : [];
-            const lastTypeListeners = this.lastTypeListeners[type] ? this.lastTypeListeners[type] : [];
+            const typeListeners = this.typeListeners.has(type) ? this.typeListeners.get(type) : [];
+            const onceTypeListeners = this.onceTypeListeners.has(type) ? this.onceTypeListeners.get(type) : [];
+            const lastTypeListeners = this.lastTypeListeners.has(type) ? this.lastTypeListeners.get(type) : [];
             typeListeners
                 .concat(onceTypeListeners)
                 .filter(function (listener) {
@@ -179,20 +179,20 @@ define(function (require, exports, module) {
                 .forEach(function (listener) {
                     return listener(data);
                 });
-            delete this.onceTypeListeners[type];
+            this.onceTypeListeners.delete(type);
         }
     };
 
     OpenPublisher.prototype.subscribe = function (type, listener) {
-        if (typeof type === 'function') {
+        if (listener == null) {
             listener = type;
             type = undefined;
         }
         if (isValidType(type)) {
-            if (!this.typeListeners[type]) {
-                this.typeListeners[type] = [];
+            if (!this.typeListeners.has(type)) {
+                this.typeListeners.set(type, []);
             }
-            this.typeListeners[type].push(listener);
+            this.typeListeners.get(type).push(listener);
         } else {
             this.listeners.push(listener);
         }
@@ -200,43 +200,43 @@ define(function (require, exports, module) {
 
     OpenPublisher.prototype.subscribeLast = function (type, listener) {
         if (isValidType(type)) {
-            if (!this.lastTypeListeners[type]) {
-                this.lastTypeListeners[type] = [];
+            if (!this.lastTypeListeners.has(type)) {
+                this.lastTypeListeners.set(type, []);
             }
-            this.lastTypeListeners[type].push(listener);
+            this.lastTypeListeners.get(type).push(listener);
         } else {
             this.lastListeners.push(listener);
         }
     };
 
     OpenPublisher.prototype.subscribeOnce = function (type, listener) {
-        if (typeof type === 'function') {
+        if (listener == null) {
             listener = type;
             type = undefined;
         }
         if (isValidType(type)) {
-            if (!this.onceTypeListeners[type]) {
-                this.onceTypeListeners[type] = [];
+            if (!this.onceTypeListeners.has(type)) {
+                this.onceTypeListeners.set(type, []);
             }
-            this.onceTypeListeners[type].push(listener);
+            this.onceTypeListeners.get(type).push(listener);
         } else {
             this.onceListeners.push(listener);
         }
     };
 
     OpenPublisher.prototype.unsubscribe = function (type, callback) {
-        if (typeof type === 'function') {
+        if (callback == null) {
             callback = type;
             type = undefined;
         }
         var index;
         var array;
         if (isValidType(type)) {
-            if (this.typeListeners[type]) {
-                array = this.typeListeners[type]
+            if (this.typeListeners.has(type)) {
+                array = this.typeListeners.get(type);
             } else {
-                if (this.onceTypeListeners[type]) {
-                    array = this.onceTypeListeners[type];
+                if (this.onceTypeListeners.has(type)) {
+                    array = this.onceTypeListeners.get(type);
                 } else {
                     console.error('type do not exists', type);
                     throw 'type do not exists';
