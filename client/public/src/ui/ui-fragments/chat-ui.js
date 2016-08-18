@@ -6,9 +6,10 @@ define(function (require, exports, module) {
         type: 'fragment',
         properties: {
             requirements: {
-                applicationState: Predicates.is('running')
+                chatState: Predicates.is('connected')
             }
         },
+        isFocused: false,
         created: function () {
             this.innerHTML = `
 <ul class="chat-messages"></ul>
@@ -44,7 +45,7 @@ define(function (require, exports, module) {
                 }
                 if (event.keyCode == KEY_CODES.ENTER) {
                     if (input.value.length > 0) {
-                        chat.sendMessage(input.value);
+                        chat.send(input.value);
                     }
                     input.value = '';
                     input.blur();
@@ -52,22 +53,30 @@ define(function (require, exports, module) {
                 event.stopPropagation()
             });
 
-            input.addEventListener("focus", this._showChat.bind(this));
-            input.addEventListener("blur", this._fadeDelayed.bind(this));
+            input.addEventListener("focus", this.onFocus.bind(this));
+            input.addEventListener("blur", this.onBlur.bind(this));
 
-            uiState.playerMessage.subscribe(this._print.bind(this))
+            uiState.chatMessage.subscribe(this.print.bind(this))
         },
         detached: function () {
-            uiState.playerMessage.unsubscribe(this._print.bind(this))
+            uiState.chatMessage.unsubscribe(this.print.bind(this))
         },
-        _print: function (data) {
+        onFocus: function () {
+            this.isFocused = true;
+            this.showChat();
+        },
+        onBlur: function () {
+            this.isFocused = false;
+            this.fadeDelayed();
+        },
+        print: function (message) {
             var line = document.createElement('li');
-            line.innerHTML = `<span class="player">${data.playerNick}</span>: <span class="message">${data.message}</span>`;
+            line.innerHTML = `<span class="message message-type-${message.type}">${message.text}</span>`;
             this.messages.appendChild(line);
             this.messages.scrollTop = this.messages.scrollHeight;
-            this._showChat();
+            this.showChat();
         },
-        _fadeDelayed: function () {
+        fadeDelayed: function () {
             const chat = this;
             chat.fadeTimeout = setTimeout(function () {
                 chat.style.animation = 'fade 1s linear';
@@ -75,13 +84,15 @@ define(function (require, exports, module) {
                     chat.style.display = 'none';
                     chat.style.animation = 'none';
                 }, 1000);
-            }, 10000);
+            }, 3000);
         },
-        _showChat: function () {
+        showChat: function () {
             this.style.display = 'block';
             clearTimeout(this.fadeTimeout);
             clearTimeout(this.hideTimeout);
-            this._fadeDelayed();
+            if (!this.isFocused) {
+                this.fadeDelayed();
+            }
         }
     });
 });

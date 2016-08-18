@@ -26,6 +26,7 @@ define(function (require, exports, module) {
     const MessagesIds = require('../common/packet/messages').ids;
     const MainPlayer = require('../store/main-player');
     const ItemStore = require('../store/item');
+    const Chat = require('./chat');
     const network = new Network();
     var instanceKey = Configuration.defaultInstance;
     var userNick;
@@ -174,6 +175,8 @@ define(function (require, exports, module) {
             });
         } else {
             network.connect(userNick);
+            Chat.connect(userNick);
+            Chat.joinToInstanceChannel(instanceKey);
             setState('connecting');
         }
     }

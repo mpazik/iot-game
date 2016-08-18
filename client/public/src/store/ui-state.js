@@ -39,7 +39,8 @@ define(function (require, exports, module) {
         profilingStats: ProfilingStore.updateStatsState,
         cooldown: MainPlayerStore.playerCooldown,
         gameMessage: ServerMessagesStore.messageToShowState,
-        playerMessage: Chat.playerMessage,
+        chatState: Chat.state,
+        chatMessage: Chat.chatMessage,
         playerItems: Item.itemsChange
     };
 });

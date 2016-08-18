@@ -13,7 +13,7 @@ define(function (require) {
         require('./ui-fragments/screen/loading-screen'),
         require('./ui-fragments/screen/disconnected-screen'),
         require('./ui-fragments/screen/connecting'),
-        require('./ui-fragments/game-chat'),
+        require('./ui-fragments/chat-ui'),
         require('./ui-fragments/inventory')
     ].concat(extraComponents.fragments);
 
@@ -53,7 +53,7 @@ define(function (require) {
     });
     document.registerElement('game-ui', {prototype: gameUiTag});
 
-    const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution', 'endScenario', 'applicationState', 'cooldown', 'gameMessage'];
+    const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution', 'endScenario', 'applicationState', 'cooldown', 'gameMessage', 'chatState'];
 
     function initUi(gameUiElement) {
         const windowRegister = new Map();

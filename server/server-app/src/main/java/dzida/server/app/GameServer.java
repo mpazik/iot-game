@@ -2,6 +2,7 @@ package dzida.server.app;
 
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
+import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.ContainerResource;
@@ -24,8 +25,11 @@ public final class GameServer {
         WebSocketServer webSocketServer = new WebSocketServer();
 
         Container container = new Container(playerService, new SchedulerImpl(webSocketServer.getEventLoop()), gate);
+        Chat chat = new Chat();
+
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         serverDispatcher.addServer("instance", container);
+        serverDispatcher.addServer("chat", chat);
 
         webSocketServer.start(gameServerPort, serverDispatcher);
 

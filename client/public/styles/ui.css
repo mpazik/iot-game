@@ -146,7 +146,7 @@ dzida-game canvas {
 /* GAME CHAT */
 game-chat {
     position: absolute;
-    width: 300px;
+    width: 400px;
     left: 1px;
     bottom: 120px;
     color: white;
@@ -167,10 +167,22 @@ game-chat .chat-messages {
 }
 
 game-chat .chat-messages li {
-    margin: 5px 2px;
+    margin: 1px 2px;
     color: white;
+    text-shadow: 0 0 2px black;
 }
 
+game-chat .message-type-command {
+    color: #aaaaaa;
+}
+
+game-chat .message-type-error {
+    color: #ff2c2c;
+}
+
+game-chat .message-type-whisper {
+    color: #f56eff;
+}
 
 game-chat .chat-input {
     color: white;
