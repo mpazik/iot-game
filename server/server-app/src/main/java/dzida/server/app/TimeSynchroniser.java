@@ -44,10 +44,5 @@ public class TimeSynchroniser {
         public long getServerTime() {
             return serverTime;
         }
-
-        @Override
-        public int getId() {
-            return GameEvent.TimeSyncRes;
-        }
     }
 }

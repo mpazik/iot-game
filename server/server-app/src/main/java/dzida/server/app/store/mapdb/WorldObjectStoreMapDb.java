@@ -1,7 +1,7 @@
 package dzida.server.app.store.mapdb;
 
 import com.google.gson.Gson;
-import dzida.server.app.Serializer;
+import dzida.server.app.BasicJsonSerializer;
 import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.world.object.WorldObject;
@@ -18,9 +18,9 @@ import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.stream.Collectors;
 
 public class WorldObjectStoreMapDb implements WorldObjectStore {
-    long idGenerator = 0;
-    private final Gson serializer = Serializer.getSerializer();
+    private final Gson serializer = BasicJsonSerializer.getSerializer();
     private final ConcurrentNavigableMap<Long, String> worldObjects;
+    long idGenerator = 0;
 
     public WorldObjectStoreMapDb(String instanceKey) {
         DB db = DBMaker.fileDB(new File("worldObjectsDB-" + instanceKey))

@@ -2,14 +2,14 @@ define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const Point = require('../unit/point');
     const Dispatcher = require('../component/dispatcher');
-    const MessageIds = require('../common/packet/messages').ids;
+    const Messages = require('../component/instnace/messages');
     const SkillStore = require('./skill');
 
     var playerId = null;
     var characterId = null;
     var timeOutToResetCooldown = null;
 
-    Dispatcher.messageStream.subscribe(MessageIds.InitialData, function (response) {
+    Dispatcher.messageStream.subscribe(Messages.InitialData, function (response) {
         playerId = response.playerId;
         characterId = response.characterId;
     });
@@ -22,30 +22,30 @@ define(function (require, exports, module) {
         playerId: () => playerId,
         characterId: () => characterId,
         playerData: new Publisher.StatePublisher({}, (push) => {
-            Dispatcher.messageStream.subscribe(MessageIds.InitialData, (data) => {
+            Dispatcher.messageStream.subscribe(Messages.InitialData, (data) => {
                 push(data.playerData)
             });
         }),
         playerLiveState: new Publisher.StatePublisher(false, (push) => {
-            Dispatcher.messageStream.subscribe(MessageIds.InitialData, () => {
+            Dispatcher.messageStream.subscribe(Messages.InitialData, () => {
                 push(true)
             });
 
-            Dispatcher.messageStream.subscribe(MessageIds.CharacterSpawned, (event) => {
+            Dispatcher.messageStream.subscribe(Messages.CharacterSpawned, (event) => {
                 if (event.character.id != characterId) return;
                 push(true)
             });
 
-            Dispatcher.messageStream.subscribe(MessageIds.CharacterDied, (event) => {
+            Dispatcher.messageStream.subscribe(Messages.CharacterDied, (event) => {
                 if (event.characterId != characterId) return;
                 push(false)
             });
-            Dispatcher.messageStream.subscribe(MessageIds.Disconnected, () => {
+            Dispatcher.messageStream.subscribe(Messages.Disconnected, () => {
                 push(false)
             });
         }),
         playerRespawnTimeState: new Publisher.StatePublisher(null, (push) => {
-            Dispatcher.messageStream.subscribe(MessageIds.CharacterSpawned, (event) => {
+            Dispatcher.messageStream.subscribe(Messages.CharacterSpawned, (event) => {
                 if (event.character.id != characterId) return;
                 push(null);
             });
@@ -58,12 +58,12 @@ define(function (require, exports, module) {
                 clearTimeout(timeOutToResetCooldown);
                 timeOutToResetCooldown = setTimeout(() => push(null), skill.cooldown)
             };
-            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnCharacter, checkAndSetCooldown);
-            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnWorldMap, checkAndSetCooldown);
-            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnWorldObject, checkAndSetCooldown);
-            Dispatcher.messageStream.subscribe(MessageIds.SkillUsed, checkAndSetCooldown);
+            Dispatcher.messageStream.subscribe(Messages.SkillUsedOnCharacter, checkAndSetCooldown);
+            Dispatcher.messageStream.subscribe(Messages.SkillUsedOnWorldMap, checkAndSetCooldown);
+            Dispatcher.messageStream.subscribe(Messages.SkillUsedOnWorldObject, checkAndSetCooldown);
+            Dispatcher.messageStream.subscribe(Messages.SkillUsed, checkAndSetCooldown);
 
-            Dispatcher.messageStream.subscribe(MessageIds.CharacterDied, function (event) {
+            Dispatcher.messageStream.subscribe(Messages.CharacterDied, function (event) {
                 if (event.characterId != characterId) return;
                 clearTimeout(timeOutToResetCooldown);
                 push(null);

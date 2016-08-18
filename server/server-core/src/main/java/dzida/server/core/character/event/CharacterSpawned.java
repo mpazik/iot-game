@@ -15,9 +15,4 @@ public class CharacterSpawned implements GameEvent {
         this.move = move;
         this.skillData = skillData;
     }
-
-    @Override
-    public int getId() {
-        return GameEvent.CharacterSpawned;
-    }
 }

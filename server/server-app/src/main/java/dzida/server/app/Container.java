@@ -1,11 +1,12 @@
 package dzida.server.app;
 
-import com.google.gson.Gson;
 import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.command.JoinBattleCommand;
 import dzida.server.app.instance.Instance;
+import dzida.server.app.instance.InstanceSerializer;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
+import dzida.server.app.protocol.json.JsonProtocol;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.ClientConnection;
@@ -17,14 +18,12 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
-import static dzida.server.app.Serializer.getSerializer;
 
 public class Container implements VerifyingConnectionServer<String, String> {
     private final Scheduler scheduler;
@@ -34,9 +33,8 @@ public class Container implements VerifyingConnectionServer<String, String> {
     private final MapDescriptorStore mapDescriptorStore;
     private final PlayerService playerService;
     private final Gate gate;
-    private final CommandParser commandParser;
+    private final JsonProtocol serializer;
     private final TimeSynchroniser timeSynchroniser;
-    private final Gson serializer;
 
     Container(PlayerService playerService, Scheduler scheduler, Gate gate) {
         this.scheduler = scheduler;
@@ -44,8 +42,7 @@ public class Container implements VerifyingConnectionServer<String, String> {
         this.gate = gate;
 
         mapDescriptorStore = new MapDescriptorStore();
-        commandParser = new CommandParser();
-        serializer = getSerializer();
+        serializer = InstanceSerializer.createSerializer();
         timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         gate.subscribePlayerJoinedToInstance(this::playerJoinedToInstance);
@@ -91,34 +88,33 @@ public class Container implements VerifyingConnectionServer<String, String> {
     }
 
     private void sendMessageToPlayer(Id<Player> playerId, GameEvent data) {
-        connections.get(playerId).onMessage(serializer.toJson(Collections.singleton(new Packet(data.getId(), data))));
+        connections.get(playerId).onMessage(serializer.serializeMessage(data));
     }
 
     public void handleMessage(Id<Player> playerId, String message) {
         Key<Instance> instanceKey = playersInstances.get(playerId);
-        commandParser.readPacket(message).forEach(commandToProcess -> {
-            whenTypeOf(commandToProcess)
-                    .is(CharacterCommand.class)
-                    .then(command -> instances.get(instanceKey).handleCommand(playerId, command))
+        Object commandToProcess = serializer.parseMessage(message);
+        whenTypeOf(commandToProcess)
+                .is(CharacterCommand.class)
+                .then(command -> instances.get(instanceKey).handleCommand(playerId, command))
 
-                    .is(InstanceCommand.class)
-                    .then(command -> instances.get(instanceKey).handleCommand(command))
+                .is(InstanceCommand.class)
+                .then(command -> instances.get(instanceKey).handleCommand(command))
 
-                    .is(JoinBattleCommand.class)
-                    .then(command -> {
-                        Player.Data playerData = playerService.getPlayer(playerId).getData();
-                        Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
-                        playerService.updatePlayerData(playerId, updatedPlayerData);
-                        Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
-                        sendMessageToPlayer(playerId, new JoinToInstance(newInstanceKey));
-                    })
+                .is(JoinBattleCommand.class)
+                .then(command -> {
+                    Player.Data playerData = playerService.getPlayer(playerId).getData();
+                    Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
+                    playerService.updatePlayerData(playerId, updatedPlayerData);
+                    Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
+                    sendMessageToPlayer(playerId, new JoinToInstance(newInstanceKey));
+                })
 
-                    .is(TimeSynchroniser.TimeSyncRequest.class)
-                    .then(command -> {
-                        TimeSynchroniser.TimeSyncResponse timeSyncResponse = timeSynchroniser.timeSync(command);
-                        sendMessageToPlayer(playerId, timeSyncResponse);
-                    });
-        });
+                .is(TimeSynchroniser.TimeSyncRequest.class)
+                .then(command -> {
+                    TimeSynchroniser.TimeSyncResponse timeSyncResponse = timeSynchroniser.timeSync(command);
+                    sendMessageToPlayer(playerId, timeSyncResponse);
+                });
     }
 
     @Override
@@ -155,16 +151,11 @@ public class Container implements VerifyingConnectionServer<String, String> {
         gate.logoutPlayer(playerId);
     }
 
-    private static class JoinToInstance implements GameEvent {
+    public static class JoinToInstance implements GameEvent {
         final Key<Instance> instanceKey;
 
         JoinToInstance(Key<Instance> instanceKey) {
             this.instanceKey = instanceKey;
-        }
-
-        @Override
-        public int getId() {
-            return InstanceCreated;
         }
     }
 

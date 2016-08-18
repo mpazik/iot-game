@@ -12,9 +12,4 @@ public class CharacterGotDamage implements GameEvent {
         this.characterId = characterId;
         this.damage = damage;
     }
-
-    @Override
-    public int getId() {
-        return GameEvent.CharacterGotDamage;
-    }
 }

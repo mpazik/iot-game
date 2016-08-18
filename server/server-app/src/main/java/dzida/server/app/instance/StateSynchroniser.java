@@ -62,10 +62,5 @@ public class StateSynchroniser {
             this.playerData = playerData;
             this.serverTime = serverTime;
         }
-
-        @Override
-        public int getId() {
-            return GameEvent.InitialData;
-        }
     }
 }

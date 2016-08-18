@@ -1,11 +1,11 @@
 define(function (require, exports, module) {
-    const ResponseIds = require('../common/packet/messages').ids;
-    const PacketDispatcher = require('./dispatcher');
+    const Messages = require('./instnace/messages');
+    const Dispatcher = require('./dispatcher');
 
     const stores = new Map();
 
     //client specific
-    PacketDispatcher.messageStream.subscribe(ResponseIds.InitialData, (initialData) => {
+    Dispatcher.messageStream.subscribe(Messages.InitialData, (initialData) => {
         stores.forEach((store, key) => store.init(initialData.state[key]))
     });
 
@@ -18,11 +18,6 @@ define(function (require, exports, module) {
         },
         registerStore: (store) => {
             stores.set(store.key, store);
-            if (store.eventHandlers) {
-                Object.forEach(store.eventHandlers, (handler, id) => {
-                    PacketDispatcher.messageStream.subscribe(id, handler);
-                })
-            }
         }
     }
 });

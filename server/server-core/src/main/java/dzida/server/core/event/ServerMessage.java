@@ -17,11 +17,6 @@ public class ServerMessage implements GameEvent {
         return new ServerMessage(message, Types.ERROR);
     }
 
-    @Override
-    public int getId() {
-        return GameEvent.ServerMessage;
-    }
-
     public String getMessage() {
         return message;
     }

@@ -2,20 +2,18 @@ define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const StoreRegistrar = require('../component/store-registrar');
     const Resources = require('./resources');
-    const MessageIds = require('../common/packet/messages').ids;
+    const Messages = require('../component/instnace/messages');
     const Dispatcher = require('../component/dispatcher');
 
     const key = 'worldObject';
     const state = new Map();
 
-    const eventHandlers = {
-        [MessageIds.WorldObjectCreated]: (event) => {
-            addWorldObject(event.worldObject);
-        },
-        [MessageIds.WorldObjectRemoved]: (event) => {
-            state.delete(event.worldObjectId);
-        }
-    };
+    Dispatcher.messageStream.subscribe(Messages.WorldObjectCreated, (event) => {
+        addWorldObject(event.worldObject);
+    });
+    Dispatcher.messageStream.subscribe(Messages.WorldObjectRemoved, (event) => {
+        state.delete(event.worldObjectId);
+    });
 
     function addWorldObject(worldObject) {
         worldObject.data.id = worldObject.id;
@@ -24,7 +22,6 @@ define(function (require, exports, module) {
 
     StoreRegistrar.registerStore({
         key,
-        eventHandlers,
         state: () => Map.toObject(state),
         init: (initialState) => {
             state.clear();
@@ -51,10 +48,10 @@ define(function (require, exports, module) {
         key,
         objects: () => Array.from(state.values()),
         worldObjectCreated: new Publisher.StreamPublisher((push) => {
-            Dispatcher.messageStream.subscribeLast(MessageIds.WorldObjectCreated, (event) => push(event.worldObject.data));
+            Dispatcher.messageStream.subscribeLast(Messages.WorldObjectCreated, (event) => push(event.worldObject.data));
         }),
         worldObjectRemoved: new Publisher.StreamPublisher((push) => {
-            Dispatcher.messageStream.subscribeLast(MessageIds.WorldObjectRemoved, (event) => push(event.worldObjectId));
+            Dispatcher.messageStream.subscribeLast(Messages.WorldObjectRemoved, (event) => push(event.worldObjectId));
         }),
         kindDefinition,
         isAnyObjectOnTile: (tx, ty) => {

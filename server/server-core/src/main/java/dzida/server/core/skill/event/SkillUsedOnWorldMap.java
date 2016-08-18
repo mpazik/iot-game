@@ -17,9 +17,4 @@ public class SkillUsedOnWorldMap implements GameEvent {
         this.x = x;
         this.y = y;
     }
-
-    @Override
-    public int getId() {
-        return GameEvent.SkillUsedOnWorldMap;
-    }
 }

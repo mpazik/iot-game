@@ -15,9 +15,4 @@ public class SkillUsedOnCharacter implements GameEvent {
         this.skillId = skillId;
         this.targetId = targetId;
     }
-
-    @Override
-    public int getId() {
-        return GameEvent.SkillUsedOnCharacter;
-    }
 }

@@ -2,8 +2,8 @@ package dzida.server.app.store.http.loader;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import dzida.server.app.BasicJsonSerializer;
 import dzida.server.app.Configuration;
-import dzida.server.app.Serializer;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class StaticDataLoader {
             URLConnection urlConnection = url.openConnection();
             String contentEncoding = urlConnection.getContentEncoding();
             JsonReader jsonReader = new JsonReader(requestInputStream(url.openStream(), contentEncoding));
-            T data = Serializer.getSerializer().fromJson(jsonReader, typeToken.getType());
+            T data = BasicJsonSerializer.getSerializer().fromJson(jsonReader, typeToken.getType());
 
             long loadTime = System.currentTimeMillis() - startTime;
             System.out.printf("File %s downloaded in %dms \n", path, loadTime);

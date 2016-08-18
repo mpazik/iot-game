@@ -16,9 +16,4 @@ public class SkillUsedOnWorldObject implements GameEvent {
         this.skillId = skillId;
         this.worldObjectId = worldObjectId;
     }
-
-    @Override
-    public int getId() {
-        return GameEvent.SkillUsedOnWorldObject;
-    }
 }

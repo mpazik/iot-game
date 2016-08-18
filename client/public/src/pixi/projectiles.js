@@ -4,7 +4,7 @@ define(function (require, exports, module) {
     const SkillStore = require('../store/skill');
     const Point = require('../unit/point');
     const Dispatcher = require('../component/dispatcher');
-    const EventIds = require('../common/packet/messages').ids;
+    const Messages = require('../component/instnace/messages');
     const MainLoop = require('../store/main-loop');
     const MoveStore = require('../store/move');
     const Timer = require('../component/timer');
@@ -42,7 +42,7 @@ define(function (require, exports, module) {
         })
     });
 
-    Dispatcher.messageStream.subscribe(EventIds.SkillUsedOnCharacter, (event) => {
+    Dispatcher.messageStream.subscribe(Messages.SkillUsedOnCharacter, (event) => {
         const skill = SkillStore.skill(event.skillId);
         if (skill.projectile) {
             const currentTime = Timer.currentTimeOnServer();
@@ -54,7 +54,7 @@ define(function (require, exports, module) {
         }
     });
 
-    Dispatcher.messageStream.subscribe(EventIds.CharacterDied, (event) => {
+    Dispatcher.messageStream.subscribe(Messages.CharacterDied, (event) => {
         const animation = animations.find(animation => animation.target == event.characterId);
         if (animation) {
             animation.target = null;

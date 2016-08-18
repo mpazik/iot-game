@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
-    const MessageIds = require('../common/packet/messages').ids;
+    const Messages = require('../component/instnace/messages');
     const StoreRegistrar = require('../component/store-registrar');
     const ResourcesStore = require('./resources');
     const Dispatcher = require('../component/dispatcher');
@@ -8,29 +8,28 @@ define(function (require, exports, module) {
     const key = 'skill';
     const state = new Map();
 
-    const eventHandlers = {
-        [MessageIds.CharacterSpawned]: (event) => {
-            state.set(event.character.id, event.skillData);
-        },
-        [MessageIds.CharacterDied]: (event) => {
-            state.delete(event.characterId);
-        },
-        [MessageIds.CharacterGotDamage]: (event) => {
-            state.get(event.characterId).health -= event.damage;
-        },
-        [MessageIds.SkillUsedOnCharacter]: (event) => {
-            setCooldown(event.casterId, event.skillId)
-        },
-        [MessageIds.SkillUsedOnWorldMap]: (event) => {
-            setCooldown(event.casterId, event.skillId)
-        },
-        [MessageIds.SkillUsedOnWorldObject]: (event) => {
-            setCooldown(event.casterId, event.skillId)
-        },
-        [MessageIds.SkillUsed]: (event) => {
-            setCooldown(event.casterId, event.skillId)
-        }
-    };
+
+    Dispatcher.messageStream.subscribe(Messages.CharacterSpawned, (event) => {
+        state.set(event.character.id, event.skillData);
+    });
+    Dispatcher.messageStream.subscribe(Messages.CharacterDied, (event) => {
+        state.delete(event.characterId);
+    });
+    Dispatcher.messageStream.subscribe(Messages.CharacterGotDamage, (event) => {
+        state.get(event.characterId).health -= event.damage;
+    });
+    Dispatcher.messageStream.subscribe(Messages.SkillUsedOnCharacter, (event) => {
+        setCooldown(event.casterId, event.skillId)
+    });
+    Dispatcher.messageStream.subscribe(Messages.SkillUsedOnWorldMap, (event) => {
+        setCooldown(event.casterId, event.skillId)
+    });
+    Dispatcher.messageStream.subscribe(Messages.SkillUsedOnWorldObject, (event) => {
+        setCooldown(event.casterId, event.skillId)
+    });
+    Dispatcher.messageStream.subscribe(Messages.SkillUsed, (event) => {
+        setCooldown(event.casterId, event.skillId)
+    });
 
     function setCooldown(casterId, skillId) {
         const skillCooldown = ResourcesStore.skill(skillId).cooldown;
@@ -40,7 +39,6 @@ define(function (require, exports, module) {
 
     StoreRegistrar.registerStore({
         key,
-        eventHandlers,
         state: () => Map.toObject(state),
         init: (initialState) => {
             state.clear();
@@ -51,12 +49,12 @@ define(function (require, exports, module) {
     module.exports = {
         key,
         characterGotDamageStream: new Publisher.StreamPublisher((push) => {
-            Dispatcher.messageStream.subscribe(MessageIds.CharacterGotDamage, (event) => {
+            Dispatcher.messageStream.subscribe(Messages.CharacterGotDamage, (event) => {
                 push(event);
             });
         }),
         characterUsedSkillOnCharacter: new Publisher.StreamPublisher((push) => {
-            Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnCharacter, (event) => {
+            Dispatcher.messageStream.subscribe(Messages.SkillUsedOnCharacter, (event) => {
                 push({
                     characterId: event.casterId,
                     skill: ResourcesStore.skill(event.skillId),

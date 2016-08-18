@@ -1,25 +1,23 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
-    const MessageIds = require('../common/packet/messages').ids;
+    const Messages = require('../component/instnace/messages');
     const StoreRegistrar = require('../component/store-registrar');
     const Dispatcher = require('../component/dispatcher');
 
     const key = 'character';
     const state = new Map();
 
-    const eventHandlers = {
-        [MessageIds.CharacterSpawned]: (event) => {
-            const character = event.character;
-            state.set(character.id, character);
-        },
-        [MessageIds.CharacterDied]: (event) => {
-            state.delete(event.characterId);
-        }
-    };
+    Dispatcher.messageStream.subscribe(Messages.CharacterSpawned, (event) => {
+        const character = event.character;
+        state.set(character.id, character);
+    });
+
+    Dispatcher.messageStream.subscribe(Messages.CharacterDied, (event) => {
+        state.delete(event.characterId);
+    });
 
     StoreRegistrar.registerStore({
         key,
-        eventHandlers,
         state: () => Map.toObject(state),
         init: (initialState) => {
             state.clear();
@@ -32,10 +30,10 @@ define(function (require, exports, module) {
     module.exports = {
         key,
         characterSpawnedStream: new Publisher.StreamPublisher((push) => {
-            Dispatcher.messageStream.subscribeLast(MessageIds.CharacterSpawned, (event) =>push(event.character));
+            Dispatcher.messageStream.subscribeLast(Messages.CharacterSpawned, (event) =>push(event.character));
         }),
         characterDiedStream: new Publisher.StreamPublisher((push) => {
-            Dispatcher.messageStream.subscribeLast(MessageIds.CharacterDied, (event) =>push(event.characterId));
+            Dispatcher.messageStream.subscribeLast(Messages.CharacterDied, (event) =>push(event.characterId));
         }),
         CharacterType: {
             Player: 0,

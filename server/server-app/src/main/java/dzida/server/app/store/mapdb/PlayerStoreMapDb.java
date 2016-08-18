@@ -1,7 +1,7 @@
 package dzida.server.app.store.mapdb;
 
 import com.google.gson.Gson;
-import dzida.server.app.Serializer;
+import dzida.server.app.BasicJsonSerializer;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerStore;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class PlayerStoreMapDb implements PlayerStore {
 
-    private final Gson serializer = Serializer.getSerializer();
+    private final Gson serializer = BasicJsonSerializer.getSerializer();
     private final ConcurrentNavigableMap<Long, String> players;
     private final ConcurrentNavigableMap<String, Long> playersByNick;
 
@@ -35,7 +35,7 @@ public class PlayerStoreMapDb implements PlayerStore {
         return players.entrySet().stream()
                 .map(entry -> {
                     Player.Data data = serializer.fromJson(entry.getValue(), Player.Data.class);
-                    Id<Player> id = new Id<Player>(entry.getKey());
+                    Id<Player> id = new Id<>(entry.getKey());
                     return new Player(id, data);
                 });
     }
@@ -43,7 +43,7 @@ public class PlayerStoreMapDb implements PlayerStore {
     @Override
     public Player createPlayer(Player.Data playerData) {
         Long newId = createNewId();
-        Id<Player> id = new Id<Player>(newId);
+        Id<Player> id = new Id<>(newId);
         Player entity = new Player(id, playerData);
         players.put(newId, serializer.toJson(playerData));
         playersByNick.put(playerData.getNick(), newId);

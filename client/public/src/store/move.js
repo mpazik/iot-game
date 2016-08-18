@@ -1,26 +1,24 @@
 define(function (require, exports, module) {
-    const MessageIds = require('../common/packet/messages').ids;
+    const Messages = require('../component/instnace/messages');
     const Move = require('../unit/move');
     const StoreRegistrar = require('../component/store-registrar');
+    const Dispatcher = require('../component/dispatcher');
 
     const key = 'move';
     const state = new Map();
 
-    const eventHandlers = {
-        [MessageIds.CharacterMoved]: (event) => {
-            state.set(event.characterId, event.move);
-        },
-        [MessageIds.CharacterSpawned]: (event) => {
-            state.set(event.character.id, event.move);
-        },
-        [MessageIds.CharacterDied]: (event) => {
-            state.delete(event.characterId);
-        }
-    };
+    Dispatcher.messageStream.subscribe(Messages.CharacterMoved, (event) => {
+        state.set(event.characterId, event.move);
+    });
+    Dispatcher.messageStream.subscribe(Messages.CharacterSpawned, (event) => {
+        state.set(event.character.id, event.move);
+    });
+    Dispatcher.messageStream.subscribe(Messages.CharacterDied, (event) => {
+        state.delete(event.characterId);
+    });
 
     StoreRegistrar.registerStore({
         key,
-        eventHandlers,
         state: () => Map.toObject(state),
         init: (initialState) => {
             state.clear();

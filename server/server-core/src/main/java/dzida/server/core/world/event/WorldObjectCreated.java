@@ -10,9 +10,4 @@ public class WorldObjectCreated implements GameEvent {
     public WorldObjectCreated(GeneralEntity<WorldObject> worldObject) {
         this.worldObject = worldObject;
     }
-
-    @Override
-    public int getId() {
-        return GameEvent.WorldObjectCreated;
-    }
 }

@@ -3,9 +3,9 @@ define(function (require, exports, module) {
     const MainLoop = require('./main-loop');
     const MainPlayer = require('./main-player');
     const Application = require('../component/application');
-    const Commands = require('../common/packet/commands').constructors;
+    const Commands = require('../component/instnace/commands');
     const Dispatcher = require('../component/dispatcher');
-    const MessageIds = require('../common/packet/messages').ids;
+    const Messages = require('../component/instnace/messages');
 
     var pingScheduler;
 
@@ -17,7 +17,7 @@ define(function (require, exports, module) {
 
     Application.state.subscribeState('running', () => {
         function ping() {
-            Application.sendCommands([new Commands.TimeSync(Date.now())])
+            Application.sendCommand(new Commands.TimeSync(Date.now()))
         }
         pingScheduler = setInterval(ping, 2000);
     });
@@ -32,7 +32,7 @@ define(function (require, exports, module) {
             MainLoop.updateStatsStream.subscribe(function (loopStats) {
                 push({fps: loopStats.fps, ping: ping, position: MainPlayer.position});
             });
-            Dispatcher.messageStream.subscribe(MessageIds.TimeSync, function (response) {
+            Dispatcher.messageStream.subscribe(Messages.TimeSync, function (response) {
                 ping = Date.now() - response.clientTime;
             });
         })

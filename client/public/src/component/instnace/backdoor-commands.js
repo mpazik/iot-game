@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const Commands = require("./commands").constructors;
+    const Commands = require("./commands");
 
     const CommandIds = {
         KillCharacter: 0

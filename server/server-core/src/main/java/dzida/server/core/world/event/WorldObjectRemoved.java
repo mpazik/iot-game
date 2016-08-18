@@ -10,9 +10,4 @@ public class WorldObjectRemoved implements GameEvent {
     public WorldObjectRemoved(Id<WorldObject> worldObjectId) {
         this.worldObjectId = worldObjectId;
     }
-
-    @Override
-    public int getId() {
-        return GameEvent.WorldObjectRemoved;
-    }
 }

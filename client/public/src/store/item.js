@@ -1,7 +1,6 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
-    const MessageIds = require('../common/packet/messages').ids;
-    const Messages = require('../common/packet/messages').constructors;
+    const Messages = require('../component/instnace/messages');
     const ResourcesStore = require('./resources');
     const MainPlayerStore = require('./main-player');
     const Dispatcher = require('../component/dispatcher');
@@ -18,11 +17,11 @@ define(function (require, exports, module) {
 
         if (checkSkillItemRequirements(skill.id)) {
             const skillUsed = new Messages.SkillUsed(MainPlayerStore.characterId(), skill.id);
-            Dispatcher.messageStream.publish(MessageIds.SkillUsed, skillUsed);
+            Dispatcher.messageStream.publish(Messages.SkillUsed, skillUsed);
         }
     });
 
-    Dispatcher.messageStream.subscribe(MessageIds.SkillUsed, function (event) {
+    Dispatcher.messageStream.subscribe(Messages.SkillUsed, function (event) {
         if (event.casterId != MainPlayerStore.characterId()) return;
 
         const skill = ResourcesStore.skill(event.skillId);
@@ -38,7 +37,7 @@ define(function (require, exports, module) {
         }
     });
 
-    Dispatcher.messageStream.subscribe(MessageIds.CharacterDied, (event) => {
+    Dispatcher.messageStream.subscribe(Messages.CharacterDied, (event) => {
         if (event.casterId != MainPlayerStore.characterId()) return;
 
         Object.keys(quantities).forEach(item => {
@@ -46,7 +45,7 @@ define(function (require, exports, module) {
         });
     });
 
-    Dispatcher.messageStream.subscribe(MessageIds.SkillUsedOnWorldObject, (event) => {
+    Dispatcher.messageStream.subscribe(Messages.SkillUsedOnWorldObject, (event) => {
         if (event.casterId != MainPlayerStore.characterId()) return;
 
         const skill = ResourcesStore.skill(event.skillId);
@@ -81,7 +80,7 @@ define(function (require, exports, module) {
         var serverMessage;
         if (MainPlayerStore.playerCooldown.value != null) {
             serverMessage = new Messages.ServerMessage("You are not ready yet to use ability", Messages.ServerMessage.Kinds.INFO);
-            Dispatcher.messageStream.publish(MessageIds.ServerMessage, serverMessage);
+            Dispatcher.messageStream.publish(Messages.ServerMessage, serverMessage);
             return false;
         }
         const skill = ResourcesStore.skill(skillId);
@@ -90,7 +89,7 @@ define(function (require, exports, module) {
                 var item = ResourcesStore.item(itemRequirements.item);
                 if (getItemQuantity(itemRequirements.item) < itemRequirements.quantity) {
                     serverMessage = new Messages.ServerMessage(`Not enough number of ${item.name}s. Required ${itemRequirements.quantity}`, Messages.ServerMessage.Kinds.INFO);
-                    Dispatcher.messageStream.publish(MessageIds.ServerMessage, serverMessage);
+                    Dispatcher.messageStream.publish(Messages.ServerMessage, serverMessage);
                     return false;
                 }
             }

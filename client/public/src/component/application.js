@@ -17,13 +17,13 @@
 
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
-    const Network = require('./network');
+    const Network = require('./instnace/network');
     const Targeting = require('./targeting');
     const Render = require('./../pixi/render');
     const ResourcesStore = require('../store/resources');
     const Dispatcher = require('./dispatcher');
-    const Commands = require('../common/packet/commands').constructors;
-    const MessagesIds = require('../common/packet/messages').ids;
+    const Commands = require('./instnace/commands');
+    const Messages = require('./instnace/messages');
     const MainPlayer = require('../store/main-player');
     const ItemStore = require('../store/item');
     const Chat = require('./chat');
@@ -39,7 +39,7 @@ define(function (require, exports, module) {
     network.state.subscribe(function (networkState) {
         switch (networkState) {
             case Network.State.CONNECTED:
-                Dispatcher.messageStream.subscribeOnce(MessagesIds.InitialData, (data) => {
+                Dispatcher.messageStream.subscribeOnce(Messages.InitialData, (data) => {
                     showGame();
                     console.log("Got initial data");
                 });
@@ -54,7 +54,7 @@ define(function (require, exports, module) {
         }
     });
 
-    Dispatcher.messageStream.subscribe(MessagesIds.JoinToInstance, (data) => {
+    Dispatcher.messageStream.subscribe(Messages.JoinToInstance, (data) => {
         // create type listener or something like that for network.
         const listener = function (networkState) {
             switch (networkState) {
@@ -105,26 +105,26 @@ define(function (require, exports, module) {
     });
 
     function sendMoveCommand(data) {
-        network.sendCommands([new Commands.Move(data.x, data.y)]);
+        network.sendCommand(new Commands.Move(data.x, data.y));
     }
 
     function sendUseSkillOnCharacterCommand(data) {
         if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
-        network.sendCommands([new Commands.UseSkillOnCharacter(data.skillId, data.characterId)]);
+        network.sendCommand(new Commands.UseSkillOnCharacter(data.skillId, data.characterId));
     }
 
     function sendUseSkillOnWorldMapCommand(data) {
         if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
-        network.sendCommands([new Commands.UseSkillOnWorldMap(data.skillId, data.x, data.y)]);
+        network.sendCommand(new Commands.UseSkillOnWorldMap(data.skillId, data.x, data.y));
     }
 
     function sendUseSkillOnWorldObjectCommand(data) {
         if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
-        network.sendCommands([new Commands.UseSkillOnWorldObject(data.skillId, data.worldObjectId)]);
+        network.sendCommand(new Commands.UseSkillOnWorldObject(data.skillId, data.worldObjectId));
     }
 
     function sendJoinBattle(data) {
-        network.sendCommands([new Commands.JoinBattle(data.map, data.difficultyLevel)]);
+        network.sendCommand(new Commands.JoinBattle(data.map, data.difficultyLevel));
     }
 
     function goToHome() {
@@ -190,7 +190,7 @@ define(function (require, exports, module) {
         }
         Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
         Dispatcher.userEventStream.unsubscribe('go-to-home', goToHome);
-        Dispatcher.messageStream.publish(MessagesIds.Disconnected, {});
+        Dispatcher.messageStream.publish(Messages.Disconnected, {});
     }
 
     function loadGameAssets() {
@@ -227,8 +227,8 @@ define(function (require, exports, module) {
             deleteCookie('nick');
             disconnect();
         },
-        sendCommands: function (commands) {
-            network.sendCommands(commands)
+        sendCommand: function (command) {
+            network.sendCommand(command)
         }
     };
 });
