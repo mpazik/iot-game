@@ -4,37 +4,31 @@ define(function (require, exports, module) {
     const NetworkDispatcher = require('./../network-dispatcher');
     const Commands = require('./commands');
     const Messages = require('./messages');
+    const JsonProtocol = require('../../common/basic/json-protocol');
 
-    const messageConstructorsForCode = (function () {
-        const map = new Map();
-        map.set(5, Messages.CharacterSpawned);
-        map.set(6, Messages.CharacterDied);
-        map.set(7, Messages.CharacterMoved);
-        map.set(8, Messages.SkillUsedOnCharacter);
-        map.set(9, Messages.CharacterGotDamage);
-        map.set(11, Messages.InitialData);
-        map.set(12, Messages.ServerMessage);
-        map.set(16, Messages.TimeSync);
-        map.set(17, Messages.JoinToInstance);
-        map.set(19, Messages.ScenarioEnd);
-        map.set(21, Messages.SkillUsedOnWorldMap);
-        map.set(22, Messages.WorldObjectCreated);
-        map.set(23, Messages.SkillUsedOnWorldObject);
-        map.set(24, Messages.WorldObjectRemoved);
-        return map;
-    }());
-
-    const commandCodesForConstructor = (function () {
-        const map = new Map();
-        map.set(Commands.Move, 2);
-        map.set(Commands.UseSkillOnCharacter, 3);
-        map.set(Commands.UseSkillOnWorldMap, 4);
-        map.set(Commands.TimeSync, 6);
-        map.set(Commands.JoinBattle, 7);
-        map.set(Commands.Backdoor, 8);
-        map.set(Commands.UseSkillOnWorldObject, 11);
-        return map;
-    }());
+    const instanceProtocol = JsonProtocol.Builder()
+        .registerParsingMessageType(5, Messages.CharacterSpawned)
+        .registerParsingMessageType(6, Messages.CharacterDied)
+        .registerParsingMessageType(7, Messages.CharacterMoved)
+        .registerParsingMessageType(8, Messages.SkillUsedOnCharacter)
+        .registerParsingMessageType(9, Messages.CharacterGotDamage)
+        .registerParsingMessageType(11, Messages.InitialData)
+        .registerParsingMessageType(12, Messages.ServerMessage)
+        .registerParsingMessageType(16, Messages.TimeSync)
+        .registerParsingMessageType(17, Messages.JoinToInstance)
+        .registerParsingMessageType(19, Messages.ScenarioEnd)
+        .registerParsingMessageType(21, Messages.SkillUsedOnWorldMap)
+        .registerParsingMessageType(22, Messages.WorldObjectCreated)
+        .registerParsingMessageType(23, Messages.SkillUsedOnWorldObject)
+        .registerParsingMessageType(24, Messages.WorldObjectRemoved)
+        .registerSerializationMessageType(2, Commands.Move)
+        .registerSerializationMessageType(3, Commands.UseSkillOnCharacter)
+        .registerSerializationMessageType(4, Commands.UseSkillOnWorldMap)
+        .registerSerializationMessageType(6, Commands.TimeSync)
+        .registerSerializationMessageType(7, Commands.JoinBattle)
+        .registerSerializationMessageType(8, Commands.Backdoor)
+        .registerSerializationMessageType(11, Commands.UseSkillOnWorldObject)
+        .build();
 
     const State = {
         CREATED: 0,
@@ -54,28 +48,14 @@ define(function (require, exports, module) {
         });
     }
 
-    function parseJson(string) {
-        try {
-            return JSON.parse(string);
-        } catch (e) {
-            return undefined;
-        }
-    }
-
     Network.State = State;
     Network.prototype.connect = function (userNick) {
         var _this = this;
         var socket = NetworkDispatcher.newSocket('instance', userNick);
         this.updateState(State.CONNECTING);
         socket.onMessage = function (data) {
-            const message = parseJson(data);
-            const messageCode = message[0];
-            const messageConstructor = messageConstructorsForCode.get(messageCode);
-            if (!message) {
-                console.error("Received wrong message from sever: " + data);
-            } else {
-                Dispatcher.messageStream.publish(messageConstructor, message[1]);
-            }
+            const message = instanceProtocol.parse(data);
+            Dispatcher.messageStream.publish(message.constructor, message);
         };
         socket.onClose = function () {
             _this.updateState(State.DISCONNECTED);
@@ -96,8 +76,7 @@ define(function (require, exports, module) {
         return connectionPromise;
     };
     Network.prototype.sendCommand = function (command) {
-        const code = commandCodesForConstructor.get(command.constructor);
-        this.socket.send(JSON.stringify([code, command]));
+        this.socket.send(instanceProtocol.serialize(command));
     };
     Network.prototype.disconnect = function () {
         this.updateState(State.DISCONNECTING);

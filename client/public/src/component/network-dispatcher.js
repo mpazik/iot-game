@@ -1,10 +1,42 @@
 define(function (require, exports, module) {
+    const JsonProtocol = require('../common/basic/json-protocol');
 
     const dispatcherServerKey = 'dispatcher';
     const connections = new Map();
     const packetQueue = [];
+
     var socket = null;
 
+    function ConnectedToServerMessage(serverKey) {
+        this.serverKey = serverKey;
+    }
+
+    function DisconnectedFromServer(serverKey) {
+        this.serverKey = serverKey;
+    }
+
+    function NotConnectedToServerMessage(serverKey, errorMessage) {
+        this.serverKey = serverKey;
+        this.errorMessage = errorMessage;
+    }
+
+    function ConnectToServerMessage(serverKey, connectionData) {
+        this.serverKey = serverKey;
+        //noinspection JSUnusedGlobalSymbols
+        this.connectionData = connectionData;
+    }
+
+    function DisconnectFromServerMessage(serverKey) {
+        this.serverKey = serverKey;
+    }
+
+    const dispatcherProtocol = JsonProtocol.Builder()
+        .registerParsingMessageType(1, ConnectedToServerMessage)
+        .registerParsingMessageType(2, DisconnectedFromServer)
+        .registerParsingMessageType(3, NotConnectedToServerMessage)
+        .registerSerializationMessageType(1, ConnectToServerMessage)
+        .registerSerializationMessageType(2, DisconnectFromServerMessage)
+        .build();
 
     function isConnected() {
         return socket != null && socket.readyState === WebSocket.OPEN;
@@ -17,10 +49,6 @@ define(function (require, exports, module) {
         CLOSED: 3
     };
 
-    function close(serverKey) {
-        send(dispatcherServerKey, disconnectFromServerMessage(serverKey));
-    }
-
     function send(serverKey, message) {
         const packetToServer = [serverKey, message];
         if (isConnected()) {
@@ -30,16 +58,12 @@ define(function (require, exports, module) {
         }
     }
 
+    function sendToDispatcher(message) {
+        send(dispatcherServerKey, dispatcherProtocol.serialize(message));
+    }
+
     function sendServerPackets(packets) {
         socket.send(JSON.stringify(packets))
-    }
-
-    function connectToServerMessage(serverKey, connectionData) {
-        return JSON.stringify([1, {serverKey, connectionData}]);
-    }
-
-    function disconnectFromServerMessage(serverKey) {
-        return JSON.stringify([2, {serverKey}]);
     }
 
     function disconnectAll() {
@@ -51,26 +75,23 @@ define(function (require, exports, module) {
     }
 
     function handleDispatcherMessage(data) {
-        const message = JSON.parse(data);
-        const messageId = message[0];
-        const obj = message[1];
-        if (messageId === 1) {
-            const connection = connections.get(obj.serverKey);
+        const message = dispatcherProtocol.parse(data);
+        if (message.constructor === ConnectedToServerMessage) {
+            const connection = connections.get(message.serverKey);
             connection.onOpen();
             connection.readyState = connectionState.OPEN;
-        } else if (messageId === 2) {
-            const connection = connections.get(obj.serverKey);
+        } else if (message.constructor === DisconnectedFromServer) {
+            const connection = connections.get(message.serverKey);
             connection.readyState = connectionState.CLOSING;
             connection.onClose();
             connection.readyState = connectionState.CLOSED;
-
-            connections.delete(obj.serverKey);
-        } else if (messageId === 3) {
-            const connection = connections.get(obj.serverKey);
+            connections.delete(message.serverKey);
+        } else if (message.constructor === NotConnectedToServerMessage) {
+            const connection = connections.get(message.serverKey);
             connection.readyState = connectionState.CLOSING;
-            connection.onError(obj['errorMessage']);
+            connection.onError(message.errorMessage);
             connection.readyState = connectionState.CLOSED;
-            connections.delete(obj.serverKey);
+            connections.delete(message.serverKey);
         } else {
             console.warn(`Unrecognized message from dispatcher: ${message}`)
         }
@@ -117,7 +138,7 @@ define(function (require, exports, module) {
                     send(serverKey, data);
                 },
                 close() {
-                    close(serverKey);
+                    sendToDispatcher(new DisconnectFromServerMessage(serverKey));
                 },
                 readyState: connectionState.CONNECTING,
                 onMessage: () => {
@@ -133,7 +154,7 @@ define(function (require, exports, module) {
             if (socket == null) {
                 connect()
             }
-            send(dispatcherServerKey, connectToServerMessage(serverKey, connectionData));
+            sendToDispatcher(new ConnectToServerMessage(serverKey, connectionData));
             return connection;
         }
     };

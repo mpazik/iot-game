@@ -44,12 +44,12 @@ public final class JsonProtocol {
     @Nullable
     public String serializeMessage(Object message) {
         //noinspection SuspiciousMethodCalls
-        Integer typeId = serializationMessageTypes.get(message.getClass());
-        if (typeId == null) {
+        Integer typeCode = serializationMessageTypes.get(message.getClass());
+        if (typeCode == null) {
             System.err.println("Trying to serialized not registered object: " + message);
             return null;
         }
-        return gson.toJson(ImmutableList.of(typeId, message));
+        return gson.toJson(ImmutableList.of(typeCode, message));
     }
 
     public final static class Builder {
@@ -57,19 +57,19 @@ public final class JsonProtocol {
         private final Map<Class<?>, Integer> serializationMessageTypes = new HashMap<>();
         private final GsonBuilder gsonBuilder = new GsonBuilder();
 
-        public Builder registerMessageType(int typeId, Class<?> messageType) {
-            parsingMessageTypes.put(typeId, messageType);
-            serializationMessageTypes.put(messageType, typeId);
+        public Builder registerMessageType(int typeCode, Class<?> messageType) {
+            parsingMessageTypes.put(typeCode, messageType);
+            serializationMessageTypes.put(messageType, typeCode);
             return this;
         }
 
-        public Builder registerParsingMessageType(int typeId, Class<?> messageType) {
-            parsingMessageTypes.put(typeId, messageType);
+        public Builder registerParsingMessageType(int typeCode, Class<?> messageType) {
+            parsingMessageTypes.put(typeCode, messageType);
             return this;
         }
 
-        public Builder registerSerializationMessageType(int typeId, Class<?> messageType) {
-            serializationMessageTypes.put(messageType, typeId);
+        public Builder registerSerializationMessageType(int typeCode, Class<?> messageType) {
+            serializationMessageTypes.put(messageType, typeCode);
             return this;
         }
 
