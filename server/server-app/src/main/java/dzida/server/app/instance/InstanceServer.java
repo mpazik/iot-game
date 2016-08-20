@@ -1,5 +1,6 @@
 package dzida.server.app.instance;
 
+import com.google.common.util.concurrent.Runnables;
 import dzida.server.app.arbiter.Arbiter;
 import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.instance.command.InstanceCommand;
@@ -14,6 +15,7 @@ import dzida.server.core.basic.connection.VerifyingConnectionServer;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.event.GameEvent;
+import dzida.server.core.event.ServerMessage;
 import dzida.server.core.player.Player;
 import dzida.server.core.player.PlayerService;
 
@@ -53,10 +55,21 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         Object commandToProcess = serializer.parseMessage(message);
         whenTypeOf(commandToProcess)
                 .is(CharacterCommand.class)
-                .then(command -> instance.handleCommand(playerId, command))
+                .then(command -> {
+                    Result result = instance.handleCommand(playerId, command);
+                    result.consume(Runnables.doNothing(), error -> {
+                        sendMessageToPlayer(playerId, new ServerMessage(error.getMessage()));
+                    });
+                    instance.handleCommand(playerId, command);
+                })
 
                 .is(InstanceCommand.class)
-                .then(instance::handleCommand);
+                .then(command -> {
+                    Result result = instance.handleCommand(command);
+                    result.consume(Runnables.doNothing(), error -> {
+                        sendMessageToPlayer(playerId, new ServerMessage(error.getMessage()));
+                    });
+                });
     }
 
     @Override

@@ -79,7 +79,7 @@ define(function (require, exports, module) {
     function checkSkillItemRequirements(skillId) {
         var serverMessage;
         if (MainPlayerStore.playerCooldown.value != null) {
-            serverMessage = new Messages.ServerMessage("You are not ready yet to use ability", Messages.ServerMessage.Kinds.INFO);
+            serverMessage = new Messages.ServerMessage("You are not ready yet to use ability");
             Dispatcher.messageStream.publish(Messages.ServerMessage, serverMessage);
             return false;
         }
@@ -88,7 +88,7 @@ define(function (require, exports, module) {
             for (var itemRequirements of skill.itemsRequired) {
                 var item = ResourcesStore.item(itemRequirements.item);
                 if (getItemQuantity(itemRequirements.item) < itemRequirements.quantity) {
-                    serverMessage = new Messages.ServerMessage(`Not enough number of ${item.name}s. Required ${itemRequirements.quantity}`, Messages.ServerMessage.Kinds.INFO);
+                    serverMessage = new Messages.ServerMessage(`Not enough number of ${item.name}s. Required ${itemRequirements.quantity}`);
                     Dispatcher.messageStream.publish(Messages.ServerMessage, serverMessage);
                     return false;
                 }

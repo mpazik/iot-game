@@ -29,20 +29,9 @@ define(function (require, exports, module) {
             this.state = state;
             this.scenario = scenario;
         },
-        ServerMessage: function () {
-            function ServerMessage(message, type) {
-                //noinspection JSPotentiallyInvalidUsageOfThis
-                this.message = message;
-                //noinspection JSPotentiallyInvalidUsageOfThis
-                this.type = type;
-            }
-
-            ServerMessage.Kinds = {
-                INFO: 0,
-                ERROR: 1
-            };
-            return ServerMessage;
-        }(),
+        ServerMessage: function (message) {
+            this.message = message;
+        },
         Player: function (player) {
             this.player = player;
         },

@@ -1,6 +1,7 @@
 package dzida.server.core.skill;
 
 import com.google.common.collect.ImmutableList;
+import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.CharacterService;
@@ -21,11 +22,6 @@ import dzida.server.core.world.object.WorldObjectService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static dzida.server.core.event.ServerMessage.error;
-import static dzida.server.core.event.ServerMessage.info;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 
 public class SkillCommandHandler {
 
@@ -48,56 +44,68 @@ public class SkillCommandHandler {
         this.worldObjectService = worldObjectService;
     }
 
-    public List<GameEvent> useSkillOnCharacter(Id<Character> casterId, Id<Skill> skillId, Id<Character> targetId) {
-        if (!characterService.isCharacterLive(casterId) || !characterService.isCharacterLive(targetId)) {
-            return emptyList();
+    public Outcome<List<GameEvent>> useSkillOnCharacter(Id<Character> casterId, Id<Skill> skillId, Id<Character> targetId) {
+        if (!characterService.isCharacterLive(casterId)) {
+            return Outcome.error("Skill can not be used by a not living character.");
+        }
+        if (!characterService.isCharacterLive(targetId)) {
+            return Outcome.error("Skill can not be used on a character that is not alive.");
         }
 
         Skill skill = skillService.getSkill(skillId);
-        if (!isReadyForAbility(casterId))
-            return singletonList(info("You are not ready yet to use ability"));
-        if (skill.getType() == Skills.Types.ATTACK) {
-            if (!positionService.areCharactersInDistance(casterId, targetId, skill.getRange(), timeService.getCurrentMillis())) {
-                return singletonList(info("You are out of range"));
-            }
-            if (!canTargetBeTargeted(skill, casterId, targetId)) {
-                return singletonList(info("You can not use ability on that target"));
-            }
-            return handleAttackOnCreature(casterId, skill, targetId);
+        if (!isReadyForAbility(casterId)) {
+            return Outcome.error("You are not ready yet to use ability");
         }
-        return singletonList(error("Server can not understand received message"));
+        if (skill.getType() != Skills.Types.ATTACK) {
+            return Outcome.error("Server can not understand received message");
+        }
+        if (!positionService.areCharactersInDistance(casterId, targetId, skill.getRange(), timeService.getCurrentMillis())) {
+            return Outcome.error("You are out of range");
+        }
+        if (!canTargetBeTargeted(skill, casterId, targetId)) {
+            return Outcome.error("You can not use ability on that target");
+        }
+        return Outcome.ok(handleAttackOnCreature(casterId, skill, targetId));
     }
 
-    public List<GameEvent> useSkillOnWorldMap(Id<Character> casterId, Id<Skill> skillId, double x, double y) {
+    public Outcome<List<GameEvent>> useSkillOnWorldMap(Id<Character> casterId, Id<Skill> skillId, double x, double y) {
         if (!characterService.isCharacterLive(casterId)) {
-            return emptyList();
+            return Outcome.error("Skill can not be used by a not living character.");
         }
 
         Skill skill = skillService.getSkill(skillId);
-        if (!isReadyForAbility(casterId))
-            return singletonList(info("You are not ready yet to use ability"));
-        if (skill.getType() == Skills.Types.BUILDING) {
-            Optional<GeneralEntity<WorldObject>> worldObject = worldObjectService.createWorldObject(skill.getWorldObject(), (int) x, (int) y);
-            if (!worldObject.isPresent()) {
-                return singletonList(info("You can not build object on that position"));
-            }
-            return ImmutableList.of(new SkillUsedOnWorldMap(casterId, skill.getId(), x, y), new WorldObjectCreated(worldObject.get()));
+        if (!isReadyForAbility(casterId)) {
+            return Outcome.error("You are not ready yet to use ability");
         }
-        return singletonList(error("Server can not understand received message"));
+        if (skill.getType() != Skills.Types.BUILDING) {
+            return Outcome.error("Server can not understand received message");
+        }
+        Optional<GeneralEntity<WorldObject>> worldObject = worldObjectService.createWorldObject(skill.getWorldObject(), (int) x, (int) y);
+        if (!worldObject.isPresent()) {
+            return Outcome.error("You can not build object on that position");
+        }
+        return Outcome.ok(ImmutableList.of(
+                new SkillUsedOnWorldMap(casterId, skill.getId(), x, y),
+                new WorldObjectCreated(worldObject.get())
+        ));
     }
 
-    public List<GameEvent> useSkillOnWorldObject(Id<Character> casterId, Id<Skill> skillId, Id<WorldObject> targetId) {
+    public Outcome<List<GameEvent>> useSkillOnWorldObject(Id<Character> casterId, Id<Skill> skillId, Id<WorldObject> targetId) {
         if (!characterService.isCharacterLive(casterId)) {
-            return emptyList();
+            return Outcome.error("Skill can not be used by a not living character.");
         }
 
         Skill skill = skillService.getSkill(skillId);
-        if (!isReadyForAbility(casterId))
-            return singletonList(info("You are not ready yet to use ability"));
-        if (skill.getType() == Skills.Types.GATHER) {
-            return ImmutableList.of(new SkillUsedOnWorldObject(casterId, skill.getId(), targetId), new WorldObjectRemoved(targetId));
+        if (!isReadyForAbility(casterId)) {
+            return Outcome.error("You are not ready yet to use ability");
         }
-        return singletonList(error("Server can not understand received message"));
+        if (skill.getType() != Skills.Types.GATHER) {
+            return Outcome.error("Server can not understand received message");
+        }
+        return Outcome.ok(ImmutableList.of(
+                new SkillUsedOnWorldObject(casterId, skill.getId(), targetId),
+                new WorldObjectRemoved(targetId)
+        ));
     }
 
     private List<GameEvent> handleAttackOnCreature(Id<Character> casterId, Skill skill, Id<Character> targetId) {

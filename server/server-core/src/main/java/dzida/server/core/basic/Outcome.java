@@ -13,6 +13,10 @@ public interface Outcome<T> {
         return new ErrorOutcome<>(error);
     }
 
+    static <T> Outcome<T> error(String errorMessage) {
+        return new ErrorOutcome<>(new Error(errorMessage));
+    }
+
     static <T> Outcome<T> fromOptional(Optional<T> playerScore, Error error) {
         return playerScore.map(Outcome::ok).orElseGet(() -> new ErrorOutcome<>(error));
     }
@@ -20,6 +24,8 @@ public interface Outcome<T> {
     void consume(Consumer<T> onValid, Consumer<Error> onError);
 
     Optional<T> toOptional();
+
+    Result toResult();
 
     final class ValidOutcome<T> implements Outcome<T> {
         private final T value;
@@ -36,6 +42,11 @@ public interface Outcome<T> {
         @Override
         public Optional<T> toOptional() {
             return Optional.of(value);
+        }
+
+        @Override
+        public Result toResult() {
+            return Result.ok();
         }
 
     }
@@ -55,6 +66,11 @@ public interface Outcome<T> {
         @Override
         public Optional<T> toOptional() {
             return Optional.empty();
+        }
+
+        @Override
+        public Result toResult() {
+            return Result.error(error);
         }
     }
 

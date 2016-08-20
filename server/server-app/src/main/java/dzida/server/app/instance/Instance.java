@@ -17,6 +17,8 @@ import dzida.server.app.store.mapdb.WorldObjectStoreMapDb;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.app.store.memory.SkillStoreInMemory;
 import dzida.server.core.Scheduler;
+import dzida.server.core.basic.Outcome;
+import dzida.server.core.basic.Result;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.CharacterCommandHandler;
@@ -138,22 +140,18 @@ public class Instance {
         System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
     }
 
-    public void handleCommand(Id<Player> playerId, CharacterCommand characterCommand) {
+    public Result handleCommand(Id<Player> playerId, CharacterCommand characterCommand) {
         Id<Character> characterId = characterIds.get(playerId);
         InstanceCommand instanceCommand = characterCommand.getInstanceCommand(characterId);
-        handleCommand(instanceCommand);
+        return handleCommand(instanceCommand);
     }
 
-    public void handleCommand(InstanceCommand command) {
-        List<GameEvent> gameEvents = commandResolver.handleCommand(command);
-        instanceStateManager.updateState(gameEvents);
-    }
-
-    public void shutdown() {
-    }
-
-    public boolean isEmpty() {
-        return stateSynchroniser.areAnyListeners();
+    public Result handleCommand(InstanceCommand command) {
+        // temporary validation done here. Eventually this will be asynchronous so it couldn't return any response.
+        // in that case validation would have to be performed on InstanceServer on a copy of the state that may be a bit outdated.
+        Outcome<List<GameEvent>> gameEvents = commandResolver.handleCommand(command);
+        gameEvents.toOptional().ifPresent(instanceStateManager::updateState);
+        return gameEvents.toResult();
     }
 
     public String getKey() {

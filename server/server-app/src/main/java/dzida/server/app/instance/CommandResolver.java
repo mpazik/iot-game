@@ -8,6 +8,7 @@ import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
 import dzida.server.app.instance.command.SkillUseOnWorldMapCommand;
 import dzida.server.app.instance.command.SkillUseOnWorldObjectCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
+import dzida.server.core.basic.Outcome;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
@@ -39,7 +40,7 @@ public class CommandResolver {
         }
     }
 
-    public List<GameEvent> handleCommand(InstanceCommand commandToProcess) {
+    public Outcome<List<GameEvent>> handleCommand(InstanceCommand commandToProcess) {
         return whenTypeOf(commandToProcess)
 
                 .is(MoveCommand.class)
