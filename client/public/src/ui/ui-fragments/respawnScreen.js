@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+define(function (require) {
     const uiState = require('../../store/ui-state');
     const timer = require('../../component/timer');
     
@@ -17,7 +17,7 @@ define(function (require, exports, module) {
             requirements: {
                 playerAlive: Predicates.is(false),
                 scenarioType: Predicates.is('open-world'),
-                applicationState: Predicates.is('running')
+                instanceState: Predicates.is('running')
             }
         },
         created: function () {

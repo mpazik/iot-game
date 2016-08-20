@@ -69,9 +69,6 @@ define(function (require, exports, module) {
         },
         WorldObjectRemoved: function (worldObjectId) {
             this.worldObjectId = worldObjectId;
-        },
-        JoinToInstance: function (instanceKey) {
-            this.instanceKey = instanceKey;
         }
     };
 });

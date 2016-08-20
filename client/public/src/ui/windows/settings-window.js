@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+define(function (require) {
     const app = require('../../component/application');
     
     return createUiElement('settings-window', {
@@ -8,7 +8,7 @@ define(function (require, exports, module) {
                 [KEY_CODES.fromLetter("L"), "logout"]
             ],
             requirements: {
-                applicationState: Predicates.is('running')
+                applicationState: Predicates.is('connected')
             }
         },
         created: function () {

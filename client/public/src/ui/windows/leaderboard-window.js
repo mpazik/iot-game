@@ -1,9 +1,9 @@
-define(function (require, exports, module) {
+define(function () {
     return createUiElement('leaderboard-window', {
         type: 'window',
         properties: {
             requirements: {
-                applicationState: Predicates.is('running')
+                applicationState: Predicates.is('connected')
             }
         },
         created: function () {

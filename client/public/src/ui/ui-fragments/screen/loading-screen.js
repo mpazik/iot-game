@@ -1,9 +1,9 @@
-define(function (require, exports, module) {
+define(function () {
     return createUiElement('loading-screen', {
         type: 'fragment',
         properties: {
             requirements: {
-                applicationState: Predicates.is('loading-game-assets')
+                instanceState: Predicates.is('loading-game-assets')
             }
         },
         created: function () {

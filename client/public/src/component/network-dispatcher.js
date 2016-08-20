@@ -138,6 +138,7 @@ define(function (require, exports, module) {
                     send(serverKey, data);
                 },
                 close() {
+                    connections.delete(serverKey);
                     sendToDispatcher(new DisconnectFromServerMessage(serverKey));
                 },
                 readyState: connectionState.CONNECTING,

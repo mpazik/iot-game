@@ -9,8 +9,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import dzida.server.app.protocol.json.JsonProtocol;
 import dzida.server.core.basic.Result;
-import dzida.server.core.basic.connection.ClientConnection;
-import dzida.server.core.basic.connection.ConnectionServer;
+import dzida.server.core.basic.connection.Connector;
+import dzida.server.core.basic.connection.Server;
 import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.connection.VerifyingConnectionServer;
 
@@ -23,7 +23,7 @@ import java.util.Objects;
 
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
-public class ServerDispatcher implements ConnectionServer<String> {
+public class ServerDispatcher implements Server<String> {
     private static final String dispatcherServerKey = "dispatcher";
     private static final Type packetType = new TypeToken<List<ServerMessage>>() {
     }.getType();
@@ -61,18 +61,18 @@ public class ServerDispatcher implements ConnectionServer<String> {
     }
 
     @Override
-    public void onConnection(ClientConnection<String> clientConnection) {
-        clientConnection.onOpen(new DispatcherConnection(clientConnection, serializer, dispatcherSerializer, servers));
+    public void onConnection(Connector<String> connector) {
+        connector.onOpen(new DispatcherConnection(connector, serializer, dispatcherSerializer, servers));
     }
 
     private static final class DispatcherConnection implements ServerConnection<String> {
         private final Map<String, ServerConnection<String>> connectionsToServers = new HashMap<>();
-        private final ClientConnection<String> connectionHandler;
+        private final Connector<String> connectionHandler;
         private final Gson serializer;
         private final JsonProtocol dispatcherSerializer;
         private final Map<String, VerifyingConnectionServer<String, String>> servers;
 
-        private DispatcherConnection(ClientConnection<String> connectionHandler, Gson serializer, JsonProtocol dispatcherSerializer, Map<String, VerifyingConnectionServer<String, String>> servers) {
+        private DispatcherConnection(Connector<String> connectionHandler, Gson serializer, JsonProtocol dispatcherSerializer, Map<String, VerifyingConnectionServer<String, String>> servers) {
             this.connectionHandler = connectionHandler;
             this.serializer = serializer;
             this.dispatcherSerializer = dispatcherSerializer;
@@ -119,27 +119,11 @@ public class ServerDispatcher implements ConnectionServer<String> {
                 return;
             }
 
-            ClientConnection<String> clientConnection = new ClientConnection<String>() {
-                @Override
-                public void onOpen(ServerConnection<String> serverConnection) {
-                    connectionsToServers.put(serverKey, serverConnection);
-                }
-
-                @Override
-                public void onClose() {
-                    sendDispatcherMessageToClient(new DispatcherProtocol.DisconnectedFromServer(serverKey));
-                }
-
-                @Override
-                public void onMessage(String data) {
-                    sendToClient(serverKey, data);
-                }
-            };
             Result connectionResult = servers.get(serverKey).verifyConnection(connectionData);
-
             connectionResult.consume(() -> {
+                Connector<String> connector = new ServerConnector(serverKey, this);
                 sendDispatcherMessageToClient(new DispatcherProtocol.ConnectedToServerMessage(serverKey));
-                servers.get(serverKey).onConnection(clientConnection, connectionData);
+                servers.get(serverKey).onConnection(connector, connectionData);
             }, error -> {
                 sendDispatcherMessageToClient(new DispatcherProtocol.NotConnectedToServerMessage(serverKey, error.getMessage()));
             });
@@ -161,6 +145,32 @@ public class ServerDispatcher implements ConnectionServer<String> {
             if (!connectionsToServers.containsKey(serverKey)) return;
             connectionsToServers.get(serverKey).close();
             connectionsToServers.remove(serverKey);
+        }
+    }
+
+    private final static class ServerConnector implements Connector<String> {
+        private final String serverKey;
+        private final DispatcherConnection dispatcherConnection;
+
+        private ServerConnector(String serverKey, DispatcherConnection dispatcherConnection) {
+            this.serverKey = serverKey;
+            this.dispatcherConnection = dispatcherConnection;
+        }
+
+        @Override
+        public void onOpen(ServerConnection<String> serverConnection) {
+            dispatcherConnection.connectionsToServers.put(serverKey, serverConnection);
+        }
+
+        @Override
+        public void onClose() {
+            dispatcherConnection.sendDispatcherMessageToClient(new DispatcherProtocol.DisconnectedFromServer(serverKey));
+            dispatcherConnection.connectionsToServers.remove(serverKey);
+        }
+
+        @Override
+        public void onMessage(String data) {
+            dispatcherConnection.sendToClient(serverKey, data);
         }
     }
 

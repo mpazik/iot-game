@@ -1,11 +1,11 @@
-define(function (require, exports, module) {
+define(function (require) {
     const app = require('../../../component/application');
     
     return createUiElement('disconnected-screen', {
         type: 'fragment',
         properties: {
             requirements: {
-                applicationState: Predicates.is('disconnected')
+                instanceState: Predicates.is('disconnected')
             }
         },
         created: function () {

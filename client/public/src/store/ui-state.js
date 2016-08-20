@@ -6,6 +6,7 @@ define(function (require, exports, module) {
     const ServerMessagesStore = require('./server-messages');
     const Publisher = require('../common/basic/publisher');
     const Application = require('../component/application');
+    const Instance = require('../component/instance/instance-controller');
     const Item = require('./item');
     const Chat = require('../component/chat');
 
@@ -34,6 +35,7 @@ define(function (require, exports, module) {
         }),
         endScenario: ScenarioStore.endScenarioData,
         applicationState: Application.state,
+        instanceState: Instance.state,
         actionBarSkills: ActionBar.skills,
         actionBarActiveSkill: ActionBar.activeState,
         profilingStats: ProfilingStore.updateStatsState,

@@ -2,7 +2,7 @@ define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const Point = require('../unit/point');
     const Dispatcher = require('../component/dispatcher');
-    const Messages = require('../component/instnace/messages');
+    const Messages = require('../component/instance/messages');
     const SkillStore = require('./skill');
 
     var playerId = null;

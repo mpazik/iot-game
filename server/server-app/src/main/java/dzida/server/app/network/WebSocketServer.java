@@ -1,7 +1,7 @@
 package dzida.server.app.network;
 
-import dzida.server.core.basic.connection.ClientConnection;
-import dzida.server.core.basic.connection.ConnectionServer;
+import dzida.server.core.basic.connection.Connector;
+import dzida.server.core.basic.connection.Server;
 import dzida.server.core.basic.connection.ServerConnection;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -53,7 +53,7 @@ public class WebSocketServer {
         eventLoop = workerGroup.next();
     }
 
-    public void start(int port, ConnectionServer<String> connectionServer) {
+    public void start(int port, Server<String> server) {
 
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -68,7 +68,7 @@ public class WebSocketServer {
                             pipeline.addLast("decoder", new HttpRequestDecoder());
                             pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
                             //noinspection unchecked
-                            pipeline.addLast("handler", new WebSocketHandler(connectionServer));
+                            pipeline.addLast("handler", new WebSocketHandler(server));
                         }
                     });
 
@@ -90,12 +90,12 @@ public class WebSocketServer {
     private static class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
 
         private static final String WEBSOCKET_PATH = "/websocket";
-        private final ConnectionServer<String> connectionServer;
+        private final Server<String> server;
         private WebSocketServerHandshaker handshaker;
         private ServerConnection<String> serverConnection;
 
-        public WebSocketHandler(ConnectionServer<String> connectionServer) {
-            this.connectionServer = connectionServer;
+        public WebSocketHandler(Server<String> server) {
+            this.server = server;
         }
 
         private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
@@ -167,7 +167,7 @@ public class WebSocketServer {
             if (handshaker == null) {
                 WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
             } else {
-                ClientConnection<String> clientConnection = new ClientConnection<String>() {
+                Connector<String> connector = new Connector<String>() {
                     private Channel channel;
 
                     @Override
@@ -186,7 +186,7 @@ public class WebSocketServer {
                         channel.writeAndFlush(new TextWebSocketFrame(data));
                     }
                 };
-                connectionServer.onConnection(clientConnection);
+                server.onConnection(connector);
                 System.out.println("Received new connection");
             }
         }

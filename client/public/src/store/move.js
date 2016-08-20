@@ -1,5 +1,5 @@
 define(function (require, exports, module) {
-    const Messages = require('../component/instnace/messages');
+    const Messages = require('../component/instance/messages');
     const Move = require('../unit/move');
     const StoreRegistrar = require('../component/store-registrar');
     const Dispatcher = require('../component/dispatcher');

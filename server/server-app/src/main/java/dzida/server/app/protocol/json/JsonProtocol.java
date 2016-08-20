@@ -36,7 +36,7 @@ public final class JsonProtocol {
             }
             return gson.fromJson(data, messageType);
         } catch (JsonSyntaxException | IllegalStateException | UnsupportedOperationException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }

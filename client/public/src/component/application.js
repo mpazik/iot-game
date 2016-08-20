@@ -2,139 +2,58 @@
  * Starting the game
  * ----------------------------
  *  1. Loading web resources (HTML, CSS, JS).
- *  2. Verification of the user.
- *  3. Loading game assets (textures, sounds) and getting address of the server to connect
- *  4. Connecting to the server.
- *  5. Waiting for initial message.
- *  6. Init world state based on initial message.
- *  7. Show loaded game to player.
- *
- * Joining to the new instnace
- * ----------------------------
- *  1. Disconnecting.
- *  2. Got to 4 point of connecting.
+ *  2. Loading game assets (textures, sounds) and getting address of the server to connect
+ *  3. Verification of the user.
+ *  4. Connecting to the arbiter and chat.
+ *  5. Waiting for a message from arbiter with instance key.
+ *  6. Connecting to the instance server.
  */
 
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
-    const Network = require('./instnace/network');
-    const Targeting = require('./targeting');
-    const Render = require('./../pixi/render');
-    const ResourcesStore = require('../store/resources');
     const Dispatcher = require('./dispatcher');
-    const Commands = require('./instnace/commands');
-    const Messages = require('./instnace/messages');
-    const MainPlayer = require('../store/main-player');
-    const ItemStore = require('../store/item');
+    const NetworkDispatcher = require('./network-dispatcher');
+    const JsonProtocol = require('../common/basic/json-protocol');
+    const InstanceController = require('./instance/instance-controller');
+    const ResourcesStore = require('../store/resources');
     const Chat = require('./chat');
-    const network = new Network();
-    var instanceKey = Configuration.defaultInstance;
     var userNick;
+
+    function JoinToInstance(instanceKey) {
+        this.instanceKey = instanceKey;
+    }
+
+    function JoinToBattleCommand(map, difficultyLevel) {
+        this.map = map;
+        this.difficultyLevel = difficultyLevel;
+    }
+
+    function GoHomeCommand() {
+    }
+
+    const arbiterProtocol = JsonProtocol.Builder()
+        .registerParsingMessageType(1, JoinToInstance)
+        .registerSerializationMessageType(1, JoinToBattleCommand)
+        .registerSerializationMessageType(2, GoHomeCommand)
+        .build();
+
+    var arbiterSocket = null;
+
+    function sendJoinBattle(data) {
+        arbiterSocket.send(arbiterProtocol.serialize(new JoinToBattleCommand(data.map, data.difficultyLevel)));
+    }
+
+    function sendGoToHome() {
+        arbiterSocket.send(arbiterProtocol.serialize(new GoHomeCommand()));
+    }
 
     var setState = null;
     const statePublisher = new Publisher.StatePublisher('started', function (f) {
         return setState = f;
     });
 
-    network.state.subscribe(function (networkState) {
-        switch (networkState) {
-            case Network.State.CONNECTED:
-                Dispatcher.messageStream.subscribeOnce(Messages.InitialData, (data) => {
-                    showGame();
-                    console.log("Got initial data");
-                });
-                break;
-
-            case Network.State.DISCONNECTED:
-                disconnected();
-                break;
-            case Network.State.ERROR:
-                error();
-                break;
-        }
-    });
-
-    Dispatcher.messageStream.subscribe(Messages.JoinToInstance, (data) => {
-        // create type listener or something like that for network.
-        const listener = function (networkState) {
-            switch (networkState) {
-                case Network.State.DISCONNECTED:
-                    network.state.unsubscribe(listener);
-                    instanceKey = data.instanceKey;
-                    connect();
-                    break;
-            }
-        };
-        network.state.subscribe(listener);
-        disconnect();
-    });
-    MainPlayer.playerLiveState.subscribe((live) => {
-        if (live) {
-            Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
-            Dispatcher.userEventStream.subscribe('move-to', sendMoveCommand);
-            Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
-            Dispatcher.userEventStream.subscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
-            Dispatcher.userEventStream.subscribe('skill-used-on-world-object', sendUseSkillOnWorldObjectCommand);
-            Dispatcher.userEventStream.subscribe('join-battle', sendJoinBattle);
-            Dispatcher.userEventStream.subscribe('go-to-home', goToHome);
-        } else {
-            Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
-            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
-            Dispatcher.userEventStream.unsubscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
-            Dispatcher.userEventStream.unsubscribe('skill-used-on-world-object', sendUseSkillOnWorldObjectCommand);
-        }
-    });
-
-    const isTargetingState = new Publisher.StatePublisher(false, push => {
-        Targeting.targetingState.subscribe(skill => {
-            if (skill == null && isTargetingState.value == true) {
-                push(false);
-            }
-            if (skill != null && isTargetingState.value == false) {
-                push(true);
-            }
-        });
-    });
-
-    isTargetingState.subscribe(isTargeting => {
-        if (isTargeting) {
-            Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
-        } else {
-            Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
-        }
-    });
-
-    function sendMoveCommand(data) {
-        network.sendCommand(new Commands.Move(data.x, data.y));
-    }
-
-    function sendUseSkillOnCharacterCommand(data) {
-        if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
-        network.sendCommand(new Commands.UseSkillOnCharacter(data.skillId, data.characterId));
-    }
-
-    function sendUseSkillOnWorldMapCommand(data) {
-        if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
-        network.sendCommand(new Commands.UseSkillOnWorldMap(data.skillId, data.x, data.y));
-    }
-
-    function sendUseSkillOnWorldObjectCommand(data) {
-        if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
-        network.sendCommand(new Commands.UseSkillOnWorldObject(data.skillId, data.worldObjectId));
-    }
-
-    function sendJoinBattle(data) {
-        network.sendCommand(new Commands.JoinBattle(data.map, data.difficultyLevel));
-    }
-
-    function goToHome() {
-        disconnect();
-        instanceKey = Configuration.defaultInstance;
-        connect();
-    }
-
-    function getCookie(cname) {
-        var name = cname + "=";
+    function getCookie(cookieName) {
+        var name = cookieName + "=";
         var ca = document.cookie.split(';');
         for (var i = 0; i < ca.length; i++) {
             var c = ca[i];
@@ -162,6 +81,27 @@ define(function (require, exports, module) {
         });
     }
 
+    function connectToArbiter(userNick) {
+        arbiterSocket = NetworkDispatcher.newSocket('arbiter', userNick);
+        arbiterSocket.onMessage = (data) => {
+            const message = arbiterProtocol.parse(data);
+            if (message.constructor === JoinToInstance) {
+                InstanceController.connect(message.instanceKey, userNick);
+                Chat.joinToInstanceChannel(message.instanceKey);
+            }
+        };
+        arbiterSocket.onOpen = () => {
+            Dispatcher.userEventStream.subscribe('join-battle', sendJoinBattle);
+            Dispatcher.userEventStream.subscribe('go-to-home', sendGoToHome);
+            setState('connected');
+        };
+        arbiterSocket.onClose = () => {
+            Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
+            Dispatcher.userEventStream.unsubscribe('go-to-home', sendGoToHome);
+            setState('disconnected');
+        };
+    }
+
     function connect() {
         if (userNick == null) {
             getAndCheckUserNick().then(nick=> {
@@ -174,23 +114,10 @@ define(function (require, exports, module) {
                 setState('need-authentication');
             });
         } else {
-            network.connect(userNick);
+            connectToArbiter(userNick);
             Chat.connect(userNick);
-            Chat.joinToInstanceChannel(instanceKey);
             setState('connecting');
         }
-    }
-
-    function disconnect() {
-        network.disconnect();
-        Render.cleanWorld();
-        if (MainPlayer.playerLiveState.state) {
-            Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
-            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
-        }
-        Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
-        Dispatcher.userEventStream.unsubscribe('go-to-home', goToHome);
-        Dispatcher.messageStream.publish(Messages.Disconnected, {});
     }
 
     function loadGameAssets() {
@@ -199,24 +126,11 @@ define(function (require, exports, module) {
         ResourcesStore.load().then(connect);
     }
 
-    function showGame() {
-        setState('running');
-        Render.initWorld();
-    }
-
-    function error() {
-        setState('error');
-    }
-
-    function disconnected() {
-        setState('disconnected');
-    }
-
     module.exports = {
         state: statePublisher,
         init: function (gameElement) {
             loadGameAssets();
-            Render.init(gameElement);
+            InstanceController.init(gameElement)
         },
         setUser: function (nick) {
             document.cookie = "nick=" + nick;
@@ -225,10 +139,7 @@ define(function (require, exports, module) {
         logout: function () {
             userNick = null;
             deleteCookie('nick');
-            disconnect();
-        },
-        sendCommand: function (command) {
-            network.sendCommand(command)
+            NetworkDispatcher.disconnect();
         }
     };
 });

@@ -1,6 +1,6 @@
 package dzida.server.core.basic.connection;
 
-public interface ClientConnection<T> {
+public interface Connector<T> {
     void onOpen(ServerConnection<T> serverConnection);
 
     void onClose();

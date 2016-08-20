@@ -1,8 +1,6 @@
 package dzida.server.app.instance;
 
 import dzida.server.app.BasicJsonSerializer;
-import dzida.server.app.Container;
-import dzida.server.app.command.JoinBattleCommand;
 import dzida.server.app.command.MoveRawCommand;
 import dzida.server.app.command.SkillUseOnCharacterRawCommand;
 import dzida.server.app.command.SkillUseOnWorldMapRawCommand;
@@ -33,7 +31,6 @@ public class InstanceProtocol {
                 .registerParsingMessageType(2, MoveRawCommand.class)
                 .registerParsingMessageType(3, SkillUseOnCharacterRawCommand.class)
                 .registerParsingMessageType(4, SkillUseOnWorldMapRawCommand.class)
-                .registerParsingMessageType(7, JoinBattleCommand.class)
                 .registerParsingMessageType(8, BackdoorCommandResolver.BackdoorCommand.class)
                 .registerParsingMessageType(11, SkillUseOnWorldObjectRawCommand.class)
                 .registerSerializationMessageType(5, CharacterSpawned.class)
@@ -43,7 +40,6 @@ public class InstanceProtocol {
                 .registerSerializationMessageType(9, CharacterGotDamage.class)
                 .registerSerializationMessageType(11, StateSynchroniser.InitialMessage.class)
                 .registerSerializationMessageType(12, ServerMessage.class)
-                .registerSerializationMessageType(17, Container.JoinToInstance.class)
                 .registerSerializationMessageType(19, ScenarioEnd.class)
                 .registerSerializationMessageType(21, SkillUsedOnWorldMap.class)
                 .registerSerializationMessageType(22, WorldObjectCreated.class)

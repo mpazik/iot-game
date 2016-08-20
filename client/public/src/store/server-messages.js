@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const Dispatcher = require('../component/dispatcher');
-    const Messages = require('../component/instnace/messages');
+    const Messages = require('../component/instance/messages');
     const ServerMessage = Messages.ServerMessage;
 
     const delay = 1000;

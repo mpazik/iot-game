@@ -94,14 +94,13 @@ public class Instance {
         instanceStateManager = new InstanceStateManager(positionService, characterService, worldMapService, skillService, worldObjectService);
         commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler);
 
-
         stateSynchroniser = new StateSynchroniser(instanceStateManager, scenario);
         instanceStateManager.getEventPublisher().subscribe(stateSynchroniser::syncStateChange);
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
         NpcBehaviour npcBehaviour = new NpcBehaviour(timeService, instanceStateManager);
         AiService aiService = new AiService(npcBehaviour);
 
-        this.gameLogic = new GameLogic(scheduler, instanceStateManager, playerService, survivalScenario, scenario, aiService, commandResolver::handleCommand);
+        this.gameLogic = new GameLogic(scheduler, instanceStateManager, playerService, survivalScenario, scenario, aiService, this::handleCommand);
     }
 
     public void start() {

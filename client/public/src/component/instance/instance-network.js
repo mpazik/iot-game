@@ -14,8 +14,6 @@ define(function (require, exports, module) {
         .registerParsingMessageType(9, Messages.CharacterGotDamage)
         .registerParsingMessageType(11, Messages.InitialData)
         .registerParsingMessageType(12, Messages.ServerMessage)
-        .registerParsingMessageType(16, Messages.TimeSync)
-        .registerParsingMessageType(17, Messages.JoinToInstance)
         .registerParsingMessageType(19, Messages.ScenarioEnd)
         .registerParsingMessageType(21, Messages.SkillUsedOnWorldMap)
         .registerParsingMessageType(22, Messages.WorldObjectCreated)
@@ -24,8 +22,6 @@ define(function (require, exports, module) {
         .registerSerializationMessageType(2, Commands.Move)
         .registerSerializationMessageType(3, Commands.UseSkillOnCharacter)
         .registerSerializationMessageType(4, Commands.UseSkillOnWorldMap)
-        .registerSerializationMessageType(6, Commands.TimeSync)
-        .registerSerializationMessageType(7, Commands.JoinBattle)
         .registerSerializationMessageType(8, Commands.Backdoor)
         .registerSerializationMessageType(11, Commands.UseSkillOnWorldObject)
         .build();
@@ -49,9 +45,9 @@ define(function (require, exports, module) {
     }
 
     Network.State = State;
-    Network.prototype.connect = function (userNick) {
+    Network.prototype.connect = function (instanceKey, userNick) {
         var _this = this;
-        var socket = NetworkDispatcher.newSocket('instance', userNick);
+        var socket = NetworkDispatcher.newSocket(instanceKey, userNick);
         this.updateState(State.CONNECTING);
         socket.onMessage = function (data) {
             const message = instanceProtocol.parse(data);
@@ -60,20 +56,15 @@ define(function (require, exports, module) {
         socket.onClose = function () {
             _this.updateState(State.DISCONNECTED);
         };
-        var self = this;
-        var connectionPromise = new Promise(function (resolve, reject) {
-            socket.onOpen = function () {
-                self.updateState(State.CONNECTED);
-                resolve();
-            };
-            socket.onError = function (error) {
-                if (self.state.value === State.CONNECTING) {
-                    reject(error);
-                }
-            };
-        });
+        socket.onOpen = function () {
+            _this.updateState(State.CONNECTED);
+        };
+        socket.onError = function (error) {
+            if (_this.state.value === State.CONNECTING) {
+                console.error(error);
+            }
+        };
         this.socket = socket;
-        return connectionPromise;
     };
     Network.prototype.sendCommand = function (command) {
         this.socket.send(instanceProtocol.serialize(command));

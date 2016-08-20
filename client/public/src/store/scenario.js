@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const Dispatcher = require('../component/dispatcher');
-    const Messages = require('../component/instnace/messages');
+    const Messages = require('../component/instance/messages');
 
     module.exports = {
         data: new Publisher.StatePublisher(null, (push) => {

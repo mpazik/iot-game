@@ -2,7 +2,7 @@ package dzida.server.app.chat;
 
 import com.google.common.base.Strings;
 import dzida.server.core.basic.Result;
-import dzida.server.core.basic.connection.ClientConnection;
+import dzida.server.core.basic.connection.Connector;
 import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.connection.VerifyingConnectionServer;
 
@@ -40,10 +40,10 @@ public class Chat implements VerifyingConnectionServer<String, String> {
     }
 
     @Override
-    public void onConnection(ClientConnection<String> clientConnection, String userNick) {
-        messageTargets.put(userNick, clientConnection::onMessage);
+    public void onConnection(Connector<String> connector, String userNick) {
+        messageTargets.put(userNick, connector::onMessage);
         ChatConnection chatConnection = new ChatConnection(userNick);
-        clientConnection.onOpen(chatConnection);
+        connector.onOpen(chatConnection);
     }
 
     private void createChannel(String channelName) {

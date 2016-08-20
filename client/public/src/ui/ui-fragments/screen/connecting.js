@@ -1,9 +1,9 @@
-define(function (require, exports, module) {
+define(function () {
     return createUiElement('connecting-screen', {
         type: 'fragment',
         properties: {
             requirements: {
-                applicationState: Predicates.is('connecting')
+                instanceState: Predicates.is('connecting')
             }
         },
         created: function () {

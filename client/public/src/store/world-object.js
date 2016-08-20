@@ -2,7 +2,7 @@ define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const StoreRegistrar = require('../component/store-registrar');
     const Resources = require('./resources');
-    const Messages = require('../component/instnace/messages');
+    const Messages = require('../component/instance/messages');
     const Dispatcher = require('../component/dispatcher');
 
     const key = 'worldObject';

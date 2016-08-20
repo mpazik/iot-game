@@ -1,7 +1,7 @@
 package dzida.server.app.dispatcher;
 
 import dzida.server.core.basic.Result;
-import dzida.server.core.basic.connection.ClientConnection;
+import dzida.server.core.basic.connection.Connector;
 import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.connection.VerifyingConnectionServer;
 import org.assertj.core.api.AbstractAssert;
@@ -19,7 +19,7 @@ public class ServerDispatcherTest {
     private ProbeServer serverB;
     private ProbeServer serverA;
     private ServerDispatcher serverDispatcher;
-    private ProbeClientConnection connection;
+    private ProbeConnector connection;
 
     @Before
     public void setUp() throws Exception {
@@ -30,7 +30,7 @@ public class ServerDispatcherTest {
         serverDispatcher.addServer("serverA", serverA);
         serverDispatcher.addServer("serverB", serverB);
         serverDispatcher.addServer("serverC", serverC);
-        connection = new ProbeClientConnection();
+        connection = new ProbeConnector();
     }
 
     @Test
@@ -57,7 +57,7 @@ public class ServerDispatcherTest {
     public void clientReceiveMessageWithServerIdToWhichItWasConnected() {
         ProbeServer serverD = new ProbeServer() {
             @Override
-            public void onConnection(ClientConnection<String> clientConnection, String connectionData) {
+            public void onConnection(Connector<String> clientConnection, String connectionData) {
                 // This message should be send after the message about connecting to the server D.
                 clientConnection.onMessage("Initial data from server D");
             }
@@ -194,7 +194,7 @@ public class ServerDispatcherTest {
     }
 }
 
-class ProbeClientConnection implements ClientConnection<String> {
+class ProbeConnector implements Connector<String> {
     private final List<String> messages = new ArrayList<>();
     private ServerConnection<String> serverConnection;
 
@@ -228,7 +228,7 @@ class ProbeClientConnection implements ClientConnection<String> {
 class ProbeServer implements VerifyingConnectionServer<String, String> {
     private final List<String> messages = new ArrayList<>();
     private String connectionData;
-    private ClientConnection<String> clientConnection;
+    private Connector<String> connector;
 
     public static Assert assertThat(ProbeServer actual) {
         return new Assert(actual);
@@ -240,8 +240,8 @@ class ProbeServer implements VerifyingConnectionServer<String, String> {
     }
 
     @Override
-    public void onConnection(ClientConnection<String> clientConnection, String connectionData) {
-        clientConnection.onOpen(new ServerConnection<String>() {
+    public void onConnection(Connector<String> connector, String connectionData) {
+        connector.onOpen(new ServerConnection<String>() {
             @Override
             public void send(String message) {
                 messages.add(message);
@@ -253,25 +253,25 @@ class ProbeServer implements VerifyingConnectionServer<String, String> {
             }
         });
         this.connectionData = connectionData;
-        this.clientConnection = clientConnection;
+        this.connector = connector;
     }
 
     private void handleDisconnection() {
         messages.clear();
-        clientConnection = null;
+        connector = null;
         connectionData = null;
     }
 
     private boolean hasConnection() {
-        return clientConnection != null;
+        return connector != null;
     }
 
     public void send(String data) {
-        clientConnection.onMessage(data);
+        connector.onMessage(data);
     }
 
     public void disconnectClient() {
-        clientConnection.onClose();
+        connector.onClose();
     }
 
     public static final class Assert extends AbstractAssert<Assert, ProbeServer> {

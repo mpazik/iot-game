@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
-    const Messages = require('../component/instnace/messages');
+    const Messages = require('../component/instance/messages');
     const StoreRegistrar = require('../component/store-registrar');
     const Dispatcher = require('../component/dispatcher');
 

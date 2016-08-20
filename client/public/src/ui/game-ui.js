@@ -53,7 +53,8 @@ define(function (require) {
     });
     document.registerElement('game-ui', {prototype: gameUiTag});
 
-    const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution', 'endScenario', 'applicationState', 'cooldown', 'gameMessage', 'chatState'];
+    const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
+        'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage', 'chatState'];
 
     function initUi(gameUiElement) {
         const windowRegister = new Map();
