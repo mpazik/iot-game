@@ -10,9 +10,6 @@ import dzida.server.core.Scheduler;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.model.Character;
-import dzida.server.core.character.model.PlayerCharacter;
-import dzida.server.core.player.Player;
-import dzida.server.core.player.PlayerService;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 
@@ -30,7 +27,6 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     private final SurvivalScenario survivalScenario;
     private final InstanceStateManager instanceStateManager;
     private final SurvivalScenarioState survivalScenarioState;
-    private final PlayerService playerService;
     private final Scheduler scheduler;
     private final Consumer<InstanceCommand> commandConsumer;
 
@@ -40,24 +36,22 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
             NpcScenarioLogic npcScenarioLogic,
             Survival survival,
             SurvivalScenario survivalScenario,
-            PlayerService playerService,
             Consumer<InstanceCommand> commandConsumer) {
         this.scheduler = scheduler;
         this.npcScenarioLogic = npcScenarioLogic;
         this.survival = survival;
         this.survivalScenario = survivalScenario;
         this.instanceStateManager = instanceStateManager;
-        this.playerService = playerService;
         this.commandConsumer = commandConsumer;
         survivalScenarioState = new SurvivalScenarioState();
     }
 
     @Override
-    public void handlePlayerDead(Id<Character> characterId, Id<Player> playerId) {
+    public void handlePlayerDead(Id<Character> characterId) {
         if (survivalScenarioState.end) {
             return;
         }
-        instanceStateManager.dispatchEvent(new ScenarioEnd(Defeat));
+        instanceStateManager.dispatchEvent(new ScenarioEnd(Defeat, survival.getDifficultyLevel()));
         survivalScenarioState.end = true;
     }
 
@@ -74,17 +68,8 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
     }
 
     private void victory() {
-        List<PlayerCharacter> players = instanceStateManager.getCharacterService().getCharactersOfType(PlayerCharacter.class);
-        players.forEach(playerCharacter -> {
-            Id<Player> playerId = playerCharacter.getPlayerId();
-            Player.Data player = playerService.getPlayer(playerId).getData();
-            if (survivalScenario.difficultyLevel > player.getHighestDifficultyLevel()) {
-                Player.Data newPlayerData = new Player.Data(player.getNick(), survival.getDifficultyLevel(), player.getLastDifficultyLevel());
-                playerService.updatePlayerData(playerId, newPlayerData);
-            }
-        });
         survivalScenarioState.end = true;
-        instanceStateManager.updateState(ImmutableList.of(new ScenarioEnd(Victory)));
+        instanceStateManager.updateState(ImmutableList.of(new ScenarioEnd(Victory, survival.getDifficultyLevel())));
     }
 
     @Override

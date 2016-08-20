@@ -1,10 +1,7 @@
 package dzida.server.app.instance;
 
 import dzida.server.app.TimeServiceImpl;
-import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.instance.command.InstanceCommand;
-import dzida.server.app.instance.command.KillCharacterCommand;
-import dzida.server.app.instance.command.SpawnCharacterCommand;
 import dzida.server.app.instance.npc.AiService;
 import dzida.server.app.instance.npc.NpcBehaviour;
 import dzida.server.app.map.descriptor.Scenario;
@@ -23,11 +20,7 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
-import dzida.server.core.character.model.Character;
-import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
-import dzida.server.core.player.Player;
-import dzida.server.core.player.PlayerService;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.position.PositionStore;
@@ -46,7 +39,6 @@ import dzida.server.core.world.pathfinding.CollisionBitMap;
 import dzida.server.core.world.pathfinding.PathFinder;
 import dzida.server.core.world.pathfinding.PathFinderFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,16 +49,11 @@ public class Instance {
     private final CommandResolver commandResolver;
     private final InstanceStateManager instanceStateManager;
 
-    private final PlayerService playerService;
     private final String instanceKey;
-    private final StateSynchroniser stateSynchroniser;
-
-    private final Map<Id<Player>, Id<Character>> characterIds = new HashMap<>();
 
     private final GameLogic gameLogic;
 
-    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler, PlayerService playerService) {
-        this.playerService = playerService;
+    public Instance(String instanceKey, Scenario scenario, Scheduler scheduler) {
         this.instanceKey = instanceKey;
 
         Key<WorldMap> worldMapKey = scenario.getWorldMapKey();
@@ -96,18 +83,24 @@ public class Instance {
         instanceStateManager = new InstanceStateManager(positionService, characterService, worldMapService, skillService, worldObjectService);
         commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler);
 
-        stateSynchroniser = new StateSynchroniser(instanceStateManager, scenario);
-        instanceStateManager.getEventPublisher().subscribe(stateSynchroniser::syncStateChange);
         Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
         NpcBehaviour npcBehaviour = new NpcBehaviour(timeService, instanceStateManager);
         AiService aiService = new AiService(npcBehaviour);
 
-        this.gameLogic = new GameLogic(scheduler, instanceStateManager, playerService, survivalScenario, scenario, aiService, this::handleCommand);
+        this.gameLogic = new GameLogic(scheduler, instanceStateManager, survivalScenario, scenario, aiService, this::handleCommand);
     }
 
     public void start() {
         instanceStateManager.getEventPublisherBeforeChanges().subscribe(gameLogic::processEventBeforeChanges);
         gameLogic.start();
+    }
+
+    public Map<String, Object> getState() {
+        return instanceStateManager.getState();
+    }
+
+    public void subscribeChange(Consumer<GameEvent> subscriber) {
+        instanceStateManager.getEventPublisher().subscribe(subscriber);
     }
 
     private Optional<SurvivalScenario> createSurvivalScenario(Scenario scenario) {
@@ -117,33 +110,6 @@ public class Instance {
             return Optional.of(survivalScenarioFactory.createSurvivalScenario(survival.getDifficultyLevel()));
         }
         return Optional.empty();
-    }
-
-    public void addPlayer(Id<Player> playerId, Consumer<GameEvent> sendToPlayer) {
-        Id<Character> characterId = new Id<>((int) Math.round((Math.random() * 100000)));
-        characterIds.put(playerId, characterId);
-        Player playerEntity = playerService.getPlayer(playerId);
-        String nick = playerEntity.getData().getNick();
-        PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
-        gameLogic.playerJoined(character);
-        handleCommand(new SpawnCharacterCommand(character));
-        stateSynchroniser.registerCharacter(playerId, sendToPlayer);
-        stateSynchroniser.sendInitialPacket(characterId, playerId, playerEntity);
-        System.out.println(String.format("Instance: %s - character %s joined", instanceKey, characterId));
-    }
-
-    public void removePlayer(Id<Player> playerId) {
-        Id<Character> characterId = characterIds.get(playerId);
-        characterIds.remove(playerId);
-        stateSynchroniser.unregisterListener(playerId);
-        handleCommand(new KillCharacterCommand(characterId));
-        System.out.println(String.format("Instance: %s - character %s quit", instanceKey, characterId));
-    }
-
-    public Result handleCommand(Id<Player> playerId, CharacterCommand characterCommand) {
-        Id<Character> characterId = characterIds.get(playerId);
-        InstanceCommand instanceCommand = characterCommand.getInstanceCommand(characterId);
-        return handleCommand(instanceCommand);
     }
 
     public Result handleCommand(InstanceCommand command) {

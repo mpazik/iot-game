@@ -13,11 +13,11 @@ import java.util.function.Consumer;
 public class StateSynchroniser {
     private final Map<Id<Player>, Consumer<GameEvent>> listeners = new HashMap<>();
 
-    private final InstanceStateManager instanceStateManager;
+    private final Instance instance;
     private final Scenario scenario;
 
-    public StateSynchroniser(InstanceStateManager instanceStateManager, Scenario scenario) {
-        this.instanceStateManager = instanceStateManager;
+    public StateSynchroniser(Instance instance, Scenario scenario) {
+        this.instance = instance;
         this.scenario = scenario;
     }
 
@@ -31,16 +31,12 @@ public class StateSynchroniser {
 
 
     public void sendInitialPacket(Id<Character> characterId, Id<Player> playerId, Player playerEntity) {
-        InitialMessage initialMessage = new InitialMessage(characterId, playerId, instanceStateManager.getState(), scenario, playerEntity.getData());
+        InitialMessage initialMessage = new InitialMessage(characterId, playerId, instance.getState(), scenario, playerEntity.getData());
         listeners.get(playerId).accept(initialMessage);
     }
 
     public void syncStateChange(GameEvent gameEvent) {
         listeners.values().forEach(consumer -> consumer.accept(gameEvent));
-    }
-
-    public boolean areAnyListeners() {
-        return listeners.isEmpty();
     }
 
     public static final class InitialMessage implements GameEvent {
