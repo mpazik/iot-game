@@ -60,6 +60,10 @@ public class ServerDispatcher implements Server<String> {
         servers.put(serverKey, server);
     }
 
+    public void removeServer(String serverKey) {
+        servers.remove(serverKey);
+    }
+
     @Override
     public void onConnection(Connector<String> connector) {
         connector.onOpen(new DispatcherConnection(connector, serializer, dispatcherSerializer, servers));

@@ -33,7 +33,7 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class InstanceServer implements VerifyingConnectionServer<String, String> {
     private final Instance instance;
-    private final Map<Id<Player>, Connector<String>> connections = new HashMap<>();
+    private final Map<Id<Player>, ContainerConnection> connections = new HashMap<>();
     private final PlayerService playerService;
     private final Arbiter arbiter;
     private final JsonProtocol serializer;
@@ -51,22 +51,25 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         stateSynchroniser = new StateSynchroniser(instance, scenario);
         instance.subscribeChange(stateSynchroniser::syncStateChange);
         instance.subscribeChange(gameEvent -> {
-            if (gameEvent instanceof ScenarioEnd && ((ScenarioEnd) gameEvent).resolution == ScenarioEnd.Resolution.Victory) {
-                connections.keySet().forEach(playerId -> {
-                    Player.Data player = playerService.getPlayer(playerId).getData();
-                    int scenarioDifficultyLevel = ((ScenarioEnd) gameEvent).difficultyLevel;
-                    if (scenarioDifficultyLevel > player.getHighestDifficultyLevel()) {
-                        Player.Data newPlayerData = new Player.Data(player.getNick(), scenarioDifficultyLevel, player.getLastDifficultyLevel());
-                        playerService.updatePlayerData(playerId, newPlayerData);
-                    }
-                });
+            if (gameEvent instanceof ScenarioEnd) {
+                ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;
+                arbiter.endOfScenario(instanceKey);
+                if (scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
+                    connections.keySet().forEach(playerId -> {
+                        Player.Data player = playerService.getPlayer(playerId).getData();
+                        if (scenarioEnd.difficultyLevel > player.getHighestDifficultyLevel()) {
+                            Player.Data newPlayerData = new Player.Data(player.getNick(), scenarioEnd.difficultyLevel, player.getLastDifficultyLevel());
+                            playerService.updatePlayerData(playerId, newPlayerData);
+                        }
+                    });
+                }
             }
         });
         instance.start();
     }
 
     private void sendMessageToPlayer(Id<Player> playerId, GameEvent data) {
-        connections.get(playerId).onMessage(serializer.serializeMessage(data));
+        connections.get(playerId).serverSend(serializer.serializeMessage(data));
     }
 
     @Override
@@ -87,9 +90,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         Id<Player> playerId = playerIdOpt.get();
         Id<Character> characterId = new Id<>((int) Math.round((Math.random() * 100000)));
 
-        connector.onOpen(new ContainerConnection(playerId, characterId));
-        connections.put(playerId, connector);
-        playerService.loginPlayer(playerId);
+        ContainerConnection serverConnection = new ContainerConnection(playerId, characterId, connector);
+        connector.onOpen(serverConnection);
+        connections.put(playerId, serverConnection);
 
         Consumer<GameEvent> sendToPlayer = gameEvent -> sendMessageToPlayer(playerId, gameEvent);
         Player playerEntity = playerService.getPlayer(playerId);
@@ -99,16 +102,26 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         instance.handleCommand(new SpawnCharacterCommand(character));
         stateSynchroniser.registerCharacter(playerId, sendToPlayer);
         stateSynchroniser.sendInitialPacket(characterId, playerId, playerEntity);
-        System.out.printf("Instance: %s - player %s joined", instanceKey, playerId);
+        System.out.printf("Instance: %s - player %s joined \n", instanceKey, playerId);
+    }
+
+    public boolean isEmpty() {
+        return connections.isEmpty();
+    }
+
+    public void disconnectPlayer(Id<Player> playerId) {
+        connections.get(playerId).serverClose();
     }
 
     private final class ContainerConnection implements ServerConnection<String> {
         private final Id<Player> playerId;
         private final Id<Character> characterId;
+        private final Connector<String> connector;
 
-        private ContainerConnection(Id<Player> playerId, Id<Character> characterId) {
+        private ContainerConnection(Id<Player> playerId, Id<Character> characterId, Connector<String> connector) {
             this.playerId = playerId;
             this.characterId = characterId;
+            this.connector = connector;
         }
 
         @Override
@@ -130,12 +143,20 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
         @Override
         public void close() {
-            playerService.logoutPlayer(playerId);
             stateSynchroniser.unregisterListener(playerId);
             instance.handleCommand(new KillCharacterCommand(characterId));
-            System.out.printf("Instance: %s - player %s quit", instanceKey, playerId);
+            System.out.printf("Instance: %s - player %s quit \n", instanceKey, playerId);
 
             connections.remove(playerId);
+        }
+
+        public void serverSend(String data) {
+            connector.onMessage(data);
+        }
+
+        public void serverClose() {
+            close();
+            connector.onClose();
         }
     }
 }

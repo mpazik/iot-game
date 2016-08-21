@@ -43,24 +43,29 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
             .build();
 
     private final Map<Id<Player>, Key<Instance>> playersInstances;
+    private final Map<Key<Instance>, InstanceServer> instances;
     private final Set<Key<Instance>> initialInstances;
     private final Set<Id<Player>> playingPlayers;
     private final Key<Instance> defaultInstance;
+    private final Set<Key<Instance>> instancesToShootdown;
 
     public Arbiter(ServerDispatcher serverDispatcher, PlayerService playerService, Scheduler scheduler) {
         this.serverDispatcher = serverDispatcher;
         this.playerService = playerService;
         this.scheduler = scheduler;
         playersInstances = new HashMap<>();
+        instances = new HashMap<>();
         initialInstances = ImmutableList.copyOf(Configuration.getInitialInstances())
                 .stream()
                 .map((Function<String, Key<Instance>>) Key::new)
                 .collect(Collectors.toSet());
         playingPlayers = new HashSet<>();
+        instancesToShootdown = new HashSet<>();
         defaultInstance = new Key<>(Configuration.getInitialInstances()[0]);
     }
 
     public void start() {
+        System.out.println("Arbiter: started system");
         initialInstances.forEach(instanceKey -> {
             startInstance(instanceKey.getValue(), null);
         });
@@ -73,7 +78,8 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         InstanceServer instanceServer = new InstanceServer(playerService, scheduler, this, instanceKey, instanceType, difficultyLevel);
 
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
-
+        instances.put(instanceKey, instanceServer);
+        System.out.println("Arbiter: started instance: " + instanceKey);
         return instanceKey;
     }
 
@@ -117,40 +123,30 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         }
         Id<Player> playerId = playerIdOpt.get();
         playingPlayers.add(playerId);
-        playersInstances.put(playerId, defaultInstance);
-        connector.onMessage(arbiterProtocol.serializeMessage(new JoinToInstance(defaultInstance)));
+        playerService.loginPlayer(playerId);
 
-        connector.onOpen(new ServerConnection<String>() {
-            @Override
-            public void send(String data) {
-                Object message = arbiterProtocol.parseMessage(data);
-                whenTypeOf(message)
-                        .is(JoinBattleCommand.class)
-                        .then(command -> {
-                            Player.Data playerData = playerService.getPlayer(playerId).getData();
-                            Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
-                            playerService.updatePlayerData(playerId, updatedPlayerData);
-                            Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
-                            playersInstances.put(playerId, newInstanceKey);
-                            connector.onMessage(arbiterProtocol.serializeMessage(new JoinToInstance(newInstanceKey)));
-                        })
-                        .is(GoHomeCommand.class)
-                        .then(command -> {
-                            playersInstances.put(playerId, defaultInstance);
-                            connector.onMessage(arbiterProtocol.serializeMessage(new JoinToInstance(defaultInstance)));
-                        });
-            }
-
-
-            @Override
-            public void close() {
-                playingPlayers.remove(playerId);
-            }
-        });
+        ArbiterConnection arbiterConnection = new ArbiterConnection(playerId, connector);
+        connector.onOpen(arbiterConnection);
+        arbiterConnection.movePlayerToInstance(defaultInstance);
     }
 
     public Optional<Id<Player>> authenticate(Key<Instance> instanceKey, String connectionData) {
         return findOrCreatePlayer(connectionData).filter(playerId -> playersInstances.get(playerId).equals(instanceKey));
+    }
+
+    public void endOfScenario(Key<Instance> instanceKey) {
+        InstanceServer instanceServer = instances.get(instanceKey);
+        if (instanceServer.isEmpty()) {
+            shutdownInstanced(instanceKey);
+        } else {
+            instancesToShootdown.add(instanceKey);
+        }
+    }
+
+    public void shutdownInstanced(Key<Instance> instanceKey) {
+        serverDispatcher.removeServer(instanceKey.getValue());
+        instances.remove(instanceKey);
+        System.out.println("Arbiter: shutdown instance: " + instanceKey);
     }
 
     private static class JoinToInstance {
@@ -158,6 +154,63 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
         JoinToInstance(Key<Instance> instanceKey) {
             this.instanceKey = instanceKey;
+        }
+    }
+
+    private final class ArbiterConnection implements ServerConnection<String> {
+        private final Id<Player> playerId;
+        private final Connector<String> connector;
+
+        ArbiterConnection(Id<Player> playerId, Connector<String> connector) {
+            this.playerId = playerId;
+            this.connector = connector;
+        }
+
+        @Override
+        public void send(String data) {
+            Object message = arbiterProtocol.parseMessage(data);
+            whenTypeOf(message)
+                    .is(JoinBattleCommand.class)
+                    .then(command -> {
+                        removePlayerFromLastInstance();
+                        Player.Data playerData = playerService.getPlayer(playerId).getData();
+                        Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
+                        playerService.updatePlayerData(playerId, updatedPlayerData);
+                        Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
+                        movePlayerToInstance(newInstanceKey);
+                    })
+                    .is(GoHomeCommand.class)
+                    .then(command -> {
+                        removePlayerFromLastInstance();
+                        movePlayerToInstance(defaultInstance);
+                    });
+        }
+
+        public void movePlayerToInstance(Key<Instance> newInstanceKey) {
+            playersInstances.put(playerId, newInstanceKey);
+            connector.onMessage(arbiterProtocol.serializeMessage(new JoinToInstance(newInstanceKey)));
+            System.out.println("Arbiter: player: " + playerId + " assigned to instance: " + newInstanceKey);
+        }
+
+        private void removePlayerFromLastInstance() {
+            Key<Instance> lastInstanceKey = playersInstances.get(playerId);
+            if (lastInstanceKey == null) return;
+            InstanceServer instanceServer = instances.get(lastInstanceKey);
+            instanceServer.disconnectPlayer(playerId);
+            System.out.println("Arbiter: player: " + playerId + " removed from instance: " + lastInstanceKey);
+            tryToKillInstance(lastInstanceKey);
+        }
+
+        private void tryToKillInstance(Key<Instance> instanceKey) {
+            if (instancesToShootdown.contains(instanceKey) && instances.get(instanceKey).isEmpty()) {
+                shutdownInstanced(instanceKey);
+            }
+        }
+
+        @Override
+        public void close() {
+            playerService.logoutPlayer(playerId);
+            playingPlayers.remove(playerId);
         }
     }
 
