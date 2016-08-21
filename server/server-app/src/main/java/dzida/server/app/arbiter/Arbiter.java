@@ -3,6 +3,7 @@ package dzida.server.app.arbiter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.Configuration;
+import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceServer;
@@ -31,6 +32,7 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final ServerDispatcher serverDispatcher;
+    private final Chat chat;
     private final PlayerService playerService;
     private final Scheduler scheduler;
     private final JsonProtocol arbiterProtocol;
@@ -42,8 +44,9 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final Key<Instance> defaultInstance;
     private final Set<Key<Instance>> instancesToShutdown;
 
-    public Arbiter(ServerDispatcher serverDispatcher, PlayerService playerService, Scheduler scheduler) {
+    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, PlayerService playerService, Scheduler scheduler) {
         this.serverDispatcher = serverDispatcher;
+        this.chat = chat;
         this.playerService = playerService;
         this.scheduler = scheduler;
         playersInstances = new HashMap<>();
@@ -73,6 +76,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
         instances.put(instanceKey, instanceServer);
+        chat.createInstanceChannel(instanceKey);
         System.out.println("Arbiter: started instance: " + instanceKey);
         return instanceKey;
     }
@@ -140,6 +144,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     public void shutdownInstanced(Key<Instance> instanceKey) {
         serverDispatcher.removeServer(instanceKey.getValue());
         instances.remove(instanceKey);
+        chat.closeInstanceChannel(instanceKey);
         System.out.println("Arbiter: shutdown instance: " + instanceKey);
     }
 

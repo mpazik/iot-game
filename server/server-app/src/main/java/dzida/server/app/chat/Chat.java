@@ -1,10 +1,12 @@
 package dzida.server.app.chat;
 
 import com.google.common.base.Strings;
+import dzida.server.app.instance.Instance;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.Connector;
 import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.connection.VerifyingConnectionServer;
+import dzida.server.core.basic.entity.Key;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,16 +48,23 @@ public class Chat implements VerifyingConnectionServer<String, String> {
         connector.onOpen(chatConnection);
     }
 
-    private void createChannel(String channelName) {
+    public void createInstanceChannel(Key<Instance> instanceKey) {
+        String channelName = chanelNameFromInstanceKey(instanceKey);
         channelConnections.put(channelName, new ArrayList<>());
         messageTargets.put(channelName, message -> channelConnections.get(channelName)
                 .forEach(nick -> messageTargets.get(nick).accept("CHANNEL " + channelName + " " + message))
         );
     }
 
-    private void closeChannel(String channelName) {
+    public void closeInstanceChannel(Key<Instance> instanceKey) {
+        String channelName = chanelNameFromInstanceKey(instanceKey);
+        messageTargets.get(channelName).accept("CLOSED");
         channelConnections.remove(channelName);
         messageTargets.remove(channelName);
+    }
+
+    public String chanelNameFromInstanceKey(Key<Instance> instanceKey) {
+        return "#" + instanceKey.getValue();
     }
 
     private final class ChatConnection implements ServerConnection<String> {
@@ -107,9 +116,6 @@ public class Chat implements VerifyingConnectionServer<String, String> {
             }
             channelConnections.get(channelName).remove(userNick);
             messageTargets.get(channelName).accept("QUITED " + userNick);
-            if (channelConnections.get(channelName).size() == 0) {
-                closeChannel(channelName);
-            }
         }
 
         private boolean channelNameValidation(String channelName) {
@@ -150,7 +156,7 @@ public class Chat implements VerifyingConnectionServer<String, String> {
                 return;
             }
             if (!channelConnections.containsKey(channelName)) {
-                createChannel(channelName);
+                response("ERROR channel: " + channelName + ", does not exist.");
             }
             channelConnections.get(channelName).add(userNick);
             messageTargets.get(channelName).accept("JOINED " + userNick);
@@ -159,13 +165,7 @@ public class Chat implements VerifyingConnectionServer<String, String> {
         @Override
         public void close() {
             messageTargets.remove(userNick);
-            channelConnections.forEach((channelName, users) -> {
-                if (!users.contains(userNick)) {
-                    return;
-                }
-                users.remove(userNick);
-                quiteFromChannel(channelName);
-            });
+            channelConnections.forEach((channelName, users) -> users.remove(userNick));
         }
     }
 

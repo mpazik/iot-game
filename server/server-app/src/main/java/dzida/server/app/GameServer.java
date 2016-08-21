@@ -26,8 +26,8 @@ public final class GameServer {
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
 
         ServerDispatcher serverDispatcher = new ServerDispatcher();
-        Arbiter arbiter = new Arbiter(serverDispatcher, playerService, scheduler);
         Chat chat = new Chat();
+        Arbiter arbiter = new Arbiter(serverDispatcher, chat, playerService, scheduler);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         serverDispatcher.addServer("arbiter", arbiter);
