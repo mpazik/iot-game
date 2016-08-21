@@ -2,7 +2,6 @@ package dzida.server.app.arbiter;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import dzida.server.app.BasicJsonSerializer;
 import dzida.server.app.Configuration;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
@@ -34,20 +33,14 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final ServerDispatcher serverDispatcher;
     private final PlayerService playerService;
     private final Scheduler scheduler;
-    private final JsonProtocol arbiterProtocol = new JsonProtocol.Builder()
-            .registerParsingMessageType(1, JoinBattleCommand.class)
-            .registerParsingMessageType(2, GoHomeCommand.class)
-            .registerSerializationMessageType(1, JoinToInstance.class)
-            .registerTypeHierarchyAdapter(Id.class, BasicJsonSerializer.idTypeAdapter)
-            .registerTypeHierarchyAdapter(Key.class, BasicJsonSerializer.keyTypeAdapter)
-            .build();
+    private final JsonProtocol arbiterProtocol;
 
     private final Map<Id<Player>, Key<Instance>> playersInstances;
     private final Map<Key<Instance>, InstanceServer> instances;
     private final Set<Key<Instance>> initialInstances;
     private final Set<Id<Player>> playingPlayers;
     private final Key<Instance> defaultInstance;
-    private final Set<Key<Instance>> instancesToShootdown;
+    private final Set<Key<Instance>> instancesToShutdown;
 
     public Arbiter(ServerDispatcher serverDispatcher, PlayerService playerService, Scheduler scheduler) {
         this.serverDispatcher = serverDispatcher;
@@ -60,8 +53,9 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
                 .map((Function<String, Key<Instance>>) Key::new)
                 .collect(Collectors.toSet());
         playingPlayers = new HashSet<>();
-        instancesToShootdown = new HashSet<>();
+        instancesToShutdown = new HashSet<>();
         defaultInstance = new Key<>(Configuration.getInitialInstances()[0]);
+        arbiterProtocol = ArbiterProtocol.createSerializer();
     }
 
     public void start() {
@@ -139,7 +133,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         if (instanceServer.isEmpty()) {
             shutdownInstanced(instanceKey);
         } else {
-            instancesToShootdown.add(instanceKey);
+            instancesToShutdown.add(instanceKey);
         }
     }
 
@@ -147,14 +141,6 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         serverDispatcher.removeServer(instanceKey.getValue());
         instances.remove(instanceKey);
         System.out.println("Arbiter: shutdown instance: " + instanceKey);
-    }
-
-    private static class JoinToInstance {
-        final Key<Instance> instanceKey;
-
-        JoinToInstance(Key<Instance> instanceKey) {
-            this.instanceKey = instanceKey;
-        }
     }
 
     private final class ArbiterConnection implements ServerConnection<String> {
@@ -202,7 +188,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         }
 
         private void tryToKillInstance(Key<Instance> instanceKey) {
-            if (instancesToShootdown.contains(instanceKey) && instances.get(instanceKey).isEmpty()) {
+            if (instancesToShutdown.contains(instanceKey) && instances.get(instanceKey).isEmpty()) {
                 shutdownInstanced(instanceKey);
             }
         }
@@ -212,18 +198,5 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
             playerService.logoutPlayer(playerId);
             playingPlayers.remove(playerId);
         }
-    }
-
-    public class JoinBattleCommand {
-        public final String map;
-        public final int difficultyLevel;
-
-        public JoinBattleCommand(String map, int difficultyLevel) {
-            this.map = map;
-            this.difficultyLevel = difficultyLevel;
-        }
-    }
-
-    public class GoHomeCommand {
     }
 }
