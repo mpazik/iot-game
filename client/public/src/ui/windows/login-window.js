@@ -45,9 +45,8 @@ define(function (require) {
             form.onsubmit = function () {
                 const nick = userNickElement.value;
                 const password = userPasswordElement.value;
-                userService.login(nick, password).then(token => {
+                userService.login(nick, password).then(() => {
                     errorMessage.style.display = 'none';
-                    app.setUserToken(token);
                     app.connect();
                 }).catch(showError);
                 return false;

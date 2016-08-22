@@ -17,7 +17,7 @@ define(function (require, exports, module) {
     const InstanceController = require('./instance/instance-controller');
     const ResourcesStore = require('../store/resources');
     const Chat = require('./chat');
-    var userToken;
+    const UserService = require('./user-service');
 
     function JoinToInstance(instanceKey) {
         this.instanceKey = instanceKey;
@@ -74,11 +74,15 @@ define(function (require, exports, module) {
     }
 
     function connect() {
-        if (userToken == null) {
-            setState('need-authentication');
+        if (UserService.userToken == null) {
+            UserService.reissueUserToken()
+                .then(connect)
+                .catch(() => {
+                    setState('need-authentication');
+                });
         } else {
-            connectToArbiter(userToken);
-            Chat.connect(userToken);
+            connectToArbiter(UserService.userToken);
+            Chat.connect(UserService.userToken);
             setState('connecting');
         }
     }
@@ -95,12 +99,9 @@ define(function (require, exports, module) {
             loadGameAssets();
             InstanceController.init(gameElement)
         },
-        setUserToken: function (token) {
-            userToken = token;
-        },
         connect,
         logout: function () {
-            userToken = null;
+            UserService.logout();
             NetworkDispatcher.disconnect();
         }
     };

@@ -74,13 +74,13 @@ public class UserService {
         return Outcome.ok(createReissueToken(userId));
     }
 
-    public Outcome<EncryptedLoginToken> createLoginToken(EncryptedReissueToken encryptedReissueToken) {
+    public Outcome<EncryptedLoginToken> reissueLoginToken(EncryptedReissueToken encryptedReissueToken) {
         Optional<Id<User>> userIdOpt = decryptReissueToken(encryptedReissueToken);
         if (!userIdOpt.isPresent()) {
             return Outcome.error("Reissue token is not valid");
         }
         Id<User> userId = userIdOpt.get();
-        return Outcome.ok(createLoginToken(userId, userNicks.get(userId)));
+        return Outcome.ok(reissueLoginToken(userId, userNicks.get(userId)));
     }
 
     private Id<User> generateNewUserId() {
@@ -112,7 +112,7 @@ public class UserService {
         }
     }
 
-    private EncryptedLoginToken createLoginToken(Id<User> userId, String nick) {
+    private EncryptedLoginToken reissueLoginToken(Id<User> userId, String nick) {
         long issuedAt = System.currentTimeMillis() / 1000L;
         long expiration = issuedAt + (60 * 10); // 10 minutes
         HashMap<String, Object> claims = new HashMap<>();

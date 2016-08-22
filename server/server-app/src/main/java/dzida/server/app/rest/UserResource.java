@@ -21,8 +21,7 @@ public class UserResource extends AbstractResource {
     @POST
     public void login(HttpRequest request, HttpResponder responder) {
         LoginRequest loginRequest = parseJsonRequest(request, LoginRequest.class);
-        Outcome<LoginResponse> responseOutcome = login(loginRequest);
-        send(responder, responseOutcome);
+        send(responder, login(loginRequest));
     }
 
     private Outcome<LoginResponse> login(LoginRequest loginRequest) {
@@ -31,12 +30,28 @@ public class UserResource extends AbstractResource {
             return Outcome.error(reissueTokenOutcome);
         }
 
-        Outcome<EncryptedLoginToken> loginTokenOutcome = userService.createLoginToken(reissueTokenOutcome.get());
+        Outcome<EncryptedLoginToken> loginTokenOutcome = userService.reissueLoginToken(reissueTokenOutcome.get());
         if (!loginTokenOutcome.isValid()) {
             System.err.println("User resource generated token that is not valid");
             return Outcome.error(loginTokenOutcome);
         }
         return Outcome.ok(new LoginResponse(reissueTokenOutcome.get().value, loginTokenOutcome.get().value));
+    }
+
+    @Path("reissue")
+    @POST
+    public void reissue(HttpRequest request, HttpResponder responder) {
+        ReissueTokenRequest reissueTokenRequest = parseJsonRequest(request, ReissueTokenRequest.class);
+        send(responder, reissue(reissueTokenRequest));
+    }
+
+    private Outcome<ReissueTokenResponse> reissue(ReissueTokenRequest reissueTokenRequest) {
+        Outcome<EncryptedLoginToken> loginTokenOutcome = userService.reissueLoginToken(new EncryptedReissueToken(reissueTokenRequest.token));
+        if (!loginTokenOutcome.isValid()) {
+            System.err.println("User resource generated token that is not valid");
+            return Outcome.error(loginTokenOutcome);
+        }
+        return Outcome.ok(new ReissueTokenResponse(loginTokenOutcome.get().value));
     }
 
     private static final class LoginRequest {
@@ -55,6 +70,22 @@ public class UserResource extends AbstractResource {
 
         private LoginResponse(String reissueToken, String loginToken) {
             this.reissueToken = reissueToken;
+            this.loginToken = loginToken;
+        }
+    }
+
+    private static final class ReissueTokenRequest {
+        final String token;
+
+        private ReissueTokenRequest(String token) {
+            this.token = token;
+        }
+    }
+
+    private static final class ReissueTokenResponse {
+        final String loginToken;
+
+        private ReissueTokenResponse(String loginToken) {
             this.loginToken = loginToken;
         }
     }
