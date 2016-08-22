@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+define(function (require) {
     const uiState = require('../../store/ui-state');
     const userEventStream = require('../../component/dispatcher').userEventStream;
     
@@ -29,6 +29,7 @@ define(function (require, exports, module) {
             const scenario = uiState.scenario.value;
             const level = this.getElementsByClassName('level')[0];
             level.innerText = scenario.difficultyLevel;
+            localStorage.setItem('lastDifficultyLevel', scenario.difficultyLevel);
 
             const ranking = this.getElementsByClassName('ranking')[0];
             Request.Server.playerLeaderboardResult(uiState.playerData.value.nick).then(function (data) {

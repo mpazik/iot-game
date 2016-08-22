@@ -67,7 +67,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
                     connections.keySet().forEach(playerId -> {
                         Player.Data player = playerService.getPlayer(playerId).getData();
                         if (scenarioEnd.difficultyLevel > player.getHighestDifficultyLevel()) {
-                            Player.Data newPlayerData = new Player.Data(player.getNick(), scenarioEnd.difficultyLevel, player.getLastDifficultyLevel());
+                            Player.Data newPlayerData = new Player.Data(player.getNick(), scenarioEnd.difficultyLevel);
                             playerService.updatePlayerData(playerId, newPlayerData);
                         }
                     });

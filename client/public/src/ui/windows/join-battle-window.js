@@ -1,5 +1,4 @@
-define(function (require, exports, module) {
-    const uiState = require('../../store/ui-state');
+define(function (require) {
     const userEventStream = require('../../component/dispatcher').userEventStream;
     
     return createUiElement('join-battle-window', {
@@ -28,14 +27,19 @@ define(function (require, exports, module) {
 `;
         },
         attached: function () {
-            const playerData = uiState.playerData.value;
+            function getLastDifficultyLevel() {
+                const storageItem = localStorage.getItem('lastDifficultyLevel');
+                return storageItem == null ? 1 : storageItem;
+            }
+
+            const lastDifficultyLevel = getLastDifficultyLevel();
             const difficultyLevelInput = this.getElementsByClassName('difficulty-level')[0];
             const select = this.getElementsByTagName('select')[0];
             const form = this.getElementsByTagName('form')[0];
             const formSubmitButton = this.querySelector('input[type=submit]');
-            difficultyLevelInput.value = playerData.lastDifficultyLevel;
+            difficultyLevelInput.value = lastDifficultyLevel;
             difficultyLevelInput.min = 1;
-            difficultyLevelInput.max = playerData.highestDifficultyLevel + 5;
+            difficultyLevelInput.max = lastDifficultyLevel + 5;
 
             deffer(function () {
                 formSubmitButton.focus()

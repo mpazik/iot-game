@@ -3,7 +3,6 @@ package dzida.server.core.player;
 import dzida.server.core.basic.Error;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.entity.Key;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +36,7 @@ public class PlayerService {
         if (player.isPresent()) {
             return Outcome.error(new Error("player already exists"));
         }
-        Player.Data playerData = new Player.Data(nick, 0, 1);
+        Player.Data playerData = new Player.Data(nick, 0);
 
         Player playerEntity = playerStore.createPlayer(playerData);
         return Outcome.ok(playerEntity);

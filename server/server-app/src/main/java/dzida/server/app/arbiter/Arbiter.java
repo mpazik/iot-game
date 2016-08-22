@@ -164,9 +164,6 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
                     .is(JoinBattleCommand.class)
                     .then(command -> {
                         removePlayerFromLastInstance();
-                        Player.Data playerData = playerService.getPlayer(playerId).getData();
-                        Player.Data updatedPlayerData = new Player.Data(playerData.getNick(), playerData.getHighestDifficultyLevel(), command.difficultyLevel);
-                        playerService.updatePlayerData(playerId, updatedPlayerData);
                         Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
                         movePlayerToInstance(newInstanceKey);
                     })
