@@ -18,6 +18,7 @@ define(function (require, exports, module) {
     const ResourcesStore = require('../store/resources');
     const Chat = require('./chat');
     const UserService = require('./user-service');
+    const Timer = require('./timer');
 
     function JoinToInstance(instanceKey) {
         this.instanceKey = instanceKey;
@@ -70,10 +71,14 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
             Dispatcher.userEventStream.unsubscribe('go-to-home', sendGoToHome);
             setState('disconnected');
+
+            // connection could be closed due to invalid user token.
+            UserService.clearUserToken();
         };
     }
 
     function connect() {
+        InstanceController.readyToConnect();
         if (UserService.userToken == null) {
             UserService.reissueUserToken()
                 .then(connect)
@@ -83,6 +88,7 @@ define(function (require, exports, module) {
         } else {
             connectToArbiter(UserService.userToken);
             Chat.connect(UserService.userToken);
+            Timer.connect();
             setState('connecting');
         }
     }

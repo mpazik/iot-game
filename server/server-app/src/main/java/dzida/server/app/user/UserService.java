@@ -15,7 +15,6 @@ import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 public class UserService {
     private final PasswordHash passwordHash;
@@ -50,7 +49,7 @@ public class UserService {
             return Result.error("User with " + nick + " is already registered.");
         }
         String hashedPassword = passwordHash.createHash(password);
-        Id<User> userId = generateNewUserId();
+        Id<User> userId = generateNewUserId(nick);
         userNicks.put(userId, nick);
         userPasswords.put(userId, hashedPassword);
 
@@ -83,8 +82,8 @@ public class UserService {
         return Outcome.ok(reissueLoginToken(userId, userNicks.get(userId)));
     }
 
-    private Id<User> generateNewUserId() {
-        return new Id<>(new Random().nextInt());
+    private Id<User> generateNewUserId(String nick) {
+        return new Id<>(nick.hashCode());
     }
 
     private EncryptedReissueToken createReissueToken(Id<User> userId) {

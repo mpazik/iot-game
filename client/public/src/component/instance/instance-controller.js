@@ -31,7 +31,7 @@ define(function (require, exports, module) {
     var currentInstanceKey = null;
 
     var setState = null;
-    const statePublisher = new Publisher.StatePublisher('started', function (f) {
+    const statePublisher = new Publisher.StatePublisher('ready-to-connect', function (f) {
         return setState = f;
     });
 
@@ -116,11 +116,6 @@ define(function (require, exports, module) {
 
     function disconnect() {
         network.disconnect();
-        Render.cleanWorld();
-        if (MainPlayer.playerLiveState.state) {
-            Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
-            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
-        }
     }
 
     function showGame() {
@@ -132,8 +127,17 @@ define(function (require, exports, module) {
         setState('error');
     }
 
+    function readyToConnect() {
+        setState('ready-to-connect')
+    }
+
     function disconnected() {
         setState('disconnected');
+        Render.cleanWorld();
+        if (MainPlayer.playerLiveState.state) {
+            Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
+            Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
+        }
         Dispatcher.messageStream.publish(Messages.Disconnected, {});
     }
 
@@ -142,6 +146,7 @@ define(function (require, exports, module) {
         init: function (gameElement) {
             Render.init(gameElement);
         },
+        readyToConnect,
         connect,
         disconnect,
         sendCommand: function (command) {

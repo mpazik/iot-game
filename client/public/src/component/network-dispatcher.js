@@ -68,10 +68,14 @@ define(function (require, exports, module) {
 
     function disconnectAll() {
         for (const connection of connections.values()) {
-            connection.readyState = connectionState.CLOSING;
-            connection.onClose();
+            if (connection.readyState === connectionState.OPEN) {
+                connection.readyState = connectionState.CLOSING;
+                connection.onClose();
+            }
             connection.readyState = connectionState.CLOSED;
         }
+        connections.clear();
+        socket = null;
     }
 
     function handleDispatcherMessage(data) {
@@ -123,7 +127,7 @@ define(function (require, exports, module) {
         };
         socket.onclose = () => {
             disconnectAll();
-            console.error('Server closed connection.');
+            console.info('Server closed connection.');
         };
     }
 
@@ -157,6 +161,13 @@ define(function (require, exports, module) {
             }
             sendToDispatcher(new ConnectToServerMessage(serverKey, connectionData));
             return connection;
+        },
+        disconnect() {
+            socket.close();
+            connections.forEach(connection => {
+                connection.onClose();
+            });
+            connections.clear();
         }
     };
 });

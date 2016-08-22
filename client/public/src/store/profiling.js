@@ -14,7 +14,7 @@ define(function (require, exports, module) {
     module.exports = {
         updateStatsState: new Publisher.StatePublisher(initState, (push) => {
             MainLoop.updateStatsStream.subscribe(function (loopStats) {
-                push({fps: loopStats.fps, ping: Timer.ping(), position: MainPlayer.position});
+                push({fps: loopStats.fps, ping: Timer.ping, position: MainPlayer.position});
             });
         })
     };

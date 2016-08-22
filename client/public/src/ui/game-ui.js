@@ -13,6 +13,7 @@ define(function (require) {
         require('./ui-fragments/screen/loading-screen'),
         require('./ui-fragments/screen/disconnected-screen'),
         require('./ui-fragments/screen/connecting'),
+        require('./ui-fragments/screen/connecting-to-instnace'),
         require('./ui-fragments/chat-ui'),
         require('./ui-fragments/inventory')
     ].concat(extraComponents.fragments);

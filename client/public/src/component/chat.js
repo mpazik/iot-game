@@ -103,6 +103,7 @@ Type and press enter to send a message.<br />
             const channelCommandArgs = args.slice(j + 1);
             if (!channelCommands.hasOwnProperty(channelCommand)) {
                 console.error(`Unsupported channel command: ${channelCommand}`);
+                return
             }
             channelCommands[channelCommand](channel, channelCommandArgs);
         }

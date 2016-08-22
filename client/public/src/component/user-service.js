@@ -11,6 +11,10 @@ define(['../common/request'], (request) => {
         localStorage.removeItem(reissueTokenKey);
     }
 
+    function clearUserToken() {
+        userToken = null;
+    }
+
     return {
         get userToken() {
             return userToken;
@@ -38,8 +42,9 @@ define(['../common/request'], (request) => {
             });
         },
         logout () {
-            userToken = null;
+            clearUserToken();
             removeReissueToken();
-        }
+        },
+        clearUserToken
     }
 });
