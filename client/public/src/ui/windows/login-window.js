@@ -14,30 +14,50 @@ define(function (require) {
         created: function () {
             this.innerHTML = `
 <form id="login-form" method="post">
-    <label for="login-nick">Nick:</label>
-    <input type="text" name="login-nick" minlength="3" maxlength="20" required>
-    <label for="login-password">Password:</label>
-    <input type="password" name="login-password" minlength="3" maxlength="20" required>
-    <br />
-    <input type="submit" value="Login!">
-    <br />
-    <br />
-    <a id="forgot-your-password">Forgot your password?</a>
+    <div class="form-group">
+        <label for="login-nick">Nick:</label>
+        <input type="text" name="login-nick" minlength="3" maxlength="20" required>
+    </div>
+    <div class="form-group">
+        <label for="login-password">Password:</label>
+        <input type="password" name="login-password" minlength="3" maxlength="20" required>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Login!">
+    </div>
+    <div class="form-group">
+        <br />
+        <a id="forgot-your-password">Forgot your password?</a>
+    </div>
+    <div class="form-group">
+        <div id="login-error-message" class="error"></div>
+    </div>
 </form>
 <form id="registration-form" method="post">
-    <label for="register-nick">Nick:</label>
-    <input type="text" name="register-nick" minlength="3" maxlength="20" required>
-    <label for="register-email">Email:</label>
-    <input type="email" name="register-email" minlength="3" maxlength="20" required>
-    <label for="register-password">Password:</label>
-    <input type="password" name="register-password" minlength="3" maxlength="20" required>
-    <label for="register-repeat-password">Repeat Password:</label>
-    <input type="password" name="register-repeat-password" minlength="3" maxlength="20" required>
-    <br />
-    <input type="submit" value="Register & Play!">
+    <div class="form-group">
+        <label for="register-nick">Nick:</label>
+        <input type="text" name="register-nick" minlength="3" maxlength="20" required>
+    </div>
+    <div class="form-group">
+        <label for="register-email">Email:</label>
+        <input type="email" name="register-email" minlength="3" maxlength="20" required>
+    </div>
+    <div class="form-group">
+        <label for="register-password">Password:</label>
+        <input type="password" name="register-password" minlength="3" maxlength="20" required>
+    </div>
+    <div class="form-group">
+        <label for="register-repeat-password">Repeat Password:</label>
+        <input type="password" name="register-repeat-password" minlength="3" maxlength="20" required>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Register & Play!">
+    </div>
+    <div class="form-group">
+        <div id="register-error-message" class="error"></div>
+    </div>
 </form>
-<div style="clear: both;"></div>
-<div id="error-message" class="error"></div>
+
 `;
         },
         attached: function () {
@@ -46,31 +66,40 @@ define(function (require) {
                 app.retrievingPassword();
             });
 
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.style.display = 'none';
-            function showError(error) {
-                errorMessage.innerText = error;
-                errorMessage.style.display = 'block';
+            const loginErrorMessage = document.getElementById('login-error-message');
+            const registerErrorMessage = document.getElementById('register-error-message');
+            loginErrorMessage.style.display = 'none';
+            registerErrorMessage.style.display = 'none';
+
+            function showLoginError(error) {
+                loginErrorMessage.innerText = error;
+                loginErrorMessage.style.display = 'block';
+                registerErrorMessage.style.display = 'block';
+            }
+
+            function showRegisterError(error) {
+                registerErrorMessage.innerText = error;
+                loginErrorMessage.style.display = 'block';
+                registerErrorMessage.style.display = 'block';
             }
 
             const loginForm = document.getElementById("login-form");
             const loginNickElement = document.getElementsByName('login-nick')[0];
-
             const loginPasswordElement = document.getElementsByName('login-password')[0];
-
-            deffer(function () {
-                loginNickElement.focus();
-            });
 
             loginForm.onsubmit = function () {
                 const nick = loginNickElement.value;
                 const password = loginPasswordElement.value;
                 userService.login(nick, password).then(() => {
-                    errorMessage.style.display = 'none';
+                    loginErrorMessage.style.display = 'none';
                     app.connect();
-                }).catch(showError);
+                }).catch(showLoginError);
                 return false;
             }.bind(this);
+
+            deffer(function () {
+                loginNickElement.focus();
+            });
 
             const registerForm = document.getElementById("registration-form");
             const registerNickElement = document.getElementsByName('register-nick')[0];
@@ -85,16 +114,16 @@ define(function (require) {
                 const repeatedPassword = registerRepeatPasswordElement.value;
 
                 if (password != repeatedPassword) {
-                    showError("Passwords are not identical");
+                    showRegisterError("Passwords are not identical");
                     return false;
                 }
 
                 userService.register(nick, email, password).then(() => {
                     userService.login(nick, password).then(() => {
-                        errorMessage.style.display = 'none';
+                        loginErrorMessage.style.display = 'none';
                         app.connect();
-                    }).catch(showError);
-                }).catch(showError);
+                    }).catch(showRegisterError);
+                }).catch(showRegisterError);
                 return false;
             }.bind(this);
         }

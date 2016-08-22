@@ -51,7 +51,7 @@ button, .button, input[type=submit] {
     box-shadow: inset 0 1px 0 0 #41557d;
     border: #f7d104 solid 1px;
     border-radius: 3px;
-    margin-top: 15px;
+    margin-top: 5px;
 }
 
 button:hover, .button:hover, input[type=submit]:hover {
@@ -110,9 +110,13 @@ input::-webkit-inner-spin-button {
 }
 
 form label {
-    display: block;
-    padding: 10px 0 0 0;
+    /* padding: 3px 0 0 0; */
     color: #f7d104;
+    /* float: left; */
+    /* display: block; */
+    /* width: 80px; */
+    width: 80px;
+    display: inline-block;
 }
 
 form button {
@@ -145,4 +149,8 @@ table tbody td {
 
 table td {
     padding: 5px 15px;
+}
+
+.form-group {
+    padding: 5px;
 }

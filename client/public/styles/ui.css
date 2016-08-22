@@ -204,14 +204,12 @@ player-inventory {
 }
 
 #login-form {
-    float: left;
-    padding-right: 28px;
 }
 
 #registration-form {
-    float: left;
-    border-left: solid 1px #f7d104;
-    padding-left: 30px;
+    border-top: solid 1px #f7d104;
+    margin-top: 30px;
+    padding-top: 10px;
 }
 
 #error-message {
