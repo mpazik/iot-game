@@ -14,8 +14,8 @@ define(function (require, exports, module) {
         help(){
             const helpText = `/help<br />
 Type and press enter to send a message.<br />
-<b>/w</b> <i>nick</i> <i>message</i> - whisper a message to the player with the given nick
-<b>/list</b> - list all players connected to the instance.
+<b>/w</b> <i>nick</i> <i>message</i> - whisper a message to the user with the given nick
+<b>/list</b> - list all users connected to the instance.
 `;
             displayMessage({type: 'command', text: helpText})
         },
@@ -28,10 +28,10 @@ Type and press enter to send a message.<br />
                 });
                 return
             }
-            const player = args.slice(0, i);
+            const user = args.slice(0, i);
             const message = args.slice(i + 1);
-            socket.send(`MSG ${player} ${message}`);
-            displayMessage({type: 'whisper', text: `to: ${player} : ${message}`})
+            socket.send(`MSG ${user} ${message}`);
+            displayMessage({type: 'whisper', text: `to: ${user} : ${message}`})
         },
         list() {
             socket.send(`LIST ${currentInstanceKey}`)
@@ -44,26 +44,26 @@ Type and press enter to send a message.<br />
     const channelCommands = {
         msg (channel, args) {
             const i = args.indexOf(' ');
-            const player = args.slice(0, i);
+            const user = args.slice(0, i);
             const message = args.slice(i + 1);
             if (channel === currentInstanceKey) {
-                displayMessage({type: 'message', text: `${player} : ${message}`})
+                displayMessage({type: 'message', text: `${user} : ${message}`})
             } else {
-                displayMessage({type: 'message', text: `${channel} : ${player} : ${message}`})
+                displayMessage({type: 'message', text: `${channel} : ${user} : ${message}`})
             }
         },
-        joined (channel, player) {
+        joined (channel, user) {
             if (channel === currentInstanceKey) {
-                displayMessage({type: 'command', text: `player <i>${player}</i> joined`})
+                displayMessage({type: 'command', text: `user <i>${user}</i> joined`})
             } else {
-                displayMessage({type: 'command', text: `player <i>${player}</i> joined to channel <i>${channel}</i>`})
+                displayMessage({type: 'command', text: `user <i>${user}</i> joined to channel <i>${channel}</i>`})
             }
         },
-        quited (channel, player) {
+        quited (channel, user) {
             if (channel === currentInstanceKey) {
-                displayMessage({type: 'command', text: `player <i>${player}</i> quited`})
+                displayMessage({type: 'command', text: `user <i>${user}</i> quited`})
             } else {
-                displayMessage({type: 'command', text: `player <i>${player}</i> quited from channel <i>${channel}</i>`})
+                displayMessage({type: 'command', text: `user <i>${user}</i> quited from channel <i>${channel}</i>`})
             }
         },
         list (channel, args) {
@@ -71,9 +71,9 @@ Type and press enter to send a message.<br />
             const userNum = args.slice(0, i);
             const users = args.slice(i + 1);
             if (channel === currentInstanceKey) {
-                displayMessage({type: 'command', text: `/list: players(${userNum}): ${users}`})
+                displayMessage({type: 'command', text: `/list: users(${userNum}): ${users}`})
             } else {
-                displayMessage({type: 'command', text: `/list: ${channel} : players(${userNum}): ${users}`})
+                displayMessage({type: 'command', text: `/list: ${channel} : users(${userNum}): ${users}`})
             }
         },
         closed (channel) {
@@ -88,9 +88,9 @@ Type and press enter to send a message.<br />
     const serverCommands = {
         msg(args) {
             const i = args.indexOf(' ');
-            const player = args.slice(0, i);
+            const user = args.slice(0, i);
             const message = args.slice(i + 1);
-            displayMessage({type: 'whisper', text: `from: ${player} : ${message}`})
+            displayMessage({type: 'whisper', text: `from: ${user} : ${message}`})
         },
         error(args) {
             displayMessage({type: 'error', text: args})

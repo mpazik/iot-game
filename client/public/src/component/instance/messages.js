@@ -23,17 +23,12 @@ define(function (require, exports, module) {
             this.characterId = characterId;
             this.damage = damage;
         },
-        InitialData: function (playerId, characterId, state, scenario) {
-            this.playerId = playerId;
-            this.characterId = characterId;
+        InitialData: function (state, scenario) {
             this.state = state;
             this.scenario = scenario;
         },
         ServerMessage: function (message) {
             this.message = message;
-        },
-        Player: function (player) {
-            this.player = player;
         },
         ScenarioEnd: function (resolution) {
             this.resolution = resolution;
@@ -59,9 +54,9 @@ define(function (require, exports, module) {
         WorldObjectRemoved: function (worldObjectId) {
             this.worldObjectId = worldObjectId;
         },
-        UserCharacter: function (playerId, characterId, userNick) {
-            this.playerId = playerId;
+        UserCharacter: function (characterId, userId, userNick) {
             this.characterId = characterId;
+            this.userId = userId;
             this.userNick = userNick;
         }
     };

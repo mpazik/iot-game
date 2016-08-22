@@ -1,7 +1,7 @@
 package dzida.server.app;
 
+import dzida.server.app.user.User;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.player.Player;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,41 +10,41 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Leaderboard {
-    private final Map<Id<Player>, Integer> highestScores;
+    private final Map<Id<User>, Integer> highestScores;
 
     public Leaderboard() {
         highestScores = new HashMap<>();
     }
 
-    public void notePlayerScore(Id<Player> playerId, Integer score) {
-        if (highestScores.containsKey(playerId)) {
-            if (highestScores.get(playerId) < score) {
-                highestScores.put(playerId, score);
+    public void notePlayerScore(Id<User> userId, Integer score) {
+        if (highestScores.containsKey(userId)) {
+            if (highestScores.get(userId) < score) {
+                highestScores.put(userId, score);
             }
         } else {
-            highestScores.put(playerId, score);
+            highestScores.put(userId, score);
         }
     }
 
     public List<PlayerScore> getListOfSurvivalRecords() {
         int limit = 10;
-        List<Id<Player>> topPlayerData = getTopPlayerData();
+        List<Id<User>> topUsers = getTopUsers();
 
-        int numOfRecords = Math.min(limit, topPlayerData.size());
+        int numOfRecords = Math.min(limit, topUsers.size());
         return IntStream.range(0, numOfRecords).mapToObj(index -> {
-            Id<Player> playerId = topPlayerData.get(index);
-            return new PlayerScore("", highestScores.get(playerId), getPositionFromIndex(index));
+            Id<User> userid = topUsers.get(index);
+            return new PlayerScore("", highestScores.get(userid), getPositionFromIndex(index));
         }).collect(Collectors.toList());
     }
 
-    public PlayerScore getPlayerScore(Id<Player> playerId) {
-        List<Id<Player>> topPlayerData = getTopPlayerData();
-        int playerPosition = getPositionFromIndex(topPlayerData.indexOf(playerId));
-        return new PlayerScore("", highestScores.get(playerId), playerPosition);
+    public PlayerScore getPlayerScore(Id<User> userId) {
+        List<Id<User>> topUsers = getTopUsers();
+        int userPosition = getPositionFromIndex(topUsers.indexOf(userId));
+        return new PlayerScore("", highestScores.get(userId), userPosition);
     }
 
 
-    private List<Id<Player>> getTopPlayerData() {
+    private List<Id<User>> getTopUsers() {
         return highestScores.entrySet().stream()
                 .sorted((o1, o2) -> o1.getValue() - o2.getValue())
                 .map(Map.Entry::getKey)

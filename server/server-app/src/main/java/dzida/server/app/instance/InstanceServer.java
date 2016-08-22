@@ -12,6 +12,7 @@ import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.protocol.json.JsonProtocol;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
+import dzida.server.app.user.User;
 import dzida.server.app.user.UserTokenVerifier;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Result;
@@ -24,7 +25,6 @@ import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
-import dzida.server.core.player.Player;
 import dzida.server.core.scenario.ScenarioEnd;
 
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     private final Leaderboard leaderboard;
 
     private final Key<Instance> instanceKey;
-    private final Map<Id<Player>, ContainerConnection> connections;
+    private final Map<Id<User>, ContainerConnection> connections;
 
     public InstanceServer(Scheduler scheduler, Arbiter arbiter, Leaderboard leaderboard, Key<Instance> instanceKey, String instanceType, Integer difficultyLevel) {
         this.arbiter = arbiter;
@@ -66,8 +66,8 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
                 ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;
                 arbiter.endOfScenario(instanceKey);
                 if (scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
-                    connections.keySet().forEach(playerId -> {
-                        leaderboard.notePlayerScore(playerId, scenarioEnd.difficultyLevel);
+                    connections.keySet().forEach(userId -> {
+                        leaderboard.notePlayerScore(userId, scenarioEnd.difficultyLevel);
                     });
                 }
             }
@@ -76,8 +76,8 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         instance.start();
     }
 
-    private void sendMessageToPlayer(Id<Player> playerId, GameEvent data) {
-        connections.get(playerId).serverSend(serializer.serializeMessage(data));
+    private void sendMessageToPlayer(Id<User> userId, GameEvent data) {
+        connections.get(userId).serverSend(serializer.serializeMessage(data));
     }
 
     @Override
@@ -87,25 +87,24 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
             return Result.error("Login to is invalid");
         }
 
+        Id<User> userId = loginToken.get().userId;
         String userNick = loginToken.get().nick;
-        Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, userNick);
-        if (!playerIdOpt.isPresent()) {
+        if (!arbiter.isUserOnInstance(instanceKey, userId)) {
             return Result.error("Player is not assigned to the instance: " + instanceKey);
         }
-        Id<Player> playerId = playerIdOpt.get();
         Id<Character> characterId = new Id<>((int) Math.round((Math.random() * 100000)));
 
-        ContainerConnection serverConnection = new ContainerConnection(playerId, characterId, connector);
+        ContainerConnection serverConnection = new ContainerConnection(userId, characterId, connector);
         connector.onOpen(serverConnection);
-        connections.put(playerId, serverConnection);
+        connections.put(userId, serverConnection);
 
-        Consumer<GameEvent> sendToPlayer = gameEvent -> sendMessageToPlayer(playerId, gameEvent);
-        PlayerCharacter character = new PlayerCharacter(characterId, userNick, playerId);
+        Consumer<GameEvent> sendToPlayer = gameEvent -> sendMessageToPlayer(userId, gameEvent);
+        PlayerCharacter character = new PlayerCharacter(characterId, userNick);
 
         instance.handleCommand(new SpawnCharacterCommand(character));
-        sendMessageToPlayer(playerId, new InstanceProtocol.UserCharacterMessage(playerId, characterId, userNick));
-        stateSynchroniser.registerCharacter(playerId, sendToPlayer);
-        System.out.printf("Instance: %s - player %s joined \n", instanceKey, playerId);
+        sendMessageToPlayer(userId, new InstanceProtocol.UserCharacterMessage(characterId, userId, userNick));
+        stateSynchroniser.registerCharacter(userId, sendToPlayer);
+        System.out.printf("Instance: %s - user %s joined \n", instanceKey, userId);
         return Result.ok();
     }
 
@@ -113,17 +112,17 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         return connections.isEmpty();
     }
 
-    public void disconnectPlayer(Id<Player> playerId) {
-        connections.get(playerId).serverClose();
+    public void disconnectPlayer(Id<User> userId) {
+        connections.get(userId).serverClose();
     }
 
     private final class ContainerConnection implements ServerConnection<String> {
-        private final Id<Player> playerId;
+        private final Id<User> userId;
         private final Id<Character> characterId;
         private final Connector<String> connector;
 
-        private ContainerConnection(Id<Player> playerId, Id<Character> characterId, Connector<String> connector) {
-            this.playerId = playerId;
+        private ContainerConnection(Id<User> userId, Id<Character> characterId, Connector<String> connector) {
+            this.userId = userId;
             this.characterId = characterId;
             this.connector = connector;
         }
@@ -141,17 +140,17 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         public void runInstanceCommand(InstanceCommand command) {
             Result result = instance.handleCommand(command);
             result.consume(Runnables.doNothing(), error -> {
-                sendMessageToPlayer(playerId, new ServerMessage(error.getMessage()));
+                sendMessageToPlayer(userId, new ServerMessage(error.getMessage()));
             });
         }
 
         @Override
         public void close() {
-            stateSynchroniser.unregisterListener(playerId);
+            stateSynchroniser.unregisterListener(userId);
             instance.handleCommand(new KillCharacterCommand(characterId));
-            System.out.printf("Instance: %s - player %s quit \n", instanceKey, playerId);
+            System.out.printf("Instance: %s - user %s quit \n", instanceKey, userId);
 
-            connections.remove(playerId);
+            connections.remove(userId);
         }
 
         public void serverSend(String data) {

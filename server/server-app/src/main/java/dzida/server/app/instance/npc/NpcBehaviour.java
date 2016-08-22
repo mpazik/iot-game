@@ -33,9 +33,9 @@ public class NpcBehaviour {
     }
 
     public List<InstanceCommand> processTick(NpcImpl npc) {
-        Stream<Id<Character>> players = state.getCharacterService().getCharactersOfType(PlayerCharacter.class).stream().map(Character::getId);
+        Stream<Id<Character>> users = state.getCharacterService().getCharactersOfType(PlayerCharacter.class).stream().map(Character::getId);
         NpcCharacter npcCharacter = npc.getCharacter();
-        Optional<Id<Character>> target = players.filter(player -> state.getPositionService().areCharactersInDistance(npcCharacter.getId(), player, AggroRange, timeService.getCurrentMillis())).findAny();
+        Optional<Id<Character>> target = users.filter(player -> state.getPositionService().areCharactersInDistance(npcCharacter.getId(), player, AggroRange, timeService.getCurrentMillis())).findAny();
         if (target.isPresent()) {
             if (isInAttackRange(npcCharacter, target.get())) {
                 return tryAttackPlayer(npcCharacter, target.get());

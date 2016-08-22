@@ -5,13 +5,13 @@ define(function (require, exports, module) {
     const Messages = require('../component/instance/messages');
     const SkillStore = require('./skill');
 
-    var playerId = null;
     var characterId = null;
+    var userId = null;
     var userNick = null;
     var timeOutToResetCooldown = null;
 
     Dispatcher.messageStream.subscribe(Messages.UserCharacter, (data) => {
-        playerId = data.playerId;
+        userId = data.userId;
         characterId = data.characterId;
         userNick = data.userNick;
     });
@@ -20,8 +20,8 @@ define(function (require, exports, module) {
         // positions are recalculated in character renderer
         position: new Point(0, 0),
         positionInPixels: new Point(0, 0),
-        playerId: () => playerId,
         characterId: () => characterId,
+        userId: () => userId,
         userNick: () => userNick,
         playerLiveState: new Publisher.StatePublisher(false, (push) => {
             Dispatcher.messageStream.subscribe(Messages.InitialData, () => {

@@ -10,17 +10,15 @@ import dzida.server.app.instance.InstanceServer;
 import dzida.server.app.protocol.json.JsonProtocol;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
+import dzida.server.app.user.User;
 import dzida.server.app.user.UserTokenVerifier;
 import dzida.server.core.Scheduler;
-import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.Connector;
 import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.connection.VerifyingConnectionServer;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
-import dzida.server.core.player.Player;
-import dzida.server.core.player.PlayerService;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,35 +34,31 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final ServerDispatcher serverDispatcher;
     private final Chat chat;
-    private final PlayerService playerService;
     private final Scheduler scheduler;
     private final Leaderboard leaderboard;
     private final JsonProtocol arbiterProtocol;
     private final UserTokenVerifier userTokenVerifier;
 
-    private final Map<Id<Player>, Key<Instance>> playersInstances;
+    private final Map<Id<User>, Key<Instance>> usersInstances;
     private final Map<Key<Instance>, InstanceServer> instances;
     private final Set<Key<Instance>> initialInstances;
-    private final Set<Id<Player>> playingPlayers;
     private final Key<Instance> defaultInstance;
     private final Set<Key<Instance>> instancesToShutdown;
 
-    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, PlayerService playerService, Scheduler scheduler, Leaderboard leaderboard) {
+    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, Leaderboard leaderboard) {
         this.serverDispatcher = serverDispatcher;
         this.chat = chat;
-        this.playerService = playerService;
         this.scheduler = scheduler;
         this.leaderboard = leaderboard;
         arbiterProtocol = ArbiterProtocol.createSerializer();
         userTokenVerifier = new UserTokenVerifier();
 
-        playersInstances = new HashMap<>();
+        usersInstances = new HashMap<>();
         instances = new HashMap<>();
         initialInstances = ImmutableList.copyOf(Configuration.getInitialInstances())
                 .stream()
                 .map((Function<String, Key<Instance>>) Key::new)
                 .collect(Collectors.toSet());
-        playingPlayers = new HashSet<>();
         instancesToShutdown = new HashSet<>();
         defaultInstance = new Key<>(Configuration.getInitialInstances()[0]);
     }
@@ -97,20 +91,6 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         return new Key<>(instanceType + '_' + difficultyLevel + '_' + new Random().nextInt(10000000));
     }
 
-    public boolean isPlayerPlaying(String nick) {
-        Optional<Id<Player>> playerIdOpt = playerService.findPlayer(nick);
-        return playerIdOpt.isPresent() && playingPlayers.contains(playerIdOpt.get());
-    }
-
-    private Optional<Id<Player>> findOrCreatePlayer(String nick) {
-        Optional<Id<Player>> playerIdOpt = playerService.findPlayer(nick);
-        if (playerIdOpt.isPresent()) {
-            return playerIdOpt;
-        }
-        Outcome<Player> player = playerService.createPlayer(nick);
-        return player.toOptional().map(Player::getId);
-    }
-
     @Override
     public Result onConnection(Connector<String> connector, String userToken) {
         Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
@@ -118,22 +98,16 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
             return Result.error("Login to is invalid");
         }
 
-        Optional<Id<Player>> playerIdOpt = findOrCreatePlayer(loginToken.get().nick);
-        if (!playerIdOpt.isPresent()) {
-            return Result.error("Login to is invalid");
-        }
-        Id<Player> playerId = playerIdOpt.get();
-        playingPlayers.add(playerId);
-        playerService.loginPlayer(playerId);
+        Id<User> userId = loginToken.get().userId;
 
-        ArbiterConnection arbiterConnection = new ArbiterConnection(playerId, connector);
+        ArbiterConnection arbiterConnection = new ArbiterConnection(userId, connector);
         connector.onOpen(arbiterConnection);
         arbiterConnection.movePlayerToInstance(defaultInstance);
         return Result.ok();
     }
 
-    public Optional<Id<Player>> authenticate(Key<Instance> instanceKey, String userNick) {
-        return findOrCreatePlayer(userNick).filter(playerId -> playersInstances.get(playerId).equals(instanceKey));
+    public boolean isUserOnInstance(Key<Instance> instanceKey, Id<User> userId) {
+        return usersInstances.get(userId).equals(instanceKey);
     }
 
     public void endOfScenario(Key<Instance> instanceKey) {
@@ -153,11 +127,11 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     }
 
     private final class ArbiterConnection implements ServerConnection<String> {
-        private final Id<Player> playerId;
+        private final Id<User> userId;
         private final Connector<String> connector;
 
-        ArbiterConnection(Id<Player> playerId, Connector<String> connector) {
-            this.playerId = playerId;
+        ArbiterConnection(Id<User> userId, Connector<String> connector) {
+            this.userId = userId;
             this.connector = connector;
         }
 
@@ -179,17 +153,17 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         }
 
         public void movePlayerToInstance(Key<Instance> newInstanceKey) {
-            playersInstances.put(playerId, newInstanceKey);
+            usersInstances.put(userId, newInstanceKey);
             connector.onMessage(arbiterProtocol.serializeMessage(new JoinToInstance(newInstanceKey)));
-            System.out.println("Arbiter: player: " + playerId + " assigned to instance: " + newInstanceKey);
+            System.out.println("Arbiter: user: " + userId + " assigned to instance: " + newInstanceKey);
         }
 
         private void removePlayerFromLastInstance() {
-            Key<Instance> lastInstanceKey = playersInstances.get(playerId);
+            Key<Instance> lastInstanceKey = usersInstances.get(userId);
             if (lastInstanceKey == null) return;
             InstanceServer instanceServer = instances.get(lastInstanceKey);
-            instanceServer.disconnectPlayer(playerId);
-            System.out.println("Arbiter: player: " + playerId + " removed from instance: " + lastInstanceKey);
+            instanceServer.disconnectPlayer(userId);
+            System.out.println("Arbiter: user: " + userId + " removed from instance: " + lastInstanceKey);
             tryToKillInstance(lastInstanceKey);
         }
 
@@ -201,8 +175,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
         @Override
         public void close() {
-            playerService.logoutPlayer(playerId);
-            playingPlayers.remove(playerId);
+            usersInstances.remove(userId);
         }
     }
 }

@@ -14,6 +14,7 @@ define(function (require, exports, module) {
         playerAlive: MainPlayerStore.playerLiveState,
         playerRespawnTimeState: MainPlayerStore.playerRespawnTimeState,
         userNick: MainPlayerStore.userNick,
+        userId: MainPlayerStore.userId,
         scenario: ScenarioStore.data,
         scenarioType: new Publisher.StatePublisher(null, (push) => {
             ScenarioStore.data.subscribe(scenario => {

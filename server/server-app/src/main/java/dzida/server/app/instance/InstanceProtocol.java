@@ -6,6 +6,7 @@ import dzida.server.app.command.SkillUseOnCharacterRawCommand;
 import dzida.server.app.command.SkillUseOnWorldMapRawCommand;
 import dzida.server.app.command.SkillUseOnWorldObjectRawCommand;
 import dzida.server.app.protocol.json.JsonProtocol;
+import dzida.server.app.user.User;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.event.CharacterDied;
@@ -13,7 +14,6 @@ import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
-import dzida.server.core.player.Player;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.skill.event.CharacterGotDamage;
@@ -53,13 +53,13 @@ public class InstanceProtocol {
     }
 
     public static final class UserCharacterMessage implements GameEvent {
-        public final Id<Player> playerId;
         public final Id<Character> characterId;
+        public final Id<User> userId;
         public final String userNick;
 
-        public UserCharacterMessage(Id<Player> playerId, Id<Character> characterId, String userNick) {
-            this.playerId = playerId;
+        public UserCharacterMessage(Id<Character> characterId, Id<User> userId, String userNick) {
             this.characterId = characterId;
+            this.userId = userId;
             this.userNick = userNick;
         }
     }

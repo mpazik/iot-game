@@ -32,8 +32,8 @@ define(function (require) {
             localStorage.setItem('lastDifficultyLevel', scenario.difficultyLevel);
 
             const ranking = this.getElementsByClassName('ranking')[0];
-            Request.Server.playerLeaderboardResult(uiState.userNick()).then(function (data) {
-                ranking.innerText = ordinalSuffixOf(data.value.position);
+            Request.Server.userLeaderboardResult(uiState.userId()).then(function (data) {
+                ranking.innerText = ordinalSuffixOf(data.position);
             });
 
             const goBackButton = this.getElementsByClassName('go-back')[0];

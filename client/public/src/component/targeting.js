@@ -65,9 +65,9 @@ define(function (require, exports, module) {
             return
         }
         const characterPos = MoveStore.positionAtTime(target.characterId, Timer.currentTimeOnServer());
-        const playerPos = MainPlayer.position;
+        const userPos = MainPlayer.position;
         const skillRange = target.skillToUse.range;
-        if (playerPos.isInRange(characterPos, skillRange)) {
+        if (userPos.isInRange(characterPos, skillRange)) {
             Dispatcher.userEventStream.publish('skill-used-on-character', {
                 characterId: target.characterId,
                 skillId: target.skillToUse.id
@@ -76,10 +76,10 @@ define(function (require, exports, module) {
             // move is expensive so it's done every x huntTarget operation
             if (target.attemptToMove === 5) {
                 target.attemptToMove = 0;
-                const distanceToCreature = playerPos.distanceTo(characterPos);
+                const distanceToCreature = userPos.distanceTo(characterPos);
                 const ratio = (distanceToCreature - skillRange) / distanceToCreature;
                 // there +10% to make sure that player will be in distance to creature.
-                const targetVector = Point.interpolate(ratio * 1.1, playerPos, characterPos);
+                const targetVector = Point.interpolate(ratio * 1.1, userPos, characterPos);
                 Dispatcher.userEventStream.publish('move-to', {x: targetVector.x, y: targetVector.y});
             } else {
                 target.attemptToMove += 1;

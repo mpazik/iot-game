@@ -6,13 +6,10 @@ import dzida.server.app.arbiter.Arbiter;
 import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.network.WebSocketServer;
-import dzida.server.app.rest.ContainerResource;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.rest.UserResource;
-import dzida.server.app.store.mapdb.PlayerStoreMapDb;
 import dzida.server.app.timesync.TimeSynchroniser;
 import dzida.server.app.user.UserService;
-import dzida.server.core.player.PlayerService;
 
 import java.io.IOException;
 
@@ -22,15 +19,13 @@ public final class GameServer {
         Configuration.pirnt();
 
         int gameServerPort = Configuration.getGameServerPort();
-        PlayerStoreMapDb playerStore = new PlayerStoreMapDb();
-        PlayerService playerService = new PlayerService(playerStore);
         WebSocketServer webSocketServer = new WebSocketServer();
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
 
         Leaderboard leaderboard = new Leaderboard();
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         Chat chat = new Chat();
-        Arbiter arbiter = new Arbiter(serverDispatcher, chat, playerService, scheduler, leaderboard);
+        Arbiter arbiter = new Arbiter(serverDispatcher, chat, scheduler, leaderboard);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         serverDispatcher.addServer("arbiter", arbiter);
@@ -45,8 +40,7 @@ public final class GameServer {
                 .setHost(Configuration.getContainerHost())
                 .setPort(Configuration.getContainerRestPort())
                 .addHttpHandlers(ImmutableList.of(
-                        new ContainerResource(arbiter),
-                        new LeaderboardResource(leaderboard, playerStore),
+                        new LeaderboardResource(leaderboard),
                         new UserResource(new UserService())
                 ))
                 .build();

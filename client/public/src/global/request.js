@@ -28,8 +28,8 @@ Request.Server = (function () {
                 }
             })
         },
-        playerLeaderboardResult: function (nick) {
-            return get('leaderboard/player/' + nick, function (httpRequest, resolve, reject) {
+        userLeaderboardResult: function (userId) {
+            return get('leaderboard/user/' + userId, function (httpRequest, resolve, reject) {
                 if (httpRequest.status === 200) {
                     resolve(JSON.parse(httpRequest.responseText));
                 } else {
