@@ -6,9 +6,9 @@ define(() => {
                 httpRequest.onreadystatechange = function () {
                     if (httpRequest.readyState === XMLHttpRequest.DONE) {
                         if (httpRequest.status >= 200 && httpRequest.status < 300) {
-                            resolve(JSON.parse(httpRequest.responseText), httpRequest.status);
+                            resolve(httpRequest.responseText ? JSON.parse(httpRequest.responseText) : undefined, httpRequest.status);
                         } else {
-                            reject(httpRequest.responseText, httpRequest.status)
+                            reject(JSON.parse(httpRequest.responseText).message, httpRequest.status)
                         }
                     }
                 };

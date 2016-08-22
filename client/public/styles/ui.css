@@ -12,7 +12,7 @@ game-ui .window > * {
 }
 
 game-ui .window .window-actions {
-   margin-top: 45px;
+    margin-top: 45px;
 }
 
 game-ui {
@@ -191,7 +191,7 @@ game-chat .chat-input {
     margin-top: 10px;
     font-weight: normal;
     font-size: 14px;
-    border: rgba(255,255,255,0.3) solid 1px;
+    border: rgba(255, 255, 255, 0.3) solid 1px;
     background: rgba(0, 0, 0, 0.1);
     box-shadow: none;
 }
@@ -201,4 +201,20 @@ player-inventory {
     right: 1px;
     padding: 10px;
     min-width: 100px;
+}
+
+#login-form {
+    float: left;
+    padding-right: 28px;
+}
+
+#registration-form {
+    float: left;
+    border-left: solid 1px #f7d104;
+    padding-left: 30px;
+}
+
+#error-message {
+    margin-top: 20px;
+    font-size: 16px;
 }

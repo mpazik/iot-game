@@ -45,6 +45,9 @@ define(['../common/request'], (request) => {
             clearUserToken();
             removeReissueToken();
         },
+        register (nick, email, password) {
+            return request.post('register', {nick, password, email});
+        },
         clearUserToken
     }
 });

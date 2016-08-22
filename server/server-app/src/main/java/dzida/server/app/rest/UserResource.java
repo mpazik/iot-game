@@ -5,6 +5,7 @@ import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.EncryptedReissueToken;
 import dzida.server.app.user.UserService;
 import dzida.server.core.basic.Outcome;
+import dzida.server.core.basic.Result;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import javax.ws.rs.POST;
@@ -54,6 +55,14 @@ public class UserResource extends AbstractResource {
         return Outcome.ok(new ReissueTokenResponse(loginTokenOutcome.get().value));
     }
 
+    @Path("register")
+    @POST
+    public void register(HttpRequest request, HttpResponder responder) {
+        RegisterRequest registerRequest = parseJsonRequest(request, RegisterRequest.class);
+        Result registerResult = userService.register(registerRequest.nick, registerRequest.password);
+        send(responder, registerResult);
+    }
+
     private static final class LoginRequest {
         final String nick;
         final String password;
@@ -87,6 +96,18 @@ public class UserResource extends AbstractResource {
 
         private ReissueTokenResponse(String loginToken) {
             this.loginToken = loginToken;
+        }
+    }
+
+    private static final class RegisterRequest {
+        final String nick;
+        final String password;
+        final String email;
+
+        private RegisterRequest(String nick, String password, String email) {
+            this.nick = nick;
+            this.password = password;
+            this.email = email;
         }
     }
 }
