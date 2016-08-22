@@ -29,10 +29,12 @@ a {
 
 a:hover {
     color: #fff;
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .area {
-    color: #f7d104;
+    color: #bdbdbd;
     background: rgba(0, 0, 0, 0.7);
     border: #777 solid 1px;
     border-radius: 5px;
@@ -110,6 +112,7 @@ input::-webkit-inner-spin-button {
 form label {
     display: block;
     padding: 10px 0 0 0;
+    color: #f7d104;
 }
 
 form button {

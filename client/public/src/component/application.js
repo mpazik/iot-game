@@ -94,21 +94,24 @@ define(function (require, exports, module) {
     }
 
     function loadGameAssets() {
-        setState("loading-game-assets");
+        setState('loading-game-assets');
 
         ResourcesStore.load().then(connect);
     }
 
     module.exports = {
         state: statePublisher,
-        init: function (gameElement) {
+        init (gameElement) {
             loadGameAssets();
             InstanceController.init(gameElement)
         },
         connect,
-        logout: function () {
+        logout () {
             UserService.logout();
             NetworkDispatcher.disconnect();
+        },
+        retrievingPassword () {
+            setState('retrieving-password')
         }
     };
 });

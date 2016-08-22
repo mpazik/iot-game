@@ -20,6 +20,9 @@ define(function (require) {
     <input type="password" name="login-password" minlength="3" maxlength="20" required>
     <br />
     <input type="submit" value="Login!">
+    <br />
+    <br />
+    <a id="forgot-your-password">Forgot your password?</a>
 </form>
 <form id="registration-form" method="post">
     <label for="register-nick">Nick:</label>
@@ -38,6 +41,11 @@ define(function (require) {
 `;
         },
         attached: function () {
+            const forgotYourPassword = document.getElementById('forgot-your-password');
+            forgotYourPassword.addEventListener('click', () => {
+                app.retrievingPassword();
+            });
+
             const errorMessage = document.getElementById('error-message');
             errorMessage.style.display = 'none';
             function showError(error) {
