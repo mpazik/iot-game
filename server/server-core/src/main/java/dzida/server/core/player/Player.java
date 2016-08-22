@@ -37,19 +37,13 @@ public class Player {
 
     public static final class Data extends dzida.server.core.basic.entity.Data {
         private final String nick;
-        private final int highestDifficultyLevel;
 
-        public Data(String nick, int highestDifficultyLevel) {
+        public Data(String nick) {
             this.nick = nick;
-            this.highestDifficultyLevel = highestDifficultyLevel;
         }
 
         public String getNick() {
             return nick;
-        }
-
-        public int getHighestDifficultyLevel() {
-            return highestDifficultyLevel;
         }
 
         @Override
@@ -57,13 +51,12 @@ public class Player {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Data data = (Data) o;
-            return highestDifficultyLevel == data.highestDifficultyLevel &&
-                    Objects.equals(nick, data.nick);
+            return Objects.equals(nick, data.nick);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(nick, highestDifficultyLevel);
+            return Objects.hash(nick);
         }
     }
 }

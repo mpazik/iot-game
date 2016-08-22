@@ -1,6 +1,7 @@
 package dzida.server.app.instance;
 
 import com.google.common.util.concurrent.Runnables;
+import dzida.server.app.Leaderboard;
 import dzida.server.app.arbiter.Arbiter;
 import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.instance.command.InstanceCommand;
@@ -24,7 +25,6 @@ import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
 import dzida.server.core.player.Player;
-import dzida.server.core.player.PlayerService;
 import dzida.server.core.scenario.ScenarioEnd;
 
 import java.util.HashMap;
@@ -36,18 +36,18 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class InstanceServer implements VerifyingConnectionServer<String, String> {
     private final Instance instance;
-    private final PlayerService playerService;
     private final Arbiter arbiter;
     private final JsonProtocol serializer;
     private final StateSynchroniser stateSynchroniser;
     private final UserTokenVerifier userTokenVerifier;
+    private final Leaderboard leaderboard;
 
     private final Key<Instance> instanceKey;
     private final Map<Id<Player>, ContainerConnection> connections;
 
-    public InstanceServer(PlayerService playerService, Scheduler scheduler, Arbiter arbiter, Key<Instance> instanceKey, String instanceType, Integer difficultyLevel) {
-        this.playerService = playerService;
+    public InstanceServer(Scheduler scheduler, Arbiter arbiter, Leaderboard leaderboard, Key<Instance> instanceKey, String instanceType, Integer difficultyLevel) {
         this.arbiter = arbiter;
+        this.leaderboard = leaderboard;
         userTokenVerifier = new UserTokenVerifier();
 
         serializer = InstanceProtocol.createSerializer();
@@ -57,7 +57,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
         this.instanceKey = instanceKey;
         connections = new HashMap<>();
+    }
 
+    public void start() {
         instance.subscribeChange(stateSynchroniser::syncStateChange);
         instance.subscribeChange(gameEvent -> {
             if (gameEvent instanceof ScenarioEnd) {
@@ -65,11 +67,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
                 arbiter.endOfScenario(instanceKey);
                 if (scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
                     connections.keySet().forEach(playerId -> {
-                        Player.Data player = playerService.getPlayer(playerId).getData();
-                        if (scenarioEnd.difficultyLevel > player.getHighestDifficultyLevel()) {
-                            Player.Data newPlayerData = new Player.Data(player.getNick(), scenarioEnd.difficultyLevel);
-                            playerService.updatePlayerData(playerId, newPlayerData);
-                        }
+                        leaderboard.notePlayerScore(playerId, scenarioEnd.difficultyLevel);
                     });
                 }
             }
@@ -89,7 +87,8 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
             return Result.error("Login to is invalid");
         }
 
-        Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, loginToken.get().nick);
+        String userNick = loginToken.get().nick;
+        Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, userNick);
         if (!playerIdOpt.isPresent()) {
             return Result.error("Player is not assigned to the instance: " + instanceKey);
         }
@@ -101,12 +100,10 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         connections.put(playerId, serverConnection);
 
         Consumer<GameEvent> sendToPlayer = gameEvent -> sendMessageToPlayer(playerId, gameEvent);
-        Player playerEntity = playerService.getPlayer(playerId);
-        String nick = playerEntity.getData().getNick();
-        PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
+        PlayerCharacter character = new PlayerCharacter(characterId, userNick, playerId);
 
         instance.handleCommand(new SpawnCharacterCommand(character));
-        sendMessageToPlayer(playerId, new InstanceProtocol.UserCharacterMessage(playerId, characterId, loginToken.get().nick));
+        sendMessageToPlayer(playerId, new InstanceProtocol.UserCharacterMessage(playerId, characterId, userNick));
         stateSynchroniser.registerCharacter(playerId, sendToPlayer);
         System.out.printf("Instance: %s - player %s joined \n", instanceKey, playerId);
         return Result.ok();

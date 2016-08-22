@@ -2,6 +2,7 @@ package dzida.server.app.arbiter;
 
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.Configuration;
+import dzida.server.app.Leaderboard;
 import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
@@ -37,6 +38,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final Chat chat;
     private final PlayerService playerService;
     private final Scheduler scheduler;
+    private final Leaderboard leaderboard;
     private final JsonProtocol arbiterProtocol;
     private final UserTokenVerifier userTokenVerifier;
 
@@ -47,11 +49,12 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final Key<Instance> defaultInstance;
     private final Set<Key<Instance>> instancesToShutdown;
 
-    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, PlayerService playerService, Scheduler scheduler) {
+    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, PlayerService playerService, Scheduler scheduler, Leaderboard leaderboard) {
         this.serverDispatcher = serverDispatcher;
         this.chat = chat;
         this.playerService = playerService;
         this.scheduler = scheduler;
+        this.leaderboard = leaderboard;
         arbiterProtocol = ArbiterProtocol.createSerializer();
         userTokenVerifier = new UserTokenVerifier();
 
@@ -77,7 +80,8 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         Key<Instance> instanceKey = generateInstanceKey(instanceType, difficultyLevel);
 
         String instanceKeyValue = instanceKey.getValue();
-        InstanceServer instanceServer = new InstanceServer(playerService, scheduler, this, instanceKey, instanceType, difficultyLevel);
+        InstanceServer instanceServer = new InstanceServer(scheduler, this, leaderboard, instanceKey, instanceType, difficultyLevel);
+        instanceServer.start();
 
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
         instances.put(instanceKey, instanceServer);

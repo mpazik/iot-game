@@ -2,41 +2,52 @@ package dzida.server.app;
 
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.player.Player;
-import dzida.server.core.player.PlayerStore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Leaderboard {
-    private final PlayerStore playerStore;
+    private final Map<Id<Player>, Integer> highestScores;
 
-    public Leaderboard(PlayerStore playerStore) {
-        this.playerStore = playerStore;
+    public Leaderboard() {
+        highestScores = new HashMap<>();
+    }
+
+    public void notePlayerScore(Id<Player> playerId, Integer score) {
+        if (highestScores.containsKey(playerId)) {
+            if (highestScores.get(playerId) < score) {
+                highestScores.put(playerId, score);
+            }
+        } else {
+            highestScores.put(playerId, score);
+        }
     }
 
     public List<PlayerScore> getListOfSurvivalRecords() {
         int limit = 10;
-        List<Player> topPlayerData = getTopPlayerData();
+        List<Id<Player>> topPlayerData = getTopPlayerData();
 
         int numOfRecords = Math.min(limit, topPlayerData.size());
         return IntStream.range(0, numOfRecords).mapToObj(index -> {
-            Player.Data data = topPlayerData.get(index).getData();
-            return new PlayerScore(data.getNick(), data.getHighestDifficultyLevel(), getPositionFromIndex(index));
+            Id<Player> playerId = topPlayerData.get(index);
+            return new PlayerScore("", highestScores.get(playerId), getPositionFromIndex(index));
         }).collect(Collectors.toList());
     }
 
     public PlayerScore getPlayerScore(Id<Player> playerId) {
-        Player player = playerStore.getPlayer(playerId);
-        List<Player> topPlayerData = getTopPlayerData();
-        int playerPosition = getPositionFromIndex(topPlayerData.indexOf(player));
-        return new PlayerScore(player.getData().getNick(), player.getData().getHighestDifficultyLevel(), playerPosition);
+        List<Id<Player>> topPlayerData = getTopPlayerData();
+        int playerPosition = getPositionFromIndex(topPlayerData.indexOf(playerId));
+        return new PlayerScore("", highestScores.get(playerId), playerPosition);
     }
 
 
-    private List<Player> getTopPlayerData() {
-        return playerStore.getAllPlayers()
-                .filter(player -> player.getData().getHighestDifficultyLevel() > 0)
+    private List<Id<Player>> getTopPlayerData() {
+        return highestScores.entrySet().stream()
+                .sorted((o1, o2) -> o1.getValue() - o2.getValue())
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }
 

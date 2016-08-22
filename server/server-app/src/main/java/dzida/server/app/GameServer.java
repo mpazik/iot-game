@@ -27,9 +27,10 @@ public final class GameServer {
         WebSocketServer webSocketServer = new WebSocketServer();
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
 
+        Leaderboard leaderboard = new Leaderboard();
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         Chat chat = new Chat();
-        Arbiter arbiter = new Arbiter(serverDispatcher, chat, playerService, scheduler);
+        Arbiter arbiter = new Arbiter(serverDispatcher, chat, playerService, scheduler, leaderboard);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         serverDispatcher.addServer("arbiter", arbiter);
@@ -39,7 +40,7 @@ public final class GameServer {
         webSocketServer.start(gameServerPort, serverDispatcher);
         arbiter.start();
 
-        Leaderboard leaderboard = new Leaderboard(playerStore);
+
         NettyHttpService service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())
                 .setPort(Configuration.getContainerRestPort())

@@ -36,14 +36,10 @@ public class PlayerService {
         if (player.isPresent()) {
             return Outcome.error(new Error("player already exists"));
         }
-        Player.Data playerData = new Player.Data(nick, 0);
+        Player.Data playerData = new Player.Data(nick);
 
         Player playerEntity = playerStore.createPlayer(playerData);
         return Outcome.ok(playerEntity);
-    }
-
-    public boolean isPlayerPlaying(Id<Player> playerId) {
-        return playingPlayers.containsKey(playerId);
     }
 
     public void logoutPlayer(Id<Player> playerId) {
