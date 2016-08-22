@@ -108,22 +108,15 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     }
 
     @Override
-    public Result verifyConnection(String connectionData) {
-        return Result.ok();
-    }
-
-    @Override
-    public void onConnection(Connector<String> connector, String userToken) {
+    public Result onConnection(Connector<String> connector, String userToken) {
         Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
         if (!loginToken.isPresent()) {
-            connector.onClose();
-            return;
+            return Result.error("Login to is invalid");
         }
 
         Optional<Id<Player>> playerIdOpt = findOrCreatePlayer(loginToken.get().nick);
         if (!playerIdOpt.isPresent()) {
-            connector.onClose();
-            return;
+            return Result.error("Login to is invalid");
         }
         Id<Player> playerId = playerIdOpt.get();
         playingPlayers.add(playerId);
@@ -132,6 +125,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         ArbiterConnection arbiterConnection = new ArbiterConnection(playerId, connector);
         connector.onOpen(arbiterConnection);
         arbiterConnection.movePlayerToInstance(defaultInstance);
+        return Result.ok();
     }
 
     public Optional<Id<Player>> authenticate(Key<Instance> instanceKey, String userNick) {

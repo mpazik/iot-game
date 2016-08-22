@@ -36,25 +36,16 @@ public class Chat implements VerifyingConnectionServer<String, String> {
     }
 
     @Override
-    public Result verifyConnection(String userToken) {
+    public Result onConnection(Connector<String> connector, String userToken) {
         Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
         if (!loginToken.isPresent()) {
-            return Result.error("User token is not valid");
-        }
-        return Result.ok();
-    }
-
-    @Override
-    public void onConnection(Connector<String> connector, String userToken) {
-        Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
-        if (!loginToken.isPresent()) {
-            connector.onClose();
-            return;
+            return Result.error("Login to is invalid");
         }
         String nick = loginToken.get().nick;
         messageTargets.put(nick, connector::onMessage);
         ChatConnection chatConnection = new ChatConnection(nick);
         connector.onOpen(chatConnection);
+        return Result.ok();
     }
 
     public void createInstanceChannel(Key<Instance> instanceKey) {

@@ -15,12 +15,7 @@ public class TimeSynchroniser implements VerifyingConnectionServer<String, Strin
     }
 
     @Override
-    public Result verifyConnection(String connectionData) {
-        return Result.ok();
-    }
-
-    @Override
-    public void onConnection(Connector<String> connector, String connectionData) {
+    public Result onConnection(Connector<String> connector, String connectionData) {
         connector.onOpen(new ServerConnection<String>() {
             @Override
             public void send(String message) {
@@ -32,5 +27,6 @@ public class TimeSynchroniser implements VerifyingConnectionServer<String, Strin
 
             }
         });
+        return Result.ok();
     }
 }

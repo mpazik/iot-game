@@ -57,9 +57,11 @@ public class ServerDispatcherTest {
     public void clientReceiveMessageWithServerIdToWhichItWasConnected() {
         ProbeServer serverD = new ProbeServer() {
             @Override
-            public void onConnection(Connector<String> clientConnection, String connectionData) {
+            public Result onConnection(Connector<String> clientConnection, String connectionData) {
                 // This message should be send after the message about connecting to the server D.
+                super.onConnection(clientConnection, connectionData);
                 clientConnection.onMessage("Initial data from server D");
+                return Result.ok();
             }
         };
         serverDispatcher.addServer("serverD", serverD);
@@ -90,7 +92,7 @@ public class ServerDispatcherTest {
     public void clientReceiveMessageWithErrorIfServerDoNotAcceptClient() {
         ProbeServer serverD = new ProbeServer() {
             @Override
-            public Result verifyConnection(String connectionData) {
+            public Result onConnection(Connector<String> connector, String connectionData) {
                 return Result.error("You shall not pass.");
             }
         };
@@ -235,12 +237,7 @@ class ProbeServer implements VerifyingConnectionServer<String, String> {
     }
 
     @Override
-    public Result verifyConnection(String connectionData) {
-        return Result.ok();
-    }
-
-    @Override
-    public void onConnection(Connector<String> connector, String connectionData) {
+    public Result onConnection(Connector<String> connector, String connectionData) {
         connector.onOpen(new ServerConnection<String>() {
             @Override
             public void send(String message) {
@@ -254,6 +251,7 @@ class ProbeServer implements VerifyingConnectionServer<String, String> {
         });
         this.connectionData = connectionData;
         this.connector = connector;
+        return Result.ok();
     }
 
     private void handleDisconnection() {

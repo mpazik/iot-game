@@ -123,15 +123,12 @@ public class ServerDispatcher implements Server<String> {
                 return;
             }
 
-            Result connectionResult = servers.get(serverKey).verifyConnection(connectionData);
-            connectionResult.consume(() -> {
-                Connector<String> connector = new ServerConnector(serverKey, this);
-                sendDispatcherMessageToClient(new DispatcherProtocol.ConnectedToServerMessage(serverKey));
-                servers.get(serverKey).onConnection(connector, connectionData);
+            Connector<String> connector = new ServerConnector(serverKey, this);
+            Result result = servers.get(serverKey).onConnection(connector, connectionData);
+            result.consume(() -> {
             }, error -> {
                 sendDispatcherMessageToClient(new DispatcherProtocol.NotConnectedToServerMessage(serverKey, error.getMessage()));
             });
-
         }
 
         private void sendToClient(String serverKey, String data) {
@@ -163,6 +160,7 @@ public class ServerDispatcher implements Server<String> {
 
         @Override
         public void onOpen(ServerConnection<String> serverConnection) {
+            dispatcherConnection.sendDispatcherMessageToClient(new DispatcherProtocol.ConnectedToServerMessage(serverKey));
             dispatcherConnection.connectionsToServers.put(serverKey, serverConnection);
         }
 

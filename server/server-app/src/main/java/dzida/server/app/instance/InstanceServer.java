@@ -83,30 +83,15 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     }
 
     @Override
-    public Result verifyConnection(String userToken) {
+    public Result onConnection(Connector<String> connector, String userToken) {
         Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
         if (!loginToken.isPresent()) {
-            return Result.error("User token is not valid");
+            return Result.error("Login to is invalid");
         }
 
         Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, loginToken.get().nick);
         if (!playerIdOpt.isPresent()) {
-            return Result.error("Can not authenticate player");
-        }
-        return Result.ok();
-    }
-
-    @Override
-    public void onConnection(Connector<String> connector, String userToken) {
-        Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
-        if (!loginToken.isPresent()) {
-            connector.onClose();
-            return;
-        }
-
-        Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, loginToken.get().nick);
-        if (!playerIdOpt.isPresent()) {
-            throw new RuntimeException("player id should be verified by the verifyConnection method at this point");
+            return Result.error("Player is not assigned to the instance: " + instanceKey);
         }
         Id<Player> playerId = playerIdOpt.get();
         Id<Character> characterId = new Id<>((int) Math.round((Math.random() * 100000)));
@@ -124,6 +109,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         stateSynchroniser.registerCharacter(playerId, sendToPlayer);
         stateSynchroniser.sendInitialPacket(characterId, playerId, playerEntity);
         System.out.printf("Instance: %s - player %s joined \n", instanceKey, playerId);
+        return Result.ok();
     }
 
     public boolean isEmpty() {
