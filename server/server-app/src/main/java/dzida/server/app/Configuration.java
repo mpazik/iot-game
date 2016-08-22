@@ -24,6 +24,14 @@ public class Configuration {
         return Integer.parseInt(System.getProperty("gameServerPort", "7001"));
     }
 
+    public static String getLoginTokenSecret() {
+        return System.getProperty("loginTokenKey", "login token secret");
+    }
+
+    public static String getReissueTokenSecret() {
+        return System.getProperty("loginTokenKey", "reissue token secret");
+    }
+
     /**
      * Return the number of millis that will be added to the Server current time. Required for debuging reasons to simulate client/server time differences.
      */
