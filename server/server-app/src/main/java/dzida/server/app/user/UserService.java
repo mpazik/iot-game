@@ -42,6 +42,9 @@ public class UserService {
     }
 
     public Result register(String nick, String password) {
+        if (hadNonAlphaCharacter(nick)) {
+            return Result.error("Nick name can only contains alphanumeric characters.");
+        }
         Optional<Id<User>> userIdByNick = getUserIdByNick(nick);
         if (userIdByNick.isPresent()) {
             return Result.error("User with " + nick + " is already registered.");
@@ -52,6 +55,10 @@ public class UserService {
         userPasswords.put(userId, hashedPassword);
 
         return Result.ok();
+    }
+
+    public boolean hadNonAlphaCharacter(String nick) {
+        return nick.matches("^.*[^a-zA-Z0-9 ].*$");
     }
 
     public Outcome<EncryptedReissueToken> login(String nick, String password) {
@@ -67,13 +74,13 @@ public class UserService {
         return Outcome.ok(createReissueToken(userId));
     }
 
-    public Optional<EncryptedLoginToken> revalidateToken(EncryptedReissueToken encryptedReissueToken) {
+    public Outcome<EncryptedLoginToken> createLoginToken(EncryptedReissueToken encryptedReissueToken) {
         Optional<Id<User>> userIdOpt = decryptReissueToken(encryptedReissueToken);
         if (!userIdOpt.isPresent()) {
-            return Optional.empty();
+            return Outcome.error("Reissue token is not valid");
         }
         Id<User> userId = userIdOpt.get();
-        return Optional.of(createLoginToken(userId, userNicks.get(userId)));
+        return Outcome.ok(createLoginToken(userId, userNicks.get(userId)));
     }
 
     private Id<User> generateNewUserId() {
@@ -86,7 +93,7 @@ public class UserService {
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("exp", expiration);
         claims.put("iat", issuedAt);
-        claims.put("sub", userId.getValue());
+        claims.put("sub", Long.toString(userId.getValue()));
 
         return new EncryptedReissueToken(reissueTokenSigner.sign(claims));
     }
@@ -95,12 +102,9 @@ public class UserService {
         try {
             Map<String, Object> claims = reissueTokenVerifier.verify(encryptedReissueToken.value);
             Object subject = claims.get("sub");
-            if (subject == null || !(subject instanceof Integer)) {
-                return Optional.empty();
-            }
-            return Optional.of(new Id<>((Integer) subject));
-
-        } catch (JWTVerifyException | IllegalStateException e) {
+            int userId = Integer.parseInt((String) subject);
+            return Optional.of(new Id<>(userId));
+        } catch (JWTVerifyException | IllegalStateException | NumberFormatException e) {
             return Optional.empty();
         } catch (NoSuchAlgorithmException | IOException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();
@@ -114,7 +118,7 @@ public class UserService {
         HashMap<String, Object> claims = new HashMap<>();
         claims.put("exp", expiration);
         claims.put("iat", issuedAt);
-        claims.put("sub", userId.getValue());
+        claims.put("sub", Long.toString(userId.getValue()));
         claims.put("nick", nick);
 
         return new EncryptedLoginToken(loginTokenSigner.sign(claims));

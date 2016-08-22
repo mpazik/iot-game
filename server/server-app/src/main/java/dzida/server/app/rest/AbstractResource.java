@@ -5,26 +5,33 @@ import co.cask.http.HttpResponder;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.gson.Gson;
-import dzida.server.app.BasicJsonSerializer;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+
+import java.nio.charset.Charset;
 
 public abstract class AbstractResource extends AbstractHttpHandler {
 
-    private final Gson serializer = BasicJsonSerializer.getSerializer();
+    private final Gson serializer = new Gson();
     protected ImmutableMultimap<String, String> headers = ImmutableMultimap.of("Access-Control-Allow-Origin", "*");
 
-    protected void sendResult(HttpResponder responder, Result result) {
+    public <T> T parseJsonRequest(HttpRequest request, Class<T> requestClass) {
+        String data = request.getContent().toString(Charset.defaultCharset());
+        return serializer.fromJson(data, requestClass);
+    }
+
+    protected void send(HttpResponder responder, Result result) {
         result.consume(
                 () -> responder.sendStatus(HttpResponseStatus.NO_CONTENT, headers),
                 error -> sendObject(responder, HttpResponseStatus.BAD_REQUEST, error)
         );
     }
 
-    protected <T> void sendOutcome(HttpResponder responder, Outcome<T> outcome) {
+    protected <T> void send(HttpResponder responder, Outcome<T> outcome) {
         outcome.consume(
                 data -> sendObject(responder, data),
                 error -> sendObject(responder, HttpResponseStatus.BAD_REQUEST, error)

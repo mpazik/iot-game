@@ -1,6 +1,7 @@
-define(function (require, exports, module) {
+define(function (require) {
     const app = require('../../component/application');
-    
+    const userService = require('../../component/user-service');
+
     return createUiElement('login-window', {
         type: 'window',
         properties: {
@@ -16,6 +17,9 @@ define(function (require, exports, module) {
     <label>
         Nick:
         <input type="text" class="user-nick" minlength="3" maxlength="20" required>
+        <br />
+        Password:
+        <input type="text" class="user-password" minlength="3" maxlength="20" required>
     </label>
     <input type="submit" value="Login!">
     <div class="error-message error"></div>
@@ -25,6 +29,7 @@ define(function (require, exports, module) {
         attached: function () {
             const form = this.getElementsByTagName("form")[0];
             const userNickElement = form.getElementsByClassName('user-nick')[0];
+            const userPasswordElement = form.getElementsByClassName('user-password')[0];
             const errorMessage = form.getElementsByClassName('error-message')[0];
             errorMessage.style.display = 'none';
 
@@ -37,15 +42,14 @@ define(function (require, exports, module) {
                 userNickElement.focus();
             });
 
-            form.onsubmit = function (event) {
+            form.onsubmit = function () {
                 const nick = userNickElement.value;
-                Request.Server.canPlayerLogin(nick).then(function () {
+                const password = userPasswordElement.value;
+                userService.login(nick, password).then(token => {
                     errorMessage.style.display = 'none';
-                    app.setUser(nick);
+                    app.setUserToken(token);
                     app.connect();
-                }).catch(function (error) {
-                    showError(error);
-                });
+                }).catch(showError);
                 return false;
             }.bind(this);
         }

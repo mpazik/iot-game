@@ -1,6 +1,5 @@
 package dzida.server.app.arbiter;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.Configuration;
 import dzida.server.app.chat.Chat;
@@ -8,6 +7,9 @@ import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceServer;
 import dzida.server.app.protocol.json.JsonProtocol;
+import dzida.server.app.user.EncryptedLoginToken;
+import dzida.server.app.user.LoginToken;
+import dzida.server.app.user.UserTokenVerifier;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
@@ -36,6 +38,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final PlayerService playerService;
     private final Scheduler scheduler;
     private final JsonProtocol arbiterProtocol;
+    private final UserTokenVerifier userTokenVerifier;
 
     private final Map<Id<Player>, Key<Instance>> playersInstances;
     private final Map<Key<Instance>, InstanceServer> instances;
@@ -49,6 +52,9 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         this.chat = chat;
         this.playerService = playerService;
         this.scheduler = scheduler;
+        arbiterProtocol = ArbiterProtocol.createSerializer();
+        userTokenVerifier = new UserTokenVerifier();
+
         playersInstances = new HashMap<>();
         instances = new HashMap<>();
         initialInstances = ImmutableList.copyOf(Configuration.getInitialInstances())
@@ -58,7 +64,6 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         playingPlayers = new HashSet<>();
         instancesToShutdown = new HashSet<>();
         defaultInstance = new Key<>(Configuration.getInitialInstances()[0]);
-        arbiterProtocol = ArbiterProtocol.createSerializer();
     }
 
     public void start() {
@@ -108,13 +113,14 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     }
 
     @Override
-    public void onConnection(Connector<String> connector, String connectionData) {
-        if (Strings.isNullOrEmpty(connectionData)) {
+    public void onConnection(Connector<String> connector, String userToken) {
+        Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
+        if (!loginToken.isPresent()) {
             connector.onClose();
             return;
         }
 
-        Optional<Id<Player>> playerIdOpt = findOrCreatePlayer(connectionData);
+        Optional<Id<Player>> playerIdOpt = findOrCreatePlayer(loginToken.get().nick);
         if (!playerIdOpt.isPresent()) {
             connector.onClose();
             return;
@@ -128,8 +134,8 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         arbiterConnection.movePlayerToInstance(defaultInstance);
     }
 
-    public Optional<Id<Player>> authenticate(Key<Instance> instanceKey, String connectionData) {
-        return findOrCreatePlayer(connectionData).filter(playerId -> playersInstances.get(playerId).equals(instanceKey));
+    public Optional<Id<Player>> authenticate(Key<Instance> instanceKey, String userNick) {
+        return findOrCreatePlayer(userNick).filter(playerId -> playersInstances.get(playerId).equals(instanceKey));
     }
 
     public void endOfScenario(Key<Instance> instanceKey) {

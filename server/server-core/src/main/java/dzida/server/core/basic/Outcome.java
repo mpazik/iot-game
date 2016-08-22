@@ -17,6 +17,11 @@ public interface Outcome<T> {
         return new ErrorOutcome<>(new Error(errorMessage));
     }
 
+    static <T> Outcome<T> error(Outcome<?> outcome) {
+        assert !outcome.isValid();
+        return error(outcome.getError());
+    }
+
     static <T> Outcome<T> fromOptional(Optional<T> playerScore, Error error) {
         return playerScore.map(Outcome::ok).orElseGet(() -> new ErrorOutcome<>(error));
     }
@@ -26,6 +31,12 @@ public interface Outcome<T> {
     Optional<T> toOptional();
 
     Result toResult();
+
+    boolean isValid();
+
+    T get();
+
+    Error getError();
 
     final class ValidOutcome<T> implements Outcome<T> {
         private final T value;
@@ -47,6 +58,21 @@ public interface Outcome<T> {
         @Override
         public Result toResult() {
             return Result.ok();
+        }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public T get() {
+            return value;
+        }
+
+        @Override
+        public Error getError() {
+            throw new NullPointerException("Valid outcome does not contain an error");
         }
 
     }
@@ -71,6 +97,21 @@ public interface Outcome<T> {
         @Override
         public Result toResult() {
             return Result.error(error);
+        }
+
+        @Override
+        public boolean isValid() {
+            return false;
+        }
+
+        @Override
+        public T get() {
+            throw new NullPointerException("Error outcome does not contain an value");
+        }
+
+        @Override
+        public Error getError() {
+            return error;
         }
     }
 

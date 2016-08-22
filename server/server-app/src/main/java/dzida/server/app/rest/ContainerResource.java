@@ -22,6 +22,6 @@ public class ContainerResource extends AbstractResource {
     public void testGet(HttpRequest request, HttpResponder responder, @PathParam("nick") String nick) {
         boolean isPlayerPlaying = arbiter.isPlayerPlaying(nick);
         Result result = isPlayerPlaying ? Result.error("Player is currently logged in") : Result.ok();
-        sendResult(responder, result);
+        send(responder, result);
     }
 }

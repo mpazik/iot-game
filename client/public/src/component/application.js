@@ -17,7 +17,7 @@ define(function (require, exports, module) {
     const InstanceController = require('./instance/instance-controller');
     const ResourcesStore = require('../store/resources');
     const Chat = require('./chat');
-    var userNick;
+    var userToken;
 
     function JoinToInstance(instanceKey) {
         this.instanceKey = instanceKey;
@@ -52,41 +52,12 @@ define(function (require, exports, module) {
         return setState = f;
     });
 
-    function getCookie(cookieName) {
-        var name = cookieName + "=";
-        var ca = document.cookie.split(';');
-        for (var i = 0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') c = c.substring(1);
-            if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
-        }
-        return null;
-    }
-
-    function deleteCookie(name) {
-        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    }
-
-    function getAndCheckUserNick() {
-        return new Promise((resolve, reject) => {
-            const nick = getCookie('nick');
-            if (nick == null) {
-                return reject()
-            }
-            Request.Server.canPlayerLogin(nick).then(function () {
-                resolve(nick)
-            }).catch(function (error) {
-                reject(error);
-            });
-        });
-    }
-
-    function connectToArbiter(userNick) {
-        arbiterSocket = NetworkDispatcher.newSocket('arbiter', userNick);
+    function connectToArbiter(userToken) {
+        arbiterSocket = NetworkDispatcher.newSocket('arbiter', userToken);
         arbiterSocket.onMessage = (data) => {
             const message = arbiterProtocol.parse(data);
             if (message.constructor === JoinToInstance) {
-                InstanceController.connect(message.instanceKey, userNick);
+                InstanceController.connect(message.instanceKey, userToken);
                 Chat.joinToInstanceChannel(message.instanceKey);
             }
         };
@@ -103,19 +74,11 @@ define(function (require, exports, module) {
     }
 
     function connect() {
-        if (userNick == null) {
-            getAndCheckUserNick().then(nick=> {
-                userNick = nick;
-                connect();
-            }).catch(error => {
-                if (error) {
-                    console.error(error);
-                }
-                setState('need-authentication');
-            });
+        if (userToken == null) {
+            setState('need-authentication');
         } else {
-            connectToArbiter(userNick);
-            Chat.connect(userNick);
+            connectToArbiter(userToken);
+            Chat.connect(userToken);
             setState('connecting');
         }
     }
@@ -132,13 +95,12 @@ define(function (require, exports, module) {
             loadGameAssets();
             InstanceController.init(gameElement)
         },
-        setUser: function (nick) {
-            document.cookie = "nick=" + nick;
+        setUserToken: function (token) {
+            userToken = token;
         },
         connect,
         logout: function () {
-            userNick = null;
-            deleteCookie('nick');
+            userToken = null;
             NetworkDispatcher.disconnect();
         }
     };

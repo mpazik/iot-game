@@ -12,24 +12,22 @@ import java.security.SignatureException;
 import java.util.Map;
 import java.util.Optional;
 
-public class UserTokenDecryptor {
+public class UserTokenVerifier {
     private final JWTVerifier tokenVerifier;
 
-    public UserTokenDecryptor() {
+    public UserTokenVerifier() {
         tokenVerifier = new JWTVerifier(Configuration.getLoginTokenSecret());
     }
 
-    Optional<LoginToken> decryptToken(EncryptedLoginToken encryptedLoginToken) {
+    public Optional<LoginToken> verifyToken(EncryptedLoginToken encryptedLoginToken) {
         try {
             Map<String, Object> claims = tokenVerifier.verify(encryptedLoginToken.value);
             Object subject = claims.get("sub");
             Object nick = claims.get("nick");
-            if (subject == null || !(subject instanceof Integer) || nick == null || !(nick instanceof String)) {
-                return Optional.empty();
-            }
-            return Optional.of(new LoginToken(new Id<>((Integer) subject), (String) nick));
+            int userId = Integer.parseInt((String) subject);
+            return Optional.of(new LoginToken(new Id<>(userId), (String) nick));
 
-        } catch (JWTVerifyException | IllegalStateException e) {
+        } catch (JWTVerifyException | IllegalStateException | NumberFormatException e) {
             return Optional.empty();
         } catch (NoSuchAlgorithmException | IOException | SignatureException | InvalidKeyException e) {
             e.printStackTrace();

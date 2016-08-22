@@ -37,16 +37,6 @@ Request.Server = (function () {
                 }
             })
 
-        },
-        canPlayerLogin: function (nick) {
-            return get('can-player-login/' + nick, function (httpRequest, resolve, reject) {
-                if (httpRequest.status === 204) {
-                    resolve();
-                } else {
-                    const response = JSON.parse(httpRequest.responseText);
-                    reject(response.message);
-                }
-            });
         }
     }
 })();

@@ -135,8 +135,8 @@ Type and press enter to send a message.<br />
                 clientCommands.send(message);
             }
         },
-        connect (userNick) {
-            socket = NetworkDispatcher.newSocket('chat', userNick);
+        connect (userToken) {
+            socket = NetworkDispatcher.newSocket('chat', userToken);
             socket.onMessage = parseServerMessage;
             socket.onOpen = () => {
                 if (currentInstanceKey != null) {

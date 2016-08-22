@@ -2,6 +2,9 @@ package dzida.server.app.chat;
 
 import com.google.common.base.Strings;
 import dzida.server.app.instance.Instance;
+import dzida.server.app.user.EncryptedLoginToken;
+import dzida.server.app.user.LoginToken;
+import dzida.server.app.user.UserTokenVerifier;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.Connector;
 import dzida.server.core.basic.connection.ServerConnection;
@@ -12,13 +15,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class Chat implements VerifyingConnectionServer<String, String> {
+    private final UserTokenVerifier userTokenVerifier;
+
     private final Map<String, List<String>> channelConnections;
     private final Map<String, Consumer<String>> messageTargets;
 
     public Chat() {
+        userTokenVerifier = new UserTokenVerifier();
+
         channelConnections = new HashMap<>();
         messageTargets = new HashMap<>();
     }
@@ -28,23 +36,24 @@ public class Chat implements VerifyingConnectionServer<String, String> {
     }
 
     @Override
-    public Result verifyConnection(String nick) {
-        if (Strings.isNullOrEmpty(nick)) {
-            return Result.error("Nick has to be defined");
-        }
-        if (nick.length() < 3) {
-            return Result.error("Length of the userNick should be longer than 3 characters");
-        }
-        if (isChannelName(nick)) {
-            return Result.error("Nick can not starts with '#'");
+    public Result verifyConnection(String userToken) {
+        Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
+        if (!loginToken.isPresent()) {
+            return Result.error("User token is not valid");
         }
         return Result.ok();
     }
 
     @Override
-    public void onConnection(Connector<String> connector, String userNick) {
-        messageTargets.put(userNick, connector::onMessage);
-        ChatConnection chatConnection = new ChatConnection(userNick);
+    public void onConnection(Connector<String> connector, String userToken) {
+        Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
+        if (!loginToken.isPresent()) {
+            connector.onClose();
+            return;
+        }
+        String nick = loginToken.get().nick;
+        messageTargets.put(nick, connector::onMessage);
+        ChatConnection chatConnection = new ChatConnection(nick);
         connector.onOpen(chatConnection);
     }
 

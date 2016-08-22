@@ -105,11 +105,11 @@ define(function (require, exports, module) {
         network.sendCommand(new Commands.UseSkillOnWorldObject(data.skillId, data.worldObjectId));
     }
 
-    function connect(instanceKey, userNick) {
+    function connect(instanceKey, userToken) {
         if (currentInstanceKey != null) {
             network.disconnect();
         }
-        network.connect(instanceKey, userNick);
+        network.connect(instanceKey, userToken);
         currentInstanceKey = instanceKey;
         setState('connecting');
     }

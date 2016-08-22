@@ -45,9 +45,9 @@ define(function (require, exports, module) {
     }
 
     Network.State = State;
-    Network.prototype.connect = function (instanceKey, userNick) {
+    Network.prototype.connect = function (instanceKey, userToken) {
         var _this = this;
-        var socket = NetworkDispatcher.newSocket(instanceKey, userNick);
+        var socket = NetworkDispatcher.newSocket(instanceKey, userToken);
         this.updateState(State.CONNECTING);
         socket.onMessage = function (data) {
             const message = instanceProtocol.parse(data);

@@ -9,6 +9,9 @@ import dzida.server.app.instance.command.SpawnCharacterCommand;
 import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.protocol.json.JsonProtocol;
+import dzida.server.app.user.EncryptedLoginToken;
+import dzida.server.app.user.LoginToken;
+import dzida.server.app.user.UserTokenVerifier;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.Connector;
@@ -33,22 +36,28 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class InstanceServer implements VerifyingConnectionServer<String, String> {
     private final Instance instance;
-    private final Map<Id<Player>, ContainerConnection> connections = new HashMap<>();
     private final PlayerService playerService;
     private final Arbiter arbiter;
     private final JsonProtocol serializer;
-    private final Key<Instance> instanceKey;
     private final StateSynchroniser stateSynchroniser;
+    private final UserTokenVerifier userTokenVerifier;
+
+    private final Key<Instance> instanceKey;
+    private final Map<Id<Player>, ContainerConnection> connections;
 
     public InstanceServer(PlayerService playerService, Scheduler scheduler, Arbiter arbiter, Key<Instance> instanceKey, String instanceType, Integer difficultyLevel) {
         this.playerService = playerService;
         this.arbiter = arbiter;
-        this.instanceKey = instanceKey;
+        userTokenVerifier = new UserTokenVerifier();
 
         serializer = InstanceProtocol.createSerializer();
         Scenario scenario = new MapDescriptorStore().getScenario(instanceType, difficultyLevel);
         instance = new Instance(instanceKey.getValue(), scenario, scheduler);
         stateSynchroniser = new StateSynchroniser(instance, scenario);
+
+        this.instanceKey = instanceKey;
+        connections = new HashMap<>();
+
         instance.subscribeChange(stateSynchroniser::syncStateChange);
         instance.subscribeChange(gameEvent -> {
             if (gameEvent instanceof ScenarioEnd) {
@@ -65,6 +74,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
                 }
             }
         });
+
         instance.start();
     }
 
@@ -73,8 +83,13 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     }
 
     @Override
-    public Result verifyConnection(String connectionData) {
-        Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, connectionData);
+    public Result verifyConnection(String userToken) {
+        Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
+        if (!loginToken.isPresent()) {
+            return Result.error("User token is not valid");
+        }
+
+        Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, loginToken.get().nick);
         if (!playerIdOpt.isPresent()) {
             return Result.error("Can not authenticate player");
         }
@@ -82,8 +97,14 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     }
 
     @Override
-    public void onConnection(Connector<String> connector, String connectionData) {
-        Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, connectionData);
+    public void onConnection(Connector<String> connector, String userToken) {
+        Optional<LoginToken> loginToken = userTokenVerifier.verifyToken(new EncryptedLoginToken(userToken));
+        if (!loginToken.isPresent()) {
+            connector.onClose();
+            return;
+        }
+
+        Optional<Id<Player>> playerIdOpt = arbiter.authenticate(instanceKey, loginToken.get().nick);
         if (!playerIdOpt.isPresent()) {
             throw new RuntimeException("player id should be verified by the verifyConnection method at this point");
         }

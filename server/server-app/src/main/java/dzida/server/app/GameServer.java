@@ -8,8 +8,10 @@ import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.ContainerResource;
 import dzida.server.app.rest.LeaderboardResource;
+import dzida.server.app.rest.UserResource;
 import dzida.server.app.store.mapdb.PlayerStoreMapDb;
 import dzida.server.app.timesync.TimeSynchroniser;
+import dzida.server.app.user.UserService;
 import dzida.server.core.player.PlayerService;
 
 import java.io.IOException;
@@ -41,7 +43,11 @@ public final class GameServer {
         NettyHttpService service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())
                 .setPort(Configuration.getContainerRestPort())
-                .addHttpHandlers(ImmutableList.of(new ContainerResource(arbiter), new LeaderboardResource(leaderboard, playerStore)))
+                .addHttpHandlers(ImmutableList.of(
+                        new ContainerResource(arbiter),
+                        new LeaderboardResource(leaderboard, playerStore),
+                        new UserResource(new UserService())
+                ))
                 .build();
 
         service.startAsync();
