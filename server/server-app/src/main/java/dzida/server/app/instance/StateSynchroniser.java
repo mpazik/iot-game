@@ -2,7 +2,6 @@ package dzida.server.app.instance;
 
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.player.Player;
 
@@ -23,6 +22,7 @@ public class StateSynchroniser {
 
     public void registerCharacter(Id<Player> listenerId, Consumer<GameEvent> send) {
         listeners.put(listenerId, send);
+        sendInitialPacket(listenerId);
     }
 
     public void unregisterListener(Id<Player> listenerId) {
@@ -30,8 +30,8 @@ public class StateSynchroniser {
     }
 
 
-    public void sendInitialPacket(Id<Character> characterId, Id<Player> playerId, Player playerEntity) {
-        InitialMessage initialMessage = new InitialMessage(characterId, playerId, instance.getState(), scenario, playerEntity.getData());
+    public void sendInitialPacket(Id<Player> playerId) {
+        InitialMessage initialMessage = new InitialMessage(instance.getState(), scenario);
         listeners.get(playerId).accept(initialMessage);
     }
 
@@ -40,18 +40,12 @@ public class StateSynchroniser {
     }
 
     public static final class InitialMessage implements GameEvent {
-        Id<Character> characterId;
-        Id<Player> playerId;
         Map<String, Object> state;
         Scenario scenario;
-        Player.Data playerData;
 
-        public InitialMessage(Id<Character> characterId, Id<Player> playerId, Map<String, Object> state, Scenario scenario, dzida.server.core.player.Player.Data playerData) {
-            this.characterId = characterId;
-            this.playerId = playerId;
+        public InitialMessage(Map<String, Object> state, Scenario scenario) {
             this.state = state;
             this.scenario = scenario;
-            this.playerData = playerData;
         }
     }
 }

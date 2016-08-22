@@ -13,16 +13,19 @@ define(function (require) {
         created: function () {
             this.innerHTML = `
 <form>
-    <label>
+    <div class="form-group">
+    <label>Scenario</label>
         <select>
             <option value="small-island">Small Island - Survival</option>
         </select>
-    </label>
-    <label>
-        Difficulty Level:
+    </div>
+    <div class="form-group">
+        <label>Difficulty:</label>
         <input type="number" class="difficulty-level" required="required">
-    </label>
+    </div>
+    <div class="form-group">
     <input type="submit" value="Join!">
+    </div>
 </form>
 `;
         },

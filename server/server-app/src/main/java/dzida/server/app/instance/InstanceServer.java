@@ -106,8 +106,8 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         PlayerCharacter character = new PlayerCharacter(characterId, nick, playerId);
 
         instance.handleCommand(new SpawnCharacterCommand(character));
+        sendMessageToPlayer(playerId, new InstanceProtocol.UserCharacterMessage(playerId, characterId, loginToken.get().nick));
         stateSynchroniser.registerCharacter(playerId, sendToPlayer);
-        stateSynchroniser.sendInitialPacket(characterId, playerId, playerEntity);
         System.out.printf("Instance: %s - player %s joined \n", instanceKey, playerId);
         return Result.ok();
     }

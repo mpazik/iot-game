@@ -19,6 +19,7 @@ define(function (require, exports, module) {
         .registerParsingMessageType(22, Messages.WorldObjectCreated)
         .registerParsingMessageType(23, Messages.SkillUsedOnWorldObject)
         .registerParsingMessageType(24, Messages.WorldObjectRemoved)
+        .registerParsingMessageType(25, Messages.UserCharacter)
         .registerSerializationMessageType(2, Commands.Move)
         .registerSerializationMessageType(3, Commands.UseSkillOnCharacter)
         .registerSerializationMessageType(4, Commands.UseSkillOnWorldMap)

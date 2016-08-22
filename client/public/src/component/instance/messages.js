@@ -58,6 +58,11 @@ define(function (require, exports, module) {
         },
         WorldObjectRemoved: function (worldObjectId) {
             this.worldObjectId = worldObjectId;
+        },
+        UserCharacter: function (playerId, characterId, userNick) {
+            this.playerId = playerId;
+            this.characterId = characterId;
+            this.userNick = userNick;
         }
     };
 });

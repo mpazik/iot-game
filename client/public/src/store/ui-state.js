@@ -13,7 +13,7 @@ define(function (require, exports, module) {
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
         playerRespawnTimeState: MainPlayerStore.playerRespawnTimeState,
-        playerData: MainPlayerStore.playerData,
+        userNick: MainPlayerStore.userNick,
         scenario: ScenarioStore.data,
         scenarioType: new Publisher.StatePublisher(null, (push) => {
             ScenarioStore.data.subscribe(scenario => {

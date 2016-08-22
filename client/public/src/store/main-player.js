@@ -7,13 +7,14 @@ define(function (require, exports, module) {
 
     var playerId = null;
     var characterId = null;
+    var userNick = null;
     var timeOutToResetCooldown = null;
 
-    Dispatcher.messageStream.subscribe(Messages.InitialData, function (response) {
-        playerId = response.playerId;
-        characterId = response.characterId;
+    Dispatcher.messageStream.subscribe(Messages.UserCharacter, (data) => {
+        playerId = data.playerId;
+        characterId = data.characterId;
+        userNick = data.userNick;
     });
-
 
     module.exports = {
         // positions are recalculated in character renderer
@@ -21,11 +22,7 @@ define(function (require, exports, module) {
         positionInPixels: new Point(0, 0),
         playerId: () => playerId,
         characterId: () => characterId,
-        playerData: new Publisher.StatePublisher({}, (push) => {
-            Dispatcher.messageStream.subscribe(Messages.InitialData, (data) => {
-                push(data.playerData)
-            });
-        }),
+        userNick: () => userNick,
         playerLiveState: new Publisher.StatePublisher(false, (push) => {
             Dispatcher.messageStream.subscribe(Messages.InitialData, () => {
                 push(true)

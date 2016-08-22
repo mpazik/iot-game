@@ -10,7 +10,10 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
+import dzida.server.core.character.model.Character;
+import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
+import dzida.server.core.player.Player;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.skill.event.CharacterGotDamage;
@@ -45,6 +48,19 @@ public class InstanceProtocol {
                 .registerSerializationMessageType(22, WorldObjectCreated.class)
                 .registerSerializationMessageType(23, SkillUsedOnWorldObject.class)
                 .registerSerializationMessageType(24, WorldObjectRemoved.class)
+                .registerSerializationMessageType(25, UserCharacterMessage.class)
                 .build();
+    }
+
+    public static final class UserCharacterMessage implements GameEvent {
+        public final Id<Player> playerId;
+        public final Id<Character> characterId;
+        public final String userNick;
+
+        public UserCharacterMessage(Id<Player> playerId, Id<Character> characterId, String userNick) {
+            this.playerId = playerId;
+            this.characterId = characterId;
+            this.userNick = userNick;
+        }
     }
 }
