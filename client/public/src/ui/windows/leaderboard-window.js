@@ -1,4 +1,6 @@
-define(function () {
+define(function (require) {
+    const Leaderboard = require('../../component/leaderboard');
+
     return createUiElement('leaderboard-window', {
         type: 'window',
         properties: {
@@ -18,7 +20,7 @@ define(function () {
         },
         attached: function () {
             const table = this.getElementsByTagName('tbody')[0];
-            Request.Server.leaderboard().then(function (data) {
+            Leaderboard.leaderboard().then(function (data) {
                 table.innerHTML = data.map(function (rowData) {
                     return `<tr><td>${rowData.position}.</td><td>${rowData.nick}</td><td>${rowData.record}</td>`;
                 }).join('\n');
