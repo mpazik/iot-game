@@ -17,6 +17,11 @@ define(function (require, exports, module) {
             Dispatcher.messageStream.subscribe(Messages.ServerMessage, function (event) {
                 showMessage(push, event.message);
             });
+        }),
+        errorToShowState: new Publisher.StatePublisher(null, push => {
+            Dispatcher.messageStream.subscribe(Messages.ServerError, function (event) {
+                push(event.message);
+            });
         })
     };
 });

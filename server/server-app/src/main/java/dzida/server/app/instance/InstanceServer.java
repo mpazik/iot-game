@@ -89,6 +89,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
         Id<User> userId = loginToken.get().userId;
         String userNick = loginToken.get().nick;
+        if (connections.containsKey(userId)) {
+            return Result.error("User is already logged in.");
+        }
         if (!arbiter.isUserOnInstance(instanceKey, userId)) {
             return Result.error("Player is not assigned to the instance: " + instanceKey);
         }

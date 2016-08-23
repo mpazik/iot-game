@@ -121,6 +121,17 @@ game-message {
     width: 100%;
 }
 
+server-error {
+    top: 30%;
+    font-weight: bold;
+    color: #c20101;
+    text-shadow: 0 0 20px #FFFFFF;
+    font-size: 32px;
+    pointer-events: none;
+    text-align: center;
+    width: 100%;
+}
+
 .game-state {
     font-size: 44px;
     width: 100%;

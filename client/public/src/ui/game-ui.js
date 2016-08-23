@@ -10,6 +10,7 @@ define(function (require) {
         require('./ui-fragments/action-bar'),
         require('./ui-fragments/cooldown-bar'),
         require('./ui-fragments/game-message'),
+        require('./ui-fragments/server-error'),
         require('./ui-fragments/screen/loading-screen'),
         require('./ui-fragments/screen/disconnected-screen'),
         require('./ui-fragments/screen/connecting'),
@@ -56,7 +57,7 @@ define(function (require) {
     document.registerElement('game-ui', {prototype: gameUiTag});
 
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
-        'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage', 'chatState'];
+        'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage', 'serverError', 'chatState'];
 
     function initUi(gameUiElement) {
         const windowRegister = new Map();

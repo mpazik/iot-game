@@ -30,6 +30,9 @@ define(function (require, exports, module) {
         ServerMessage: function (message) {
             this.message = message;
         },
+        ServerError: function (error) {
+            this.message = error;
+        },
         ScenarioEnd: function (resolution) {
             this.resolution = resolution;
         },

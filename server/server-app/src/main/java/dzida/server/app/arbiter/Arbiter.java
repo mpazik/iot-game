@@ -44,6 +44,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final Set<Key<Instance>> initialInstances;
     private final Key<Instance> defaultInstance;
     private final Set<Key<Instance>> instancesToShutdown;
+    private final Set<Id<User>> connectedUsers;
 
     public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, Leaderboard leaderboard) {
         this.serverDispatcher = serverDispatcher;
@@ -61,6 +62,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
                 .collect(Collectors.toSet());
         instancesToShutdown = new HashSet<>();
         defaultInstance = new Key<>(Configuration.getInitialInstances()[0]);
+        connectedUsers = new HashSet<>();
     }
 
     public void start() {
@@ -99,6 +101,10 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         }
 
         Id<User> userId = loginToken.get().userId;
+        if (connectedUsers.contains(userId)) {
+            return Result.error("User is already logged in.");
+        }
+        connectedUsers.add(userId);
 
         ArbiterConnection arbiterConnection = new ArbiterConnection(userId, connector);
         connector.onOpen(arbiterConnection);
@@ -175,6 +181,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
         @Override
         public void close() {
+            connectedUsers.remove(userId);
             usersInstances.remove(userId);
         }
     }

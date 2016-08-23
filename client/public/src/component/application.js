@@ -15,6 +15,7 @@ define(function (require, exports, module) {
     const NetworkDispatcher = require('./network-dispatcher');
     const JsonProtocol = require('../common/basic/json-protocol');
     const InstanceController = require('./instance/instance-controller');
+    const Messages = require('./instance/messages');
     const ResourcesStore = require('../store/resources');
     const Chat = require('./chat');
     const UserService = require('./user-service');
@@ -75,6 +76,11 @@ define(function (require, exports, module) {
             // connection could be closed due to invalid user token.
             UserService.clearUserToken();
         };
+        arbiterSocket.onError = (error) => {
+            const serverError = new Messages.ServerError(error);
+            Dispatcher.messageStream.publish(Messages.ServerError, serverError);
+            setState('disconnected');
+        }
     }
 
     function connect() {

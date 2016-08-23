@@ -42,6 +42,9 @@ public class Chat implements VerifyingConnectionServer<String, String> {
             return Result.error("Login to is invalid");
         }
         String nick = loginToken.get().nick;
+        if (messageTargets.containsKey(nick)) {
+            return Result.error("User is already logged in.");
+        }
         messageTargets.put(nick, connector::onMessage);
         ChatConnection chatConnection = new ChatConnection(nick);
         connector.onOpen(chatConnection);
