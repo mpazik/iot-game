@@ -78,7 +78,7 @@ Type and press enter to send a message.<br />
         },
         closed (channel) {
             if (channel === currentInstanceKey) {
-                displayMessage({type: 'command', text: `Connection with instance chat channel has been lost.`})
+                currentInstanceKey = null;
             } else {
                 displayMessage({type: 'command', text: `Connection with ${channel} chat channel has been lost.`})
             }
@@ -99,8 +99,14 @@ Type and press enter to send a message.<br />
             const i = args.indexOf(' ');
             const channel = args.slice(0, i);
             const j = args.indexOf(' ', i + 1);
-            const channelCommand = args.slice(i + 1, j).toLowerCase();
-            const channelCommandArgs = args.slice(j + 1);
+            var channelCommand;
+            var channelCommandArgs;
+            if (j === -1) {
+                channelCommand = args.slice(i + 1).toLowerCase();
+            } else {
+                channelCommand = args.slice(i + 1, j).toLowerCase();
+                channelCommandArgs = args.slice(j + 1);
+            }
             if (!channelCommands.hasOwnProperty(channelCommand)) {
                 console.error(`Unsupported channel command: ${channelCommand}`);
                 return
@@ -149,7 +155,14 @@ Type and press enter to send a message.<br />
                 setState('disconnected')
             };
         },
+        quiteFromInstanceChannel () {
+            socket.send(`QUIT ${currentInstanceKey}`);
+            currentInstanceKey = null;
+        },
         joinToInstanceChannel (instanceKey) {
+            if (currentInstanceKey != null) {
+                this.quiteFromInstanceChannel();
+            }
             currentInstanceKey = '#' + instanceKey;
             if (statePublisher.value === 'connected') {
                 socket.send(`JOIN ${currentInstanceKey}`);

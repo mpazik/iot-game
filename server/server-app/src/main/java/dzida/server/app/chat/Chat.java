@@ -51,8 +51,9 @@ public class Chat implements VerifyingConnectionServer<String, String> {
     public void createInstanceChannel(Key<Instance> instanceKey) {
         String channelName = chanelNameFromInstanceKey(instanceKey);
         channelConnections.put(channelName, new ArrayList<>());
-        messageTargets.put(channelName, message -> channelConnections.get(channelName)
-                .forEach(nick -> messageTargets.get(nick).accept("CHANNEL " + channelName + " " + message))
+        messageTargets.put(channelName,
+                message -> channelConnections.get(channelName)
+                        .forEach(nick -> messageTargets.get(nick).accept("CHANNEL " + channelName + " " + message))
         );
     }
 
@@ -114,6 +115,10 @@ public class Chat implements VerifyingConnectionServer<String, String> {
             if (!channelNameValidation(channelName)) {
                 return;
             }
+            if (!channelConnections.containsKey(channelName)) {
+                response("ERROR channel: " + channelName + ", does not have user: " + userNick);
+                return;
+            }
             channelConnections.get(channelName).remove(userNick);
             messageTargets.get(channelName).accept("QUITED " + userNick);
         }
@@ -157,6 +162,11 @@ public class Chat implements VerifyingConnectionServer<String, String> {
             }
             if (!channelConnections.containsKey(channelName)) {
                 response("ERROR channel: " + channelName + ", does not exist.");
+                return;
+            }
+            if (channelConnections.get(channelName).contains(userNick)) {
+                response("ERROR channel: " + channelName + ", already has user: " + userNick + ".");
+                return;
             }
             channelConnections.get(channelName).add(userNick);
             messageTargets.get(channelName).accept("JOINED " + userNick);
@@ -165,7 +175,11 @@ public class Chat implements VerifyingConnectionServer<String, String> {
         @Override
         public void close() {
             messageTargets.remove(userNick);
-            channelConnections.forEach((channelName, users) -> users.remove(userNick));
+            channelConnections.forEach((channelName, users) -> {
+                if (users.contains(userNick)) {
+                    quiteFromChannel(channelName);
+                }
+            });
         }
     }
 
