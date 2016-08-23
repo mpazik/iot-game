@@ -80,7 +80,7 @@ define(function (require, exports, module) {
     function connect() {
         InstanceController.readyToConnect();
         if (UserService.userToken == null) {
-            UserService.reissueUserToken()
+            UserService.tryLoginUsingClientData()
                 .then(connect)
                 .catch(() => {
                     setState('need-authentication');
