@@ -40,9 +40,7 @@ public class UserService {
             return Result.error("User with " + nick + " is already registered.");
         }
         String hashedPassword = passwordHash.createHash(password);
-        userStore.registerNewUser(nick, email, hashedPassword);
-
-        return Result.ok();
+        return userStore.registerNewUser(nick, email, hashedPassword).toResult();
     }
 
     public boolean hadNonAlphaCharacter(String nick) {

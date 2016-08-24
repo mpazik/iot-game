@@ -3,6 +3,7 @@ package dzida.server.app.store.database;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.user.User;
 import dzida.server.app.user.UserStore;
+import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.entity.Id;
 
 import java.util.Optional;
@@ -18,8 +19,8 @@ public class UserStoreDb implements UserStore {
     }
 
     @Override
-    public Id<User> registerNewUser(String nick, String email, String password) {
-        return connectionProvider.withSqlFactory(sqlQueryFactory -> {
+    public Outcome<Id<User>> registerNewUser(String nick, String email, String password) {
+        return connectionProvider.withSqlFactorySafe(sqlQueryFactory -> {
             Integer userId = sqlQueryFactory.insert(userRegistration)
                     .set(userRegistration.nick, nick)
                     .set(userRegistration.email, email)
@@ -29,7 +30,7 @@ public class UserStoreDb implements UserStore {
                     .set(userPassword.userId, userId)
                     .set(userPassword.password, password)
                     .execute();
-            return new Id<>(userId);
+            return new Id<User>(userId);
         });
     }
 

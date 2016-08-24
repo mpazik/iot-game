@@ -4,6 +4,7 @@ import com.querydsl.sql.Configuration;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
+import dzida.server.core.basic.Outcome;
 
 import java.sql.Connection;
 import java.util.function.Consumer;
@@ -38,5 +39,14 @@ public class ConnectionProvider {
     public <T> T withSqlFactory(Function<SQLQueryFactory, T> sqlQueryFactoryConsumer) {
         SQLQueryFactory queryFactory = new SQLQueryFactory(queryDslConfiguration, () -> connection);
         return sqlQueryFactoryConsumer.apply(queryFactory);
+    }
+
+    public <T> Outcome<T> withSqlFactorySafe(Function<SQLQueryFactory, T> sqlQueryFactoryConsumer) {
+        SQLQueryFactory queryFactory = new SQLQueryFactory(queryDslConfiguration, () -> connection);
+        try {
+            return Outcome.ok(sqlQueryFactoryConsumer.apply(queryFactory));
+        } catch (RuntimeException e) {
+            return Outcome.error(e.getMessage());
+        }
     }
 }
