@@ -47,6 +47,22 @@ public class Configuration {
         return "true".equals(System.getProperty("devMode"));
     }
 
+    public static String databaseUrl() {
+        return System.getProperty("databaseUrl", "localhost:5432");
+    }
+
+    public static String databaseName() {
+        return System.getProperty("databaseName", "test_db");
+    }
+
+    public static String databaseUser() {
+        return System.getProperty("databaseUser", "test_user");
+    }
+
+    public static String databasePassword() {
+        return System.getProperty("databasePassword", "test_password");
+    }
+
     public static void pirnt() {
         System.out.println("Configuration listing");
         System.out.println("---------------------");
