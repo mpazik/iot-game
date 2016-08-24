@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -73,6 +74,11 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         initialInstances.forEach(instanceKey -> {
             startInstance(instanceKey.getValue(), null);
         });
+    }
+
+    public void close() {
+        List<Key<Instance>> instanceKeysCopy = instances.keySet().stream().collect(Collectors.toList());
+        instanceKeysCopy.forEach(this::shutdownInstanced);
     }
 
     public Key<Instance> startInstance(String instanceType, Integer difficultyLevel) {

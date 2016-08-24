@@ -72,7 +72,7 @@ public class Configuration {
     private static String getProperty(String key) {
         String property = System.getProperty(key);
         if (property == null) {
-            throw new NullPointerException("Property for key: " + key + " is not set. Start app with 'maven:exec' plugin");
+            throw new NullPointerException("Property for key: " + key + " is not set. Look at mvn:exec configuration to see what properties are expected.");
         }
         return property;
     }

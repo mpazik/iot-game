@@ -16,6 +16,7 @@ import dzida.server.app.store.database.UserStoreDb;
 import dzida.server.app.timesync.TimeSynchroniser;
 import dzida.server.app.user.UserService;
 import dzida.server.app.user.UserStore;
+import dzida.server.core.profiling.Profilings;
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
@@ -24,39 +25,51 @@ import java.io.IOException;
 public final class GameServer {
     private static final Logger log = Logger.getLogger(GameServer.class);
 
+    private NettyHttpService service;
+    private WebSocketServer webSocketServer;
+    private ConnectionManager connectionManager;
+    private Arbiter arbiter;
+
     public static void main(String[] args) throws IOException {
-        long start = System.nanoTime();
+        GameServer gameServer = new GameServer();
 
         Configuration.print();
 
-        ConnectionManager connectionManager = new ConnectionManager();
+        Profilings.printTime("Server start time", gameServer::start);
+
+        gameServer.service.awaitTerminated();
+    }
+
+    private void start() {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                shutdown();
+            }
+        });
+
+        connectionManager = new ConnectionManager();
         connectionManager.connect();
         ConnectionProvider connectionProvider = connectionManager.getConnectionProvider();
 
         UserStore userStore = new UserStoreDb(connectionProvider);
         UserService userService = new UserService(userStore);
 
+        webSocketServer = new WebSocketServer();
         int gameServerPort = Configuration.getGameServerPort();
-        WebSocketServer webSocketServer = new WebSocketServer();
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
 
         Leaderboard leaderboard = new Leaderboard();
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         Chat chat = new Chat();
-        Arbiter arbiter = new Arbiter(serverDispatcher, chat, scheduler, leaderboard);
+        arbiter = new Arbiter(serverDispatcher, chat, scheduler, leaderboard);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);
         serverDispatcher.addServer("time", timeSynchroniser);
 
-        webSocketServer.start(gameServerPort, serverDispatcher);
-        arbiter.start();
-
-        long elapsedTime = System.nanoTime() - start;
-        log.info("Started in: " + ((double) (elapsedTime / 1000) / 1000) + "ms");
-
-        NettyHttpService service = NettyHttpService.builder()
+        service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())
                 .setPort(Configuration.getContainerRestPort())
                 .setExceptionHandler(new ExceptionHandler() {
@@ -72,8 +85,16 @@ public final class GameServer {
                 ))
                 .build();
 
+        webSocketServer.start(gameServerPort, serverDispatcher);
+        arbiter.start();
+
+        log.info("starting");
         service.startAsync();
-        service.awaitTerminated();
+    }
+
+    private void shutdown() {
+        arbiter.close();
+        service.stopAsync();
         webSocketServer.shootDown();
         connectionManager.close();
     }
