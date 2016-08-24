@@ -26,6 +26,7 @@ import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
 import dzida.server.core.scenario.ScenarioEnd;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,8 @@ import java.util.function.Consumer;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class InstanceServer implements VerifyingConnectionServer<String, String> {
+    private static final Logger log = Logger.getLogger(InstanceServer.class);
+
     private final Instance instance;
     private final Arbiter arbiter;
     private final JsonProtocol serializer;
@@ -107,7 +110,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         instance.handleCommand(new SpawnCharacterCommand(character));
         sendMessageToPlayer(userId, new InstanceProtocol.UserCharacterMessage(characterId, userId, userNick));
         stateSynchroniser.registerCharacter(userId, sendToPlayer);
-        System.out.printf("Instance: %s - user %s joined \n", instanceKey, userId);
+        log.info("Instance: " + instanceKey + " - user " + userId + " joined \n");
         return Result.ok();
     }
 
@@ -151,7 +154,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         public void close() {
             stateSynchroniser.unregisterListener(userId);
             instance.handleCommand(new KillCharacterCommand(characterId));
-            System.out.printf("Instance: %s - user %s quit \n", instanceKey, userId);
+            log.info("Instance: " + instanceKey + " - user " + userId + " quit");
 
             connections.remove(userId);
         }

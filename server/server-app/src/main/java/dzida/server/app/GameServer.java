@@ -16,11 +16,13 @@ import dzida.server.app.store.database.UserStoreDb;
 import dzida.server.app.timesync.TimeSynchroniser;
 import dzida.server.app.user.UserService;
 import dzida.server.app.user.UserStore;
+import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import java.io.IOException;
 
 public final class GameServer {
+    private static final Logger log = Logger.getLogger(GameServer.class);
 
     public static void main(String[] args) throws IOException {
         long start = System.nanoTime();
@@ -52,7 +54,7 @@ public final class GameServer {
         arbiter.start();
 
         long elapsedTime = System.nanoTime() - start;
-        System.out.println("Started in: " + ((double) (elapsedTime / 1000) / 1000) + "ms");
+        log.info("Started in: " + ((double) (elapsedTime / 1000) / 1000) + "ms");
 
         NettyHttpService service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())

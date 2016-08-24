@@ -1,11 +1,15 @@
 package dzida.server.app;
 
+import org.apache.log4j.Logger;
+
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.Properties;
 
 public class Configuration {
+    private static final Logger log = Logger.getLogger(Configuration.class);
+
     public static String getContainerHost() {
         return System.getProperty("containerHost", "localhost");
     }
@@ -74,16 +78,16 @@ public class Configuration {
     }
 
     public static void print() {
-        System.out.println("Configuration listing");
-        System.out.println("---------------------");
-        System.out.println("dev mode: " + isDevMode());
-        System.out.println("container host: " + getContainerHost());
-        System.out.println("container rest port: " + getContainerRestPort());
-        System.out.println("container first instance port: " + getGameServerPort());
-        System.out.println("static server instanceKey: " + getStaticServerAddress());
+        log.info("Configuration listing");
+        log.info("---------------------");
+        log.info("dev mode: " + isDevMode());
+        log.info("container host: " + getContainerHost());
+        log.info("container rest port: " + getContainerRestPort());
+        log.info("container first instance port: " + getGameServerPort());
+        log.info("static server instanceKey: " + getStaticServerAddress());
         //noinspection ConfusingArgumentToVarargsMethod
-        System.out.println("initial instances: " + String.join(",", getInitialInstances()));
-        System.out.println("server time offset " + getServerTimeOffset());
+        log.info("initial instances: " + String.join(",", getInitialInstances()));
+        log.info("server time offset " + getServerTimeOffset());
 
         Properties p = System.getProperties();
         Enumeration keys = p.keys();
@@ -93,9 +97,9 @@ public class Configuration {
                 continue;
             }
             String value = (String) p.get(key);
-            System.out.println(key + ": " + value);
+            log.info(key + ": " + value);
         }
 
-        System.out.println("---------------------\n");
+        log.info("---------------------\n");
     }
 }

@@ -1,6 +1,7 @@
 package dzida.server.app.database;
 
 import dzida.server.app.Configuration;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -8,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionManager {
+    private static final Logger log = Logger.getLogger(ConnectionManager.class);
     private Connection connection;
 
     public void connect() {
@@ -16,7 +18,7 @@ public class ConnectionManager {
             connection = DriverManager.getConnection(postgresUrl(), Configuration.databaseUser(), Configuration.databasePassword());
 
             DatabaseMetaData dbmd = connection.getMetaData();
-            System.out.println("Connected with " + dbmd.getDriverName() +
+            log.info("Connected with " + dbmd.getDriverName() +
                     " " + dbmd.getDriverVersion() + "{ " + dbmd.getDriverMajorVersion() + "," + dbmd.getDriverMinorVersion() + " }" +
                     " to " + dbmd.getDatabaseProductName() + " " + dbmd.getDatabaseProductVersion() + "\n");
 
@@ -38,7 +40,7 @@ public class ConnectionManager {
                 throw new IllegalStateException("Can not close not open database connection");
             }
             connection.close();
-            System.out.println("Closed connection with database.");
+            log.info("Closed connection with database.");
         } catch (SQLException | IllegalStateException e) {
             e.printStackTrace();
         }

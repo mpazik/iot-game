@@ -19,6 +19,7 @@ import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.connection.VerifyingConnectionServer;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +33,8 @@ import java.util.stream.Collectors;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class Arbiter implements VerifyingConnectionServer<String, String> {
+    private static final Logger log = Logger.getLogger(Arbiter.class);
+
     private final ServerDispatcher serverDispatcher;
     private final Chat chat;
     private final Scheduler scheduler;
@@ -66,7 +69,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     }
 
     public void start() {
-        System.out.println("Arbiter: started system");
+        log.info("Arbiter: started system");
         initialInstances.forEach(instanceKey -> {
             startInstance(instanceKey.getValue(), null);
         });
@@ -82,7 +85,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
         instances.put(instanceKey, instanceServer);
         chat.createInstanceChannel(instanceKey);
-        System.out.println("Arbiter: started instance: " + instanceKey);
+        log.info("Arbiter: started instance: " + instanceKey);
         return instanceKey;
     }
 
@@ -129,7 +132,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         serverDispatcher.removeServer(instanceKey.getValue());
         instances.remove(instanceKey);
         chat.closeInstanceChannel(instanceKey);
-        System.out.println("Arbiter: shutdown instance: " + instanceKey);
+        log.info("Arbiter: shutdown instance: " + instanceKey);
     }
 
     private final class ArbiterConnection implements ServerConnection<String> {
@@ -161,7 +164,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         public void movePlayerToInstance(Key<Instance> newInstanceKey) {
             usersInstances.put(userId, newInstanceKey);
             connector.onMessage(arbiterProtocol.serializeMessage(new JoinToInstance(newInstanceKey)));
-            System.out.println("Arbiter: user: " + userId + " assigned to instance: " + newInstanceKey);
+            log.info("Arbiter: user: " + userId + " assigned to instance: " + newInstanceKey);
         }
 
         private void removePlayerFromLastInstance() {
@@ -169,7 +172,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
             if (lastInstanceKey == null) return;
             InstanceServer instanceServer = instances.get(lastInstanceKey);
             instanceServer.disconnectPlayer(userId);
-            System.out.println("Arbiter: user: " + userId + " removed from instance: " + lastInstanceKey);
+            log.info("Arbiter: user: " + userId + " removed from instance: " + lastInstanceKey);
             tryToKillInstance(lastInstanceKey);
         }
 

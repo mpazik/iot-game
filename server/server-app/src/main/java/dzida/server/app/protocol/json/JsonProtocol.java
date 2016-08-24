@@ -8,12 +8,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
+import org.apache.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class JsonProtocol {
+    private static final Logger log = Logger.getLogger(JsonProtocol.class);
+
     private final Gson gson;
     private final Map<Integer, Class<?>> parsingMessageTypes;
     private final Map<Class<?>, Integer> serializationMessageTypes;
@@ -46,7 +49,7 @@ public final class JsonProtocol {
         //noinspection SuspiciousMethodCalls
         Integer typeCode = serializationMessageTypes.get(message.getClass());
         if (typeCode == null) {
-            System.err.println("Trying to serialized not registered object: " + message);
+            log.error("Trying to serialized not registered object: " + message);
             return null;
         }
         return gson.toJson(ImmutableList.of(typeCode, message));
