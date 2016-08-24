@@ -38,6 +38,7 @@ public class ConnectionManager {
                 throw new IllegalStateException("Can not close not open database connection");
             }
             connection.close();
+            System.out.println("Closed connection with database.");
         } catch (SQLException | IllegalStateException e) {
             e.printStackTrace();
         }

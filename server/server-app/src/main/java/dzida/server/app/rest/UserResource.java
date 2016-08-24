@@ -59,7 +59,7 @@ public class UserResource extends AbstractResource {
     @POST
     public void register(HttpRequest request, HttpResponder responder) {
         RegisterRequest registerRequest = parseJsonRequest(request, RegisterRequest.class);
-        Result registerResult = userService.register(registerRequest.nick, registerRequest.password);
+        Result registerResult = userService.register(registerRequest.nick, registerRequest.email, registerRequest.password);
         send(responder, registerResult);
     }
 

@@ -2,6 +2,8 @@ package dzida.server.app;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
+import java.util.Enumeration;
+import java.util.Properties;
 
 public class Configuration {
     public static String getContainerHost() {
@@ -48,22 +50,30 @@ public class Configuration {
     }
 
     public static String databaseUrl() {
-        return System.getProperty("databaseUrl", "localhost:5432");
+        return getProperty("database.host");
     }
 
     public static String databaseName() {
-        return System.getProperty("databaseName", "test_db");
+        return getProperty("database.name");
     }
 
     public static String databaseUser() {
-        return System.getProperty("databaseUser", "test_user");
+        return getProperty("database.user");
     }
 
     public static String databasePassword() {
-        return System.getProperty("databasePassword", "test_password");
+        return getProperty("database.password");
     }
 
-    public static void pirnt() {
+    private static String getProperty(String key) {
+        String property = System.getProperty(key);
+        if (property == null) {
+            throw new NullPointerException("Property for key: " + key + " is not set. Start app with 'maven:exec' plugin");
+        }
+        return property;
+    }
+
+    public static void print() {
         System.out.println("Configuration listing");
         System.out.println("---------------------");
         System.out.println("dev mode: " + isDevMode());
@@ -74,6 +84,18 @@ public class Configuration {
         //noinspection ConfusingArgumentToVarargsMethod
         System.out.println("initial instances: " + String.join(",", getInitialInstances()));
         System.out.println("server time offset " + getServerTimeOffset());
+
+        Properties p = System.getProperties();
+        Enumeration keys = p.keys();
+        while (keys.hasMoreElements()) {
+            String key = (String) keys.nextElement();
+            if (!key.startsWith("database")) {
+                continue;
+            }
+            String value = (String) p.get(key);
+            System.out.println(key + ": " + value);
+        }
+
         System.out.println("---------------------\n");
     }
 }

@@ -83,8 +83,12 @@ public class WebSocketServer {
     }
 
     public void shootDown() {
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+        try {
+            bossGroup.shutdownGracefully().sync();
+            workerGroup.shutdownGracefully().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
