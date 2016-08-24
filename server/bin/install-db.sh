@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
-DB_USER='test_user'
-DB_PASSWORD='test_db'
+DB_NAME=$1
+DB_USER=$2
 SCRIPT_PATH=$(dirname "$0")/
 SQL_DIR=${SCRIPT_PATH}../resources/sql/
+echo ${DB_NAME}
+echo ${DB_USER}
 
 POSTGRES_DIR=${SCRIPT_PATH}../server-app/target/postgres
 
@@ -24,7 +26,7 @@ echo "Setup database."
 psql --dbname=postgres --username=$(whoami) --file=${SQL_DIR}test/instal.sql
 
 echo "Setup tables."
-psql --dbname=${DB_PASSWORD} --username=${DB_USER} --file=${SQL_DIR}create-tables.sql
+psql --dbname=${DB_NAME} --username=${DB_USER} --file=${SQL_DIR}create-tables.sql
 
 echo "Setup data."
-psql --dbname=${DB_PASSWORD} --username=${DB_USER} --file=${SQL_DIR}test/test-data.sql
+psql --dbname=${DB_NAME} --username=${DB_USER} --file=${SQL_DIR}test/test-data.sql
