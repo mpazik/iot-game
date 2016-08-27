@@ -11,3 +11,18 @@ CREATE TABLE user_password (
   password   TEXT               NOT NULL,
   created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE arbiter_event (
+  id         SERIAL PRIMARY KEY NOT NULL,
+  type       TEXT               NOT NULL,
+  data       JSON               NOT NULL,
+  created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE scenario_event (
+  id          SERIAL PRIMARY KEY NOT NULL,
+  scenario_id SERIAL             NOT NULL,
+  type        TEXT               NOT NULL,
+  data        JSON               NOT NULL,
+  created_at  TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

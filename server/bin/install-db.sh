@@ -24,6 +24,7 @@ sleep 3
 
 echo "Setup database."
 psql --dbname=postgres --username=$(whoami) --file=${SQL_DIR}test/instal.sql
+psql --dbname=${DB_NAME} --username=$(whoami) --file=${SQL_DIR}root-commands.sql
 
 echo "Setup tables."
 psql --dbname=${DB_NAME} --username=${DB_USER} --file=${SQL_DIR}create-tables.sql

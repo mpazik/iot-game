@@ -37,7 +37,7 @@ public class ConnectionManager {
     public void close() {
         try {
             if (connection == null) {
-                throw new IllegalStateException("Can not close not open database connection");
+                throw new IllegalStateException("Can not stop not open database connection");
             }
             connection.close();
             log.info("Closed connection with database.");

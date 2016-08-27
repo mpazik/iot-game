@@ -5,13 +5,17 @@ import co.cask.http.HttpResponder;
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.arbiter.Arbiter;
+import dzida.server.app.arbiter.ArbiterStore;
 import dzida.server.app.chat.Chat;
 import dzida.server.app.database.ConnectionManager;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.dispatcher.ServerDispatcher;
+import dzida.server.app.instance.ScenarioStore;
 import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.rest.UserResource;
+import dzida.server.app.store.database.ArbiterStoreDb;
+import dzida.server.app.store.database.ScenarioStoreDb;
 import dzida.server.app.store.database.UserStoreDb;
 import dzida.server.app.timesync.TimeSynchroniser;
 import dzida.server.app.user.UserService;
@@ -52,6 +56,8 @@ public final class GameServer {
         connectionManager.connect();
         ConnectionProvider connectionProvider = connectionManager.getConnectionProvider();
 
+        ArbiterStore arbiterStore = new ArbiterStoreDb(connectionProvider);
+        ScenarioStore scenarioStore = new ScenarioStoreDb(connectionProvider);
         UserStore userStore = new UserStoreDb(connectionProvider);
         UserService userService = new UserService(userStore);
 
@@ -62,7 +68,7 @@ public final class GameServer {
         Leaderboard leaderboard = new Leaderboard();
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         Chat chat = new Chat();
-        arbiter = new Arbiter(serverDispatcher, chat, scheduler, leaderboard);
+        arbiter = new Arbiter(serverDispatcher, chat, scheduler, leaderboard, arbiterStore, scenarioStore);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         serverDispatcher.addServer("arbiter", arbiter);
@@ -93,7 +99,7 @@ public final class GameServer {
     }
 
     private void shutdown() {
-        arbiter.close();
+        arbiter.stop();
         service.stopAsync();
         webSocketServer.shootDown();
         connectionManager.close();

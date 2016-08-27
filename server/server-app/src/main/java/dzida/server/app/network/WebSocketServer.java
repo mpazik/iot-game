@@ -114,7 +114,7 @@ public class WebSocketServer {
                 HttpHeaderUtil.setContentLength(res, res.content().readableBytes());
             }
 
-            // Send the response and close the connection if necessary.
+            // Send the response and stop the connection if necessary.
             ChannelFuture f = ctx.channel().writeAndFlush(res);
             if (!HttpHeaderUtil.isKeepAlive(req) || res.status().code() != 200) {
                 f.addListener(ChannelFutureListener.CLOSE);

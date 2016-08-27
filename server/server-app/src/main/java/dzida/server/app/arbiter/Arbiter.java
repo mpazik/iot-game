@@ -1,12 +1,17 @@
 package dzida.server.app.arbiter;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import dzida.server.app.Configuration;
 import dzida.server.app.Leaderboard;
 import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceServer;
+import dzida.server.app.instance.ScenarioStore;
+import dzida.server.app.map.descriptor.OpenWorld;
+import dzida.server.app.map.descriptor.Scenario;
+import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.protocol.json.JsonProtocol;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
@@ -19,14 +24,13 @@ import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.connection.VerifyingConnectionServer;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
-import org.apache.log4j.Logger;
+import dzida.server.core.basic.unit.Point;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,14 +38,14 @@ import java.util.stream.Collectors;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class Arbiter implements VerifyingConnectionServer<String, String> {
-    private static final Logger log = Logger.getLogger(Arbiter.class);
-
     private final ServerDispatcher serverDispatcher;
     private final Chat chat;
     private final Scheduler scheduler;
     private final Leaderboard leaderboard;
     private final JsonProtocol arbiterProtocol;
     private final UserTokenVerifier userTokenVerifier;
+    private final ArbiterStore arbiterStore;
+    private final ScenarioStore scenarioStore;
 
     private final Map<Id<User>, Key<Instance>> usersInstances;
     private final Map<Key<Instance>, InstanceServer> instances;
@@ -50,11 +54,13 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final Set<Key<Instance>> instancesToShutdown;
     private final Set<Id<User>> connectedUsers;
 
-    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, Leaderboard leaderboard) {
+    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, Leaderboard leaderboard, ArbiterStore arbiterStore, ScenarioStore scenarioStore) {
         this.serverDispatcher = serverDispatcher;
         this.chat = chat;
         this.scheduler = scheduler;
         this.leaderboard = leaderboard;
+        this.arbiterStore = arbiterStore;
+        this.scenarioStore = scenarioStore;
         arbiterProtocol = ArbiterProtocol.createSerializer();
         userTokenVerifier = new UserTokenVerifier();
 
@@ -70,36 +76,35 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     }
 
     public void start() {
-        log.info("Arbiter: started system");
+        arbiterStore.systemStarted();
         initialInstances.forEach(instanceKey -> {
-            startInstance(instanceKey.getValue(), null);
+            startInstance(instanceKey, new OpenWorld(new Key<>(instanceKey.getValue())));
         });
     }
 
-    public void close() {
+    public void stop() {
         List<Key<Instance>> instanceKeysCopy = instances.keySet().stream().collect(Collectors.toList());
-        instanceKeysCopy.forEach(this::shutdownInstanced);
+        instanceKeysCopy.forEach(this::stopInstance);
+        arbiterStore.systemStopped();
     }
 
-    public Key<Instance> startInstance(String instanceType, Integer difficultyLevel) {
-        Key<Instance> instanceKey = generateInstanceKey(instanceType, difficultyLevel);
-
+    public void startInstance(Key<Instance> instanceKey, Scenario scenario) {
+        arbiterStore.instanceStarted(instanceKey);
         String instanceKeyValue = instanceKey.getValue();
-        InstanceServer instanceServer = new InstanceServer(scheduler, this, leaderboard, instanceKey, instanceType, difficultyLevel);
+        InstanceServer instanceServer = new InstanceServer(scheduler, this, leaderboard, scenarioStore, instanceKey, scenario);
         instanceServer.start();
 
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
         instances.put(instanceKey, instanceServer);
         chat.createInstanceChannel(instanceKey);
-        log.info("Arbiter: started instance: " + instanceKey);
-        return instanceKey;
     }
 
-    private Key<Instance> generateInstanceKey(String instanceType, Integer difficultyLevel) {
-        if (difficultyLevel == null) {
-            return new Key<>(instanceType);
-        }
-        return new Key<>(instanceType + '_' + difficultyLevel + '_' + new Random().nextInt(10000000));
+    public void stopInstance(Key<Instance> instanceKey) {
+        serverDispatcher.removeServer(instanceKey.getValue());
+        instances.get(instanceKey).closeInstance();
+        instances.remove(instanceKey);
+        chat.closeInstanceChannel(instanceKey);
+        arbiterStore.instanceStopped(instanceKey);
     }
 
     @Override
@@ -125,20 +130,13 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         return usersInstances.get(userId).equals(instanceKey);
     }
 
-    public void endOfScenario(Key<Instance> instanceKey) {
+    public void instanceFinished(Key<Instance> instanceKey) {
         InstanceServer instanceServer = instances.get(instanceKey);
         if (instanceServer.isEmpty()) {
-            shutdownInstanced(instanceKey);
+            stopInstance(instanceKey);
         } else {
             instancesToShutdown.add(instanceKey);
         }
-    }
-
-    public void shutdownInstanced(Key<Instance> instanceKey) {
-        serverDispatcher.removeServer(instanceKey.getValue());
-        instances.remove(instanceKey);
-        chat.closeInstanceChannel(instanceKey);
-        log.info("Arbiter: shutdown instance: " + instanceKey);
     }
 
     private final class ArbiterConnection implements ServerConnection<String> {
@@ -157,7 +155,12 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
                     .is(JoinBattleCommand.class)
                     .then(command -> {
                         removePlayerFromLastInstance();
-                        Key<Instance> newInstanceKey = startInstance(command.map, command.difficultyLevel);
+                        Survival survival = new Survival(new Key<>(command.map), command.difficultyLevel, ImmutableList.of(
+                                new Survival.Spawn(new Point(19, 10)),
+                                new Survival.Spawn(new Point(19, 14))
+                        ), ImmutableSet.of(userId));
+                        Key<Instance> newInstanceKey = arbiterStore.createInstance();
+                        startInstance(newInstanceKey, survival);
                         movePlayerToInstance(newInstanceKey);
                     })
                     .is(GoHomeCommand.class)
@@ -170,7 +173,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         public void movePlayerToInstance(Key<Instance> newInstanceKey) {
             usersInstances.put(userId, newInstanceKey);
             connector.onMessage(arbiterProtocol.serializeMessage(new JoinToInstance(newInstanceKey)));
-            log.info("Arbiter: user: " + userId + " assigned to instance: " + newInstanceKey);
+            arbiterStore.userJoinedInstance(userId, newInstanceKey);
         }
 
         private void removePlayerFromLastInstance() {
@@ -178,13 +181,13 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
             if (lastInstanceKey == null) return;
             InstanceServer instanceServer = instances.get(lastInstanceKey);
             instanceServer.disconnectPlayer(userId);
-            log.info("Arbiter: user: " + userId + " removed from instance: " + lastInstanceKey);
+            arbiterStore.playerLeftInstance(userId, lastInstanceKey);
             tryToKillInstance(lastInstanceKey);
         }
 
         private void tryToKillInstance(Key<Instance> instanceKey) {
             if (instancesToShutdown.contains(instanceKey) && instances.get(instanceKey).isEmpty()) {
-                shutdownInstanced(instanceKey);
+                stopInstance(instanceKey);
             }
         }
 
@@ -192,6 +195,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         public void close() {
             connectedUsers.remove(userId);
             usersInstances.remove(userId);
+            removePlayerFromLastInstance();
         }
     }
 }

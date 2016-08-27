@@ -7,8 +7,8 @@ import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
-import dzida.server.app.map.descriptor.MapDescriptorStore;
 import dzida.server.app.map.descriptor.Scenario;
+import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.protocol.json.JsonProtocol;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
@@ -44,21 +44,25 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     private final StateSynchroniser stateSynchroniser;
     private final UserTokenVerifier userTokenVerifier;
     private final Leaderboard leaderboard;
+    private final ScenarioStore scenarioStore;
 
     private final Key<Instance> instanceKey;
+    private final Scenario scenario;
     private final Map<Id<User>, ContainerConnection> connections;
+    private Id<Scenario> scenarioId;
 
-    public InstanceServer(Scheduler scheduler, Arbiter arbiter, Leaderboard leaderboard, Key<Instance> instanceKey, String instanceType, Integer difficultyLevel) {
+    public InstanceServer(Scheduler scheduler, Arbiter arbiter, Leaderboard leaderboard, ScenarioStore scenarioStore, Key<Instance> instanceKey, Scenario scenario) {
         this.arbiter = arbiter;
         this.leaderboard = leaderboard;
+        this.scenarioStore = scenarioStore;
         userTokenVerifier = new UserTokenVerifier();
-
         serializer = InstanceProtocol.createSerializer();
-        Scenario scenario = new MapDescriptorStore().getScenario(instanceType, difficultyLevel);
         instance = new Instance(instanceKey.getValue(), scenario, scheduler);
         stateSynchroniser = new StateSynchroniser(instance, scenario);
 
         this.instanceKey = instanceKey;
+        this.scenario = scenario;
+
         connections = new HashMap<>();
     }
 
@@ -67,14 +71,19 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         instance.subscribeChange(gameEvent -> {
             if (gameEvent instanceof ScenarioEnd) {
                 ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;
-                arbiter.endOfScenario(instanceKey);
-                if (scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
-                    connections.keySet().forEach(userId -> {
-                        leaderboard.notePlayerScore(userId, scenarioEnd.difficultyLevel);
-                    });
+                scenarioStore.scenarioFinished(scenarioId, scenarioEnd);
+                arbiter.instanceFinished(instanceKey);
+                if (scenario instanceof Survival) {
+                    Survival survival = (Survival) scenario;
+                    if (scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
+                        connections.keySet().forEach(userId -> {
+                            leaderboard.notePlayerScore(userId, survival.getDifficultyLevel());
+                        });
+                    }
                 }
             }
         });
+        scenarioId = scenarioStore.scenarioStarted(scenario);
 
         instance.start();
     }
@@ -94,6 +103,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         String userNick = loginToken.get().nick;
         if (connections.containsKey(userId)) {
             return Result.error("User is already logged in.");
+        }
+        if (scenario instanceof Survival && !((Survival) scenario).getAttendees().contains(userId)) {
+            return Result.error("Player is not playing the scenario.");
         }
         if (!arbiter.isUserOnInstance(instanceKey, userId)) {
             return Result.error("Player is not assigned to the instance: " + instanceKey);
@@ -116,6 +128,12 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
     public boolean isEmpty() {
         return connections.isEmpty();
+    }
+
+    public void closeInstance() {
+        if (!scenarioStore.isScenarioFinished(scenarioId)) {
+            scenarioStore.scenarioFinished(scenarioId, new ScenarioEnd(ScenarioEnd.Resolution.Terminated));
+        }
     }
 
     public void disconnectPlayer(Id<User> userId) {

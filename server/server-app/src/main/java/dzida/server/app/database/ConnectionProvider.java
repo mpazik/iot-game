@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-// Consumer is used so in future, provider can easily use connection pool and close connection after doing query.
+// Consumer is used so in future, provider can easily use connection pool and stop connection after doing query.
 @SuppressWarnings("unused")
 public class ConnectionProvider {
 

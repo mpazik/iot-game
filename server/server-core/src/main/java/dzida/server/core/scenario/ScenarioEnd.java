@@ -4,15 +4,14 @@ import dzida.server.core.event.GameEvent;
 
 public class ScenarioEnd implements GameEvent {
     public final Resolution resolution;
-    public final int difficultyLevel;
 
-    public ScenarioEnd(Resolution resolution, int difficultyLevel) {
-        this.difficultyLevel = difficultyLevel;
+    public ScenarioEnd(Resolution resolution) {
         this.resolution = resolution;
     }
 
     public enum Resolution {
         Victory,
-        Defeat
+        Defeat,
+        Terminated
     }
 }
