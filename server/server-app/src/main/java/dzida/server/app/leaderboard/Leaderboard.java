@@ -1,4 +1,4 @@
-package dzida.server.app;
+package dzida.server.app.leaderboard;
 
 import dzida.server.app.user.User;
 import dzida.server.core.basic.entity.Id;

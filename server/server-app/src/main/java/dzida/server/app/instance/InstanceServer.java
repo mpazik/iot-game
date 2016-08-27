@@ -1,12 +1,12 @@
 package dzida.server.app.instance;
 
 import com.google.common.util.concurrent.Runnables;
-import dzida.server.app.Leaderboard;
 import dzida.server.app.arbiter.Arbiter;
 import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
+import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.protocol.json.JsonProtocol;

@@ -1,6 +1,5 @@
 package dzida.server.app.instance;
 
-import dzida.server.app.TimeServiceImpl;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.npc.AiService;
 import dzida.server.app.instance.npc.NpcBehaviour;
@@ -13,6 +12,7 @@ import dzida.server.app.store.http.loader.WorldMapLoader;
 import dzida.server.app.store.mapdb.WorldObjectStoreMapDb;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.app.store.memory.SkillStoreInMemory;
+import dzida.server.app.timesync.TimeServiceImpl;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
