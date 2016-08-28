@@ -7,7 +7,7 @@ import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceServer;
-import dzida.server.app.instance.ScenarioStore;
+import dzida.server.app.instance.scenario.ScenarioStore;
 import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.map.descriptor.OpenWorld;
 import dzida.server.app.map.descriptor.Scenario;

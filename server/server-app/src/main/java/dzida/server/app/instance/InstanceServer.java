@@ -6,6 +6,7 @@ import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
+import dzida.server.app.instance.scenario.ScenarioStore;
 import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
@@ -73,14 +74,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
                 ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;
                 scenarioStore.scenarioFinished(scenarioId, scenarioEnd);
                 arbiter.instanceFinished(instanceKey);
-                if (scenario instanceof Survival) {
-                    Survival survival = (Survival) scenario;
-                    if (scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
-                        connections.keySet().forEach(userId -> {
-                            leaderboard.notePlayerScore(userId, survival.getDifficultyLevel());
-                        });
-                    }
-                }
             }
         });
         scenarioId = scenarioStore.scenarioStarted(scenario);

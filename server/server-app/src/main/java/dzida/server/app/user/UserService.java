@@ -105,6 +105,10 @@ public class UserService {
 
         return new EncryptedLoginToken(loginTokenSigner.sign(claims));
     }
+
+    public String getUserNick(Id<User> userId) {
+        return userStore.getUserNick(userId);
+    }
 }
 
 

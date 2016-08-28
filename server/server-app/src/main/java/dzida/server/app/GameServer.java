@@ -10,7 +10,7 @@ import dzida.server.app.chat.Chat;
 import dzida.server.app.database.ConnectionManager;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.dispatcher.ServerDispatcher;
-import dzida.server.app.instance.ScenarioStore;
+import dzida.server.app.instance.scenario.ScenarioStore;
 import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.LeaderboardResource;
@@ -67,7 +67,7 @@ public final class GameServer {
         int gameServerPort = Configuration.getGameServerPort();
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
 
-        Leaderboard leaderboard = new Leaderboard();
+        Leaderboard leaderboard = new Leaderboard(userService, scenarioStore);
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         Chat chat = new Chat();
         arbiter = new Arbiter(serverDispatcher, chat, scheduler, leaderboard, arbiterStore, scenarioStore);
