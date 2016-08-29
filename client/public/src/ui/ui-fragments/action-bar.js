@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+define(function (require) {
     require('../elements/action-socket');
     const uiState = require('../../store/ui-state');
     const skillByKey = require('../../store/resources').skill;
@@ -21,25 +21,25 @@ define(function (require, exports, module) {
 
         attached: function () {
             const keyBinds = ['Q', 'W', 'E', 'R', '1', '2', '3', '4', '5'];
-            const actionBar = this;
 
-            function createSystemIcon(key, icon, keyBind, action) {
+            function createSystemIcon(key, icon, keyBind, title, action) {
                 var socket = document.createElement('action-socket');
                 if (icon) socket.setAttribute('icon', icon);
                 if (key) socket.setAttribute('key', key);
                 if (action) socket.addEventListener('action-triggered', action);
                 if (keyBind) socket.setAttribute('keyBind', keyBind);
+                if (title) socket.setAttribute('title', title);
                 return socket;
             }
 
             // init system bar
             const systemBar = this.getElementsByClassName("system-bar")[0];
-            var settingsButton = createSystemIcon('settings', 'icon-settings', 'S', function () {
+            var settingsButton = createSystemIcon('settings', 'icon-settings', 'S', 'Settings', function () {
                 userEventStream.publish('toggle-window', 'settings-window');
             });
             systemBar.appendChild(settingsButton);
 
-            var leaderboardButton = createSystemIcon('settings', 'icon-ranking', 'L', function () {
+            var leaderboardButton = createSystemIcon('leaderboard', 'icon-ranking', 'L', 'Leaderboard', function () {
                 userEventStream.publish('toggle-window', 'leaderboard-window');
             });
             systemBar.appendChild(leaderboardButton);
@@ -55,6 +55,7 @@ define(function (require, exports, module) {
                 if (skill) {
                     socket.setAttribute('icon', 'icon-' + skill.icon);
                     socket.setAttribute('key', skill.id);
+                    socket.setAttribute('title', skill.name);
                     socket.addEventListener('action-triggered', function (event) {
                         const skill = skillByKey(event.detail.key);
                         userEventStream.publish('skill-triggered', {skill});
