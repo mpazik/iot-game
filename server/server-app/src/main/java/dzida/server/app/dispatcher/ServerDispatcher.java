@@ -61,6 +61,7 @@ public class ServerDispatcher implements Server<String> {
     }
 
     public void removeServer(String serverKey) {
+        System.out.println("remove server:" + serverKey);
         servers.remove(serverKey);
     }
 

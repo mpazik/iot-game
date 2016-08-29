@@ -2,6 +2,7 @@ package dzida.server.app.arbiter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import dzida.server.app.Configuration;
 import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
@@ -97,6 +98,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
         instances.put(instanceKey, instanceServer);
         chat.createInstanceChannel(instanceKey);
+        cleanOldInstances();
     }
 
     public void stopInstance(Key<Instance> instanceKey) {
@@ -132,10 +134,18 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
     public void instanceFinished(Key<Instance> instanceKey) {
         InstanceServer instanceServer = instances.get(instanceKey);
-        if (instanceServer.isEmpty()) {
+        instancesToShutdown.add(instanceKey);
+    }
+
+    private void cleanOldInstances() {
+        instancesToShutdown.forEach(this::tryToStopInstance);
+        Iterables.removeIf(initialInstances, instanceKey -> !instances.containsKey(instanceKey));
+    }
+
+    private void tryToStopInstance(Key<Instance> instanceKey) {
+        System.out.println("trying to stop instance");
+        if (instancesToShutdown.contains(instanceKey) && instances.get(instanceKey).isEmpty()) {
             stopInstance(instanceKey);
-        } else {
-            instancesToShutdown.add(instanceKey);
         }
     }
 
@@ -182,20 +192,13 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
             InstanceServer instanceServer = instances.get(lastInstanceKey);
             instanceServer.disconnectPlayer(userId);
             arbiterStore.playerLeftInstance(userId, lastInstanceKey);
-            tryToKillInstance(lastInstanceKey);
-        }
-
-        private void tryToKillInstance(Key<Instance> instanceKey) {
-            if (instancesToShutdown.contains(instanceKey) && instances.get(instanceKey).isEmpty()) {
-                stopInstance(instanceKey);
-            }
         }
 
         @Override
         public void close() {
+            removePlayerFromLastInstance();
             connectedUsers.remove(userId);
             usersInstances.remove(userId);
-            removePlayerFromLastInstance();
         }
     }
 }

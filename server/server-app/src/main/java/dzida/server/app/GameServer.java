@@ -101,9 +101,9 @@ public final class GameServer {
     }
 
     private void shutdown() {
-        arbiter.stop();
         service.stopAsync();
         webSocketServer.shootDown();
+        arbiter.stop();
         connectionManager.close();
     }
 }
