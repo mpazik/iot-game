@@ -65,20 +65,21 @@ public final class GameServer {
         UserStore userStore = new UserStoreDb(connectionProvider);
         ChatStore chatStore = new ChatStoreDb(connectionProvider);
 
+        int gameServerPort = Configuration.getGameServerPort();
         UserService userService = new UserService(userStore);
         webSocketServer = new WebSocketServer();
-        int gameServerPort = Configuration.getGameServerPort();
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
 
-        Leaderboard leaderboard = new Leaderboard(userService, scenarioStore);
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         Chat chat = new Chat(chatStore);
-        arbiter = new Arbiter(serverDispatcher, chat, scheduler, leaderboard, arbiterStore, scenarioStore);
+        arbiter = new Arbiter(serverDispatcher, chat, scheduler, arbiterStore, scenarioStore);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);
         serverDispatcher.addServer("time", timeSynchroniser);
+
+        Leaderboard leaderboard = new Leaderboard(userService, scenarioStore);
 
         service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())

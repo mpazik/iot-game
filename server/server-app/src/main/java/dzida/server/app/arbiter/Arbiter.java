@@ -9,7 +9,6 @@ import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceServer;
 import dzida.server.app.instance.scenario.ScenarioStore;
-import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.map.descriptor.OpenWorld;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
@@ -42,7 +41,6 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final ServerDispatcher serverDispatcher;
     private final Chat chat;
     private final Scheduler scheduler;
-    private final Leaderboard leaderboard;
     private final JsonProtocol arbiterProtocol;
     private final UserTokenVerifier userTokenVerifier;
     private final ArbiterStore arbiterStore;
@@ -55,11 +53,10 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final Set<Key<Instance>> instancesToShutdown;
     private final Set<Id<User>> connectedUsers;
 
-    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, Leaderboard leaderboard, ArbiterStore arbiterStore, ScenarioStore scenarioStore) {
+    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, ArbiterStore arbiterStore, ScenarioStore scenarioStore) {
         this.serverDispatcher = serverDispatcher;
         this.chat = chat;
         this.scheduler = scheduler;
-        this.leaderboard = leaderboard;
         this.arbiterStore = arbiterStore;
         this.scenarioStore = scenarioStore;
         arbiterProtocol = ArbiterProtocol.createSerializer();
@@ -92,7 +89,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     public void startInstance(Key<Instance> instanceKey, Scenario scenario) {
         arbiterStore.instanceStarted(instanceKey);
         String instanceKeyValue = instanceKey.getValue();
-        InstanceServer instanceServer = new InstanceServer(scheduler, this, leaderboard, scenarioStore, instanceKey, scenario);
+        InstanceServer instanceServer = new InstanceServer(scheduler, this, scenarioStore, instanceKey, scenario);
         instanceServer.start();
 
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
@@ -133,7 +130,6 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     }
 
     public void instanceFinished(Key<Instance> instanceKey) {
-        InstanceServer instanceServer = instances.get(instanceKey);
         instancesToShutdown.add(instanceKey);
     }
 

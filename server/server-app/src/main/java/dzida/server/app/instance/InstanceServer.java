@@ -7,7 +7,6 @@ import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
 import dzida.server.app.instance.scenario.ScenarioStore;
-import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.protocol.json.JsonProtocol;
@@ -44,7 +43,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     private final JsonProtocol serializer;
     private final StateSynchroniser stateSynchroniser;
     private final UserTokenVerifier userTokenVerifier;
-    private final Leaderboard leaderboard;
     private final ScenarioStore scenarioStore;
 
     private final Key<Instance> instanceKey;
@@ -52,9 +50,8 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     private final Map<Id<User>, ContainerConnection> connections;
     private Id<Scenario> scenarioId;
 
-    public InstanceServer(Scheduler scheduler, Arbiter arbiter, Leaderboard leaderboard, ScenarioStore scenarioStore, Key<Instance> instanceKey, Scenario scenario) {
+    public InstanceServer(Scheduler scheduler, Arbiter arbiter, ScenarioStore scenarioStore, Key<Instance> instanceKey, Scenario scenario) {
         this.arbiter = arbiter;
-        this.leaderboard = leaderboard;
         this.scenarioStore = scenarioStore;
         userTokenVerifier = new UserTokenVerifier();
         serializer = InstanceProtocol.createSerializer();
