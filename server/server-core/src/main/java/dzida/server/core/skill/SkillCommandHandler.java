@@ -10,6 +10,7 @@ import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.event.CharacterGotDamage;
+import dzida.server.core.skill.event.CharacterHealed;
 import dzida.server.core.skill.event.SkillUsedOnCharacter;
 import dzida.server.core.skill.event.SkillUsedOnWorldMap;
 import dzida.server.core.skill.event.SkillUsedOnWorldObject;
@@ -131,5 +132,16 @@ public class SkillCommandHandler {
 
     private boolean isReadyForAbility(Id<Character> casterId) {
         return !skillService.isOnCooldown(casterId, timeService.getCurrentMillis());
+    }
+
+    public Outcome<List<GameEvent>> eatApple(Id<Character> casterId) {
+        if (!characterService.isCharacterLive(casterId)) {
+            return Outcome.error("Skill can not be used by a not living character.");
+        }
+
+        int missingHealth = skillService.getMaxHealth(casterId) - skillService.getHealth(casterId);
+        int appleHealingValue = 50;
+        int toHeal = Math.min(missingHealth, appleHealingValue);
+        return Outcome.ok(ImmutableList.of(new CharacterHealed(casterId, toHeal)));
     }
 }

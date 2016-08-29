@@ -138,11 +138,10 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
     private void cleanOldInstances() {
         instancesToShutdown.forEach(this::tryToStopInstance);
-        Iterables.removeIf(initialInstances, instanceKey -> !instances.containsKey(instanceKey));
+        Iterables.removeIf(instancesToShutdown, instanceKey -> !instances.containsKey(instanceKey));
     }
 
     private void tryToStopInstance(Key<Instance> instanceKey) {
-        System.out.println("trying to stop instance");
         if (instancesToShutdown.contains(instanceKey) && instances.get(instanceKey).isEmpty()) {
             stopInstance(instanceKey);
         }

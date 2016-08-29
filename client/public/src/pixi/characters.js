@@ -16,9 +16,16 @@ define(function (require, exports, module) {
     const characterModels = [];
     var mainPlayerModel = null;
 
-    const damagePointFont = {
+    const damageFont = {
         font: "16px Arial",
         fill: 0xff3333,
+        stroke: 0x000000,
+        strokeThickness: 2
+    };
+
+    const healedFont = {
+        font: "16px Arial",
+        fill: 0x33ff33,
         stroke: 0x000000,
         strokeThickness: 2
     };
@@ -86,7 +93,8 @@ define(function (require, exports, module) {
     }
 
     function startDamagePointsAnimation(position, value) {
-        const point = new Pixi.Text(value, damagePointFont);
+        const font = value < 0 ? damageFont : healedFont;
+        const point = new Pixi.Text(value, font);
         point.position.x = position.x - point.width / 2;
         point.position.y = position.y;
         registerAnimation(point, {y: position.y}, 'point', function () {
@@ -156,9 +164,9 @@ define(function (require, exports, module) {
         removeCharacterModel(characterToRemove);
     });
 
-    SkillStore.characterGotDamageStream.subscribe(function (event) {
+    SkillStore.characterHealthChangeStream.subscribe(function (event) {
         const characterModel = findCharacterModel(event.characterId);
-        startDamagePointsAnimation(characterModel.position, event.damage);
+        startDamagePointsAnimation(characterModel.position, event.change);
         characterModel.updateHpBar(SkillStore.percentHealth(event.characterId));
     });
 

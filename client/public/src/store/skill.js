@@ -18,6 +18,9 @@ define(function (require, exports, module) {
     Dispatcher.messageStream.subscribe(Messages.CharacterGotDamage, (event) => {
         state.get(event.characterId).health -= event.damage;
     });
+    Dispatcher.messageStream.subscribe(Messages.CharacterHealed, (event) => {
+        state.get(event.characterId).health += event.healed;
+    });
     Dispatcher.messageStream.subscribe(Messages.SkillUsedOnCharacter, (event) => {
         setCooldown(event.casterId, event.skillId)
     });
@@ -48,9 +51,12 @@ define(function (require, exports, module) {
 
     module.exports = {
         key,
-        characterGotDamageStream: new Publisher.StreamPublisher((push) => {
+        characterHealthChangeStream: new Publisher.StreamPublisher((push) => {
             Dispatcher.messageStream.subscribe(Messages.CharacterGotDamage, (event) => {
-                push(event);
+                push({characterId: event.characterId, change: -event.damage});
+            });
+            Dispatcher.messageStream.subscribe(Messages.CharacterHealed, (event) => {
+                push({characterId: event.characterId, change: event.healed});
             });
         }),
         characterUsedSkillOnCharacter: new Publisher.StreamPublisher((push) => {

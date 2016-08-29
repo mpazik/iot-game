@@ -6,6 +6,7 @@ import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.skill.event.CharacterGotDamage;
+import dzida.server.core.skill.event.CharacterHealed;
 import dzida.server.core.skill.event.SkillUsedOnCharacter;
 import dzida.server.core.skill.event.SkillUsedOnWorldMap;
 import dzida.server.core.skill.event.SkillUsedOnWorldObject;
@@ -57,6 +58,10 @@ public class SkillService {
         return state.get(characterId).health;
     }
 
+    public int getMaxHealth(Id<Character> characterId) {
+        return state.get(characterId).maxHealth;
+    }
+
     public void processEvent(GameEvent gameEvent) {
         whenTypeOf(gameEvent)
                 .is(CharacterSpawned.class).then(event -> {
@@ -70,6 +75,10 @@ public class SkillService {
                 .is(CharacterGotDamage.class).then(event -> {
             SkillData skillData = state.get(event.characterId);
             skillData.health = skillData.health - (int) event.damage;
+        })
+                .is(CharacterHealed.class).then(event -> {
+            SkillData skillData = state.get(event.characterId);
+            skillData.health = skillData.health + (int) event.healed;
         });
     }
 

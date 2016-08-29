@@ -14,6 +14,7 @@ import dzida.server.core.event.ServerMessage;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.skill.event.CharacterGotDamage;
+import dzida.server.core.skill.event.CharacterHealed;
 import dzida.server.core.skill.event.SkillUsedOnCharacter;
 import dzida.server.core.skill.event.SkillUsedOnWorldMap;
 import dzida.server.core.skill.event.SkillUsedOnWorldObject;
@@ -42,6 +43,7 @@ public class InstanceStoreDb implements InstanceStore {
                 .registerEvent(SkillUsedOnWorldObject.class)
                 .registerEvent(WorldObjectRemoved.class)
                 .registerEvent(InstanceProtocol.UserCharacterMessage.class)
+                .registerEvent(CharacterHealed.class)
                 .build();
     }
 

@@ -61,6 +61,10 @@ define(function (require, exports, module) {
             this.characterId = characterId;
             this.userId = userId;
             this.userNick = userNick;
-        }
+        },
+        CharacterHealed: function (characterId, healed) {
+            this.characterId = characterId;
+            this.healed = healed;
+        },
     };
 });

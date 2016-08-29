@@ -1,6 +1,7 @@
 package dzida.server.app.instance;
 
 import dzida.server.app.BasicJsonSerializer;
+import dzida.server.app.command.EatAppleRawCommand;
 import dzida.server.app.command.MoveRawCommand;
 import dzida.server.app.command.SkillUseOnCharacterRawCommand;
 import dzida.server.app.command.SkillUseOnWorldMapRawCommand;
@@ -17,6 +18,7 @@ import dzida.server.core.event.ServerMessage;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.skill.event.CharacterGotDamage;
+import dzida.server.core.skill.event.CharacterHealed;
 import dzida.server.core.skill.event.SkillUsedOnCharacter;
 import dzida.server.core.skill.event.SkillUsedOnWorldMap;
 import dzida.server.core.skill.event.SkillUsedOnWorldObject;
@@ -36,6 +38,7 @@ public class InstanceProtocol {
                 .registerParsingMessageType(4, SkillUseOnWorldMapRawCommand.class)
                 .registerParsingMessageType(8, BackdoorCommandResolver.BackdoorCommand.class)
                 .registerParsingMessageType(11, SkillUseOnWorldObjectRawCommand.class)
+                .registerParsingMessageType(12, EatAppleRawCommand.class)
                 .registerSerializationMessageType(5, CharacterSpawned.class)
                 .registerSerializationMessageType(6, CharacterDied.class)
                 .registerSerializationMessageType(7, CharacterMoved.class)
@@ -49,6 +52,7 @@ public class InstanceProtocol {
                 .registerSerializationMessageType(23, SkillUsedOnWorldObject.class)
                 .registerSerializationMessageType(24, WorldObjectRemoved.class)
                 .registerSerializationMessageType(25, UserCharacterMessage.class)
+                .registerSerializationMessageType(26, CharacterHealed.class)
                 .build();
     }
 

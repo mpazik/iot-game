@@ -20,11 +20,13 @@ define(function (require, exports, module) {
         .registerParsingMessageType(23, Messages.SkillUsedOnWorldObject)
         .registerParsingMessageType(24, Messages.WorldObjectRemoved)
         .registerParsingMessageType(25, Messages.UserCharacter)
+        .registerParsingMessageType(26, Messages.CharacterHealed)
         .registerSerializationMessageType(2, Commands.Move)
         .registerSerializationMessageType(3, Commands.UseSkillOnCharacter)
         .registerSerializationMessageType(4, Commands.UseSkillOnWorldMap)
         .registerSerializationMessageType(8, Commands.Backdoor)
         .registerSerializationMessageType(11, Commands.UseSkillOnWorldObject)
+        .registerSerializationMessageType(12, Commands.EatApple)
         .build();
 
     const State = {

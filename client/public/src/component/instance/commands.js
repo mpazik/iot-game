@@ -20,6 +20,9 @@ define(function (require, exports, module) {
         UseSkillOnWorldObject: function (skillId, target) {
             this.skillId = skillId;
             this.target = target;
+        },
+        EatApple: function () {
+
         }
     };
 });

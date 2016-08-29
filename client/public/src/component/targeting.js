@@ -10,17 +10,8 @@ define(function (require, exports, module) {
     var pushTargeting;
     const targetingState = new Publisher.StatePublisher(null, push => pushTargeting = push);
 
-    function publishTargeting(skill) {
-        if (skill != null && skill.type != Skills.Types.CRAFT) {
-            pushTargeting(skill);
-            return;
-        }
-
-        pushTargeting(null);
-    }
-
     const cancelTargetingImmediate = function () {
-        publishTargeting(null);
+        pushTargeting(null);
         Dispatcher.userEventStream.unsubscribe('right-click', cancelTargetingImmediate);
         Dispatcher.userEventStream.unsubscribe('left-click', cancelTargetingDeferred);
         Dispatcher.userEventStream.unsubscribe('esc-down', cancelTargetingImmediate);
@@ -28,7 +19,7 @@ define(function (require, exports, module) {
 
     const cancelTargetingDeferred = function () {
         // on left click action is performed so the skill in targeting state may be needed by other components.
-        deffer(() => publishTargeting(null));
+        deffer(() => pushTargeting(null));
         Dispatcher.userEventStream.unsubscribe('right-click', cancelTargetingImmediate);
         Dispatcher.userEventStream.unsubscribe('left-click', cancelTargetingDeferred);
         Dispatcher.userEventStream.unsubscribe('esc-down', cancelTargetingImmediate);
@@ -48,13 +39,19 @@ define(function (require, exports, module) {
 
             } else {
                 // if the user triggered different skill
-                publishTargeting(event.skill);
+                if (isTargetingSkill(event.skill)) {
+                    pushTargeting(event.skill);
+                } else {
+                    cancelTargetingImmediate();
+                }
             }
         } else {
-            publishTargeting(event.skill);
-            Dispatcher.userEventStream.subscribe('right-click', cancelTargetingImmediate);
-            Dispatcher.userEventStream.subscribe('left-click', cancelTargetingDeferred);
-            Dispatcher.userEventStream.subscribe('esc-down', cancelTargetingImmediate);
+            if (isTargetingSkill(event.skill)) {
+                pushTargeting(event.skill);
+                Dispatcher.userEventStream.subscribe('right-click', cancelTargetingImmediate);
+                Dispatcher.userEventStream.subscribe('left-click', cancelTargetingDeferred);
+                Dispatcher.userEventStream.subscribe('esc-down', cancelTargetingImmediate);
+            }
         }
     });
 
@@ -86,6 +83,10 @@ define(function (require, exports, module) {
             }
             setTimeout(huntTarget, 100);
         }
+    }
+
+    function isTargetingSkill(skill) {
+        return skill.type != Skills.Types.CRAFT && skill.type != Skills.Types.USE
     }
 
     function stopHunting() {
