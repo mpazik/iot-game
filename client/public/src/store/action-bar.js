@@ -10,8 +10,9 @@ define(function (require, exports, module) {
 
     var skills = new Publisher.StatePublisher([
         Skills.PUNCH, Skills.BOW_SHOT, Skills.SWORD_HIT,
-        null, Skills.CREATE_TREE, Skills.CUT_TREE,
-        Skills.CREATE_ARROWS, null, null
+        Skills.CREATE_TREE, Skills.CUT_TREE,
+        Skills.CREATE_ARROWS, Skills.INTRODUCE,
+        Skills.GRAB_APPLE, Skills.EAT_APPLE
     ], () => {});
 
     Targeting.targetingState.subscribe(function (skill) {

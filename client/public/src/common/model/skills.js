@@ -9,11 +9,14 @@ define(function (require, exports, module) {
         ATTACK: 0,
         BUILD: 1,
         GATHER: 2,
-        CRAFT: 3
+        CRAFT: 3,
+        USE: 4,
+        SPECIAL: 5
     };
 
     const Targets = {
-        ENEMIES: 0
+        ENEMIES: 0,
+        USERS: 1
     };
 
     const Ids = {
@@ -22,7 +25,10 @@ define(function (require, exports, module) {
         SWORD_HIT: 2,
         CREATE_TREE: 3,
         CUT_TREE: 4,
-        CREATE_ARROWS: 5
+        CREATE_ARROWS: 5,
+        INTRODUCE: 6,
+        GRAB_APPLE: 7,
+        EAT_APPLE: 8,
     };
 
     module.exports = {

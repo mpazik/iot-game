@@ -11,9 +11,11 @@ define(function (require, exports, module) {
     };
     var pushEvent;
 
+    const skillHandledByClient = [Skills.Ids.CREATE_ARROWS, Skills.Ids.GRAB_APPLE, Skills.Ids.EAT_APPLE];
+
     Dispatcher.userEventStream.subscribe('skill-triggered', function (event) {
         const skill = event.skill;
-        if (skill.type != Skills.Types.CRAFT) return;
+        if (!skillHandledByClient.includes(skill.type)) return;
 
         if (checkSkillItemRequirements(skill.id)) {
             const skillUsed = new Messages.SkillUsed(MainPlayerStore.characterId(), skill.id);
