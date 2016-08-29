@@ -26,3 +26,11 @@ CREATE TABLE scenario_event (
   data        JSON               NOT NULL,
   created_at  TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE chat_command (
+  id         SERIAL PRIMARY KEY NOT NULL,
+  user_id    INT REFERENCES user_registration (id),
+  command    TEXT               NOT NULL,
+  created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+

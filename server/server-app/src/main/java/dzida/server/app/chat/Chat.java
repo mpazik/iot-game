@@ -4,11 +4,13 @@ import com.google.common.base.Strings;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
+import dzida.server.app.user.User;
 import dzida.server.app.user.UserTokenVerifier;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.Connector;
 import dzida.server.core.basic.connection.ServerConnection;
 import dzida.server.core.basic.connection.VerifyingConnectionServer;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 
 import java.util.ArrayList;
@@ -19,12 +21,14 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class Chat implements VerifyingConnectionServer<String, String> {
+    private final ChatStore chatStore;
     private final UserTokenVerifier userTokenVerifier;
 
     private final Map<String, List<String>> channelConnections;
     private final Map<String, Consumer<String>> messageTargets;
 
-    public Chat() {
+    public Chat(ChatStore chatStore) {
+        this.chatStore = chatStore;
         userTokenVerifier = new UserTokenVerifier();
 
         channelConnections = new HashMap<>();
@@ -46,7 +50,7 @@ public class Chat implements VerifyingConnectionServer<String, String> {
             return Result.error("User is already logged in.");
         }
         messageTargets.put(nick, connector::onMessage);
-        ChatConnection chatConnection = new ChatConnection(nick);
+        ChatConnection chatConnection = new ChatConnection(nick, loginToken.get().userId);
         connector.onOpen(chatConnection);
         return Result.ok();
     }
@@ -58,6 +62,7 @@ public class Chat implements VerifyingConnectionServer<String, String> {
                 message -> channelConnections.get(channelName)
                         .forEach(nick -> messageTargets.get(nick).accept("CHANNEL " + channelName + " " + message))
         );
+        chatStore.saveSystemCommand("CREATED " + channelName);
     }
 
     public void closeInstanceChannel(Key<Instance> instanceKey) {
@@ -65,6 +70,7 @@ public class Chat implements VerifyingConnectionServer<String, String> {
         messageTargets.get(channelName).accept("CLOSED");
         channelConnections.remove(channelName);
         messageTargets.remove(channelName);
+        chatStore.saveSystemCommand("CLOSED " + channelName);
     }
 
     public String chanelNameFromInstanceKey(Key<Instance> instanceKey) {
@@ -73,9 +79,11 @@ public class Chat implements VerifyingConnectionServer<String, String> {
 
     private final class ChatConnection implements ServerConnection<String> {
         private final String userNick;
+        private final Id<User> userId;
 
-        private ChatConnection(String userNick) {
+        private ChatConnection(String userNick, Id<User> userId) {
             this.userNick = userNick;
+            this.userId = userId;
         }
 
         @Override
@@ -83,6 +91,7 @@ public class Chat implements VerifyingConnectionServer<String, String> {
             String[] dataSplit = data.split(" ", 2);
             String command = dataSplit[0];
             String args = dataSplit[1];
+            chatStore.saveUserCommand(userId, data);
             switch (command) {
                 case "JOIN": {
                     joinToChannel(args);

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import dzida.server.app.arbiter.Arbiter;
 import dzida.server.app.arbiter.ArbiterStore;
 import dzida.server.app.chat.Chat;
+import dzida.server.app.chat.ChatStore;
 import dzida.server.app.database.ConnectionManager;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.dispatcher.ServerDispatcher;
@@ -16,6 +17,7 @@ import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.rest.UserResource;
 import dzida.server.app.store.database.ArbiterStoreDb;
+import dzida.server.app.store.database.ChatStoreDb;
 import dzida.server.app.store.database.ScenarioStoreDb;
 import dzida.server.app.store.database.UserStoreDb;
 import dzida.server.app.timesync.TimeServiceImpl;
@@ -61,15 +63,16 @@ public final class GameServer {
         ArbiterStore arbiterStore = new ArbiterStoreDb(connectionProvider);
         ScenarioStore scenarioStore = new ScenarioStoreDb(connectionProvider);
         UserStore userStore = new UserStoreDb(connectionProvider);
-        UserService userService = new UserService(userStore);
+        ChatStore chatStore = new ChatStoreDb(connectionProvider);
 
+        UserService userService = new UserService(userStore);
         webSocketServer = new WebSocketServer();
         int gameServerPort = Configuration.getGameServerPort();
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
 
         Leaderboard leaderboard = new Leaderboard(userService, scenarioStore);
         ServerDispatcher serverDispatcher = new ServerDispatcher();
-        Chat chat = new Chat();
+        Chat chat = new Chat(chatStore);
         arbiter = new Arbiter(serverDispatcher, chat, scheduler, leaderboard, arbiterStore, scenarioStore);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
