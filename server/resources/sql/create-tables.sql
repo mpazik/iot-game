@@ -37,6 +37,7 @@ CREATE TABLE chat_command (
 CREATE TABLE instance_event (
   id           SERIAL PRIMARY KEY NOT NULL,
   instance_key TEXT               NOT NULL,
+  type         TEXT               NOT NULL,
   data         JSON               NOT NULL,
   created_at   TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
