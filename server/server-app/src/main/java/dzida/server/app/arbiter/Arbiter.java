@@ -102,7 +102,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     }
 
     public void stopInstance(Key<Instance> instanceKey) {
-        serverDispatcher.removeServer(instanceKey.getValue());
+//        serverDispatcher.removeServer(instanceKey.getValue());
         instances.get(instanceKey).closeInstance();
         instances.remove(instanceKey);
         chat.closeInstanceChannel(instanceKey);
@@ -195,7 +195,9 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
         @Override
         public void close() {
-            removePlayerFromLastInstance();
+            Key<Instance> lastInstanceKey = usersInstances.get(userId);
+            arbiterStore.playerLeftInstance(userId, lastInstanceKey);
+
             connectedUsers.remove(userId);
             usersInstances.remove(userId);
         }
