@@ -8,7 +8,8 @@ define(function (require, exports, module) {
     var objectKinds = {};
     const items = {
         [Items.ARROW]: {name: 'Arrow'},
-        [Items.STICK]: {name: 'Stick'}
+        [Items.STICK]: {name: 'Stick'},
+        [Items.APPLE]: {name: 'Apple'}
     };
 
     const sprites = ["objects"];
