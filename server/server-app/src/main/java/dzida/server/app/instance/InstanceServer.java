@@ -39,6 +39,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     private static final Logger log = Logger.getLogger(InstanceServer.class);
 
     private final Instance instance;
+    private final InstanceStore instanceStore;
     private final Arbiter arbiter;
     private final JsonProtocol serializer;
     private final StateSynchroniser stateSynchroniser;
@@ -50,7 +51,8 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     private final Map<Id<User>, ContainerConnection> connections;
     private Id<Scenario> scenarioId;
 
-    public InstanceServer(Scheduler scheduler, Arbiter arbiter, ScenarioStore scenarioStore, Key<Instance> instanceKey, Scenario scenario) {
+    public InstanceServer(Scheduler scheduler, InstanceStore instanceStore, Arbiter arbiter, ScenarioStore scenarioStore, Key<Instance> instanceKey, Scenario scenario) {
+        this.instanceStore = instanceStore;
         this.arbiter = arbiter;
         this.scenarioStore = scenarioStore;
         userTokenVerifier = new UserTokenVerifier();
@@ -66,6 +68,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
     public void start() {
         instance.subscribeChange(stateSynchroniser::syncStateChange);
+        instance.subscribeChange(gameEvent -> {
+            instanceStore.saveEvent(instanceKey, gameEvent);
+        });
         instance.subscribeChange(gameEvent -> {
             if (gameEvent instanceof ScenarioEnd) {
                 ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;

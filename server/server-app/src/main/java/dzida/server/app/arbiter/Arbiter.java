@@ -8,6 +8,7 @@ import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceServer;
+import dzida.server.app.instance.InstanceStore;
 import dzida.server.app.instance.scenario.ScenarioStore;
 import dzida.server.app.map.descriptor.OpenWorld;
 import dzida.server.app.map.descriptor.Scenario;
@@ -45,6 +46,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final UserTokenVerifier userTokenVerifier;
     private final ArbiterStore arbiterStore;
     private final ScenarioStore scenarioStore;
+    private final InstanceStore instanceStore;
 
     private final Map<Id<User>, Key<Instance>> usersInstances;
     private final Map<Key<Instance>, InstanceServer> instances;
@@ -53,12 +55,13 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final Set<Key<Instance>> instancesToShutdown;
     private final Set<Id<User>> connectedUsers;
 
-    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, ArbiterStore arbiterStore, ScenarioStore scenarioStore) {
+    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, ArbiterStore arbiterStore, ScenarioStore scenarioStore, InstanceStore instanceStore) {
         this.serverDispatcher = serverDispatcher;
         this.chat = chat;
         this.scheduler = scheduler;
         this.arbiterStore = arbiterStore;
         this.scenarioStore = scenarioStore;
+        this.instanceStore = instanceStore;
         arbiterProtocol = ArbiterProtocol.createSerializer();
         userTokenVerifier = new UserTokenVerifier();
 
@@ -89,7 +92,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     public void startInstance(Key<Instance> instanceKey, Scenario scenario) {
         arbiterStore.instanceStarted(instanceKey);
         String instanceKeyValue = instanceKey.getValue();
-        InstanceServer instanceServer = new InstanceServer(scheduler, this, scenarioStore, instanceKey, scenario);
+        InstanceServer instanceServer = new InstanceServer(scheduler, instanceStore, this, scenarioStore, instanceKey, scenario);
         instanceServer.start();
 
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
