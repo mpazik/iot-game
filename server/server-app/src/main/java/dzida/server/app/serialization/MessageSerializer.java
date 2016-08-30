@@ -1,17 +1,16 @@
-package dzida.server.app.store;
+package dzida.server.app.serialization;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import dzida.server.app.BasicJsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class EventSerializer {
+public class MessageSerializer {
     private final Gson serializer;
     private final Map<String, Class<?>> eventClasses;
 
-    private EventSerializer(Gson serializer, Map<String, Class<?>> eventClasses) {
+    private MessageSerializer(Gson serializer, Map<String, Class<?>> eventClasses) {
         this.serializer = serializer;
         this.eventClasses = eventClasses;
     }
@@ -41,19 +40,19 @@ public class EventSerializer {
         private final Map<String, Class<?>> eventClasses = new HashMap<>();
         private Gson serializer = BasicJsonSerializer.getSerializer();
 
-        public EventSerializer.Builder registerEvent(Class<?> eventClass) {
+        public MessageSerializer.Builder registerMessage(Class<?> eventClass) {
             String eventType = getEventTypeFromClass(eventClass);
             eventClasses.put(eventType, eventClass);
             return this;
         }
 
-        public <T> EventSerializer.Builder setSerializer(Gson serializer) {
+        public <T> MessageSerializer.Builder setSerializer(Gson serializer) {
             this.serializer = serializer;
             return this;
         }
 
-        public EventSerializer build() {
-            return new EventSerializer(serializer, ImmutableMap.copyOf(eventClasses));
+        public MessageSerializer build() {
+            return new MessageSerializer(serializer, ImmutableMap.copyOf(eventClasses));
         }
     }
 }

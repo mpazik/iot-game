@@ -1,4 +1,4 @@
-package dzida.server.app;
+package dzida.server.app.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -62,7 +62,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         this.arbiterStore = arbiterStore;
         this.scenarioStore = scenarioStore;
         this.instanceStore = instanceStore;
-        arbiterProtocol = ArbiterProtocol.createSerializer();
+        arbiterProtocol = Serialization.createSerializer();
         userTokenVerifier = new UserTokenVerifier();
 
         usersInstances = new HashMap<>();
@@ -160,7 +160,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         public void send(String data) {
             Object message = arbiterProtocol.parseMessage(data);
             whenTypeOf(message)
-                    .is(JoinBattleCommand.class)
+                    .is(ArbiterCommand.JoinBattleCommand.class)
                     .then(command -> {
                         removePlayerFromLastInstance();
                         Survival survival = new Survival(new Key<>(command.map), command.difficultyLevel, ImmutableList.of(
@@ -171,7 +171,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
                         startInstance(newInstanceKey, survival);
                         movePlayerToInstance(newInstanceKey);
                     })
-                    .is(GoHomeCommand.class)
+                    .is(ArbiterCommand.GoHomeCommand.class)
                     .then(command -> {
                         removePlayerFromLastInstance();
                         movePlayerToInstance(defaultInstance);
@@ -180,7 +180,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
         public void movePlayerToInstance(Key<Instance> newInstanceKey) {
             usersInstances.put(userId, newInstanceKey);
-            connector.onMessage(arbiterProtocol.serializeMessage(new JoinToInstance(newInstanceKey)));
+            connector.onMessage(arbiterProtocol.serializeMessage(new ArbiterCommand.JoinToInstance(newInstanceKey)));
             arbiterStore.userJoinedInstance(userId, newInstanceKey);
         }
 

@@ -1,10 +1,10 @@
 package dzida.server.app.leaderboard;
 
 import com.google.common.collect.Iterables;
+import dzida.server.app.instance.scenario.ScenarioEvent.ScenarioFinished;
+import dzida.server.app.instance.scenario.ScenarioEvent.ScenarioStarted;
 import dzida.server.app.instance.scenario.ScenarioEventBox;
 import dzida.server.app.instance.scenario.ScenarioStore;
-import dzida.server.app.instance.scenario.event.ScenarioEvent.ScenarioFinished;
-import dzida.server.app.instance.scenario.event.ScenarioEvent.ScenarioStarted;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.user.User;

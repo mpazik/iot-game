@@ -1,23 +1,16 @@
 package dzida.server.app.store.database;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializer;
 import com.querydsl.core.Tuple;
-import dzida.server.app.BasicJsonSerializer;
 import dzida.server.app.database.ConnectionProvider;
+import dzida.server.app.instance.Serialization;
+import dzida.server.app.instance.scenario.ScenarioEvent;
+import dzida.server.app.instance.scenario.ScenarioEvent.ScenarioFinished;
+import dzida.server.app.instance.scenario.ScenarioEvent.ScenarioStarted;
 import dzida.server.app.instance.scenario.ScenarioEventBox;
 import dzida.server.app.instance.scenario.ScenarioStore;
-import dzida.server.app.instance.scenario.event.ScenarioEvent;
-import dzida.server.app.instance.scenario.event.ScenarioEvent.ScenarioFinished;
-import dzida.server.app.instance.scenario.event.ScenarioEvent.ScenarioStarted;
-import dzida.server.app.map.descriptor.OpenWorld;
 import dzida.server.app.map.descriptor.Scenario;
-import dzida.server.app.map.descriptor.Survival;
-import dzida.server.app.store.EventSerializer;
+import dzida.server.app.serialization.MessageSerializer;
 import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.entity.Key;
 import dzida.server.core.scenario.ScenarioEnd;
 import org.postgresql.util.PGobject;
 
@@ -29,35 +22,12 @@ import java.util.stream.Collectors;
 import static dzida.server.app.querydsl.QScenarioEvent.scenarioEvent;
 
 public class ScenarioStoreDb implements ScenarioStore {
-    public static final JsonDeserializer<Scenario> scenarioDeserializer = (json, typeOfT, context) -> {
-        JsonObject scenario = json.getAsJsonObject();
-        String type = scenario.get("type").getAsString();
-        switch (type) {
-            case "open-world":
-                return BasicJsonSerializer.getSerializer().fromJson(scenario, OpenWorld.class);
-            case "survival":
-                return BasicJsonSerializer.getSerializer().fromJson(scenario, Survival.class);
-            default:
-                throw new RuntimeException("can not parse scenario of type: " + type);
-        }
-    };
-    public static final JsonSerializer<Scenario> scenarioSerializer = (src, typeOfSrc, context) ->
-            BasicJsonSerializer.getSerializer().toJsonTree(src);
     private final ConnectionProvider connectionProvider;
-    private final EventSerializer eventSerializer;
+    private final MessageSerializer scenarioEventSerializer;
 
     public ScenarioStoreDb(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
-        eventSerializer = new EventSerializer.Builder()
-                .setSerializer(new GsonBuilder()
-                        .registerTypeHierarchyAdapter(Id.class, BasicJsonSerializer.idTypeAdapter)
-                        .registerTypeHierarchyAdapter(Key.class, BasicJsonSerializer.keyTypeAdapter)
-                        .registerTypeAdapter(Scenario.class, scenarioDeserializer)
-                        .registerTypeAdapter(Scenario.class, scenarioSerializer)
-                        .create())
-                .registerEvent(ScenarioStarted.class)
-                .registerEvent(ScenarioFinished.class)
-                .build();
+        scenarioEventSerializer = Serialization.createScenarioEventSerializer();
     }
 
     @Override
@@ -74,7 +44,7 @@ public class ScenarioStoreDb implements ScenarioStore {
 
     @Override
     public boolean isScenarioFinished(Id<Scenario> scenarioId) {
-        String scenarioEndEventType = eventSerializer.getEventType(ScenarioFinished.class);
+        String scenarioEndEventType = scenarioEventSerializer.getEventType(ScenarioFinished.class);
         return connectionProvider.withSqlFactory(sqlQueryFactory -> {
             long scenarioEndCount = sqlQueryFactory.select()
                     .from(scenarioEvent)
@@ -98,7 +68,7 @@ public class ScenarioStoreDb implements ScenarioStore {
                 assert pGobject != null;
                 String data = pGobject.getValue();
                 String type = tuple.get(scenarioEvent.type);
-                ScenarioEvent event = (ScenarioEvent) eventSerializer.parseEvent(data, type);
+                ScenarioEvent event = (ScenarioEvent) scenarioEventSerializer.parseEvent(data, type);
                 Integer id = tuple.get(scenarioEvent.scenarioId);
                 assert id != null;
                 Id<Scenario> scenarioId = new Id<>(id);
@@ -114,8 +84,8 @@ public class ScenarioStoreDb implements ScenarioStore {
     }
 
     private void saveEvent(Id<Scenario> scenarioId, ScenarioEvent event) {
-        String eventType = eventSerializer.getEventType(event);
-        String eventData = eventSerializer.serializeEvent(event);
+        String eventType = scenarioEventSerializer.getEventType(event);
+        String eventData = scenarioEventSerializer.serializeEvent(event);
 
         connectionProvider.withSqlFactory(sqlQueryFactory -> {
             sqlQueryFactory.insert(scenarioEvent)

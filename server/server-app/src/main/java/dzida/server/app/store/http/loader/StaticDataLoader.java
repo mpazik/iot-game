@@ -2,8 +2,8 @@ package dzida.server.app.store.http.loader;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import dzida.server.app.BasicJsonSerializer;
 import dzida.server.app.Configuration;
+import dzida.server.app.serialization.BasicJsonSerializer;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.core.UriBuilder;

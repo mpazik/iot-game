@@ -1,6 +1,5 @@
 package dzida.server.app.instance.scenario;
 
-import dzida.server.app.instance.scenario.event.ScenarioEvent;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.core.basic.entity.Id;
 

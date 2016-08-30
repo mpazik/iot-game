@@ -1,16 +1,11 @@
 package dzida.server.app.store.database;
 
+import dzida.server.app.arbiter.ArbiterEvent;
 import dzida.server.app.arbiter.ArbiterStore;
-import dzida.server.app.arbiter.event.ArbiterEvent;
-import dzida.server.app.arbiter.event.InstanceClosed;
-import dzida.server.app.arbiter.event.InstanceStarted;
-import dzida.server.app.arbiter.event.SystemClosed;
-import dzida.server.app.arbiter.event.SystemStarted;
-import dzida.server.app.arbiter.event.UserJoinedInstance;
-import dzida.server.app.arbiter.event.UserLeftInstance;
+import dzida.server.app.arbiter.Serialization;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.instance.Instance;
-import dzida.server.app.store.EventSerializer;
+import dzida.server.app.serialization.MessageSerializer;
 import dzida.server.app.user.User;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
@@ -21,28 +16,21 @@ import static dzida.server.app.querydsl.QArbiterEvent.arbiterEvent;
 
 public class ArbiterStoreDb implements ArbiterStore {
     private final ConnectionProvider connectionProvider;
-    private final EventSerializer eventSerializer;
+    private final MessageSerializer arbiterEventSerializer;
 
     public ArbiterStoreDb(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
-        eventSerializer = new EventSerializer.Builder()
-                .registerEvent(SystemStarted.class)
-                .registerEvent(SystemClosed.class)
-                .registerEvent(InstanceStarted.class)
-                .registerEvent(InstanceClosed.class)
-                .registerEvent(UserJoinedInstance.class)
-                .registerEvent(UserLeftInstance.class)
-                .build();
+        arbiterEventSerializer = Serialization.createArbiterEventSerializer();
     }
 
     @Override
     public void systemStarted() {
-        saveEvent(new SystemStarted());
+        saveEvent(new ArbiterEvent.SystemStarted());
     }
 
     @Override
     public void systemStopped() {
-        saveEvent(new SystemClosed());
+        saveEvent(new ArbiterEvent.SystemClosed());
     }
 
     @Override
@@ -52,22 +40,22 @@ public class ArbiterStoreDb implements ArbiterStore {
 
     @Override
     public void instanceStarted(Key<Instance> instanceKey) {
-        saveEvent(new InstanceStarted(instanceKey));
+        saveEvent(new ArbiterEvent.InstanceStarted(instanceKey));
     }
 
     @Override
     public void instanceStopped(Key<Instance> instanceKey) {
-        saveEvent(new InstanceClosed(instanceKey));
+        saveEvent(new ArbiterEvent.InstanceClosed(instanceKey));
     }
 
     @Override
     public void userJoinedInstance(Id<User> userId, Key<Instance> instanceKey) {
-        saveEvent(new UserJoinedInstance(instanceKey, userId));
+        saveEvent(new ArbiterEvent.UserJoinedInstance(instanceKey, userId));
     }
 
     @Override
     public void playerLeftInstance(Id<User> userId, Key<Instance> instanceKey) {
-        saveEvent(new UserLeftInstance(instanceKey, userId));
+        saveEvent(new ArbiterEvent.UserLeftInstance(instanceKey, userId));
     }
 
     private Key<Instance> generateInstanceKey() {
@@ -75,8 +63,8 @@ public class ArbiterStoreDb implements ArbiterStore {
     }
 
     private void saveEvent(ArbiterEvent event) {
-        String eventType = eventSerializer.getEventType(event);
-        String eventData = eventSerializer.serializeEvent(event);
+        String eventType = arbiterEventSerializer.getEventType(event);
+        String eventData = arbiterEventSerializer.serializeEvent(event);
 
         connectionProvider.withSqlFactory(sqlQueryFactory -> {
             sqlQueryFactory.insert(arbiterEvent)

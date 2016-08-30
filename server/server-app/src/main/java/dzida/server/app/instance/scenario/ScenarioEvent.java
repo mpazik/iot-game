@@ -1,4 +1,4 @@
-package dzida.server.app.instance.scenario.event;
+package dzida.server.app.instance.scenario;
 
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.core.scenario.ScenarioEnd;

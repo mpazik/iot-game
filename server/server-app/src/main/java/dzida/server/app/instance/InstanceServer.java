@@ -56,7 +56,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         this.arbiter = arbiter;
         this.scenarioStore = scenarioStore;
         userTokenVerifier = new UserTokenVerifier();
-        serializer = InstanceProtocol.createSerializer();
+        serializer = Serialization.createSerializer();
         instance = new Instance(instanceKey.getValue(), scenario, scheduler);
         stateSynchroniser = new StateSynchroniser(instance, scenario);
 
@@ -115,7 +115,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         PlayerCharacter character = new PlayerCharacter(characterId, userNick);
 
         instance.handleCommand(new SpawnCharacterCommand(character));
-        sendMessageToPlayer(userId, new InstanceProtocol.UserCharacterMessage(characterId, userId, userNick));
+        sendMessageToPlayer(userId, new Instance.UserCharacterMessage(characterId, userId, userNick));
         stateSynchroniser.registerCharacter(userId, sendToPlayer);
         log.info("Instance: " + instanceKey + " - user " + userId + " joined \n");
         return Result.ok();
