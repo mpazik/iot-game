@@ -30,19 +30,19 @@ public class StateSynchroniser {
     }
 
     public void sendInitialPacket(Id<User> userId) {
-        InitialMessage initialMessage = new InitialMessage(instance.getState(), scenario);
-        listeners.get(userId).accept(initialMessage);
+        InitialData initialData = new InitialData(instance.getState(), scenario);
+        listeners.get(userId).accept(initialData);
     }
 
     public void syncStateChange(GameEvent gameEvent) {
         listeners.values().forEach(consumer -> consumer.accept(gameEvent));
     }
 
-    public static final class InitialMessage implements GameEvent {
+    public static final class InitialData implements GameEvent {
         Map<String, Object> state;
         Scenario scenario;
 
-        public InitialMessage(Map<String, Object> state, Scenario scenario) {
+        public InitialData(Map<String, Object> state, Scenario scenario) {
             this.state = state;
             this.scenario = scenario;
         }

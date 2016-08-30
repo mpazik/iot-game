@@ -2,8 +2,8 @@ package dzida.server.app.store.database;
 
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.instance.Instance;
+import dzida.server.app.instance.InstanceEvent;
 import dzida.server.app.instance.InstanceStore;
-import dzida.server.app.instance.Serialization;
 import dzida.server.app.serialization.MessageSerializer;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.event.GameEvent;
@@ -16,13 +16,13 @@ public class InstanceStoreDb implements InstanceStore {
 
     public InstanceStoreDb(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
-        instanceEventSerializer = Serialization.createInstanceEventSerializer();
+        instanceEventSerializer = MessageSerializer.create(InstanceEvent.classes);
     }
 
     @Override
     public void saveEvent(Key<Instance> instanceKey, GameEvent event) {
-        String eventType = instanceEventSerializer.getEventType(event);
-        String eventData = instanceEventSerializer.serializeEvent(event);
+        String eventType = instanceEventSerializer.getMessageType(event);
+        String eventData = instanceEventSerializer.serializeMessage(event);
 
         connectionProvider.withSqlFactory(sqlQueryFactory -> {
             sqlQueryFactory.insert(instanceEvent)

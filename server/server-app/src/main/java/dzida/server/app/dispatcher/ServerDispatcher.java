@@ -53,7 +53,7 @@ public class ServerDispatcher implements Server<String> {
                 return new ServerMessage(serverKey, data);
             }
         }).create();
-        dispatcherSerializer = DispatcherProtocol.createSerializer();
+        dispatcherSerializer = JsonProtocol.create(ClientMessage.classes, dzida.server.app.dispatcher.ServerMessage.classes);
     }
 
     public void addServer(String serverKey, VerifyingConnectionServer<String, String> server) {
@@ -105,13 +105,13 @@ public class ServerDispatcher implements Server<String> {
         private void handleCommand(String data) {
             Object message = dispatcherSerializer.parseMessage(data);
             whenTypeOf(message)
-                    .is(DispatcherProtocol.ConnectToServerMessage.class)
-                    .then(connectToServerMessage -> {
-                        connectToServer(connectToServerMessage.serverKey, connectToServerMessage.connectionData);
+                    .is(ClientMessage.ConnectToServer.class)
+                    .then(connectToServer -> {
+                        connectToServer(connectToServer.serverKey, connectToServer.connectionData);
                     })
-                    .is(DispatcherProtocol.DisconnectFromServerMessage.class)
-                    .then(disconnectFromServerMessage -> {
-                        disconnectFromServer(disconnectFromServerMessage.serverKey);
+                    .is(ClientMessage.DisconnectFromServer.class)
+                    .then(disconnectFromServer -> {
+                        disconnectFromServer(disconnectFromServer.serverKey);
                     });
         }
 
@@ -120,7 +120,7 @@ public class ServerDispatcher implements Server<String> {
 
             if (serverOptional == null) {
                 String errorMessage = "Could not find a server with the key: " + serverKey + ".";
-                sendDispatcherMessageToClient(new DispatcherProtocol.NotConnectedToServerMessage(serverKey, errorMessage));
+                sendDispatcherMessageToClient(new dzida.server.app.dispatcher.ServerMessage.NotConnectedToServer(serverKey, errorMessage));
                 return;
             }
 
@@ -128,7 +128,7 @@ public class ServerDispatcher implements Server<String> {
             Result result = servers.get(serverKey).onConnection(connector, connectionData);
             result.consume(() -> {
             }, error -> {
-                sendDispatcherMessageToClient(new DispatcherProtocol.NotConnectedToServerMessage(serverKey, error.getMessage()));
+                sendDispatcherMessageToClient(new dzida.server.app.dispatcher.ServerMessage.NotConnectedToServer(serverKey, error.getMessage()));
             });
         }
 
@@ -161,13 +161,13 @@ public class ServerDispatcher implements Server<String> {
 
         @Override
         public void onOpen(ServerConnection<String> serverConnection) {
-            dispatcherConnection.sendDispatcherMessageToClient(new DispatcherProtocol.ConnectedToServerMessage(serverKey));
+            dispatcherConnection.sendDispatcherMessageToClient(new dzida.server.app.dispatcher.ServerMessage.ConnectedToServer(serverKey));
             dispatcherConnection.connectionsToServers.put(serverKey, serverConnection);
         }
 
         @Override
         public void onClose() {
-            dispatcherConnection.sendDispatcherMessageToClient(new DispatcherProtocol.DisconnectedFromServer(serverKey));
+            dispatcherConnection.sendDispatcherMessageToClient(new dzida.server.app.dispatcher.ServerMessage.DisconnectedFromServer(serverKey));
             dispatcherConnection.connectionsToServers.remove(serverKey);
         }
 

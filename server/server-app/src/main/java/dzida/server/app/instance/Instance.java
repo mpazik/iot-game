@@ -126,12 +126,12 @@ public class Instance {
         return instanceKey;
     }
 
-    public static final class UserCharacterMessage implements GameEvent {
+    public static final class UserCharacter implements GameEvent {
         public final Id<Character> characterId;
         public final Id<User> userId;
         public final String userNick;
 
-        public UserCharacterMessage(Id<Character> characterId, Id<User> userId, String userNick) {
+        public UserCharacter(Id<Character> characterId, Id<User> userId, String userNick) {
             this.characterId = characterId;
             this.userId = userId;
             this.userNick = userNick;

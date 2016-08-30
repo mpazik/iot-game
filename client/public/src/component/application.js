@@ -21,32 +21,31 @@ define(function (require, exports, module) {
     const UserService = require('./user-service');
     const Timer = require('./timer');
 
-    function JoinToInstance(instanceKey) {
-        this.instanceKey = instanceKey;
-    }
+    const ClientMessage = {
+        JoinBattleCommand: function (map, difficultyLevel) {
+            this.map = map;
+            this.difficultyLevel = difficultyLevel;
+        },
+        GoHomeCommand: function () {
+        }
+    };
 
-    function JoinToBattleCommand(map, difficultyLevel) {
-        this.map = map;
-        this.difficultyLevel = difficultyLevel;
-    }
+    const ServerMessage = {
+        JoinToInstance: function (instanceKey) {
+            this.instanceKey = instanceKey;
+        }
+    };
 
-    function GoHomeCommand() {
-    }
-
-    const arbiterProtocol = JsonProtocol.Builder()
-        .registerParsingMessageType(1, JoinToInstance)
-        .registerSerializationMessageType(1, JoinToBattleCommand)
-        .registerSerializationMessageType(2, GoHomeCommand)
-        .build();
+    const arbiterProtocol = new JsonProtocol(ServerMessage, ClientMessage);
 
     var arbiterSocket = null;
 
     function sendJoinBattle(data) {
-        arbiterSocket.send(arbiterProtocol.serialize(new JoinToBattleCommand(data.map, data.difficultyLevel)));
+        arbiterSocket.send(arbiterProtocol.serialize(new ClientMessage.JoinBattleCommand(data.map, data.difficultyLevel)));
     }
 
     function sendGoToHome() {
-        arbiterSocket.send(arbiterProtocol.serialize(new GoHomeCommand()));
+        arbiterSocket.send(arbiterProtocol.serialize(new ClientMessage.GoHomeCommand()));
     }
 
     var setState = null;
@@ -58,7 +57,7 @@ define(function (require, exports, module) {
         arbiterSocket = NetworkDispatcher.newSocket('arbiter', userToken);
         arbiterSocket.onMessage = (data) => {
             const message = arbiterProtocol.parse(data);
-            if (message.constructor === JoinToInstance) {
+            if (message.constructor === ServerMessage.JoinToInstance) {
                 InstanceController.connect(message.instanceKey, userToken);
                 Chat.joinToInstanceChannel(message.instanceKey);
             }
@@ -87,10 +86,10 @@ define(function (require, exports, module) {
         InstanceController.readyToConnect();
         if (UserService.userToken == null) {
             UserService.tryLoginUsingClientData()
-                .then(connect)
                 .catch(() => {
                     setState('need-authentication');
-                });
+                })
+                .then(connect);
         } else {
             connectToArbiter(UserService.userToken);
             Chat.connect(UserService.userToken);

@@ -22,7 +22,6 @@ define(function (require, exports, module) {
             this.target = target;
         },
         EatApple: function () {
-
         }
     };
 });

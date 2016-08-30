@@ -1,9 +1,19 @@
 package dzida.server.app.arbiter;
 
+import com.google.common.collect.ImmutableSet;
 import dzida.server.app.instance.Instance;
 import dzida.server.core.basic.entity.Key;
 
 public interface ArbiterCommand {
+    ImmutableSet<Class<?>> clientCommandClasses = ImmutableSet.of(
+            GoHomeCommand.class,
+            JoinBattleCommand.class
+    );
+
+    ImmutableSet<Class<?>> serverCommandClasses = ImmutableSet.of(
+            JoinToInstance.class
+    );
+
     class GoHomeCommand implements ArbiterCommand {
     }
 

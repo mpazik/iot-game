@@ -2,7 +2,6 @@ package dzida.server.app.store.database;
 
 import dzida.server.app.arbiter.ArbiterEvent;
 import dzida.server.app.arbiter.ArbiterStore;
-import dzida.server.app.arbiter.Serialization;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.serialization.MessageSerializer;
@@ -20,7 +19,7 @@ public class ArbiterStoreDb implements ArbiterStore {
 
     public ArbiterStoreDb(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
-        arbiterEventSerializer = Serialization.createArbiterEventSerializer();
+        arbiterEventSerializer = MessageSerializer.create(ArbiterEvent.classes);
     }
 
     @Override
@@ -63,8 +62,8 @@ public class ArbiterStoreDb implements ArbiterStore {
     }
 
     private void saveEvent(ArbiterEvent event) {
-        String eventType = arbiterEventSerializer.getEventType(event);
-        String eventData = arbiterEventSerializer.serializeEvent(event);
+        String eventType = arbiterEventSerializer.getMessageType(event);
+        String eventData = arbiterEventSerializer.serializeMessage(event);
 
         connectionProvider.withSqlFactory(sqlQueryFactory -> {
             sqlQueryFactory.insert(arbiterEvent)

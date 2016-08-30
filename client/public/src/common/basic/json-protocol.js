@@ -8,7 +8,7 @@ define(function (require, exports, module) {
         }
     }
 
-    class Serializer {
+    class JsonProtocol {
         constructor(parsingMessageTypes, serializationMessageTypes) {
             this.parsingMessageTypes = parsingMessageTypes;
             this.serializationMessageTypes = serializationMessageTypes;
@@ -17,36 +17,20 @@ define(function (require, exports, module) {
         parse(data) {
             const parsedData = parseJson(data);
             const messageCode = parsedData[0];
-            const messageConstructor = this.parsingMessageTypes.get(messageCode);
+            const messageConstructor = this.parsingMessageTypes[messageCode];
             const message = parsedData[1];
             Object.setPrototypeOf(message, messageConstructor.prototype);
             return message
         };
 
         serialize(message) {
-            const messageCode = this.serializationMessageTypes.get(message.constructor);
+            const messageCode = message.constructor.name;
+            if (!this.serializationMessageTypes.hasOwnProperty(messageCode)) {
+                throw "Tried to serialized not supported message type: " + messageCode
+            }
             return JSON.stringify([messageCode, message]);
         };
     }
 
-    module.exports = {
-        test: 'test',
-        Builder () {
-            const parsingMessageTypes = new Map();
-            const serializationMessageTypes = new Map();
-            return {
-                registerParsingMessageType: function (typeCode, constructor) {
-                    parsingMessageTypes.set(typeCode, constructor);
-                    return this;
-                },
-                registerSerializationMessageType: function (typeCode, constructor) {
-                    serializationMessageTypes.set(constructor, typeCode);
-                    return this;
-                },
-                build() {
-                    return new Serializer(parsingMessageTypes, serializationMessageTypes);
-                }
-            };
-        }
-    }
+    module.exports = JsonProtocol;
 });

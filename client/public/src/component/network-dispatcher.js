@@ -7,36 +7,30 @@ define(function (require, exports, module) {
 
     var socket = null;
 
-    function ConnectedToServerMessage(serverKey) {
-        this.serverKey = serverKey;
-    }
+    const ClientMessage = {
+        ConnectToServer: function (serverKey, connectionData) {
+            this.serverKey = serverKey;
+            //noinspection JSUnusedGlobalSymbols
+            this.connectionData = connectionData;
+        },
+        DisconnectFromServer: function (serverKey) {
+            this.serverKey = serverKey;
+        }
+    };
+    const ServerMessage = {
+        ConnectedToServer: function (serverKey) {
+            this.serverKey = serverKey;
+        },
+        DisconnectedFromServer: function (serverKey) {
+            this.serverKey = serverKey;
+        },
+        NotConnectedToServer: function (serverKey, errorMessage) {
+            this.serverKey = serverKey;
+            this.errorMessage = errorMessage;
+        }
+    };
 
-    function DisconnectedFromServer(serverKey) {
-        this.serverKey = serverKey;
-    }
-
-    function NotConnectedToServerMessage(serverKey, errorMessage) {
-        this.serverKey = serverKey;
-        this.errorMessage = errorMessage;
-    }
-
-    function ConnectToServerMessage(serverKey, connectionData) {
-        this.serverKey = serverKey;
-        //noinspection JSUnusedGlobalSymbols
-        this.connectionData = connectionData;
-    }
-
-    function DisconnectFromServerMessage(serverKey) {
-        this.serverKey = serverKey;
-    }
-
-    const dispatcherProtocol = JsonProtocol.Builder()
-        .registerParsingMessageType(1, ConnectedToServerMessage)
-        .registerParsingMessageType(2, DisconnectedFromServer)
-        .registerParsingMessageType(3, NotConnectedToServerMessage)
-        .registerSerializationMessageType(1, ConnectToServerMessage)
-        .registerSerializationMessageType(2, DisconnectFromServerMessage)
-        .build();
+    const dispatcherProtocol = new JsonProtocol(ServerMessage, ClientMessage);
 
     function isConnected() {
         return socket != null && socket.readyState === WebSocket.OPEN;
@@ -80,17 +74,17 @@ define(function (require, exports, module) {
 
     function handleDispatcherMessage(data) {
         const message = dispatcherProtocol.parse(data);
-        if (message.constructor === ConnectedToServerMessage) {
+        if (message.constructor === ServerMessage.ConnectedToServer) {
             const connection = connections.get(message.serverKey);
             connection.onOpen();
             connection.readyState = connectionState.OPEN;
-        } else if (message.constructor === DisconnectedFromServer) {
+        } else if (message.constructor === ServerMessage.DisconnectedFromServer) {
             const connection = connections.get(message.serverKey);
             connection.readyState = connectionState.CLOSING;
             connection.onClose();
             connection.readyState = connectionState.CLOSED;
             connections.delete(message.serverKey);
-        } else if (message.constructor === NotConnectedToServerMessage) {
+        } else if (message.constructor === ServerMessage.NotConnectedToServer) {
             const connection = connections.get(message.serverKey);
             connection.readyState = connectionState.CLOSING;
             connection.onError(message.errorMessage);
@@ -143,7 +137,7 @@ define(function (require, exports, module) {
                 },
                 close() {
                     connections.delete(serverKey);
-                    sendToDispatcher(new DisconnectFromServerMessage(serverKey));
+                    sendToDispatcher(new ClientMessage.DisconnectFromServer(serverKey));
                 },
                 readyState: connectionState.CONNECTING,
                 onMessage: () => {
@@ -159,7 +153,7 @@ define(function (require, exports, module) {
             if (socket == null) {
                 connect()
             }
-            sendToDispatcher(new ConnectToServerMessage(serverKey, connectionData));
+            sendToDispatcher(new ClientMessage.ConnectToServer(serverKey, connectionData));
             return connection;
         },
         disconnect() {

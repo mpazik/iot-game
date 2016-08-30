@@ -1,96 +1,50 @@
 package dzida.server.app.protocol.json;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.TypeAdapter;
-import org.apache.log4j.Logger;
+import dzida.server.app.serialization.BasicJsonSerializer;
+import dzida.server.app.serialization.MessageSerializer;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 
 public final class JsonProtocol {
-    private static final Logger log = Logger.getLogger(JsonProtocol.class);
-
     private final Gson gson;
-    private final Map<Integer, Class<?>> parsingMessageTypes;
-    private final Map<Class<?>, Integer> serializationMessageTypes;
+    private final MessageSerializer inputSerializer;
+    private final MessageSerializer outputSerializer;
 
-    private JsonProtocol(Gson gson, Map<Integer, Class<?>> parsingMessageTypes, Map<Class<?>, Integer> serializationMessageTypes) {
+    private JsonProtocol(Gson gson, MessageSerializer inputSerializer, MessageSerializer outputSerializer) {
         this.gson = gson;
-        this.parsingMessageTypes = parsingMessageTypes;
-        this.serializationMessageTypes = serializationMessageTypes;
+        this.inputSerializer = inputSerializer;
+        this.outputSerializer = outputSerializer;
+    }
+
+    public static JsonProtocol create(ImmutableSet<Class<?>> inputMessageClasses, ImmutableSet<Class<?>> outputMessageClasses) {
+        return create(BasicJsonSerializer.getSerializer(), inputMessageClasses, outputMessageClasses);
+    }
+
+    public static JsonProtocol create(Gson serializer, ImmutableSet<Class<?>> inputMessageClasses, ImmutableSet<Class<?>> outputMessageClasses) {
+        MessageSerializer inputSerializer = MessageSerializer.create(serializer, inputMessageClasses);
+        MessageSerializer outputSerializer = MessageSerializer.create(serializer, outputMessageClasses);
+        return new JsonProtocol(serializer, inputSerializer, outputSerializer);
     }
 
     @Nullable
     public Object parseMessage(String jsonMessage) {
-        try {
-            JsonArray message = gson.fromJson(jsonMessage, JsonArray.class);
-            int type = message.get(0).getAsNumber().intValue();
-            JsonElement data = message.get(1);
-            Class<?> messageType = parsingMessageTypes.get(type);
-            if (messageType == null) {
-                return null;
-            }
-            return gson.fromJson(data, messageType);
-        } catch (JsonSyntaxException | IllegalStateException | UnsupportedOperationException e) {
-            e.printStackTrace();
-            return null;
-        }
+        JsonArray message = gson.fromJson(jsonMessage, JsonArray.class);
+        String type = message.get(0).getAsString();
+        assert inputSerializer.isSupportedTypeName(type) : "Unsupported message type: " + type;
+        JsonElement data = message.get(1);
+        return inputSerializer.parseEvent(data, type);
     }
 
     @Nullable
     public String serializeMessage(Object message) {
-        //noinspection SuspiciousMethodCalls
-        Integer typeCode = serializationMessageTypes.get(message.getClass());
-        if (typeCode == null) {
-            log.error("Trying to serialized not registered object: " + message);
-            return null;
-        }
-        return gson.toJson(ImmutableList.of(typeCode, message));
-    }
-
-    public final static class Builder {
-        private final Map<Integer, Class<?>> parsingMessageTypes = new HashMap<>();
-        private final Map<Class<?>, Integer> serializationMessageTypes = new HashMap<>();
-        private final GsonBuilder gsonBuilder = new GsonBuilder();
-
-        public Builder registerMessageType(int typeCode, Class<?> messageType) {
-            parsingMessageTypes.put(typeCode, messageType);
-            serializationMessageTypes.put(messageType, typeCode);
-            return this;
-        }
-
-        public Builder registerParsingMessageType(int typeCode, Class<?> messageType) {
-            parsingMessageTypes.put(typeCode, messageType);
-            return this;
-        }
-
-        public Builder registerSerializationMessageType(int typeCode, Class<?> messageType) {
-            serializationMessageTypes.put(messageType, typeCode);
-            return this;
-        }
-
-        public <T> Builder registerTypeHierarchyAdapter(Class<T> baseType, TypeAdapter<T> typeAdapter) {
-            gsonBuilder.registerTypeHierarchyAdapter(baseType, typeAdapter);
-            return this;
-        }
-
-        public <T> Builder registerTypeAdapter(Class<T> baseType, TypeAdapter<T> typeAdapter) {
-            gsonBuilder.registerTypeAdapter(baseType, typeAdapter);
-            return this;
-        }
-
-        public JsonProtocol build() {
-            return new JsonProtocol(gsonBuilder.create(),
-                    ImmutableMap.copyOf(parsingMessageTypes),
-                    ImmutableMap.copyOf(serializationMessageTypes)
-            );
-        }
+        assert outputSerializer.isSupportedType(message) : "Unsupported message type: " + outputSerializer.getMessageType(message);
+        String type = outputSerializer.getMessageType(message);
+        JsonElement data = outputSerializer.serializeMessageToJsonTree(message);
+        return gson.toJson(ImmutableList.of(type, data));
     }
 }

@@ -6,28 +6,7 @@ define(function (require, exports, module) {
     const Messages = require('./messages');
     const JsonProtocol = require('../../common/basic/json-protocol');
 
-    const instanceProtocol = JsonProtocol.Builder()
-        .registerParsingMessageType(5, Messages.CharacterSpawned)
-        .registerParsingMessageType(6, Messages.CharacterDied)
-        .registerParsingMessageType(7, Messages.CharacterMoved)
-        .registerParsingMessageType(8, Messages.SkillUsedOnCharacter)
-        .registerParsingMessageType(9, Messages.CharacterGotDamage)
-        .registerParsingMessageType(11, Messages.InitialData)
-        .registerParsingMessageType(12, Messages.ServerMessage)
-        .registerParsingMessageType(19, Messages.ScenarioEnd)
-        .registerParsingMessageType(21, Messages.SkillUsedOnWorldMap)
-        .registerParsingMessageType(22, Messages.WorldObjectCreated)
-        .registerParsingMessageType(23, Messages.SkillUsedOnWorldObject)
-        .registerParsingMessageType(24, Messages.WorldObjectRemoved)
-        .registerParsingMessageType(25, Messages.UserCharacter)
-        .registerParsingMessageType(26, Messages.CharacterHealed)
-        .registerSerializationMessageType(2, Commands.Move)
-        .registerSerializationMessageType(3, Commands.UseSkillOnCharacter)
-        .registerSerializationMessageType(4, Commands.UseSkillOnWorldMap)
-        .registerSerializationMessageType(8, Commands.Backdoor)
-        .registerSerializationMessageType(11, Commands.UseSkillOnWorldObject)
-        .registerSerializationMessageType(12, Commands.EatApple)
-        .build();
+    const instanceProtocol = new JsonProtocol(Messages, Commands);
 
     const State = {
         CREATED: 0,

@@ -1,28 +1,17 @@
 package dzida.server.app.serialization;
 
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class MessageSerializerTest {
-    @Test
-    public void exceptionIsThrownIfSameClassIsRegisteredTwice() {
-        assertThatThrownBy(() -> {
-            new MessageSerializer.Builder()
-                    .registerMessage(Message.class)
-                    .registerMessage(Message.class)
-                    .build();
-        }).hasMessageContaining("Duplicated");
-    }
 
     @Test
     public void exceptionIsThrownIfAnotherClassWithSameNameIsRegistered() {
         assertThatThrownBy(() -> {
-            new MessageSerializer.Builder()
-                    .registerMessage(Message.class)
-                    .registerMessage(Base.Message.class)
-                    .build();
+            MessageSerializer.create(ImmutableSet.of(Message.class, Base.Message.class));
         }).hasMessageContaining("the old class name can not be changed");
     }
 

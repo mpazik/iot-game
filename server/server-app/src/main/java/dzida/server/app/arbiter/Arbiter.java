@@ -62,7 +62,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         this.arbiterStore = arbiterStore;
         this.scenarioStore = scenarioStore;
         this.instanceStore = instanceStore;
-        arbiterProtocol = Serialization.createSerializer();
+        arbiterProtocol = JsonProtocol.create(ArbiterCommand.clientCommandClasses, ArbiterCommand.serverCommandClasses);
         userTokenVerifier = new UserTokenVerifier();
 
         usersInstances = new HashMap<>();
