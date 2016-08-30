@@ -42,6 +42,15 @@ public class MessageSerializer {
 
         public MessageSerializer.Builder registerMessage(Class<?> eventClass) {
             String eventType = getEventTypeFromClass(eventClass);
+            if (eventClasses.containsKey(eventType)) {
+                if (eventClasses.get(eventType).equals(eventClass)) {
+                    throw new RuntimeException("Registered same event class twice. Duplicated class: " + eventClass.getName());
+                } else {
+                    throw new RuntimeException("Two different classes have same name. " +
+                            "Remember that name of the old class name can not be changed. " +
+                            "Duplicated classes: " + eventClasses.get(eventType).getName() + " & " + eventClass.getName());
+                }
+            }
             eventClasses.put(eventType, eventClass);
             return this;
         }
