@@ -42,9 +42,91 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>Install db</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${basedir}/../bin/install-db.sh</executable>
+                            <commandlineArgs>${database.name} ${database.user}</commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Stop db</id>
+                        <phase>pre-clean</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${basedir}/../bin/stop-db.sh</executable>
+                        </configuration>
+                    </execution>
+                </executions>
                 <configuration>
                     <mainClass>dzida.server.app.GameServer</mainClass>
+                    <systemProperties>
+                        <systemProperty>
+                            <key>database.host</key>
+                            <value>${database.host}</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>database.name</key>
+                            <value>${database.name}</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>database.user</key>
+                            <value>${database.user}</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>database.password</key>
+                            <value>${database.password}</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>devMode</key>
+                            <value>true</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <key>serverTimeOffset</key>
+                            <value>10000</value>
+                        </systemProperty>
+                    </systemProperties>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.querydsl</groupId>
+                <artifactId>querydsl-maven-plugin</artifactId>
+                <version>${querydsl.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>export</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jdbcDriver>org.postgresql.Driver</jdbcDriver>
+                    <jdbcUrl>jdbc:postgresql://localhost:5432/test_db</jdbcUrl>
+                    <jdbcUser>test_user</jdbcUser>
+                    <jdbcPassword>test_password</jdbcPassword>
+                    <packageName>dzida.server.app.querydsl</packageName>
+                    <targetFolder>${project.basedir}/target/generated-sources/java</targetFolder>
+                    <sourceFolder/>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>9.4.1209</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                        <version>1.6.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
@@ -66,7 +148,6 @@
             <artifactId>jersey-server</artifactId>
             <version>${jersey.version}</version>
         </dependency>
-
         <dependency>
             <groupId>co.cask.http</groupId>
             <artifactId>netty-http</artifactId>
@@ -92,8 +173,30 @@
             <artifactId>java-jwt</artifactId>
             <version>2.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.4.1209</version>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-sql</artifactId>
+            <version>${querydsl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+        </dependency>
     </dependencies>
+
     <properties>
         <jersey.version>2.22.1</jersey.version>
+        <querydsl.version>4.1.3</querydsl.version>
+
+        <database.host>localhost:5432</database.host>
+        <database.name>test_db</database.name>
+        <database.user>test_user</database.user>
+        <database.password>test_password</database.password>
     </properties>
 </project>

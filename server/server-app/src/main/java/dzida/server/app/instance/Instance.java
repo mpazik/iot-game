@@ -1,6 +1,5 @@
 package dzida.server.app.instance;
 
-import dzida.server.app.TimeServiceImpl;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.npc.AiService;
 import dzida.server.app.instance.npc.NpcBehaviour;
@@ -13,6 +12,8 @@ import dzida.server.app.store.http.loader.WorldMapLoader;
 import dzida.server.app.store.mapdb.WorldObjectStoreMapDb;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.app.store.memory.SkillStoreInMemory;
+import dzida.server.app.timesync.TimeServiceImpl;
+import dzida.server.app.user.User;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
@@ -20,6 +21,7 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
+import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
@@ -122,6 +124,18 @@ public class Instance {
 
     public String getKey() {
         return instanceKey;
+    }
+
+    public static final class UserCharacter implements GameEvent {
+        public final Id<Character> characterId;
+        public final Id<User> userId;
+        public final String userNick;
+
+        public UserCharacter(Id<Character> characterId, Id<User> userId, String userNick) {
+            this.characterId = characterId;
+            this.userId = userId;
+            this.userNick = userNick;
+        }
     }
 }
 

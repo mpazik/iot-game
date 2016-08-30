@@ -51,7 +51,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
         if (survivalScenarioState.end) {
             return;
         }
-        instanceStateManager.dispatchEvent(new ScenarioEnd(Defeat, survival.getDifficultyLevel()));
+        instanceStateManager.dispatchEvent(new ScenarioEnd(Defeat));
         survivalScenarioState.end = true;
     }
 
@@ -69,7 +69,7 @@ public class SurvivalScenarioLogic implements ScenarioLogic {
 
     private void victory() {
         survivalScenarioState.end = true;
-        instanceStateManager.updateState(ImmutableList.of(new ScenarioEnd(Victory, survival.getDifficultyLevel())));
+        instanceStateManager.updateState(ImmutableList.of(new ScenarioEnd(Victory)));
     }
 
     @Override

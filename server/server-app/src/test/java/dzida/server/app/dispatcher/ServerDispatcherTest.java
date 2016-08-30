@@ -37,8 +37,8 @@ public class ServerDispatcherTest {
     public void clientIsConnectedToSelectedServers() {
         serverDispatcher.onConnection(connection);
         connection.sendToServer("[" +
-                "[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverA\",\"connectionData\":\"test\"}]") + "], " +
-                "[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverB\"}]") + "]" +
+                "[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverA\",\"connectionData\":\"test\"}]") + "], " +
+                "[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverB\"}]") + "]" +
                 "]");
 
 
@@ -67,13 +67,13 @@ public class ServerDispatcherTest {
         serverDispatcher.addServer("serverD", serverD);
         serverDispatcher.onConnection(connection);
         connection.sendToServer("[" +
-                "[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverA\",\"connectionsData\":\"test\"}]") + "], " +
-                "[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverD\"}]") + "]" +
+                "[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverA\",\"connectionsData\":\"test\"}]") + "], " +
+                "[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverD\"}]") + "]" +
                 "]");
 
         assertThat(connection.getMessages()).containsExactly(
-                "[[\"dispatcher\"," + escapeJson("[1,{\"serverKey\":\"serverA\"}]") + "]]",
-                "[[\"dispatcher\"," + escapeJson("[1,{\"serverKey\":\"serverD\"}]") + "]]",
+                "[[\"dispatcher\"," + escapeJson("[\"ConnectedToServer\",{\"serverKey\":\"serverA\"}]") + "]]",
+                "[[\"dispatcher\"," + escapeJson("[\"ConnectedToServer\",{\"serverKey\":\"serverD\"}]") + "]]",
                 "[[\"serverD\"," + escapeJson("Initial data from server D") + "]]"
         );
     }
@@ -81,10 +81,10 @@ public class ServerDispatcherTest {
     @Test
     public void clientReceiveMessageWithErrorIfThereIsNoServerToWhichItWantedToConnect() {
         serverDispatcher.onConnection(connection);
-        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverD\"}]") + "]]");
+        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverD\"}]") + "]]");
 
         assertThat(connection.getMessages()).containsExactly(
-                "[[\"dispatcher\"," + escapeJson("[3,{\"serverKey\":\"serverD\",\"errorMessage\":\"Could not find a server with the key: serverD.\"}]") + "]]"
+                "[[\"dispatcher\"," + escapeJson("[\"NotConnectedToServer\",{\"serverKey\":\"serverD\",\"errorMessage\":\"Could not find a server with the key: serverD.\"}]") + "]]"
         );
     }
 
@@ -98,10 +98,10 @@ public class ServerDispatcherTest {
         };
         serverDispatcher.addServer("serverD", serverD);
         serverDispatcher.onConnection(connection);
-        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverD\"}]") + "]]");
+        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverD\"}]") + "]]");
 
         assertThat(connection.getMessages()).containsExactly(
-                "[[\"dispatcher\"," + escapeJson("[3,{\"serverKey\":\"serverD\",\"errorMessage\":\"You shall not pass.\"}]") + "]]"
+                "[[\"dispatcher\"," + escapeJson("[\"NotConnectedToServer\",{\"serverKey\":\"serverD\",\"errorMessage\":\"You shall not pass.\"}]") + "]]"
         );
     }
 
@@ -109,8 +109,8 @@ public class ServerDispatcherTest {
     public void messagesAreDispatchedToCorrectServer() {
         serverDispatcher.onConnection(connection);
         connection.sendToServer("[" +
-                "[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]," +
-                "[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverB\"}]") + "]," +
+                "[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverA\"}]") + "]," +
+                "[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverB\"}]") + "]," +
                 "[\"serverB\", " + escapeJson("messageToServerB") + "]," +
                 "[\"serverB\", " + escapeJson("message2") + "]" +
                 "]");
@@ -139,10 +139,10 @@ public class ServerDispatcherTest {
     @Test
     public void clientDisconnectionFromServerIsDispatchedToServer() {
         serverDispatcher.onConnection(connection);
-        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
+        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverA\"}]") + "]]");
         ProbeServer.assertThat(serverA).hasConnection();
 
-        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[2, {\"serverKey\":\"serverA\"}]") + "]]");
+        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[\"DisconnectFromServer\", {\"serverKey\":\"serverA\"}]") + "]]");
 
         ProbeServer.assertThat(serverA).hasNotConnection();
     }
@@ -151,8 +151,8 @@ public class ServerDispatcherTest {
     public void clientDisconnectionFromDispatcherIsDispatchedToAllConnectedServers() {
         serverDispatcher.onConnection(connection);
         connection.sendToServer("[" +
-                "[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":1}]") + "]," +
-                "[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":2}]") + "]" +
+                "[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":1}]") + "]," +
+                "[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":2}]") + "]" +
                 "]");
         connection.disconnect();
 
@@ -163,7 +163,7 @@ public class ServerDispatcherTest {
     @Test
     public void clientDisconnectionFromServerDoesNothingIfClientWasNotConnected() {
         serverDispatcher.onConnection(connection);
-        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[2, {\"serverKey\":1}]") + "]]");
+        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[\"DisconnectFromServer\", {\"serverKey\":1}]") + "]]");
 
         ProbeServer.assertThat(serverA).hasNotConnection();
     }
@@ -171,11 +171,11 @@ public class ServerDispatcherTest {
     @Test
     public void serverCanSendMessageToClient() {
         serverDispatcher.onConnection(connection);
-        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
+        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverA\"}]") + "]]");
         serverA.send("Test message");
 
         assertThat(connection.getMessages()).containsExactly(
-                "[[\"dispatcher\"," + escapeJson("[1,{\"serverKey\":\"serverA\"}]") + "]]",
+                "[[\"dispatcher\"," + escapeJson("[\"ConnectedToServer\",{\"serverKey\":\"serverA\"}]") + "]]",
                 "[[\"serverA\",\"Test message\"]]"
         );
     }
@@ -183,12 +183,12 @@ public class ServerDispatcherTest {
     @Test
     public void serverCanDisconnectClient() {
         serverDispatcher.onConnection(connection);
-        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[1, {\"serverKey\":\"serverA\"}]") + "]]");
+        connection.sendToServer("[[\"dispatcher\", " + escapeJson("[\"ConnectToServer\", {\"serverKey\":\"serverA\"}]") + "]]");
         serverA.disconnectClient();
 
         assertThat(connection.getMessages()).containsExactly(
-                "[[\"dispatcher\"," + escapeJson("[1,{\"serverKey\":\"serverA\"}]") + "]]",
-                "[[\"dispatcher\"," + escapeJson("[2,{\"serverKey\":\"serverA\"}]") + "]]");
+                "[[\"dispatcher\"," + escapeJson("[\"ConnectedToServer\",{\"serverKey\":\"serverA\"}]") + "]]",
+                "[[\"dispatcher\"," + escapeJson("[\"DisconnectedFromServer\",{\"serverKey\":\"serverA\"}]") + "]]");
     }
 
     private String escapeJson(String json) {

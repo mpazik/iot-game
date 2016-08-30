@@ -1,14 +1,13 @@
 package dzida.server.app.instance;
 
 import com.google.common.util.concurrent.Runnables;
-import dzida.server.app.Leaderboard;
 import dzida.server.app.arbiter.Arbiter;
-import dzida.server.app.command.CharacterCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
-import dzida.server.app.map.descriptor.MapDescriptorStore;
+import dzida.server.app.instance.scenario.ScenarioStore;
 import dzida.server.app.map.descriptor.Scenario;
+import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.protocol.json.JsonProtocol;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
@@ -26,6 +25,7 @@ import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
 import dzida.server.core.scenario.ScenarioEnd;
+import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,43 +35,50 @@ import java.util.function.Consumer;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class InstanceServer implements VerifyingConnectionServer<String, String> {
+    private static final Logger log = Logger.getLogger(InstanceServer.class);
+
     private final Instance instance;
+    private final InstanceStore instanceStore;
     private final Arbiter arbiter;
     private final JsonProtocol serializer;
     private final StateSynchroniser stateSynchroniser;
     private final UserTokenVerifier userTokenVerifier;
-    private final Leaderboard leaderboard;
+    private final ScenarioStore scenarioStore;
 
     private final Key<Instance> instanceKey;
+    private final Scenario scenario;
     private final Map<Id<User>, ContainerConnection> connections;
+    private Id<Scenario> scenarioId;
 
-    public InstanceServer(Scheduler scheduler, Arbiter arbiter, Leaderboard leaderboard, Key<Instance> instanceKey, String instanceType, Integer difficultyLevel) {
+    public InstanceServer(Scheduler scheduler, InstanceStore instanceStore, Arbiter arbiter, ScenarioStore scenarioStore, Key<Instance> instanceKey, Scenario scenario) {
+        this.instanceStore = instanceStore;
         this.arbiter = arbiter;
-        this.leaderboard = leaderboard;
+        this.scenarioStore = scenarioStore;
         userTokenVerifier = new UserTokenVerifier();
 
-        serializer = InstanceProtocol.createSerializer();
-        Scenario scenario = new MapDescriptorStore().getScenario(instanceType, difficultyLevel);
+        serializer = JsonProtocol.create(CharacterCommand.classes, InstanceEvent.classes);
         instance = new Instance(instanceKey.getValue(), scenario, scheduler);
         stateSynchroniser = new StateSynchroniser(instance, scenario);
 
         this.instanceKey = instanceKey;
+        this.scenario = scenario;
+
         connections = new HashMap<>();
     }
 
     public void start() {
         instance.subscribeChange(stateSynchroniser::syncStateChange);
         instance.subscribeChange(gameEvent -> {
+            instanceStore.saveEvent(instanceKey, gameEvent);
+        });
+        instance.subscribeChange(gameEvent -> {
             if (gameEvent instanceof ScenarioEnd) {
                 ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;
-                arbiter.endOfScenario(instanceKey);
-                if (scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
-                    connections.keySet().forEach(userId -> {
-                        leaderboard.notePlayerScore(userId, scenarioEnd.difficultyLevel);
-                    });
-                }
+                scenarioStore.scenarioFinished(scenarioId, scenarioEnd);
+                arbiter.instanceFinished(instanceKey);
             }
         });
+        scenarioId = scenarioStore.scenarioStarted(scenario);
 
         instance.start();
     }
@@ -92,6 +99,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         if (connections.containsKey(userId)) {
             return Result.error("User is already logged in.");
         }
+        if (scenario instanceof Survival && !((Survival) scenario).getAttendees().contains(userId)) {
+            return Result.error("Player is not playing the scenario.");
+        }
         if (!arbiter.isUserOnInstance(instanceKey, userId)) {
             return Result.error("Player is not assigned to the instance: " + instanceKey);
         }
@@ -105,14 +115,20 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         PlayerCharacter character = new PlayerCharacter(characterId, userNick);
 
         instance.handleCommand(new SpawnCharacterCommand(character));
-        sendMessageToPlayer(userId, new InstanceProtocol.UserCharacterMessage(characterId, userId, userNick));
+        sendMessageToPlayer(userId, new Instance.UserCharacter(characterId, userId, userNick));
         stateSynchroniser.registerCharacter(userId, sendToPlayer);
-        System.out.printf("Instance: %s - user %s joined \n", instanceKey, userId);
+        log.info("Instance: " + instanceKey + " - user " + userId + " joined \n");
         return Result.ok();
     }
 
     public boolean isEmpty() {
         return connections.isEmpty();
+    }
+
+    public void closeInstance() {
+        if (!scenarioStore.isScenarioFinished(scenarioId)) {
+            scenarioStore.scenarioFinished(scenarioId, new ScenarioEnd(ScenarioEnd.Resolution.Terminated));
+        }
     }
 
     public void disconnectPlayer(Id<User> userId) {
@@ -151,7 +167,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         public void close() {
             stateSynchroniser.unregisterListener(userId);
             instance.handleCommand(new KillCharacterCommand(characterId));
-            System.out.printf("Instance: %s - user %s quit \n", instanceKey, userId);
+            log.info("Instance: " + instanceKey + " - user " + userId + " quit");
 
             connections.remove(userId);
         }

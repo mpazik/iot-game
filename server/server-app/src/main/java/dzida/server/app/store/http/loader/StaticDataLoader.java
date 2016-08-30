@@ -2,8 +2,9 @@ package dzida.server.app.store.http.loader;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import dzida.server.app.BasicJsonSerializer;
 import dzida.server.app.Configuration;
+import dzida.server.app.serialization.BasicJsonSerializer;
+import org.apache.log4j.Logger;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
 public class StaticDataLoader {
+    private static final Logger log = Logger.getLogger(StaticDataLoader.class);
 
     public <T> T loadJsonFromServer(String path, Class<T> clazz) {
         return loadJsonFromServer(path, TypeToken.of(clazz));
@@ -23,7 +25,7 @@ public class StaticDataLoader {
         long startTime = System.currentTimeMillis();
         try {
             URL url = UriBuilder.fromUri(Configuration.getStaticServerAddress()).path(path).build().toURL();
-            System.out.printf("Downloading json file from %s \n", url);
+            log.info("Downloading json file from " + url);
 
             URLConnection urlConnection = url.openConnection();
             String contentEncoding = urlConnection.getContentEncoding();
@@ -31,7 +33,7 @@ public class StaticDataLoader {
             T data = BasicJsonSerializer.getSerializer().fromJson(jsonReader, typeToken.getType());
 
             long loadTime = System.currentTimeMillis() - startTime;
-            System.out.printf("File %s downloaded in %dms \n", path, loadTime);
+            log.info("File " + path + " downloaded in " + loadTime + "ms");
 
             return data;
         } catch (IOException e) {

@@ -11,7 +11,7 @@ define(function (require, exports, module) {
             }
         },
         created: function () {
-            this.innerHTML = '<div class="item-list"></div>';
+            this.innerHTML = '<h3 style="margin-top: 0">Inventory</h3><div class="item-list"></div>';
         },
         attached: function () {
             this._updateActive(uiState.playerItems.value);

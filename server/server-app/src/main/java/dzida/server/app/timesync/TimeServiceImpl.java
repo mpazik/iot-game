@@ -1,5 +1,6 @@
-package dzida.server.app;
+package dzida.server.app.timesync;
 
+import dzida.server.app.Configuration;
 import dzida.server.core.time.TimeService;
 
 import java.time.Instant;

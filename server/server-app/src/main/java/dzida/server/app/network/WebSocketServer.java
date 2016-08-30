@@ -36,6 +36,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.CharsetUtil;
+import org.apache.log4j.Logger;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.HOST;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
@@ -43,6 +44,8 @@ import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class WebSocketServer {
+    private static final Logger log = Logger.getLogger(WebSocketServer.class);
+
     private final EventLoopGroup workerGroup;
     private final EventLoopGroup bossGroup;
     private final EventLoop eventLoop;
@@ -83,8 +86,12 @@ public class WebSocketServer {
     }
 
     public void shootDown() {
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+        try {
+            bossGroup.shutdownGracefully().sync();
+            workerGroup.shutdownGracefully().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
@@ -107,7 +114,7 @@ public class WebSocketServer {
                 HttpHeaderUtil.setContentLength(res, res.content().readableBytes());
             }
 
-            // Send the response and close the connection if necessary.
+            // Send the response and stop the connection if necessary.
             ChannelFuture f = ctx.channel().writeAndFlush(res);
             if (!HttpHeaderUtil.isKeepAlive(req) || res.status().code() != 200) {
                 f.addListener(ChannelFutureListener.CLOSE);
@@ -187,7 +194,7 @@ public class WebSocketServer {
                     }
                 };
                 server.onConnection(connector);
-                System.out.println("Received new connection");
+                log.info("Received new connection");
             }
         }
 
@@ -219,7 +226,7 @@ public class WebSocketServer {
         }
 
         private void fail(ChannelHandlerContext ctx, String message) {
-            System.err.println(message);
+            log.error(message);
             ctx.close();
         }
 

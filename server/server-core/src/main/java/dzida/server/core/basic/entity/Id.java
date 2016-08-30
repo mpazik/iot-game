@@ -2,6 +2,7 @@ package dzida.server.core.basic.entity;
 
 import com.google.common.base.Objects;
 
+@SuppressWarnings("ALL")
 public class Id<T> {
     private final long id;
 
@@ -29,5 +30,9 @@ public class Id<T> {
 
     public long getValue() {
         return id;
+    }
+
+    public int getIntValue() {
+        return Math.toIntExact(id);
     }
 }

@@ -1,5 +1,8 @@
 package dzida.server.app.protocol.json;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -57,32 +60,35 @@ public class JsonProtocolTest {
         }
     };
 
-    final int trivialMessageId = 1;
-    final int nestedObjectMessageId = 2;
-    final int customSerializationObjectMessageId = 3;
-    final int customSerializationMessageId = 4;
-    final int customSerializationGenericObjectMessageId = 5;
-
-    JsonProtocol serializer = new JsonProtocol.Builder()
-            .registerMessageType(trivialMessageId, TrivialMessage.class)
-            .registerMessageType(nestedObjectMessageId, NestedObjectMessage.class)
-            .registerMessageType(customSerializationObjectMessageId, CustomSerializationObjectMessage.class)
-            .registerMessageType(customSerializationMessageId, CustomSerializationMessage.class)
-            .registerMessageType(customSerializationGenericObjectMessageId, CustomSerializationGenericObjectMessage.class)
+    final String trivialMessageType = "\"TrivialMessage\"";
+    final String nestedObjectMessageType = "\"NestedObjectMessage\"";
+    final String customSerializationObjectMessageType = "\"CustomSerializationObjectMessage\"";
+    final String customSerializationMessageType = "\"CustomSerializationMessage\"";
+    final String customSerializationGenericObjectMessageType = "\"CustomSerializationGenericObjectMessage\"";
+    final Gson gson = new GsonBuilder()
             .registerTypeAdapter(Bar.class, barTypeAdapter)
             .registerTypeAdapter(CustomSerializationMessage.class, CustomSerializationMessageTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
-            .build();
+            .create();
+    final ImmutableSet<Class<?>> messages = ImmutableSet.of(
+            TrivialMessage.class,
+            NestedObjectMessage.class,
+            CustomSerializationObjectMessage.class,
+            CustomSerializationMessage.class,
+            CustomSerializationGenericObjectMessage.class
+    );
+
+    JsonProtocol serializer = JsonProtocol.create(gson, messages, messages);
 
     @Test
     public void serializing_ifMessageIsRegistered_returnsProperString() {
         String data = serializer.serializeMessage(new TrivialMessage("some text"));
-        assertThat(data).isEqualTo("[" + trivialMessageId + ",{\"text\":\"some text\"}]");
+        assertThat(data).isEqualTo("[" + trivialMessageType + ",{\"text\":\"some text\"}]");
     }
 
     @Test
     public void parsing_ifMessageIsRegistered_returnsMessageObject() {
-        Object message = serializer.parseMessage("[" + trivialMessageId + ",{\"text\":\"some text\"}]");
+        Object message = serializer.parseMessage("[" + trivialMessageType + ",{\"text\":\"some text\"}]");
         assertThat(message).isEqualTo(new TrivialMessage("some text"));
     }
 
@@ -101,48 +107,48 @@ public class JsonProtocolTest {
     @Test
     public void serializing_ifMessageHasNestedObject() {
         String data = serializer.serializeMessage(new NestedObjectMessage(new Foo("some name")));
-        assertThat(data).isEqualTo("[" + nestedObjectMessageId + ",{\"foo\":{\"name\":\"some name\"}}]");
+        assertThat(data).isEqualTo("[" + nestedObjectMessageType + ",{\"foo\":{\"name\":\"some name\"}}]");
     }
 
     @Test
     public void parsing_iifMessageHasNestedObject() {
-        Object message = serializer.parseMessage("[" + nestedObjectMessageId + ",{\"foo\":{\"name\":\"some name\"}}]");
+        Object message = serializer.parseMessage("[" + nestedObjectMessageType + ",{\"foo\":{\"name\":\"some name\"}}]");
         assertThat(message).isEqualTo(new NestedObjectMessage(new Foo("some name")));
     }
 
     @Test
     public void serializing_ifTypeAdapterIsRegistered_worksForValueType() {
         String data = serializer.serializeMessage(new CustomSerializationObjectMessage(new Bar("text")));
-        assertThat(data).isEqualTo("[" + customSerializationObjectMessageId + ",{\"bar\":[\"text\"]}]");
+        assertThat(data).isEqualTo("[" + customSerializationObjectMessageType + ",{\"bar\":[\"text\"]}]");
     }
 
     @Test
     public void parsing_ifTypeAdapterIsRegistered_worksForValueType() {
-        Object message = serializer.parseMessage("[" + customSerializationObjectMessageId + ",{\"bar\":[\"text\"]}]");
+        Object message = serializer.parseMessage("[" + customSerializationObjectMessageType + ",{\"bar\":[\"text\"]}]");
         assertThat(message).isEqualTo(new CustomSerializationObjectMessage(new Bar("text")));
     }
 
     @Test
     public void serializing_ifTypeAdapterIsRegistered_worksForMessageType() {
         String data = serializer.serializeMessage(new CustomSerializationMessage("text", 4));
-        assertThat(data).isEqualTo("[" + customSerializationMessageId + ",[\"text\",4]]");
+        assertThat(data).isEqualTo("[" + customSerializationMessageType + ",[\"text\",4]]");
     }
 
     @Test
     public void parsing_ifTypeAdapterIsRegistered_worksForMessageType() {
-        Object message = serializer.parseMessage("[" + customSerializationMessageId + ",[\"text\",4]]");
+        Object message = serializer.parseMessage("[" + customSerializationMessageType + ",[\"text\",4]]");
         assertThat(message).isEqualTo(new CustomSerializationMessage("text", 4));
     }
 
     @Test
     public void serializing_ifGenericTypeAdapterIsRegistered_worksForGenericValueType() {
         String data = serializer.serializeMessage(new CustomSerializationGenericObjectMessage(new Key<>("keyValue")));
-        assertThat(data).isEqualTo("[" + customSerializationGenericObjectMessageId + ",{\"key\":\"keyValue\"}]");
+        assertThat(data).isEqualTo("[" + customSerializationGenericObjectMessageType + ",{\"key\":\"keyValue\"}]");
     }
 
     @Test
     public void parsing_ifGenericTypeAdapterIsRegistered_worksForGenericValueType() {
-        Object message = serializer.parseMessage("[" + customSerializationGenericObjectMessageId + ",{\"key\":\"keyValue\"}]");
+        Object message = serializer.parseMessage("[" + customSerializationGenericObjectMessageType + ",{\"key\":\"keyValue\"}]");
         assertThat(message).isEqualTo(new CustomSerializationGenericObjectMessage(new Key<>("keyValue")));
     }
 

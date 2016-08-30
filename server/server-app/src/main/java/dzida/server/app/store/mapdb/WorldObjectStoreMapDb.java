@@ -1,7 +1,7 @@
 package dzida.server.app.store.mapdb;
 
 import com.google.gson.Gson;
-import dzida.server.app.BasicJsonSerializer;
+import dzida.server.app.serialization.BasicJsonSerializer;
 import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.world.object.WorldObject;

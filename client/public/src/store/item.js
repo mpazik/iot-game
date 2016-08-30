@@ -4,22 +4,12 @@ define(function (require, exports, module) {
     const ResourcesStore = require('./resources');
     const MainPlayerStore = require('./main-player');
     const Dispatcher = require('../component/dispatcher');
-    const Skills = require('../common/model/skills');
 
     var items = {
-        1: 4
+        1: 4,
+        2: 20
     };
     var pushEvent;
-
-    Dispatcher.userEventStream.subscribe('skill-triggered', function (event) {
-        const skill = event.skill;
-        if (skill.type != Skills.Types.CRAFT) return;
-
-        if (checkSkillItemRequirements(skill.id)) {
-            const skillUsed = new Messages.SkillUsed(MainPlayerStore.characterId(), skill.id);
-            Dispatcher.messageStream.publish(Messages.SkillUsed, skillUsed);
-        }
-    });
 
     Dispatcher.messageStream.subscribe(Messages.SkillUsed, function (event) {
         if (event.casterId != MainPlayerStore.characterId()) return;

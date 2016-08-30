@@ -17,43 +17,30 @@ import java.util.Map;
 import java.util.Optional;
 
 public class UserService {
+    private final UserStore userStore;
     private final PasswordHash passwordHash;
     private final JWTSigner loginTokenSigner;
     private final JWTSigner reissueTokenSigner;
     private final JWTVerifier reissueTokenVerifier;
 
-    private final Map<Id<User>, String> userNicks;
-    private final Map<Id<User>, String> userPasswords;
-
-    public UserService() {
+    public UserService(UserStore userStore) {
+        this.userStore = userStore;
         passwordHash = new PasswordHash();
         loginTokenSigner = new JWTSigner(Configuration.getLoginTokenSecret());
         reissueTokenSigner = new JWTSigner(Configuration.getReissueTokenSecret());
         reissueTokenVerifier = new JWTVerifier(Configuration.getReissueTokenSecret());
-
-        this.userNicks = new HashMap<>();
-        this.userPasswords = new HashMap<>();
-
-        if (Configuration.isDevMode()) {
-            register("test", "test");
-            register("qwe", "qwe");
-        }
     }
 
-    public Result register(String nick, String password) {
+    public Result register(String nick, String email, String password) {
         if (hadNonAlphaCharacter(nick)) {
             return Result.error("Nick name can only contains alphanumeric characters.");
         }
-        Optional<Id<User>> userIdByNick = getUserIdByNick(nick);
+        Optional<Id<User>> userIdByNick = userStore.getUserIdByNick(nick);
         if (userIdByNick.isPresent()) {
             return Result.error("User with " + nick + " is already registered.");
         }
         String hashedPassword = passwordHash.createHash(password);
-        Id<User> userId = generateNewUserId(nick);
-        userNicks.put(userId, nick);
-        userPasswords.put(userId, hashedPassword);
-
-        return Result.ok();
+        return userStore.registerNewUser(nick, email, hashedPassword).toResult();
     }
 
     public boolean hadNonAlphaCharacter(String nick) {
@@ -61,12 +48,12 @@ public class UserService {
     }
 
     public Outcome<EncryptedReissueToken> login(String nick, String password) {
-        Optional<Id<User>> userIdByNick = getUserIdByNick(nick);
+        Optional<Id<User>> userIdByNick = userStore.getUserIdByNick(nick);
         if (!userIdByNick.isPresent()) {
             return Outcome.error("User not found.");
         }
         Id<User> userId = userIdByNick.get();
-        String validHashedPassword = getUserPassword(userId);
+        String validHashedPassword = userStore.getUserPassword(userId);
         if (!passwordHash.validatePassword(password, validHashedPassword)) {
             return Outcome.error("Password is incorrect.");
         }
@@ -79,11 +66,7 @@ public class UserService {
             return Outcome.error("Reissue token is not valid");
         }
         Id<User> userId = userIdOpt.get();
-        return Outcome.ok(reissueLoginToken(userId, userNicks.get(userId)));
-    }
-
-    private Id<User> generateNewUserId(String nick) {
-        return new Id<>(nick.hashCode());
+        return Outcome.ok(reissueLoginToken(userId, userStore.getUserNick(userId)));
     }
 
     private EncryptedReissueToken createReissueToken(Id<User> userId) {
@@ -123,17 +106,9 @@ public class UserService {
         return new EncryptedLoginToken(loginTokenSigner.sign(claims));
     }
 
-    private String getUserPassword(Id<User> userId) {
-        return userPasswords.get(userId);
+    public String getUserNick(Id<User> userId) {
+        return userStore.getUserNick(userId);
     }
-
-    private Optional<Id<User>> getUserIdByNick(String nick) {
-        return userNicks.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(nick))
-                .map(Map.Entry::getKey)
-                .findAny();
-    }
-
 }
 
 

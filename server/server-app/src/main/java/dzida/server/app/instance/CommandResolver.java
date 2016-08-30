@@ -1,6 +1,7 @@
 package dzida.server.app.instance;
 
 import dzida.server.app.Configuration;
+import dzida.server.app.instance.command.EatAppleCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
 import dzida.server.app.instance.command.MoveCommand;
@@ -57,6 +58,9 @@ public class CommandResolver {
 
                 .is(SkillUseOnWorldObjectCommand.class)
                 .thenReturn(command -> skillCommandHandler.useSkillOnWorldObject(command.characterId, command.skillId, command.target))
+
+                .is(EatAppleCommand.class)
+                .thenReturn(command -> skillCommandHandler.eatApple(command.characterId))
 
                 .is(BackdoorCommandResolver.BackdoorCommand.class)
                 .thenReturn(command -> backdoorCommandResolver.resolveCommand(command.characterId, command))

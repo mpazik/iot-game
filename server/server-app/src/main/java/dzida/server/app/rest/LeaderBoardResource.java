@@ -1,8 +1,8 @@
 package dzida.server.app.rest;
 
 import co.cask.http.HttpResponder;
-import dzida.server.app.Leaderboard;
-import dzida.server.app.Leaderboard.PlayerScore;
+import dzida.server.app.leaderboard.Leaderboard;
+import dzida.server.app.leaderboard.Leaderboard.PlayerScore;
 import dzida.server.core.basic.entity.Id;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
@@ -21,6 +21,7 @@ public class LeaderboardResource extends AbstractResource {
 
     @GET
     public void getLeaderboard(HttpRequest request, HttpResponder responder) {
+        leaderboard.update();
         List<PlayerScore> userScores = leaderboard.getListOfSurvivalRecords();
         sendObject(responder, userScores);
     }
@@ -28,6 +29,7 @@ public class LeaderboardResource extends AbstractResource {
     @Path("user/{userId}")
     @GET
     public void getPlayerResult(HttpRequest request, HttpResponder responder, @PathParam("userId") Integer userId) {
+        leaderboard.update();
         PlayerScore playerScore = leaderboard.getPlayerScore(new Id<>(userId));
         sendObject(responder, playerScore);
     }

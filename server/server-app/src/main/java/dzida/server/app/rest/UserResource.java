@@ -6,12 +6,15 @@ import dzida.server.app.user.EncryptedReissueToken;
 import dzida.server.app.user.UserService;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
+import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 public class UserResource extends AbstractResource {
+    private static final Logger log = Logger.getLogger(UserResource.class);
+
     private final UserService userService;
 
     public UserResource(UserService userService) {
@@ -33,7 +36,7 @@ public class UserResource extends AbstractResource {
 
         Outcome<EncryptedLoginToken> loginTokenOutcome = userService.reissueLoginToken(reissueTokenOutcome.get());
         if (!loginTokenOutcome.isValid()) {
-            System.err.println("User resource generated token that is not valid");
+            log.error("User resource generated token that is not valid");
             return Outcome.error(loginTokenOutcome);
         }
         return Outcome.ok(new LoginResponse(reissueTokenOutcome.get().value, loginTokenOutcome.get().value));
@@ -49,7 +52,7 @@ public class UserResource extends AbstractResource {
     private Outcome<ReissueTokenResponse> reissue(ReissueTokenRequest reissueTokenRequest) {
         Outcome<EncryptedLoginToken> loginTokenOutcome = userService.reissueLoginToken(new EncryptedReissueToken(reissueTokenRequest.token));
         if (!loginTokenOutcome.isValid()) {
-            System.err.println("User resource generated token that is not valid");
+            log.error("User resource generated token that is not valid");
             return Outcome.error(loginTokenOutcome);
         }
         return Outcome.ok(new ReissueTokenResponse(loginTokenOutcome.get().value));
@@ -59,7 +62,7 @@ public class UserResource extends AbstractResource {
     @POST
     public void register(HttpRequest request, HttpResponder responder) {
         RegisterRequest registerRequest = parseJsonRequest(request, RegisterRequest.class);
-        Result registerResult = userService.register(registerRequest.nick, registerRequest.password);
+        Result registerResult = userService.register(registerRequest.nick, registerRequest.email, registerRequest.password);
         send(responder, registerResult);
     }
 

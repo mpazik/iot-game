@@ -27,6 +27,7 @@ define(function (require, exports, module) {
     const Messages = require('./messages');
     const MainPlayer = require('../../store/main-player');
     const ItemStore = require('../../store/item');
+    const Skills = require('../../common/model/skills');
     const network = new InstanceNetwork();
     var currentInstanceKey = null;
 
@@ -52,6 +53,17 @@ define(function (require, exports, module) {
         }
     });
 
+    Dispatcher.userEventStream.subscribe('skill-triggered', function (event) {
+        const skill = event.skill;
+        if (skill.id == Skills.Ids.EAT_APPLE) {
+            Dispatcher.userEventStream.publish('eat-apple', null);
+        } else if (skill.id == Skills.Ids.CREATE_ARROWS) {
+            if (!ItemStore.checkSkillItemRequirements(skill.id)) return;
+            const skillUsed = new Messages.SkillUsed(MainPlayer.characterId(), skill.id);
+            Dispatcher.messageStream.publish(Messages.SkillUsed, skillUsed);
+        }
+    });
+
     MainPlayer.playerLiveState.subscribe((live) => {
         if (live) {
             Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
@@ -59,11 +71,13 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
             Dispatcher.userEventStream.subscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
             Dispatcher.userEventStream.subscribe('skill-used-on-world-object', sendUseSkillOnWorldObjectCommand);
+            Dispatcher.userEventStream.subscribe('eat-apple', eatAppleCommand);
         } else {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-world-object', sendUseSkillOnWorldObjectCommand);
+            Dispatcher.userEventStream.unsubscribe('eat-apple', eatAppleCommand);
         }
     });
 
@@ -103,6 +117,13 @@ define(function (require, exports, module) {
     function sendUseSkillOnWorldObjectCommand(data) {
         if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
         network.sendCommand(new Commands.UseSkillOnWorldObject(data.skillId, data.worldObjectId));
+    }
+
+    function eatAppleCommand() {
+        if (!ItemStore.checkSkillItemRequirements(Skills.Ids.EAT_APPLE)) return;
+        network.sendCommand(new Commands.EatApple());
+        const skillUsed = new Messages.SkillUsed(MainPlayer.characterId(), Skills.Ids.EAT_APPLE);
+        Dispatcher.messageStream.publish(Messages.SkillUsed, skillUsed);
     }
 
     function connect(instanceKey, userToken) {
