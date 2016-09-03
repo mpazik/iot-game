@@ -82,14 +82,16 @@ define(function (require, exports, module) {
         }
     }
 
+    function goToAuthenticationPage() {
+        window.location.href = Configuration.authenticationUrl;
+    }
+
     function connect() {
         InstanceController.readyToConnect();
         if (UserService.userToken == null) {
             UserService.tryLoginUsingClientData()
-                .catch(() => {
-                    setState('need-authentication');
-                })
-                .then(connect);
+                .then(connect)
+                .catch(goToAuthenticationPage)
         } else {
             connectToArbiter(UserService.userToken);
             Chat.connect(UserService.userToken);
@@ -110,13 +112,6 @@ define(function (require, exports, module) {
             loadGameAssets();
             InstanceController.init(gameElement)
         },
-        connect,
-        logout () {
-            UserService.logout();
-            NetworkDispatcher.disconnect();
-        },
-        retrievingPassword () {
-            setState('retrieving-password')
-        }
+        connect
     };
 });

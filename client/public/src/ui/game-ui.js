@@ -23,10 +23,7 @@ define(function (require) {
         require('./windows/join-battle-window'),
         require('./windows/survival-end-victory-window'),
         require('./windows/survival-end-defeat-window'),
-        require('./windows/login-window'),
-        require('./windows/settings-window'),
         require('./windows/leaderboard-window'),
-        require('./windows/retrieving-password-window')
     ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {

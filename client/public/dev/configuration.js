@@ -5,5 +5,6 @@ Configuration = {
     devMode: true,
     serverAddress: "ws://localhost:7001",
     containerRestAddress: "http://localhost:7000",
-    assetsLocalization: "/dev/lib/dzida-assets"
+    assetsLocalization: "/dev/lib/dzida-assets",
+    authenticationUrl: "http://localhost:8000/login"
 };

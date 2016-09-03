@@ -68,19 +68,9 @@ define(['../common/request'], (request) => {
                 return reissueUserToken();
             }
         },
-        login (nick, password) {
-            return request.post('login', {nick, password}).then(response => {
-                userToken = response.loginToken;
-                saveReissueToken(response.reissueToken);
-                return response.loginToken;
-            });
-        },
         logout () {
             clearUserToken();
             removeReissueToken();
-        },
-        register (nick, email, password) {
-            return request.post('register', {nick, password, email});
         },
         clearUserToken
     }
