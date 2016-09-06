@@ -32,7 +32,7 @@ public class WorldObjectService {
 
     public void processEvent(GameEvent gameEvent) {
         whenTypeOf(gameEvent)
-                .is(WorldObjectCreated.class).then(event -> worldObjectStore.saveObject(event.worldObject))
+                .is(WorldObjectCreated.class).then(event -> worldObjectStore.createObject(event.worldObject))
                 .is(WorldObjectRemoved.class).then(event -> worldObjectStore.removeObject(event.worldObjectId));
     }
 

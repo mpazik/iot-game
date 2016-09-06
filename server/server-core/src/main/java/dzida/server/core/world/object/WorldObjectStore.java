@@ -10,7 +10,7 @@ public interface WorldObjectStore {
 
     GeneralEntity<WorldObject> createWorldObject(int objectKind, int x, int y);
 
-    void saveObject(GeneralEntity<WorldObject> worldObject);
+    void createObject(GeneralEntity<WorldObject> worldObject);
 
     void removeObject(Id<WorldObject> worldObjectId);
 }

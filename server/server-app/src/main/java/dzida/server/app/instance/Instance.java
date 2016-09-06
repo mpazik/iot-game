@@ -9,9 +9,9 @@ import dzida.server.app.store.http.WorldMapStoreHttp;
 import dzida.server.app.store.http.loader.SkillLoader;
 import dzida.server.app.store.http.loader.StaticDataLoader;
 import dzida.server.app.store.http.loader.WorldMapLoader;
-import dzida.server.app.store.mapdb.WorldObjectStoreMapDb;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.app.store.memory.SkillStoreInMemory;
+import dzida.server.app.store.memory.WorldObjectStoreInMemory;
 import dzida.server.app.timesync.TimeServiceImpl;
 import dzida.server.app.user.User;
 import dzida.server.core.Scheduler;
@@ -64,11 +64,10 @@ public class Instance {
         Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
         WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
         SkillStore skillStore = new SkillStoreInMemory(skills);
-        WorldObjectStoreMapDb worldObjectStore = new WorldObjectStoreMapDb(instanceKey);
 
         WorldMap worldMap = worldMapStore.getMap(worldMapKey);
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
-        WorldObjectService worldObjectService = WorldObjectService.create(worldObjectStore);
+        WorldObjectService worldObjectService = WorldObjectService.create(new WorldObjectStoreInMemory());
 
         TimeService timeService = new TimeServiceImpl();
         CharacterService characterService = CharacterService.create();

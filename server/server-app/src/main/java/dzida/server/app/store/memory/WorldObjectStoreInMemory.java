@@ -1,4 +1,4 @@
-package dzida.server.app.store.mapdb;
+package dzida.server.app.store.memory;
 
 import com.google.gson.Gson;
 import dzida.server.app.serialization.BasicJsonSerializer;
@@ -7,28 +7,19 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.world.object.WorldObject;
 import dzida.server.core.world.object.WorldObjectKind;
 import dzida.server.core.world.object.WorldObjectStore;
-import org.mapdb.BTreeKeySerializer;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 
-import java.io.File;
+import java.util.HashMap;
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public class WorldObjectStoreMapDb implements WorldObjectStore {
+public class WorldObjectStoreInMemory implements WorldObjectStore {
     private final Gson serializer = BasicJsonSerializer.getSerializer();
-    private final ConcurrentNavigableMap<Long, String> worldObjects;
+    private final Map<Long, String> worldObjects;
     long idGenerator = 0;
 
-    public WorldObjectStoreMapDb(String instanceKey) {
-        DB db = DBMaker.fileDB(new File("worldObjectsDB-" + instanceKey))
-                .transactionDisable()
-                .closeOnJvmShutdown()
-                .make();
-        worldObjects = db.treeMap("objects", BTreeKeySerializer.LONG, org.mapdb.Serializer.STRING);
-        idGenerator = getLastIdFromDb();
+    public WorldObjectStoreInMemory() {
+        worldObjects = new HashMap<>();
     }
 
     @Override
@@ -52,21 +43,13 @@ public class WorldObjectStoreMapDb implements WorldObjectStore {
     }
 
     @Override
-    public void saveObject(GeneralEntity<WorldObject> worldObject) {
+    public void createObject(GeneralEntity<WorldObject> worldObject) {
         worldObjects.put(worldObject.getId().getValue(), serializer.toJson(worldObject.getData()));
     }
 
     @Override
     public void removeObject(Id<WorldObject> worldObjectId) {
         worldObjects.remove(worldObjectId.getValue());
-    }
-
-    private Long getLastIdFromDb() {
-        NavigableSet<Long> keySet = worldObjects.keySet();
-        if (keySet.isEmpty()) {
-            return 1L;
-        }
-        return keySet.last() + 1;
     }
 
     private Long newId() {
