@@ -121,9 +121,18 @@ define(function (require, exports, module) {
 
     function eatAppleCommand() {
         if (!ItemStore.checkSkillItemRequirements(Skills.Ids.EAT_APPLE)) return;
-        network.sendCommand(new Commands.EatApple());
         const skillUsed = new Messages.SkillUsed(MainPlayer.characterId(), Skills.Ids.EAT_APPLE);
         Dispatcher.messageStream.publish(Messages.SkillUsed, skillUsed);
+
+        const isAppleRotten = (Math.random() * 3) < 1; // 1/3 that apple will be rotten
+        if (isAppleRotten) {
+            const effects = ['invert', 'twist'];
+            const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+            Render.runEffect(randomEffect);
+            network.sendCommand(new Commands.EatRottenApple());
+        } else {
+            network.sendCommand(new Commands.EatApple());
+        }
     }
 
     function connect(instanceKey, userToken) {

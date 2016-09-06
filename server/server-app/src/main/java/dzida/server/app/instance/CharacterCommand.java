@@ -1,7 +1,6 @@
 package dzida.server.app.instance;
 
 import com.google.common.collect.ImmutableSet;
-import dzida.server.app.instance.command.EatAppleCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
@@ -18,7 +17,8 @@ public interface CharacterCommand {
             UseSkillOnCharacter.class,
             UseSkillOnWorldMap.class,
             UseSkillOnWorldObject.class,
-            EatApple.class
+            EatApple.class,
+            EatRottenApple.class
     );
 
     InstanceCommand getInstanceCommand(Id<Character> characterId);
@@ -91,7 +91,15 @@ public interface CharacterCommand {
 
         @Override
         public InstanceCommand getInstanceCommand(Id<Character> characterId) {
-            return new EatAppleCommand(characterId);
+            return new InstanceCommand.EatAppleCommand(characterId);
+        }
+    }
+
+    class EatRottenApple implements CharacterCommand {
+
+        @Override
+        public InstanceCommand getInstanceCommand(Id<Character> characterId) {
+            return new InstanceCommand.EatRottenAppleCommand(characterId);
         }
     }
 }

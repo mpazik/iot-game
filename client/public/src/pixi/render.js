@@ -8,6 +8,28 @@ define(function (require, exports, module) {
     const BuildingIndicator = require('./building-indicator');
     const Projectiles = require('./projectiles');
     const WorldObjects = require('./world-objects');
+    const Animation = require('../common/animation');
+
+    const runningEffects = [];
+    const EffectAnimations = {
+        twist: [
+            {time: 0, values: {angle: 0}, ease: Animation.ease.quad},
+            {time: 12, values: {angle: 8}},
+            {time: 16, values: {angle: 16}},
+            {time: 24, values: {angle: 0}, ease: Animation.easeMod.out(Animation.ease.quad)},
+        ],
+        invert: [
+            {time: 0, values: {invert: 0}, ease: Animation.easeMod.in(Animation.ease.quad)},
+            {time: 5, values: {invert: -2}, ease: Animation.easeMod.inOut(Animation.ease.quad)},
+            {time: 15, values: {invert: 8}, ease: Animation.easeMod.out(Animation.ease.quad)},
+            {time: 20, values: {invert: 0}},
+        ]
+    };
+
+    const Filters = {
+        twist: Object.assign(new Pixi.filters.TwistFilter(), {radius: 1.0, angle: 0}),
+        invert: Object.assign(new Pixi.filters.InvertFilter(), {invert: 0}),
+    };
 
     var width = window.innerWidth;
     var height = window.innerHeight;
@@ -34,10 +56,40 @@ define(function (require, exports, module) {
 
     MainLoop.renderStream.subscribe(render);
 
+    function runAnimation() {
+        //noinspection AmdModulesDependencies
+        const time = Date.now();
+        runningEffects.forEach(animation => animation.setValuesAtTime(time));
+        runningEffects.remove(animation => animation.isFinished(time));
+        const filters = runningEffects.map(animation => animation.object);
+        container.filters = filters.length == 0 ? null : filters;
+
+        if (runningEffects.length == 0) {
+            MainLoop.renderStream.unsubscribe(runAnimation)
+        }
+    }
+
     module.exports = {
         init: function (element) {
             element.appendChild(renderer.view);
             renderer.render(stage);
+        },
+        runEffect(effect) {
+            const filter = Filters[effect];
+            const animationFrames = EffectAnimations[effect];
+            if (filter == null || animationFrames == null) {
+                throw `Effect ${effect} is undefined`
+            }
+
+            if (runningEffects.find(animation => animation.effect == effect)) {
+                return;
+            }
+            const animation = new Animation.ObjectAnimation(filter, animationFrames);
+            animation.effect = effect;
+            if (runningEffects.length == 0) {
+                MainLoop.renderStream.subscribe(runAnimation);
+            }
+            runningEffects.push(animation);
         },
         initWorld: function () {
             World.init();
@@ -60,7 +112,7 @@ define(function (require, exports, module) {
         },
         cleanWorld: function () {
             MainLoop.stop();
-            container.removeChildren();
+            container.removeChildren(0, container.children.length);
             renderer.render(stage);
         }
     };
