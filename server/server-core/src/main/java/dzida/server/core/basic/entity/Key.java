@@ -1,14 +1,14 @@
 package dzida.server.core.basic.entity;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 
 public class Key<T> {
     private final String key;
 
     public Key(String key) {
-        Preconditions.checkNotNull(key);
-        Preconditions.checkArgument(!key.isEmpty(), "Key can not be empty");
+        assert key != null;
+        assert key.length() > 0 : "key can not be empty";
+        assert key.matches("^.*[^.-a-zA-Z0-9 ].*$") : "key can contain only alphanumeric characters, dot and dash";
         this.key = key;
     }
 
