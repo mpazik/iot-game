@@ -47,6 +47,6 @@ define(function (require, exports, module) {
         chatState: Chat.state,
         chatMessage: Chat.chatMessage,
         playerItems: Item.itemsChange,
-        achievementState: Achievement.connectionState
+        achievementConnectionState: Achievement.connectionStatePublisher
     };
 });

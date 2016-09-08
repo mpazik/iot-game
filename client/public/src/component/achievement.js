@@ -26,9 +26,9 @@ define((require, exports, module) => {
         achievementsUnlocked: new Set()
     };
 
-    var updatedAchievementState = null;
-    const achievementStatePublisher = new Publisher.StatePublisher(state, function (f) {
-        return updatedAchievementState = f;
+    var publishAchievementChange = null;
+    const achievementChangePublisher = new Publisher.TypePublisher(function (f) {
+        return publishAchievementChange = f;
     });
 
     function updateState(change) {
@@ -49,7 +49,7 @@ define((require, exports, module) => {
                 }
                 break;
         }
-        updatedAchievementState(state)
+        publishAchievementChange(change.constructor, change)
     }
 
     module.exports = {
@@ -66,8 +66,9 @@ define((require, exports, module) => {
                 setConnectionState('disconnected')
             };
         },
-        achievementState: achievementStatePublisher,
-        connectionState: connectionStatePublisher,
+        achievementChangePublisher: achievementChangePublisher,
+        connectionStatePublisher: connectionStatePublisher,
+        state,
         achievement: (key) => ResourcesStore.achievements.find(a => a.key == key),
         get achievementList() {
             return ResourcesStore.achievements

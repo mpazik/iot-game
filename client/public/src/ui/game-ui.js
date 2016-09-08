@@ -56,7 +56,7 @@ define(function (require) {
 
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
         'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage',
-        'serverError', 'chatState', 'achievementState'];
+        'serverError', 'chatState', 'achievementConnectionState'];
 
     function initUi(gameUiElement) {
         const windowRegister = new Map();

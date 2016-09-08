@@ -258,13 +258,32 @@ player-inventory {
 }
 
 achievement-window {
-    width: 600px;
+    width: 300px;
+}
+
+achievement-window > div {
+    overflow-y: scroll;
+    height: 300px;
 }
 
 achievement-window ul.navigation-list {
     width: 170px;
 }
 
-achievement-window .unlocked {
+.achievement {
+    border: #666 1px solid;
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.achievement.unlocked {
+    border-color: var(--main-color);
+}
+
+.achievement h3 {
+    margin: 0 0 2px 0
+}
+
+.achievement.unlocked h3 {
     color: var(--main-color);
 }
