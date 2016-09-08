@@ -1,3 +1,5 @@
+@import "theme.css";
+
 game-ui .window {
     top: 35%;
     padding: 20px;
@@ -226,4 +228,43 @@ player-inventory {
 #error-message {
     margin-top: 20px;
     font-size: 16px;
+}
+
+.list-with-preview ul {
+    float: left;
+    list-style-type: none;
+    font-size: 16px;
+    padding: 0 20px 0 0;
+    border-right: var(--main-color) 1px solid;
+    margin: 0;
+}
+
+.list-with-preview section {
+    float: left;
+    padding: 0 0 0 20px;
+}
+
+.list-with-preview ul li {
+    padding: 4px 0;
+}
+
+.list-with-preview ul li a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.list-with-preview ul li a:hover {
+    color: var(--highlight-color);
+}
+
+achievement-window {
+    width: 600px;
+}
+
+achievement-window ul.navigation-list {
+    width: 170px;
+}
+
+achievement-window .unlocked {
+    color: var(--main-color);
 }

@@ -20,6 +20,7 @@ define(function (require, exports, module) {
     const Chat = require('./chat');
     const UserService = require('./user-service');
     const Timer = require('./timer');
+    const Achievement = require('./achievement');
 
     const ClientMessage = {
         JoinBattleCommand: function (map, difficultyLevel) {
@@ -88,14 +89,16 @@ define(function (require, exports, module) {
 
     function connect() {
         InstanceController.readyToConnect();
-        if (UserService.userToken == null) {
+        const userToken = UserService.userToken;
+        if (userToken == null) {
             UserService.tryLoginUsingClientData()
                 .then(connect)
                 .catch(goToAuthenticationPage)
         } else {
-            connectToArbiter(UserService.userToken);
-            Chat.connect(UserService.userToken);
+            connectToArbiter(userToken);
+            Chat.connect(userToken);
             Timer.connect();
+            Achievement.connect(userToken);
             setState('connecting');
         }
     }

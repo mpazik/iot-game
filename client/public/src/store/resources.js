@@ -6,6 +6,7 @@ define(function (require, exports, module) {
     var tilesets = {};
     var skills = {};
     var objectKinds = {};
+    var achievements = [];
     const items = {
         [Items.ARROW]: {name: 'Arrow'},
         [Items.STICK]: {name: 'Stick'},
@@ -92,6 +93,9 @@ define(function (require, exports, module) {
         objectKind: id => throwIfNull(id, objectKinds[id], 'WorldObject'),
         tileset: name => throwIfNull(name, tilesets[name], 'TileSet'),
         spine: name => throwIfNull(name, Pixi.loader.resources[assetPath("spines", name)], 'Spine'),
+        get achievements() {
+            return achievements
+        },
         load: function () {
             loadCss(assetsPath + "icons/icons.css");
             const spritesPaths = sprites.map(function (file) {
@@ -110,6 +114,9 @@ define(function (require, exports, module) {
                 }),
                 loadJson('skills').then(function (downloadedSkills) {
                     skills = downloadedSkills;
+                }),
+                loadJson('achievements').then(function (downloadedAchievements) {
+                    achievements = downloadedAchievements;
                 })
             ]);
         }

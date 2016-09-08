@@ -34,15 +34,15 @@ define(function (require) {
 
             // init system bar
             const systemBar = this.getElementsByClassName("system-bar")[0];
-            var settingsButton = createSystemIcon('settings', 'icon-settings', 'S', 'Settings', function () {
-                userEventStream.publish('toggle-window', 'settings-window');
-            });
-            systemBar.appendChild(settingsButton);
-
             var leaderboardButton = createSystemIcon('leaderboard', 'icon-ranking', 'L', 'Leaderboard', function () {
                 userEventStream.publish('toggle-window', 'leaderboard-window');
             });
             systemBar.appendChild(leaderboardButton);
+
+            var settingsButton = createSystemIcon('achievements', 'icon-achievement', 'A', 'Achievements', function () {
+                userEventStream.publish('toggle-window', 'achievement-window');
+            });
+            systemBar.appendChild(settingsButton);
 
             // init skill bar
             const skillBar = this.getElementsByClassName("skill-bar")[0];
