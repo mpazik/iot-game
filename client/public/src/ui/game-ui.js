@@ -24,7 +24,8 @@ define(function (require) {
         require('./windows/survival-end-victory-window'),
         require('./windows/survival-end-defeat-window'),
         require('./windows/leaderboard-window'),
-        require('./windows/achievement-window')
+        require('./windows/achievement-window'),
+        require('./windows/tutorial-window')
     ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {
@@ -56,7 +57,7 @@ define(function (require) {
 
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
         'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage',
-        'serverError', 'chatState', 'achievementConnectionState'];
+        'serverError', 'chatState', 'achievementConnectionState', 'tutorialToDisplay'];
 
     function initUi(gameUiElement) {
         const windowRegister = new Map();

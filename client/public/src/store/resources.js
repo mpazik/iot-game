@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     var skills = {};
     var objectKinds = {};
     var achievements = [];
+    var tutorials = [];
     const items = {
         [Items.ARROW]: {name: 'Arrow'},
         [Items.STICK]: {name: 'Stick'},
@@ -96,6 +97,9 @@ define(function (require, exports, module) {
         get achievements() {
             return achievements
         },
+        get tutorials() {
+            return tutorials
+        },
         load: function () {
             loadCss(assetsPath + "icons/icons.css");
             const spritesPaths = sprites.map(function (file) {
@@ -112,11 +116,14 @@ define(function (require, exports, module) {
                 loadJson('entities/objects').then(function (downloadedObjectKinds) {
                     downloadedObjectKinds.forEach(obj => objectKinds[obj.id] = obj)
                 }),
-                loadJson('skills').then(function (downloadedSkills) {
-                    skills = downloadedSkills;
+                loadJson('skills').then(function (downloaded) {
+                    skills = downloaded;
                 }),
-                loadJson('achievements').then(function (downloadedAchievements) {
-                    achievements = downloadedAchievements;
+                loadJson('achievements').then(function (downloaded) {
+                    achievements = downloaded;
+                }),
+                loadJson('tutorials').then(function (downloaded) {
+                    tutorials = downloaded;
                 })
             ]);
         }

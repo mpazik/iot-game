@@ -5,7 +5,7 @@ define((require, exports, module) => {
     const ResourcesStore = require('../store/resources');
 
     const ClientMessage = {};
-    const ServerMessage = {
+    const Changes = {
         AchievementProgressed: function (key) {
             this.key = key
         },
@@ -19,7 +19,7 @@ define((require, exports, module) => {
         return setConnectionState = f;
     });
 
-    const achievementProtocol = new JsonProtocol(ServerMessage, ClientMessage);
+    const achievementProtocol = new JsonProtocol(Changes, ClientMessage);
 
     const state = {
         achievementsProgress: new Map(),
@@ -34,7 +34,7 @@ define((require, exports, module) => {
     function updateState(change) {
         const achievementKey = change.key;
         switch (change.constructor) {
-            case ServerMessage.AchievementProgressed:
+            case Changes.AchievementProgressed:
                 const achievementProgress = state.achievementsProgress.get(achievementKey);
                 if (achievementProgress == null) {
                     state.achievementsProgress.set(achievementKey, 1);
@@ -42,7 +42,7 @@ define((require, exports, module) => {
                     state.achievementsProgress.set(achievementKey, achievementProgress + 1);
                 }
                 break;
-            case ServerMessage.AchievementUnlocked:
+            case Changes.AchievementUnlocked:
                 state.achievementsUnlocked.add(achievementKey);
                 if (state.achievementsProgress.has(achievementKey)) {
                     state.achievementsProgress.delete(achievementKey)
@@ -53,6 +53,14 @@ define((require, exports, module) => {
     }
 
     module.exports = {
+        Changes,
+        state,
+        achievementChangePublisher: achievementChangePublisher,
+        connectionStatePublisher: connectionStatePublisher,
+        achievement: (key) => ResourcesStore.achievements.find(a => a.key == key),
+        get achievementList() {
+            return ResourcesStore.achievements
+        },
         connect(userToken) {
             const socket = NetworkDispatcher.newSocket('achievement', userToken);
             socket.onMessage = (data) => {
@@ -65,13 +73,6 @@ define((require, exports, module) => {
             socket.onClose = () => {
                 setConnectionState('disconnected')
             };
-        },
-        achievementChangePublisher: achievementChangePublisher,
-        connectionStatePublisher: connectionStatePublisher,
-        state,
-        achievement: (key) => ResourcesStore.achievements.find(a => a.key == key),
-        get achievementList() {
-            return ResourcesStore.achievements
         }
     }
 });

@@ -10,6 +10,7 @@ define(function (require, exports, module) {
     const Item = require('./item');
     const Chat = require('../component/chat');
     const Achievement = require('../component/achievement');
+    const Tutorials = require('../component/tutorial');
 
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
@@ -47,6 +48,7 @@ define(function (require, exports, module) {
         chatState: Chat.state,
         chatMessage: Chat.chatMessage,
         playerItems: Item.itemsChange,
-        achievementConnectionState: Achievement.connectionStatePublisher
+        achievementConnectionState: Achievement.connectionStatePublisher,
+        tutorialToDisplay: Tutorials.toDisplay
     };
 });
