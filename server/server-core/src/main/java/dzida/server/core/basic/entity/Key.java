@@ -1,11 +1,12 @@
 package dzida.server.core.basic.entity;
 
 import com.google.common.base.Objects;
+import org.jetbrains.annotations.NotNull;
 
 public class Key<T> {
     private final String key;
 
-    public Key(String key) {
+    public Key(@NotNull String key) {
         assert key != null;
         assert key.length() > 0 : "key can not be empty";
         assert key.matches("^.*[^.-a-zA-Z0-9 ].*$") : "key can contain only alphanumeric characters, dot and dash";
@@ -30,6 +31,7 @@ public class Key<T> {
         return "Key{" + key + '}';
     }
 
+    @NotNull
     public String getValue() {
         return key;
     }

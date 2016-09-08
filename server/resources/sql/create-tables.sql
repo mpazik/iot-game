@@ -41,3 +41,11 @@ CREATE TABLE instance_event (
   data         JSON               NOT NULL,
   created_at   TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE achievement_event (
+  id              SERIAL PRIMARY KEY NOT NULL,
+  user_id         INT                NOT NULL REFERENCES user_registration (id),
+  achievement_key TEXT               NOT NULL,
+  type            TEXT               NOT NULL,
+  created_at      TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
+)

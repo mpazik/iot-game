@@ -14,6 +14,7 @@ import dzida.server.app.user.LoginToken;
 import dzida.server.app.user.User;
 import dzida.server.app.user.UserTokenVerifier;
 import dzida.server.core.Scheduler;
+import dzida.server.core.basic.Publisher;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.Connector;
 import dzida.server.core.basic.connection.ServerConnection;
@@ -22,6 +23,7 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.character.model.PlayerCharacter;
+import dzida.server.core.event.CharacterEvent;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
 import dzida.server.core.scenario.ScenarioEnd;
@@ -37,6 +39,8 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 public class InstanceServer implements VerifyingConnectionServer<String, String> {
     private static final Logger log = Logger.getLogger(InstanceServer.class);
 
+    public final Publisher<UserGameEvent> userGameEventPublisher = new Publisher<>();
+
     private final Instance instance;
     private final InstanceStore instanceStore;
     private final Arbiter arbiter;
@@ -47,7 +51,8 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
     private final Key<Instance> instanceKey;
     private final Scenario scenario;
-    private final Map<Id<User>, ContainerConnection> connections;
+    private final Map<Id<User>, ContainerConnection> connections = new HashMap<>();
+    private final Map<Id<Character>, Id<User>> userIds = new HashMap<>();
     private Id<Scenario> scenarioId;
 
     public InstanceServer(Scheduler scheduler, InstanceStore instanceStore, Arbiter arbiter, ScenarioStore scenarioStore, Key<Instance> instanceKey, Scenario scenario) {
@@ -62,8 +67,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
         this.instanceKey = instanceKey;
         this.scenario = scenario;
-
-        connections = new HashMap<>();
     }
 
     public void start() {
@@ -76,6 +79,16 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
                 ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;
                 scenarioStore.scenarioFinished(scenarioId, scenarioEnd);
                 arbiter.instanceFinished(instanceKey);
+            }
+        });
+        instance.subscribeChange(gameEvent -> {
+            if (gameEvent instanceof CharacterEvent) {
+                CharacterEvent characterEvent = (CharacterEvent) gameEvent;
+                if (!userIds.containsKey(characterEvent.getCharacterId())) {
+                    return; // Character is not an user's character (It's a bot)
+                }
+                Id<User> userId = userIds.get(characterEvent.getCharacterId());
+                userGameEventPublisher.notify(new UserGameEvent(userId, characterEvent));
             }
         });
         scenarioId = scenarioStore.scenarioStarted(scenario);
@@ -110,6 +123,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         ContainerConnection serverConnection = new ContainerConnection(userId, characterId, connector);
         connector.onOpen(serverConnection);
         connections.put(userId, serverConnection);
+        userIds.put(characterId, userId);
 
         Consumer<GameEvent> sendToPlayer = gameEvent -> sendMessageToPlayer(userId, gameEvent);
         PlayerCharacter character = new PlayerCharacter(characterId, userNick);
@@ -133,6 +147,10 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
     public void disconnectPlayer(Id<User> userId) {
         connections.get(userId).serverClose();
+    }
+
+    public Key<Instance> getKey() {
+        return instanceKey;
     }
 
     private final class ContainerConnection implements ServerConnection<String> {
@@ -170,6 +188,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
             log.info("Instance: " + instanceKey + " - user " + userId + " quit");
 
             connections.remove(userId);
+            userIds.remove(characterId);
         }
 
         public void serverSend(String data) {

@@ -4,6 +4,8 @@ import co.cask.http.ExceptionHandler;
 import co.cask.http.HttpResponder;
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
+import dzida.server.app.achievement.AchievementServer;
+import dzida.server.app.achievement.AchievementStore;
 import dzida.server.app.arbiter.Arbiter;
 import dzida.server.app.arbiter.ArbiterStore;
 import dzida.server.app.chat.Chat;
@@ -17,6 +19,7 @@ import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.rest.UserResource;
+import dzida.server.app.store.database.AchievementStoreDb;
 import dzida.server.app.store.database.ArbiterStoreDb;
 import dzida.server.app.store.database.ChatStoreDb;
 import dzida.server.app.store.database.InstanceStoreDb;
@@ -67,6 +70,7 @@ public final class GameServer {
         UserStore userStore = new UserStoreDb(connectionProvider);
         ChatStore chatStore = new ChatStoreDb(connectionProvider);
         InstanceStore instanceStore = new InstanceStoreDb(connectionProvider);
+        AchievementStore achievementStore = new AchievementStoreDb(connectionProvider);
 
         int gameServerPort = Configuration.getGameServerPort();
         UserService userService = new UserService(userStore);
@@ -74,13 +78,22 @@ public final class GameServer {
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
 
         ServerDispatcher serverDispatcher = new ServerDispatcher();
-        Chat chat = new Chat(chatStore);
-        arbiter = new Arbiter(serverDispatcher, chat, scheduler, arbiterStore, scenarioStore, instanceStore);
+        arbiter = new Arbiter(serverDispatcher, scheduler, arbiterStore, scenarioStore, instanceStore);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
+
+        Chat chat = new Chat(chatStore);
+        arbiter.instanceStartedPublisher.subscribe(instanceServer -> chat.createInstanceChannel(instanceServer.getKey()));
+        arbiter.instanceClosedPublisher.subscribe(instanceServer -> chat.closeInstanceChannel(instanceServer.getKey()));
+
+        AchievementServer achievementServer = new AchievementServer(achievementStore);
+        arbiter.instanceStartedPublisher.subscribe(instanceServer ->
+                instanceServer.userGameEventPublisher.subscribe(achievementServer::processUserGameEvent)
+        );
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);
         serverDispatcher.addServer("time", timeSynchroniser);
+        serverDispatcher.addServer("achievement", achievementServer);
 
         Leaderboard leaderboard = new Leaderboard(userService, scenarioStore);
 

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import dzida.server.app.Configuration;
-import dzida.server.app.chat.Chat;
 import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceServer;
@@ -19,6 +18,7 @@ import dzida.server.app.user.LoginToken;
 import dzida.server.app.user.User;
 import dzida.server.app.user.UserTokenVerifier;
 import dzida.server.core.Scheduler;
+import dzida.server.core.basic.Publisher;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.connection.Connector;
 import dzida.server.core.basic.connection.ServerConnection;
@@ -39,8 +39,9 @@ import java.util.stream.Collectors;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class Arbiter implements VerifyingConnectionServer<String, String> {
+    public final Publisher<InstanceServer> instanceStartedPublisher;
+    public final Publisher<InstanceServer> instanceClosedPublisher;
     private final ServerDispatcher serverDispatcher;
-    private final Chat chat;
     private final Scheduler scheduler;
     private final JsonProtocol arbiterProtocol;
     private final UserTokenVerifier userTokenVerifier;
@@ -55,9 +56,8 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final Set<Key<Instance>> instancesToShutdown;
     private final Set<Id<User>> connectedUsers;
 
-    public Arbiter(ServerDispatcher serverDispatcher, Chat chat, Scheduler scheduler, ArbiterStore arbiterStore, ScenarioStore scenarioStore, InstanceStore instanceStore) {
+    public Arbiter(ServerDispatcher serverDispatcher, Scheduler scheduler, ArbiterStore arbiterStore, ScenarioStore scenarioStore, InstanceStore instanceStore) {
         this.serverDispatcher = serverDispatcher;
-        this.chat = chat;
         this.scheduler = scheduler;
         this.arbiterStore = arbiterStore;
         this.scenarioStore = scenarioStore;
@@ -74,6 +74,8 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         instancesToShutdown = new HashSet<>();
         defaultInstance = new Key<>(Configuration.getInitialInstances()[0]);
         connectedUsers = new HashSet<>();
+        instanceStartedPublisher = new Publisher<>();
+        instanceClosedPublisher = new Publisher<>();
     }
 
     public void start() {
@@ -97,15 +99,15 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
 
         serverDispatcher.addServer(instanceKeyValue, instanceServer);
         instances.put(instanceKey, instanceServer);
-        chat.createInstanceChannel(instanceKey);
+        instanceStartedPublisher.notify(instanceServer);
         cleanOldInstances();
     }
 
     public void stopInstance(Key<Instance> instanceKey) {
 //        serverDispatcher.removeServer(instanceKey.getValue());
+        instanceClosedPublisher.notify(instances.get(instanceKey));
         instances.get(instanceKey).closeInstance();
         instances.remove(instanceKey);
-        chat.closeInstanceChannel(instanceKey);
         arbiterStore.instanceStopped(instanceKey);
     }
 

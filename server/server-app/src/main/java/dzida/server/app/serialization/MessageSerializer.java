@@ -82,6 +82,10 @@ public class MessageSerializer {
         return getMessageTypeFromClass(messageClass);
     }
 
+    public Class<?> getMessageClass(String messageType) {
+        return messageClasses.get(messageType);
+    }
+
     public boolean isSupportedType(Object message) {
         return isSupportedType(message.getClass());
     }
