@@ -8,33 +8,40 @@ define(function (require, exports, module) {
         return publishActive = fn;
     });
 
-    var skills = new Publisher.StatePublisher([
+    var skills = [];
+
+    var updateSkills = null;
+    const skillPosition = [
         Skills.PUNCH, Skills.BOW_SHOT, Skills.SWORD_HIT,
         Skills.EAT_APPLE, Skills.CREATE_TREE, Skills.CUT_TREE,
         Skills.CREATE_ARROWS, Skills.GRAB_APPLE, Skills.INTRODUCE
-    ], () => {});
-
-    Targeting.targetingState.subscribe(function (skill) {
-        if (skill === null) {
-            // skill was deactivated
-            if (publishActive.value !== null) {
-                // deactivate skill if was activated from action-bar
-                publishActive(null);
-            }
-        } else {
-            const index = skills.value.indexOf(skill.id);
-            if (index !== -1) {
-                // skill was activated from action-bar
-                publishActive(index);
-            } else if (publishActive.value !== null) {
-                // other skill was activated from other source than action-bar
-                publishActive(null);
-            }
-        }
+    ];
+    var skillsPublisher = new Publisher.StatePublisher(skills, (push) => {
+        updateSkills = push
     });
 
+    Targeting.targetingState.subscribe(function (skill) {
+        publishActive(skill == null ? null : skill.id);
+    });
+
+    function skillKeyToSkillId(skillKey) {
+        const skillIdName = skillKey.toUpperCase().replace('-', '_');
+        const skillId = Skills[skillIdName];
+        if (skillId == null) {
+            throw `There is no skill id for a skill ${skillKey}`
+        }
+
+        return skillId
+    }
+
     module.exports = {
-        skills: skills,
+        addSkill(skillKey) {
+            const skillId = skillKeyToSkillId(skillKey);
+            const passion = skillPosition.indexOf(skillId);
+            skills[passion] = skillId;
+            updateSkills(skills.slice())
+        },
+        skills: skillsPublisher,
         activeState: activeState
     };
 });

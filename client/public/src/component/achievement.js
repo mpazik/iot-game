@@ -3,6 +3,7 @@ define((require, exports, module) => {
     const NetworkDispatcher = require('./network-dispatcher');
     const JsonProtocol = require('../common/basic/json-protocol');
     const ResourcesStore = require('../store/resources');
+    const ActionBar = require('../store/action-bar');
 
     const ClientMessage = {};
     const Changes = {
@@ -56,6 +57,15 @@ define((require, exports, module) => {
                 }
                 trackedAchievements.remove(key => key == achievementKey);
                 setTrackedAchievements(trackedAchievements.slice());
+                const achievement = ResourcesStore.achievements.find(achievement => achievement.key == achievementKey);
+                const rewards = achievement['rewards'];
+                if (rewards) {
+                    rewards.forEach(reward => {
+                        if (reward['type'] == 'skill') {
+                            ActionBar.addSkill(reward['skillKey'])
+                        }
+                    });
+                }
                 break;
         }
         publishAchievementChange(change.constructor, change)

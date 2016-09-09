@@ -1,8 +1,10 @@
 define(function (require) {
     require('../elements/action-socket');
-    const uiState = require('../../store/ui-state');
     const skillByKey = require('../../store/resources').skill;
     const userEventStream = require('../../component/dispatcher').userEventStream;
+    const ActionBar = require('../../store/action-bar');
+
+    const keyBinds = ['Q', 'W', 'E', 'R', '1', '2', '3', '4', '5'];
 
     return createUiElement('action-bar', {
         type: 'fragment',
@@ -20,8 +22,17 @@ define(function (require) {
         },
 
         attached: function () {
-            const keyBinds = ['Q', 'W', 'E', 'R', '1', '2', '3', '4', '5'];
-
+            this._renderSystemBar();
+            this._updateActive(ActionBar.activeState.value);
+            this._renderSkillBar(ActionBar.skills.value);
+            ActionBar.skills.subscribe(this._renderSkillBar.bind(this));
+            ActionBar.activeState.subscribe(this._updateActive.bind(this));
+        },
+        detached: function () {
+            ActionBar.skills.unsubscribe(this._renderSkillBar.bind(this));
+            ActionBar.activeState.unsubscribe(this._updateActive.bind(this));
+        },
+        _renderSystemBar: function () {
             function createSystemIcon(key, icon, keyBind, title, action) {
                 var socket = document.createElement('action-socket');
                 if (icon) socket.setAttribute('icon', icon);
@@ -32,7 +43,6 @@ define(function (require) {
                 return socket;
             }
 
-            // init system bar
             const systemBar = this.getElementsByClassName("system-bar")[0];
             var leaderboardButton = createSystemIcon('leaderboard', 'icon-ranking', 'L', 'Leaderboard', function () {
                 userEventStream.publish('toggle-window', 'leaderboard-window');
@@ -43,13 +53,14 @@ define(function (require) {
                 userEventStream.publish('toggle-window', 'achievement-window');
             });
             systemBar.appendChild(settingsButton);
-
-            // init skill bar
+        },
+        _renderSkillBar: function (skillIds) {
             const skillBar = this.getElementsByClassName("skill-bar")[0];
-            const skills = uiState.actionBarSkills.value.map(function (id) {
+            const skills = skillIds.map(function (id) {
                 if (id == null) return;
                 return skillByKey(id);
             });
+            skillBar.innerHTML = '';
             skills.forEach(function (skill, index) {
                 var socket = document.createElement('action-socket');
                 if (skill) {
@@ -64,20 +75,19 @@ define(function (require) {
                 socket.setAttribute('keyBind', keyBinds[index]);
                 skillBar.appendChild(socket);
             });
-            this._updateActive(uiState.actionBarActiveSkill.value);
-            uiState.actionBarActiveSkill.subscribe(this._updateActive.bind(this));
-        },
-        detached: function () {
-            uiState.actionBarActiveSkill.unsubscribe(this._updateActive.bind(this));
         },
         _updateActive: function (active) {
-            const sockets = this.getElementsByTagName('action-socket');
+            const sockets = Array.prototype.slice.call(this.getElementsByTagName('action-socket'));
+
+            const findActiveSkillSocket = () =>sockets.find(socket => socket.getAttribute('key') == this.activeSkill);
+
             if (this.activeSkill != null) {
-                sockets[this.activeSkill].removeAttribute('active');
+                findActiveSkillSocket().removeAttribute('active');
             }
+
             if (active != null) {
                 this.activeSkill = active;
-                sockets[active].setAttribute('active', 'active');
+                findActiveSkillSocket().setAttribute('active', 'active');
             }
         }
     });
