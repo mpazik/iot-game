@@ -75,7 +75,9 @@ public final class GameServer {
         int gameServerPort = Configuration.getGameServerPort();
         UserService userService = new UserService(userStore);
         webSocketServer = new WebSocketServer();
+
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
+        Leaderboard leaderboard = new Leaderboard(userService, scenarioStore);
 
         ServerDispatcher serverDispatcher = new ServerDispatcher();
         arbiter = new Arbiter(serverDispatcher, scheduler, arbiterStore, scenarioStore, instanceStore);
@@ -85,18 +87,17 @@ public final class GameServer {
         arbiter.instanceStartedPublisher.subscribe(instanceServer -> chat.createInstanceChannel(instanceServer.getKey()));
         arbiter.instanceClosedPublisher.subscribe(instanceServer -> chat.closeInstanceChannel(instanceServer.getKey()));
 
-        AchievementServer achievementServer = new AchievementServer(achievementStore);
+        AchievementServer achievementServer = new AchievementServer(achievementStore, leaderboard);
         arbiter.instanceStartedPublisher.subscribe(instanceServer -> {
             instanceServer.userGameEventPublisher.subscribe(achievementServer::processUserGameEvent);
             instanceServer.userCommandPublisher.subscribe(achievementServer::processUserCommand);
+            instanceServer.victorySurvivalPublisher.subscribe(achievementServer::processVictorySurvival);
         });
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);
         serverDispatcher.addServer("time", timeSynchroniser);
         serverDispatcher.addServer("achievement", achievementServer);
-
-        Leaderboard leaderboard = new Leaderboard(userService, scenarioStore);
 
         service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())

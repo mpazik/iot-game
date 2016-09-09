@@ -31,7 +31,9 @@ public class Leaderboard {
 
     public void update() {
         List<ScenarioEventBox> events = scenarioStore.getEvents(ranking.timestamp);
-        if (events.size() == 0) return;
+        if (events.isEmpty()) {
+            return;
+        }
 
         events.forEach(eventBox -> {
             if (eventBox.event instanceof ScenarioStarted) {
@@ -66,6 +68,10 @@ public class Leaderboard {
             this.record = record;
             this.position = position;
         }
+
+        public int getPosition() {
+            return position;
+        }
     }
 
     private final class Ranking {
@@ -78,10 +84,14 @@ public class Leaderboard {
         }
 
         public void scenarioEnded(Id<Scenario> scenarioId, ScenarioEnd.Resolution resolution) {
-            if (!scenariosRunning.containsKey(scenarioId)) return;
+            if (!scenariosRunning.containsKey(scenarioId)) {
+                return;
+            }
             Survival scenario = scenariosRunning.remove(scenarioId);
 
-            if (resolution != ScenarioEnd.Resolution.Victory) return;
+            if (resolution != ScenarioEnd.Resolution.Victory) {
+                return;
+            }
 
             int difficultyLevel = scenario.getDifficultyLevel();
             scenario.getAttendees().forEach(userId -> {

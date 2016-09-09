@@ -7,6 +7,8 @@ import com.google.gson.Gson
 import dzida.server.app.achievement.AchievementChange.AchievementProgressed
 import dzida.server.app.achievement.AchievementChange.AchievementUnlocked
 import dzida.server.app.instance.UserMessage
+import dzida.server.app.leaderboard.Leaderboard
+import dzida.server.app.map.descriptor.Survival
 import dzida.server.app.protocol.json.JsonProtocol
 import dzida.server.app.serialization.BasicJsonSerializer
 import dzida.server.app.user.EncryptedLoginToken
@@ -21,6 +23,7 @@ import dzida.server.core.basic.entity.Id
 
 class AchievementServer : VerifyingConnectionServer<String, String> {
     private val achievementStore: AchievementStore
+    private val leaderboard: Leaderboard
     private val achievementMessageSerializer: Gson = BasicJsonSerializer.getSerializerBuilder()
             .addSerializationExclusionStrategy(object : ExclusionStrategy {
                 override fun shouldSkipClass(clazz: Class<*>?): Boolean = false
@@ -34,8 +37,9 @@ class AchievementServer : VerifyingConnectionServer<String, String> {
     private val achievementsBySourceAndName: Map<String, Map<String, List<Achievement>>>
     private val userConnections: MutableMap<Id<User>, Connector<String>> = hashMapOf()
 
-    constructor(achievementStore: AchievementStore) {
+    constructor(achievementStore: AchievementStore, leaderboard: Leaderboard) {
         this.achievementStore = achievementStore
+        this.leaderboard = leaderboard
         this.achievementsBySourceAndName = achievementStore.achievements
                 .groupBy { it.unlock.eventSource }
                 .mapValues { it.value.groupBy { it.unlock.eventName } }
@@ -49,13 +53,44 @@ class AchievementServer : VerifyingConnectionServer<String, String> {
         processUserMessage(userCommand, "instance-command")
     }
 
+    fun processVictorySurvival(survival: Survival): Unit {
+        leaderboard.update()
+        val achievements = achievementsBySourceAndName.getOrElse("hardcoded", { hashMapOf() })
+        val achievementChanges: Iterable<AchievementChange> = survival.attendees.flatMap { userId ->
+            achievements.flatMap({ entry ->
+                val achievementKey = entry.value[0].key
+                if (userAchievementState.isAchievementUnlocked(achievementKey, userId)) {
+                    emptyList()
+                } else {
+                    when (entry.key) {
+                        "WinFirstBattle" -> listOf(AchievementUnlocked(userId, achievementKey))
+                        "WinBattleLevel5" ->
+                            if (survival.difficultyLevel >= 5) {
+                                listOf(AchievementUnlocked(userId, achievementKey))
+                            } else {
+                                emptyList()
+                            }
+                        "BeFirstInRanking" ->
+                            if (leaderboard.getPlayerScore(userId).position == 1) {
+                                listOf(AchievementUnlocked(userId, achievementKey))
+                            } else {
+                                emptyList()
+                            }
+                        else -> emptyList()
+                    }
+                }
+            })
+        }
+        processAchievementEvents(achievementChanges)
+    }
+
     private fun processUserMessage(userMessage: UserMessage<Any>, messageSource: String) {
         val eventName = Event.getMessageTypeFromClass(userMessage.message.javaClass)
-        val unlockedAchievements = achievementsBySourceAndName
+        val achievementsRelatedWithMessage = achievementsBySourceAndName
                 .getOrElse(messageSource, { hashMapOf() })
                 .getOrElse(eventName, { emptyList() })
-        val achievementEvents = unlockedAchievements.flatMap { processAchievement(userMessage.userId, it) }
-        processAchievementEvents(achievementEvents)
+        val achievementChanges = achievementsRelatedWithMessage.flatMap { processAchievement(userMessage.userId, it) }
+        processAchievementEvents(achievementChanges)
     }
 
     private fun processAchievement(userId: Id<User>, achievement: Achievement): Iterable<AchievementChange> {

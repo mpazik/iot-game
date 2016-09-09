@@ -41,6 +41,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
     public final Publisher<UserMessage.UserGameEvent> userGameEventPublisher = new Publisher<>();
     public final Publisher<UserMessage.UserCommand> userCommandPublisher = new Publisher<>();
+    public final Publisher<Survival> victorySurvivalPublisher = new Publisher<>();
 
     private final Instance instance;
     private final InstanceStore instanceStore;
@@ -79,6 +80,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
             if (gameEvent instanceof ScenarioEnd) {
                 ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;
                 scenarioStore.scenarioFinished(scenarioId, scenarioEnd);
+                if (scenario instanceof Survival && scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
+                    victorySurvivalPublisher.notify((Survival) scenario);
+                }
                 arbiter.instanceFinished(instanceKey);
             }
         });
