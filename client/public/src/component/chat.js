@@ -10,6 +10,21 @@ define(function (require, exports, module) {
         return setState = f;
     });
 
+    const entityMap = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': '&quot;',
+        "'": '&#39;',
+        "/": '&#x2F;'
+    };
+
+    function escapeHtml(string) {
+        return String(string).replace(/[&<>"'\/]/g, function (s) {
+            return entityMap[s];
+        });
+    }
+
     const clientCommands = {
         help(){
             const helpText = `/help<br />
@@ -45,7 +60,7 @@ Type and press enter to send a message.<br />
         msg (channel, args) {
             const i = args.indexOf(' ');
             const user = args.slice(0, i);
-            const message = args.slice(i + 1);
+            const message = escapeHtml(args.slice(i + 1));
             if (channel === currentInstanceKey) {
                 displayMessage({type: 'message', text: `${user} : ${message}`})
             } else {
@@ -89,7 +104,7 @@ Type and press enter to send a message.<br />
         msg(args) {
             const i = args.indexOf(' ');
             const user = args.slice(0, i);
-            const message = args.slice(i + 1);
+            const message = escapeHtml(args.slice(i + 1));
             displayMessage({type: 'whisper', text: `from: ${user} : ${message}`})
         },
         error(args) {

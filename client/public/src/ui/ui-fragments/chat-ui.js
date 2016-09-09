@@ -1,5 +1,4 @@
-define(function (require, exports, module) {
-    const uiState = require('../../store/ui-state');
+define(function (require) {
     const chat = require('../../component/chat');
 
     return createUiElement('game-chat', {
@@ -56,10 +55,10 @@ define(function (require, exports, module) {
             input.addEventListener("focus", this.onFocus.bind(this));
             input.addEventListener("blur", this.onBlur.bind(this));
 
-            uiState.chatMessage.subscribe(this.print.bind(this))
+            chat.chatMessage.subscribe(this.print.bind(this))
         },
         detached: function () {
-            uiState.chatMessage.unsubscribe(this.print.bind(this))
+            chat.chatMessage.unsubscribe(this.print.bind(this))
         },
         onFocus: function () {
             this.isFocused = true;

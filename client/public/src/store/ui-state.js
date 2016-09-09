@@ -43,7 +43,6 @@ define(function (require, exports, module) {
         gameMessage: ServerMessagesStore.messageToShowState,
         serverError: ServerMessagesStore.errorToShowState,
         chatState: Chat.state,
-        chatMessage: Chat.chatMessage,
         playerItems: Item.itemsChange,
         achievementConnectionState: Achievement.connectionStatePublisher,
         tutorialToDisplay: Tutorials.toDisplay
