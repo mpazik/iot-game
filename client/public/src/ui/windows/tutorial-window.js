@@ -15,7 +15,7 @@ define(function (require) {
             const tutorial = tutorialToDisplay.value;
             this.innerHTML = `
 <h1>${tutorial['title']}</h1>
-<p>${tutorial['content']}</p>
+<div>${tutorial['content']}</div>
 <button class="large">Close</button>
 `;
         },

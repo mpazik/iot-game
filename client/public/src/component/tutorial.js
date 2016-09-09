@@ -12,6 +12,10 @@ define((require, exports, module) => {
                         tutorial['trigger']['properties']['achievement-key'] == change.key;
                 });
                 if (tutorialToDisplay) {
+                    const achievementToTrack = tutorialToDisplay['track-achievement'];
+                    if (achievementToTrack) {
+                        Achievements.trackAchievement(achievementToTrack['achievement-key'])
+                    }
                     callback(tutorialToDisplay)
                 }
             });

@@ -16,7 +16,8 @@ define(function (require) {
         require('./ui-fragments/screen/connecting'),
         require('./ui-fragments/screen/connecting-to-instnace'),
         require('./ui-fragments/chat-ui'),
-        require('./ui-fragments/inventory')
+        require('./ui-fragments/inventory'),
+        require('./ui-fragments/objectives-tracker')
     ].concat(extraComponents.fragments);
 
     const windows = [

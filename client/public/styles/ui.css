@@ -34,7 +34,7 @@ profiling-display {
     padding: 2px;
     top: 0;
     right: 0;
-    font-size: 0.7em;
+    font-size: 0.75em;
 }
 
 profiling-display div {
@@ -214,7 +214,7 @@ player-inventory {
     top: 40px;
     right: 1px;
     padding: 10px;
-    min-width: 100px;
+    width: 180px;
     font-size: 0.8em;
 }
 
@@ -260,7 +260,7 @@ player-inventory {
 }
 
 achievement-window {
-    width: 300px;
+    width: 350px;
 }
 
 achievement-window > div {
@@ -272,20 +272,44 @@ achievement-window ul.navigation-list {
     width: 170px;
 }
 
-.achievement {
+achievement-window .achievement-progress {
+    float: right;
+    color: var(--highlight-color);
+}
+
+achievement-window .achievement {
     border: #666 1px solid;
     border-radius: 4px;
     padding: 15px;
 }
 
-.achievement.unlocked {
+achievement-window .achievement.unlocked {
     border-color: var(--main-color);
 }
 
-.achievement h3 {
+achievement-window .achievement h3 {
     margin: 0 0 2px 0
 }
 
-.achievement.unlocked h3 {
+achievement-window .achievement.unlocked h3 {
     color: var(--main-color);
+}
+
+objective-tracker {
+    top: 140px;
+    right: 1px;
+    padding: 10px;
+    width: 180px;
+    font-size: 0.8em;
+}
+
+objective-tracker ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+objective-tracker li span {
+    float: right;
+    color: var(--highlight-color);
 }

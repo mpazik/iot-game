@@ -1,14 +1,22 @@
 define(function (require) {
-    const Achievements = require('../../component/achievement');
+    const Achievement = require('../../component/achievement');
 
     function isUnlocked(achievementKey) {
-        return Achievements.state.achievementsUnlocked.has(achievementKey);
+        return Achievement.state.achievementsUnlocked.has(achievementKey);
+    }
+
+    function renderAchievementProgress(achievement) {
+        const steps = achievement['unlock']['steps'];
+        if (steps == null) return '';
+        const progress = Achievement.state.achievementsUnlocked.has(achievement.key) ? steps : Achievement.state.achievementsProgress.get(achievement.key) || 0;
+        return `<span class="achievement-progress">${progress}/${steps}</span>`;
     }
 
     function renderAchievement(achievement) {
         return `<div class="achievement ${isUnlocked(achievement.key) ? 'unlocked' : ''}">
 <h3>${achievement['title']}</h3>
 <span>${achievement['imperative']}</span>
+${renderAchievementProgress(achievement)}
 </div>
 `;
     }
@@ -29,15 +37,17 @@ define(function (require) {
 `;
         },
         attached: function () {
-            this._update(Achievements.achievementChangePublisher.value);
-            Achievements.achievementChangePublisher.subscribe(this._update.bind(this));
+            this._update(Achievement.achievementChangePublisher.value);
+            Achievement.achievementChangePublisher.subscribe(Achievement.Changes.AchievementUnlocked, this._update.bind(this));
+            Achievement.achievementChangePublisher.subscribe(Achievement.Changes.AchievementProgressed, this._update.bind(this));
         },
         detached: function () {
-            Achievements.achievementChangePublisher.unsubscribe(this._update.bind(this));
+            Achievement.achievementChangePublisher.unsubscribe(Achievement.Changes.AchievementUnlocked, this._update.bind(this));
+            Achievement.achievementChangePublisher.unsubscribe(Achievement.Changes.AchievementProgressed, this._update.bind(this));
         },
         _update: function () {
             const list = this.getElementsByTagName('div')[0];
-            list.innerHTML = Achievements.achievementList.map(achievement => renderAchievement(achievement)).join('\n');
+            list.innerHTML = Achievement.achievementList.map(achievement => renderAchievement(achievement)).join('\n');
         }
     });
 });

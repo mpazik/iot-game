@@ -14,11 +14,6 @@ define((require, exports, module) => {
         }
     };
 
-    var setConnectionState = null;
-    const connectionStatePublisher = new Publisher.StatePublisher('not-connected', function (f) {
-        return setConnectionState = f;
-    });
-
     const achievementProtocol = new JsonProtocol(Changes, ClientMessage);
 
     const state = {
@@ -26,9 +21,21 @@ define((require, exports, module) => {
         achievementsUnlocked: new Set()
     };
 
+    const trackedAchievements = [];
+
     var publishAchievementChange = null;
     const achievementChangePublisher = new Publisher.TypePublisher(function (f) {
         return publishAchievementChange = f;
+    });
+
+    var setConnectionState = null;
+    const connectionStatePublisher = new Publisher.StatePublisher('not-connected', function (f) {
+        return setConnectionState = f;
+    });
+
+    var setTrackedAchievements = null;
+    const trackedAchievementPublisher = new Publisher.StatePublisher(trackedAchievements, function (f) {
+        return setTrackedAchievements = f;
     });
 
     function updateState(change) {
@@ -47,6 +54,8 @@ define((require, exports, module) => {
                 if (state.achievementsProgress.has(achievementKey)) {
                     state.achievementsProgress.delete(achievementKey)
                 }
+                trackedAchievements.remove(key => key == achievementKey);
+                setTrackedAchievements(trackedAchievements.slice());
                 break;
         }
         publishAchievementChange(change.constructor, change)
@@ -57,6 +66,12 @@ define((require, exports, module) => {
         state,
         achievementChangePublisher: achievementChangePublisher,
         connectionStatePublisher: connectionStatePublisher,
+        trackedAchievementPublisher: trackedAchievementPublisher,
+        trackAchievement(achievementKey) {
+            trackedAchievements.push(achievementKey);
+            // slice used to pass array by value
+            setTrackedAchievements(trackedAchievements.slice())
+        },
         achievement: (key) => ResourcesStore.achievements.find(a => a.key == key),
         get achievementList() {
             return ResourcesStore.achievements
