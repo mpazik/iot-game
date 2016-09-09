@@ -4,8 +4,6 @@ DB_NAME=$1
 DB_USER=$2
 SCRIPT_PATH=$(dirname "$0")/
 SQL_DIR=${SCRIPT_PATH}../resources/sql/
-echo ${DB_NAME}
-echo ${DB_USER}
 
 POSTGRES_DIR=${SCRIPT_PATH}../server-app/target/postgres
 
