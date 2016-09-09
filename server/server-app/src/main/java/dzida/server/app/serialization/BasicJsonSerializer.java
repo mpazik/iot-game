@@ -9,18 +9,32 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 
 import java.io.IOException;
+import java.time.Instant;
 
 public final class BasicJsonSerializer {
     public static final TypeAdapter<Id> idTypeAdapter = new TypeAdapter<Id>() {
         @Override
-        public void write(JsonWriter out, Id characterId) throws IOException {
-            out.value(characterId.getValue());
+        public void write(JsonWriter out, Id id) throws IOException {
+            out.value(id.getValue());
         }
 
         @Override
         public Id read(JsonReader in) throws IOException {
             long id = in.nextLong();
             return new Id<>(id);
+        }
+    };
+
+    public static final TypeAdapter<Instant> instantTypeAdapter = new TypeAdapter<Instant>() {
+        @Override
+        public void write(JsonWriter out, Instant instant) throws IOException {
+            out.value(instant.toEpochMilli());
+        }
+
+        @Override
+        public Instant read(JsonReader in) throws IOException {
+            long epochMillis = in.nextLong();
+            return Instant.ofEpochMilli(epochMillis);
         }
     };
 
@@ -40,6 +54,7 @@ public final class BasicJsonSerializer {
     private static final Gson gson = new GsonBuilder()
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
+            .registerTypeHierarchyAdapter(Instant.class, instantTypeAdapter)
             .create();
 
     private BasicJsonSerializer() {

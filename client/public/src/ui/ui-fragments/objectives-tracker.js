@@ -16,6 +16,7 @@ define(function (require) {
         type: 'fragment',
         properties: {
             requirements: {
+                playerAlive: Predicates.is(true),
                 achievementConnectionState: Predicates.is('connected')
             }
         },

@@ -11,6 +11,8 @@ import dzida.server.app.store.http.loader.StaticDataLoader
 import dzida.server.app.user.User
 import dzida.server.core.basic.entity.Id
 import dzida.server.core.basic.entity.Key
+import java.sql.Timestamp
+import java.time.Instant
 
 class AchievementStoreDb : AchievementStore {
     val connectionProvider: ConnectionProvider
@@ -30,6 +32,7 @@ class AchievementStoreDb : AchievementStore {
                     .set(achievementEvent.userId, event.userId.intValue)
                     .set(achievementEvent.achievementKey, event.key.value)
                     .set(achievementEvent.type, eventType)
+                    .set(achievementEvent.createdAt, Timestamp.from(event.createdAt))
                     .execute()
         }
     }
@@ -37,20 +40,22 @@ class AchievementStoreDb : AchievementStore {
     override fun getUserEvents(userId: Id<User>): Iterable<AchievementChange> {
         return connectionProvider.withSqlFactory<List<AchievementChange>> { sqlQueryFactory ->
             val fetch = sqlQueryFactory
-                    .select(achievementEvent.userId, achievementEvent.achievementKey, achievementEvent.type)
+                    .select(achievementEvent.type, achievementEvent.achievementKey, achievementEvent.createdAt)
                     .from(achievementEvent)
                     .where(achievementEvent.userId.eq(userId.intValue))
                     .fetch()
             fetch.map({ tuple ->
                 val achievementType = tuple.get(achievementEvent.type)!!
                 val achievementKey = Key<Achievement>(tuple.get(achievementEvent.achievementKey)!!)
+                val createdAt = (tuple.get(achievementEvent.createdAt)!!).toInstant()
 
                 val messageClass = eventSerializer.getMessageClass(achievementType)
                 checkNotNull(messageClass, { "Achievement type <$achievementType> does not exists. Wrong data in DB?" })
 
                 @Suppress("UNCHECKED_CAST")
                 val eventClass = (messageClass as Class<AchievementChange>)
-                eventClass.getConstructor(Id::class.java, Key::class.java).newInstance(userId, achievementKey)
+                eventClass.getConstructor(Id::class.java, Key::class.java, Instant::class.java)
+                        .newInstance(userId, achievementKey, createdAt)
             })
         }
     }

@@ -20,7 +20,7 @@ define(function (require, exports, module) {
             const socket = NetworkDispatcher.newSocket('time');
             socket.onMessage = (message) => {
                 const i = message.indexOf(' ');
-                const clientTime = parseInt(message.slice(0, i).toLowerCase());
+                const clientTime = parseInt(message.slice(0, i));
                 const serverTime = parseInt(message.slice(i + 1));
                 var oneWayPing = (Date.now() - clientTime) / 2;
                 offset = serverTime - Date.now() + oneWayPing;

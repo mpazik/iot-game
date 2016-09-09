@@ -7,11 +7,13 @@ define((require, exports, module) => {
 
     const ClientMessage = {};
     const Changes = {
-        AchievementProgressed: function (key) {
-            this.key = key
+        AchievementProgressed: function (key, createdAt) {
+            this.key = key;
+            this.createdAt = createdAt;
         },
-        AchievementUnlocked: function (key) {
-            this.key = key
+        AchievementUnlocked: function (key, createdAt) {
+            this.key = key;
+            this.createdAt = createdAt;
         }
     };
 
@@ -19,7 +21,7 @@ define((require, exports, module) => {
 
     const state = {
         achievementsProgress: new Map(),
-        achievementsUnlocked: new Set()
+        achievementsUnlocked: new Map()
     };
 
     const trackedAchievements = [];
@@ -51,7 +53,7 @@ define((require, exports, module) => {
                 }
                 break;
             case Changes.AchievementUnlocked:
-                state.achievementsUnlocked.add(achievementKey);
+                state.achievementsUnlocked.set(achievementKey, change.createdAt);
                 if (state.achievementsProgress.has(achievementKey)) {
                     state.achievementsProgress.delete(achievementKey)
                 }
