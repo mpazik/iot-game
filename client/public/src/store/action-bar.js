@@ -1,7 +1,8 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const Targeting = require('../component/targeting');
-    const Skills = require('../common/model/skills').Ids;
+    const Skills = require('../common/model/skills');
+    const SkillIds = Skills.Ids;
 
     var publishActive;
     const activeState = new Publisher.StatePublisher(null, function (fn) {
@@ -12,9 +13,9 @@ define(function (require, exports, module) {
 
     var updateSkills = null;
     const skillPosition = [
-        Skills.PUNCH, Skills.BOW_SHOT, Skills.SWORD_HIT,
-        Skills.EAT_APPLE, Skills.CREATE_TREE, Skills.CUT_TREE,
-        Skills.CREATE_ARROWS, Skills.GRAB_APPLE, Skills.INTRODUCE
+        SkillIds.PUNCH, SkillIds.BOW_SHOT, SkillIds.SWORD_HIT,
+        SkillIds.EAT_APPLE, SkillIds.CREATE_TREE, SkillIds.CUT_TREE,
+        SkillIds.CREATE_ARROWS, SkillIds.GRAB_APPLE, SkillIds.INTRODUCE
     ];
     var skillsPublisher = new Publisher.StatePublisher(skills, (push) => {
         updateSkills = push
@@ -24,19 +25,9 @@ define(function (require, exports, module) {
         publishActive(skill == null ? null : skill.id);
     });
 
-    function skillKeyToSkillId(skillKey) {
-        const skillIdName = skillKey.toUpperCase().replace('-', '_');
-        const skillId = Skills[skillIdName];
-        if (skillId == null) {
-            throw `There is no skill id for a skill ${skillKey}`
-        }
-
-        return skillId
-    }
-
     module.exports = {
         addSkill(skillKey) {
-            const skillId = skillKeyToSkillId(skillKey);
+            const skillId = Skills.keyToId(skillKey);
             const passion = skillPosition.indexOf(skillId);
             skills[passion] = skillId;
             updateSkills(skills.slice())

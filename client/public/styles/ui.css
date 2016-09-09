@@ -295,6 +295,11 @@ achievement-window .achievement.unlocked h3 {
     color: var(--main-color);
 }
 
+achievement-window .achievement-rewards {
+    margin-top: 2px;
+    font-size: 0.8em;
+}
+
 objective-tracker {
     top: 140px;
     right: 1px;

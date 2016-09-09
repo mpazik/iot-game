@@ -34,6 +34,14 @@ define(function (require, exports, module) {
     module.exports = {
         Types,
         Ids,
-        Targets
+        Targets,
+        keyToId(skillKey) {
+            const skillIdName = skillKey.toUpperCase().replace('-', '_');
+            const skillId = Ids[skillIdName];
+            if (skillId == null) {
+                throw `There is no skill id for a skill ${skillKey}`
+            }
+            return skillId
+        }
     };
 });

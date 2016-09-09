@@ -1,6 +1,6 @@
 define(function (require) {
     require('../elements/action-socket');
-    const skillByKey = require('../../store/resources').skill;
+    const skillById = require('../../store/resources').skill;
     const userEventStream = require('../../component/dispatcher').userEventStream;
     const ActionBar = require('../../store/action-bar');
 
@@ -58,7 +58,7 @@ define(function (require) {
             const skillBar = this.getElementsByClassName("skill-bar")[0];
             const skills = skillIds.map(function (id) {
                 if (id == null) return;
-                return skillByKey(id);
+                return skillById(id);
             });
             skillBar.innerHTML = '';
             skills.forEach(function (skill, index) {
@@ -68,7 +68,7 @@ define(function (require) {
                     socket.setAttribute('key', skill.id);
                     socket.setAttribute('title', skill.name);
                     socket.addEventListener('action-triggered', function (event) {
-                        const skill = skillByKey(event.detail.key);
+                        const skill = skillById(event.detail.key);
                         userEventStream.publish('skill-triggered', {skill});
                     });
                 }
