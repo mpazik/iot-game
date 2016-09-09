@@ -1,10 +1,14 @@
 package dzida.server.app.achievement
 
 import com.google.common.collect.ImmutableSet
+import com.google.gson.ExclusionStrategy
+import com.google.gson.FieldAttributes
+import com.google.gson.Gson
 import dzida.server.app.achievement.AchievementChange.AchievementProgressed
 import dzida.server.app.achievement.AchievementChange.AchievementUnlocked
 import dzida.server.app.instance.UserGameEvent
 import dzida.server.app.protocol.json.JsonProtocol
+import dzida.server.app.serialization.BasicJsonSerializer
 import dzida.server.app.user.EncryptedLoginToken
 import dzida.server.app.user.User
 import dzida.server.app.user.UserTokenVerifier
@@ -17,7 +21,13 @@ import dzida.server.core.basic.entity.Id
 
 class AchievementServer : VerifyingConnectionServer<String, String> {
     private val achievementStore: AchievementStore
-    private val protocol: JsonProtocol = JsonProtocol.create(ImmutableSet.of(), AchievementChange.classes)
+    private val achievementMessageSerializer: Gson = BasicJsonSerializer.getSerializerBuilder()
+            .addSerializationExclusionStrategy(object : ExclusionStrategy {
+                override fun shouldSkipClass(clazz: Class<*>?): Boolean = false
+                override fun shouldSkipField(field: FieldAttributes): Boolean = field.name == "userId"
+            })
+            .create()
+    private val protocol: JsonProtocol = JsonProtocol.create(achievementMessageSerializer, ImmutableSet.of(), AchievementChange.classes)
     private val userAchievementState: UserAchievementState = UserAchievementState()
     private val userTokenVerifier: UserTokenVerifier = UserTokenVerifier()
 

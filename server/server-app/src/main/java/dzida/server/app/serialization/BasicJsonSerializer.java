@@ -51,11 +51,12 @@ public final class BasicJsonSerializer {
         }
     };
 
-    private static final Gson gson = new GsonBuilder()
+    private static final GsonBuilder gsonBuilder = new GsonBuilder()
             .registerTypeHierarchyAdapter(Id.class, idTypeAdapter)
             .registerTypeHierarchyAdapter(Key.class, keyTypeAdapter)
-            .registerTypeHierarchyAdapter(Instant.class, instantTypeAdapter)
-            .create();
+            .registerTypeHierarchyAdapter(Instant.class, instantTypeAdapter);
+
+    private static final Gson gson = gsonBuilder.create();
 
     private BasicJsonSerializer() {
         //no instance
@@ -63,5 +64,9 @@ public final class BasicJsonSerializer {
 
     public static Gson getSerializer() {
         return gson;
+    }
+
+    public static GsonBuilder getSerializerBuilder() {
+        return gsonBuilder;
     }
 }
