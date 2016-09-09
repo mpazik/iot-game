@@ -39,7 +39,8 @@ import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 public class InstanceServer implements VerifyingConnectionServer<String, String> {
     private static final Logger log = Logger.getLogger(InstanceServer.class);
 
-    public final Publisher<UserGameEvent> userGameEventPublisher = new Publisher<>();
+    public final Publisher<UserMessage.UserGameEvent> userGameEventPublisher = new Publisher<>();
+    public final Publisher<UserMessage.UserCommand> userCommandPublisher = new Publisher<>();
 
     private final Instance instance;
     private final InstanceStore instanceStore;
@@ -88,7 +89,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
                     return; // Character is not an user's character (It's a bot)
                 }
                 Id<User> userId = userIds.get(characterEvent.getCharacterId());
-                userGameEventPublisher.notify(new UserGameEvent(userId, characterEvent));
+                userGameEventPublisher.notify(new UserMessage.UserGameEvent(userId, characterEvent));
             }
         });
         scenarioId = scenarioStore.scenarioStarted(scenario);
@@ -169,7 +170,10 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
             Object commandToProcess = serializer.parseMessage(message);
             whenTypeOf(commandToProcess)
                     .is(CharacterCommand.class)
-                    .then(command -> runInstanceCommand(command.getInstanceCommand(characterId)))
+                    .then(command -> {
+                        runInstanceCommand(command.getInstanceCommand(characterId));
+                        userCommandPublisher.notify(new UserMessage.UserCommand(userId, command));
+                    })
                     .is(InstanceCommand.class)
                     .then(this::runInstanceCommand);
         }

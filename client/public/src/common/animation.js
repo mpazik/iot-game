@@ -132,7 +132,6 @@ define(() => {
 
         setValuesAtTime(time) {
             const values = this.getValuesAtTime(time);
-            console.log(time, values);
             Object.assign(this.object, values);
         }
     }

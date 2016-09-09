@@ -86,9 +86,10 @@ public final class GameServer {
         arbiter.instanceClosedPublisher.subscribe(instanceServer -> chat.closeInstanceChannel(instanceServer.getKey()));
 
         AchievementServer achievementServer = new AchievementServer(achievementStore);
-        arbiter.instanceStartedPublisher.subscribe(instanceServer ->
-                instanceServer.userGameEventPublisher.subscribe(achievementServer::processUserGameEvent)
-        );
+        arbiter.instanceStartedPublisher.subscribe(instanceServer -> {
+            instanceServer.userGameEventPublisher.subscribe(achievementServer::processUserGameEvent);
+            instanceServer.userCommandPublisher.subscribe(achievementServer::processUserCommand);
+        });
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);

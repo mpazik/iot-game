@@ -6,7 +6,7 @@ import com.google.gson.FieldAttributes
 import com.google.gson.Gson
 import dzida.server.app.achievement.AchievementChange.AchievementProgressed
 import dzida.server.app.achievement.AchievementChange.AchievementUnlocked
-import dzida.server.app.instance.UserGameEvent
+import dzida.server.app.instance.UserMessage
 import dzida.server.app.protocol.json.JsonProtocol
 import dzida.server.app.serialization.BasicJsonSerializer
 import dzida.server.app.user.EncryptedLoginToken
@@ -31,18 +31,30 @@ class AchievementServer : VerifyingConnectionServer<String, String> {
     private val userAchievementState: UserAchievementState = UserAchievementState()
     private val userTokenVerifier: UserTokenVerifier = UserTokenVerifier()
 
-    private val achievementsByEventName: Map<String, List<Achievement>>
+    private val achievementsBySourceAndName: Map<String, Map<String, List<Achievement>>>
     private val userConnections: MutableMap<Id<User>, Connector<String>> = hashMapOf()
 
     constructor(achievementStore: AchievementStore) {
         this.achievementStore = achievementStore
-        this.achievementsByEventName = achievementStore.achievements.groupBy { it.unlock.eventName }
+        this.achievementsBySourceAndName = achievementStore.achievements
+                .groupBy { it.unlock.eventSource }
+                .mapValues { it.value.groupBy { it.unlock.eventName } }
     }
 
-    fun processUserGameEvent(userEvent: UserGameEvent): Unit {
-        val eventName = Event.getMessageTypeFromClass(userEvent.event.javaClass)
-        val unlockedAchievements = achievementsByEventName.getOrElse(eventName, { emptyList() })
-        val achievementEvents = unlockedAchievements.flatMap { processAchievement(userEvent.userId, it) }
+    fun processUserGameEvent(userEvent: UserMessage.UserGameEvent): Unit {
+        processUserMessage(userEvent, "instance")
+    }
+
+    fun processUserCommand(userCommand: UserMessage.UserCommand): Unit {
+        processUserMessage(userCommand, "instance-command")
+    }
+
+    private fun processUserMessage(userMessage: UserMessage<Any>, messageSource: String) {
+        val eventName = Event.getMessageTypeFromClass(userMessage.message.javaClass)
+        val unlockedAchievements = achievementsBySourceAndName
+                .getOrElse(messageSource, { hashMapOf() })
+                .getOrElse(eventName, { emptyList() })
+        val achievementEvents = unlockedAchievements.flatMap { processAchievement(userMessage.userId, it) }
         processAchievementEvents(achievementEvents)
     }
 
