@@ -4,7 +4,8 @@ define((require, exports, module) => {
     const JsonProtocol = require('../common/basic/json-protocol');
     const ResourcesStore = require('../store/resources');
     const ActionBar = require('../store/action-bar');
-
+    const Message = require('../store/server-messages');
+    const Timer = require('./timer');
 
     ActionBar.addSkill('introduce');
 
@@ -71,9 +72,17 @@ define((require, exports, module) => {
                         }
                     });
                 }
+                const justUnlocked = change.createdAt > Timer.currentTimeOnServer() - 1000;
+                if (justUnlocked) {
+                    Message.displayMessage(`Achievement "${achievementByKey(achievementKey).title}" unlocked`);
+                }
                 break;
         }
         publishAchievementChange(change.constructor, change)
+    }
+
+    function achievementByKey(key) {
+        return ResourcesStore.achievements.find(a => a.key == key)
     }
 
     module.exports = {
@@ -87,7 +96,7 @@ define((require, exports, module) => {
             // slice used to pass array by value
             setTrackedAchievements(trackedAchievements.slice())
         },
-        achievement: (key) => ResourcesStore.achievements.find(a => a.key == key),
+        achievement: achievementByKey,
         get achievementList() {
             return ResourcesStore.achievements
         },

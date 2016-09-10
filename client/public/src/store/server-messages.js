@@ -13,6 +13,9 @@ define(function (require, exports, module) {
     }
 
     module.exports = {
+        displayMessage(message) {
+            Dispatcher.messageStream.publish(Messages.ServerMessage, new Messages.ServerMessage(message));
+        },
         messageToShowState: new Publisher.StatePublisher(null, push => {
             Dispatcher.messageStream.subscribe(Messages.ServerMessage, function (event) {
                 showMessage(push, event.message);

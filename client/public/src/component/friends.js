@@ -4,7 +4,7 @@ define((require, exports, module) => {
     const JsonProtocol = require('../common/basic/json-protocol');
     const Dispatcher = require('./dispatcher');
     const CharacterStore = require('../store/character');
-    const Messages = require('./instance/messages');
+    const Message = require('../store/server-messages');
     const SkillsIds = require('../common/model/skills').Ids;
     const MainPlayer = require('../store/main-player');
 
@@ -55,7 +55,7 @@ define((require, exports, module) => {
                 friends.set(message.userId, message.nick);
                 publishFriendship(message);
                 if (displayFriendshipMessage) {
-                    displayMessageOnScreen(`Player [${message.nick}] become your friend`);
+                    Message.displayMessage(`Player "${message.nick}" become your friend`);
                     displayFriendshipMessage = false;
                 }
                 break;
@@ -66,24 +66,20 @@ define((require, exports, module) => {
         }
     }
 
-    function displayMessageOnScreen(message) {
-        Dispatcher.messageStream.publish(Messages.ServerMessage, new Messages.ServerMessage(message));
-    }
-
     Dispatcher.userEventStream.subscribe('special-skill-used-on-character', (event) => {
         if (event.skillId != SkillsIds.INTRODUCE) {
             return;
         }
         if (event.userId == MainPlayer.userId()) {
-            displayMessageOnScreen('You can not introduce to your self');
+            Message.displayMessage('You can not introduce to your self');
         }
         if (friends.has(event.userId)) {
-            displayMessageOnScreen(`Are are already friend with ${friends.get(event.userId)}`);
+            Message.displayMessage(`Are are already friend with ${friends.get(event.userId)}`);
         }
         const character = CharacterStore.character(event.characterId);
         const userId = character.userId;
         send(new ClientMessage.RequestForFriendShip(userId));
-        displayMessageOnScreen('Request to player has been sent');
+        Message.displayMessage('Request to player has been sent');
     });
 
     Dispatcher.userEventStream.subscribe('accept-friendship-request', (event) => {
