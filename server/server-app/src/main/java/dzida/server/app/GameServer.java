@@ -6,6 +6,8 @@ import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
 import dzida.server.app.achievement.AchievementServer;
 import dzida.server.app.achievement.AchievementStore;
+import dzida.server.app.analytics.AnalyticsServer;
+import dzida.server.app.analytics.AnalyticsStore;
 import dzida.server.app.arbiter.Arbiter;
 import dzida.server.app.arbiter.ArbiterStore;
 import dzida.server.app.chat.Chat;
@@ -22,6 +24,7 @@ import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.rest.UserResource;
 import dzida.server.app.store.database.AchievementStoreDb;
+import dzida.server.app.store.database.AnalyticsStoreDb;
 import dzida.server.app.store.database.ArbiterStoreDb;
 import dzida.server.app.store.database.ChatStoreDb;
 import dzida.server.app.store.database.FriendsStoreDb;
@@ -75,6 +78,7 @@ public final class GameServer {
         InstanceStore instanceStore = new InstanceStoreDb(connectionProvider);
         AchievementStore achievementStore = new AchievementStoreDb(connectionProvider);
         FriendsStore friendsStore = new FriendsStoreDb(connectionProvider);
+        AnalyticsStore analyticsStore = new AnalyticsStoreDb(connectionProvider);
 
         int gameServerPort = Configuration.getGameServerPort();
         UserService userService = new UserService(userStore);
@@ -101,11 +105,14 @@ public final class GameServer {
         });
         friendServer.getFriendshipPublisher().subscribe(achievementServer::processUserFriendship);
 
+        AnalyticsServer analyticsServer = new AnalyticsServer(analyticsStore);
+
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);
         serverDispatcher.addServer("time", timeSynchroniser);
         serverDispatcher.addServer("achievement", achievementServer);
         serverDispatcher.addServer("friends", friendServer);
+        serverDispatcher.addServer("analytics", analyticsServer);
 
         service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())

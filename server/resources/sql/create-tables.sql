@@ -56,3 +56,18 @@ CREATE TABLE friendship (
   user_id2   INT                NOT NULL REFERENCES user_registration (id),
   created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE analytics_event (
+  id         SERIAL PRIMARY KEY NOT NULL,
+  user_id    INT                NOT NULL REFERENCES user_registration (id),
+  type       TEXT               NOT NULL,
+  created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE analytics_event_data (
+  id         SERIAL PRIMARY KEY NOT NULL,
+  user_id    INT                NOT NULL REFERENCES user_registration (id),
+  type       TEXT               NOT NULL,
+  data       JSON               NOT NULL,
+  created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

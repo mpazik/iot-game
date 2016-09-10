@@ -22,6 +22,7 @@ define(function (require, exports, module) {
     const Timer = require('./timer');
     const Achievement = require('./achievement');
     const Friends = require('./friends');
+    const Analytics = require('./analytics');
 
     const ClientMessage = {
         JoinBattleCommand: function (map, difficultyLevel) {
@@ -101,6 +102,7 @@ define(function (require, exports, module) {
             Timer.connect();
             Achievement.connect(userToken);
             Friends.connect(userToken);
+            Analytics.connect(userToken);
             setState('connecting');
         }
     }

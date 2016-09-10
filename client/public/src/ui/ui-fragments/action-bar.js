@@ -2,6 +2,7 @@ define(function (require) {
     require('../elements/action-socket');
     const skillById = require('../../store/resources').skill;
     const userEventStream = require('../../component/dispatcher').userEventStream;
+    const Analytics = require('../../component/analytics');
     const ActionBar = require('../../store/action-bar');
 
     const keyBinds = ['Q', 'W', 'E', 'R', '1', '2', '3', '4', '5'];
@@ -46,16 +47,19 @@ define(function (require) {
             const systemBar = this.getElementsByClassName("system-bar")[0];
             var leaderboardButton = createSystemIcon('leaderboard', 'icon-ranking', 'L', 'Leaderboard', function () {
                 userEventStream.publish('toggle-window', 'leaderboard-window');
+                Analytics.sendEvent('ui.action-bar.trigger.leaderboard');
             });
             systemBar.appendChild(leaderboardButton);
 
             var achievementsButton = createSystemIcon('achievements', 'icon-achievement', 'A', 'Achievements', function () {
                 userEventStream.publish('toggle-window', 'achievement-window');
+                Analytics.sendEvent('ui.action-bar.trigger.achievement');
             });
             systemBar.appendChild(achievementsButton);
 
             var friendsButton = createSystemIcon('friends', 'icon-backup', 'F', 'Friends', function () {
                 userEventStream.publish('toggle-window', 'friends-window');
+                Analytics.sendEvent('ui.action-bar.trigger.friends')
             });
             systemBar.appendChild(friendsButton);
         },
