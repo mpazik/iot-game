@@ -24,19 +24,9 @@ define(function (require) {
 
     window.onbeforeunload = goodbye;
 
-    const defaultFormData = JSON.stringify({
-        age: NaN,
-        bugDescription: "",
-        buildingScore: 3,
-        comment: "",
-        coopBattleScore: 3,
-        craftingScore: 3,
-        fightingScore: 3,
-        foundAnyBug: false,
-        gender: "male",
-        graphicScore: 3,
-        tradingScore: 3,
-    });
+    const defaultFormData = '{"gameScore":3,"graphicScore":3,"gameIdeaScore":3,' +
+        '"coopBattleScore":3,"fightingScore":3,"craftingScore":3,"tradingScore":3,' +
+        '"buildingScore":3,"foundAnyBug":false,"bugDescription":"","age":null,"gender":"","comment":""}';
 
     return createUiElement('feedback-window', {
         type: 'window',
@@ -51,7 +41,21 @@ define(function (require) {
             this.innerHTML = `
 <h2>Give feedback</h2>
 <form>
-<h4>How do you like the graphic?</h4>
+    <h4>How do you like it?</h4>
+    <div class="form-group">
+        <label>Game:</label>
+        1 <input type="range" id="score-game" value="3" min="1" max="5"> 5
+    </div>
+    <div class="form-group">
+        <label>Graphic:</label>
+        1 <input type="range" id="score-graphic" value="3" min="1" max="5"> 5
+    </div>
+    <div class="form-group">
+        <label>Game idea:</label>
+        1 <input type="range" id="score-game-idea" value="3" min="1" max="5"> 5
+    </div>
+
+    <h4>How do you like the graphic?</h4>
     <div class="form-group">
         <label>Score:</label>
         1 <input type="range" id="score-graphic" value="3" min="1" max="5"> 5
@@ -129,7 +133,9 @@ define(function (require) {
                 localStorage.setItem('feedback-sent', true);
 
                 const feedbackData = {
+                    gameScore: document.getElementById('score-game').valueAsNumber,
                     graphicScore: document.getElementById('score-graphic').valueAsNumber,
+                    gameIdeaScore: document.getElementById('score-game-idea').valueAsNumber,
                     coopBattleScore: document.getElementById('score-co-op-battles').valueAsNumber,
                     fightingScore: document.getElementById('score-fighting').valueAsNumber,
                     craftingScore: document.getElementById('score-crafting').valueAsNumber,
