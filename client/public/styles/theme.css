@@ -7,3 +7,178 @@
     --success-color: #3DD83D;
     --failure-color: #FF0700;
 }
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+html, body, div {
+    padding: 0;
+    margin: 0;
+}
+
+div, h1 {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--highlight-color);
+}
+
+h4 {
+    margin: 10px 0 2px;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: underline;
+}
+
+a:hover {
+    color: var(--main-color);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.area {
+    color: #bdbdbd;
+    background: rgba(0, 0, 0, 0.7);
+    border: #777 solid 1px;
+    border-radius: 5px;
+}
+
+/* Form */
+
+button, .button, input[type=submit] {
+    background: linear-gradient(to bottom, #041561 5%, #03114f 100%);
+    color: var(--main-color);
+    letter-spacing: 1px;
+    font-weight: bold;
+    padding: 5px 10px;
+    box-shadow: inset 0 1px 0 0 #41557d;
+    border: var(--main-color) solid 1px;
+    border-radius: 3px;
+    margin-top: 5px;
+}
+
+button:hover, .button:hover, input[type=submit]:hover {
+    color: #FFF;
+    border-color: var(--highlight-color);
+}
+
+button.large {
+    font-size: 18px;
+}
+
+select {
+    background: linear-gradient(to bottom, #041561 5%, #03114f 100%);
+    color: var(--main-color);
+    box-shadow: inset 0 1px 0 0 #41557d;
+    border: var(--main-color) solid 1px;
+    border-radius: 3px;
+    height: 26px;
+    font-weight: bold;
+}
+
+input[type=text],
+input[type=password],
+input[type=url],
+input[type=tel],
+input[type=number],
+input[type=color],
+input[type=range],
+input[type=email] {
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--main-color);
+    box-shadow: inset 0 1px 0 0 #41557d;
+    border: var(--main-color) solid 1px;
+    border-radius: 3px;
+    padding: 4px;
+    font-weight: bold;
+}
+
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+label {
+    color: var(--main-color);
+    width: 80px;
+    display: inline-block;
+}
+
+form button {
+    margin-top: 10px;
+}
+
+form .error-message {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.large-input input {
+    font-size: 1.0em;
+}
+
+.large-input input[type=text],
+.large-input input[type=password],
+.large-input input[type=url],
+.large-input input[type=tel],
+.large-input input[type=number],
+.large-input input[type=color],
+input[type=range],
+.large-input input[type=email] {
+    width: 220px;
+}
+
+.large-input label {
+    width: 160px;
+}
+
+/* Messages */
+
+.error {
+    color: var(--failure-color);
+}
+
+.highlight {
+    color: var(--main-color);
+}
+
+.defeat {
+    color: red;
+}
+
+.victory {
+    color: var(--success-color);
+}
+
+.action-key-shortcut {
+    text-decoration: underline;
+}
+
+table {
+    font-size: 16px;
+    border-spacing: 0;
+}
+
+col.center {
+    text-align: center;
+    background: red;
+}
+
+table tbody td {
+    border-top: 1px solid var(--main-color);
+    color: white;
+}
+
+table td {
+    padding: 5px 15px;
+}
+
+.form-group {
+    padding: 10px 5px;
+}

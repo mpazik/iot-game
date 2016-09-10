@@ -1,5 +1,14 @@
 @import "theme.css";
 
+body {
+    font-size: 16px;
+}
+
+.area {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 game-ui .window {
     top: 35%;
     padding: 20px;
