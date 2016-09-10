@@ -5,6 +5,9 @@ define((require, exports, module) => {
     const ResourcesStore = require('../store/resources');
     const ActionBar = require('../store/action-bar');
 
+
+    ActionBar.addSkill('introduce');
+
     const ClientMessage = {};
     const Changes = {
         AchievementProgressed: function (key, createdAt) {
