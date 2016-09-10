@@ -94,15 +94,15 @@ define(function (require, exports, module) {
         const userToken = UserService.userToken;
         if (userToken == null) {
             UserService.tryLoginUsingClientData()
-                .then(connect)
                 .catch(goToAuthenticationPage)
+                .then(connect)
         } else {
             connectToArbiter(userToken);
+            Analytics.connect(userToken);
             Chat.connect(userToken);
             Timer.connect();
             Achievement.connect(userToken);
             Friends.connect(userToken);
-            Analytics.connect(userToken);
             setState('connecting');
         }
     }
