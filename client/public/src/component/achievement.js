@@ -7,8 +7,6 @@ define((require, exports, module) => {
     const Message = require('../store/server-messages');
     const Timer = require('./timer');
 
-    ActionBar.addSkill('introduce');
-
     const ClientMessage = {};
     const Changes = {
         AchievementProgressed: function (key, createdAt) {

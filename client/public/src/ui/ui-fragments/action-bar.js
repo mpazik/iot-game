@@ -49,10 +49,15 @@ define(function (require) {
             });
             systemBar.appendChild(leaderboardButton);
 
-            var settingsButton = createSystemIcon('achievements', 'icon-achievement', 'A', 'Achievements', function () {
+            var achievementsButton = createSystemIcon('achievements', 'icon-achievement', 'A', 'Achievements', function () {
                 userEventStream.publish('toggle-window', 'achievement-window');
             });
-            systemBar.appendChild(settingsButton);
+            systemBar.appendChild(achievementsButton);
+
+            var friendsButton = createSystemIcon('friends', 'icon-backup', 'F', 'Friends', function () {
+                userEventStream.publish('toggle-window', 'friends-window');
+            });
+            systemBar.appendChild(friendsButton);
         },
         _renderSkillBar: function (skillIds) {
             const skillBar = this.getElementsByClassName("skill-bar")[0];
