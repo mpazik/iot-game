@@ -62,7 +62,7 @@ define(function (require) {
 
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
         'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage',
-        'serverError', 'chatState', 'achievementConnectionState', 'tutorialToDisplay',
+        'serverError', 'chatState', 'achievementConnectionState',
         'friendshipRequest', 'friendsConnectionState'];
 
     function initUi(gameUiElement) {

@@ -1,29 +1,22 @@
 define(function (require) {
-    const userEventStream = require('../../component/dispatcher').userEventStream;
-    const tutorialToDisplay = require('../../component/tutorial').toDisplay;
+    const Tutorial = require('../../component/tutorial');
 
     return createUiElement('tutorial-window', {
         type: 'window',
         properties: {
-            autoDisplay: true,
+            activateKeyBind: KEY_CODES.fromLetter('T'),
             requirements: {
-                scenarioType: Predicates.is('open-world'),
-                tutorialToDisplay: Predicates.isSet()
+                scenarioType: Predicates.is('open-world')
             }
         },
         created: function () {
-            const tutorial = tutorialToDisplay.value;
+            const tutorial = Tutorial.tutorialToDisplay;
             this.innerHTML = `
 <h1>${tutorial['title']}</h1>
 <div>${tutorial['content']}</div>
-<button class="large">Close</button>
 `;
         },
         attached: function () {
-            const closeButton = this.getElementsByTagName('button')[0];
-            closeButton.addEventListener('click', function () {
-                userEventStream.publish('closed-tutorial-window', {});
-            });
         }
     });
 });
