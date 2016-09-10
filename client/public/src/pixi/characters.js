@@ -10,6 +10,7 @@ define(function (require, exports, module) {
     const Targeting = require('../component/targeting');
     const Skills = require('../common/model/skills');
     const Timer = require('../component/timer');
+    const Friends = require('../component/friends');
 
     const layer = new Pixi.Container();
     const pointsLayer = new Pixi.Container();
@@ -106,6 +107,8 @@ define(function (require, exports, module) {
     function isSkillTarget(mainCharacterId, characterId, skill) {
         if (skill.target == Skills.Targets.ENEMIES) {
             return CharacterStore.isCharacterEnemyFor(mainCharacterId, characterId)
+        } else if (skill.target == Skills.Targets.USERS) {
+            return mainCharacterId != characterId && !CharacterStore.isCharacterEnemyFor(mainCharacterId, characterId)
         }
         return false;
     }
@@ -115,16 +118,36 @@ define(function (require, exports, module) {
         characterModels.forEach(function (character) {
             character.makeNonInteractive();
         });
-        if (skill !== null && skill.type === Skills.Types.ATTACK) {
+        if (skill !== null && (skill.type == Skills.Types.ATTACK || skill.type == Skills.Types.SPECIAL)) {
             characterModels
                 .filter((character) => isSkillTarget(mainCharacterId, character.id, skill))
                 .forEach((character) => character.makeInteractive());
         }
     });
 
+    const userCharactersWithoutNick = new Map();
+    Friends.friendshipPublisher.subscribe((event) => {
+        const model = userCharactersWithoutNick.get(event.userId);
+        if (model == null) {
+            return;
+        }
+        model.createNick(event.nick);
+        userCharactersWithoutNick.delete(event.userId);
+    });
+
     function createCharacterModel(character) {
         const health = SkillStore.percentHealth(character.id);
+        if (character.userId) {
+            if (character.userId == MainPlayer.userId()) {
+                character.nick = MainPlayer.userNick()
+            } else {
+                character.nick = Friends.friends.get(character.userId)
+            }
+        }
         const model = new CharacterModel(character, health);
+        if (character.userId && character.nick == null) {
+            userCharactersWithoutNick.set(character.userId, model);
+        }
         const time = Timer.currentTimeOnServer();
         model.position = characterPosition(model, time);
         model.rotatable.rotation = MoveStore.angleAtTime(model.id, time);

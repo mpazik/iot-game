@@ -1,14 +1,14 @@
 package dzida.server.app.instance.npc;
 
 import dzida.server.app.instance.InstanceStateManager;
+import dzida.server.app.instance.NpcCharacter;
+import dzida.server.app.instance.PlayerCharacter;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.model.Character;
-import dzida.server.core.character.model.NpcCharacter;
-import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.Skill;
@@ -84,8 +84,12 @@ public class NpcBehaviour {
     }
 
     private Id<Skill> getBotAttackSkillId(int npcType) {
-        if (npcType == Npc.Fighter) return Skills.Ids.PUNCH;
-        if (npcType == Npc.Archer) return Skills.Ids.BOW_SHOT;
+        if (npcType == Npc.Fighter) {
+            return Skills.Ids.PUNCH;
+        }
+        if (npcType == Npc.Archer) {
+            return Skills.Ids.BOW_SHOT;
+        }
         throw new UnsupportedOperationException("");
     }
 

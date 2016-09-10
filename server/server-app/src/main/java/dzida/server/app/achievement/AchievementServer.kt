@@ -144,6 +144,7 @@ class AchievementServer : VerifyingConnectionServer<String, String> {
 
             override fun close() {
                 userAchievementState.cleanUser(userId)
+                userConnections.remove(userId)
             }
         })
 

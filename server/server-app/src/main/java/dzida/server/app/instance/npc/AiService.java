@@ -1,9 +1,9 @@
 package dzida.server.app.instance.npc;
 
+import dzida.server.app.instance.NpcCharacter;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
-import dzida.server.core.character.model.NpcCharacter;
 import dzida.server.core.event.GameEvent;
 
 import java.util.HashMap;

@@ -300,6 +300,11 @@ achievement-window .achievement-rewards {
     font-size: 0.8em;
 }
 
+achievement-window .achievement-unlock-date {
+    float: right;
+    margin-top: -25px
+}
+
 objective-tracker {
     top: 140px;
     right: 1px;

@@ -1,6 +1,7 @@
-package dzida.server.core.character.model;
+package dzida.server.app.instance;
 
 import dzida.server.core.basic.entity.Id;
+import dzida.server.core.character.model.Character;
 
 public class NpcCharacter implements Character {
     private final Id<Character> id;
@@ -9,7 +10,7 @@ public class NpcCharacter implements Character {
 
     public NpcCharacter(Id<Character> id, int botType) {
         this.id = id;
-        this.type = Character.Type.Bot;
+        this.type = Type.Bot;
         this.botType = botType;
     }
 

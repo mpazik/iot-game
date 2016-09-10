@@ -1,11 +1,11 @@
 package dzida.server.app.instance.scenario;
 
 import dzida.server.app.instance.InstanceStateManager;
+import dzida.server.app.instance.NpcCharacter;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.npc.AiService;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
-import dzida.server.core.character.model.NpcCharacter;
 
 import java.util.List;
 import java.util.function.Consumer;

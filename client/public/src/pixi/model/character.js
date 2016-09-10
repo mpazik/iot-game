@@ -50,9 +50,10 @@ define(function (require, exports, module) {
             this.filters = [interactiveFilter];
         };
 
-        if (character.type === CharacterType.Player) {
+        if (character.nick) {
             this.createNick(character.nick);
         }
+
         if (character.type === CharacterType.Bot) {
             const chest = this.spine.skeleton.findSlot('chest');
             chest.b = 0.5;
@@ -77,11 +78,11 @@ define(function (require, exports, module) {
 
     CharacterModel.prototype.createHpBar = function () {
         var healthBarBg = new Pixi.Graphics();
-        healthBarBg.beginFill(0x000000);
+        healthBarBg.beginFill(0x000000, 1);
         healthBarBg.drawRect(-healthBarBgLength / 2, -36, healthBarBgLength, 10);
         this.addChild(healthBarBg);
         var healthBar = new Pixi.Graphics();
-        healthBar.beginFill(0x00FF00);
+        healthBar.beginFill(0x00FF00, 1);
         healthBar.drawRect(-healthBarLength / 2, -34, healthBarLength, 6);
         this.healthBar = healthBar;
         this.addChild(healthBar);

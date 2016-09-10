@@ -5,13 +5,11 @@ import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.character.model.Character;
-import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.GameEvent;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
@@ -53,21 +51,12 @@ class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public int getCharacterType(Id<Character> characterId) {
-        return state.get(characterId).getType();
-    }
-
-    @Override
-    public Optional<PlayerCharacter> getPlayerCharacter(Id<Character> characterId) {
-        Character character = state.get(characterId);
-        if (character.getType() == Character.Type.Player) {
-            return Optional.of((PlayerCharacter) character);
-        }
-        return Optional.empty();
-    }
-
-    @Override
     public boolean isCharacterLive(Id<Character> characterId) {
         return state.containsKey(characterId);
+    }
+
+    @Override
+    public Character getCharacter(Id<Character> characterId) {
+        return state.get(characterId);
     }
 }

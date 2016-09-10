@@ -48,4 +48,11 @@ CREATE TABLE achievement_event (
   achievement_key TEXT               NOT NULL,
   type            TEXT               NOT NULL,
   created_at      TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
+);
+
+CREATE TABLE friendship (
+  id         SERIAL PRIMARY KEY NOT NULL,
+  user_id1   INT                NOT NULL REFERENCES user_registration (id),
+  user_id2   INT                NOT NULL REFERENCES user_registration (id),
+  created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

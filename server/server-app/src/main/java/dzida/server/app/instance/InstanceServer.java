@@ -22,7 +22,6 @@ import dzida.server.core.basic.connection.VerifyingConnectionServer;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.character.model.Character;
-import dzida.server.core.character.model.PlayerCharacter;
 import dzida.server.core.event.CharacterEvent;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
@@ -131,7 +130,7 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         userIds.put(characterId, userId);
 
         Consumer<GameEvent> sendToPlayer = gameEvent -> sendMessageToPlayer(userId, gameEvent);
-        PlayerCharacter character = new PlayerCharacter(characterId, userNick);
+        PlayerCharacter character = new PlayerCharacter(characterId, userId);
 
         instance.handleCommand(new SpawnCharacterCommand(character));
         sendMessageToPlayer(userId, new Instance.UserCharacter(characterId, userId, userNick));

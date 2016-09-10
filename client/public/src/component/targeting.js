@@ -107,6 +107,12 @@ define(function (require, exports, module) {
             // deferred because which is invoked by 'left-click' an we want to listen to the next 'left-click'
             deffer(() => Dispatcher.userEventStream.subscribeOnce('left-click', stopHunting));
         }
+        if (skill.type === Skills.Types.SPECIAL) {
+            Dispatcher.userEventStream.publish('special-skill-used-on-character', {
+                characterId: data.characterId,
+                skillId: skill.id
+            });
+        }
     });
 
     Dispatcher.userEventStream.subscribe('world-object-clicked', function (data) {

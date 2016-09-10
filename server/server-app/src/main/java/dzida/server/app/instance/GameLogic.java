@@ -10,7 +10,7 @@ import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.map.descriptor.Survival;
 import dzida.server.core.Scheduler;
 import dzida.server.core.character.event.CharacterDied;
-import dzida.server.core.character.model.PlayerCharacter;
+import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.scenario.SurvivalScenarioFactory;
 
@@ -54,8 +54,8 @@ public class GameLogic {
 
     public void processEventBeforeChanges(GameEvent gameEvent) {
         whenTypeOf(gameEvent).is(CharacterDied.class).then(event -> {
-            Optional<PlayerCharacter> playerCharacterOpt = state.getCharacterService().getPlayerCharacter(event.characterId);
-            if (playerCharacterOpt.isPresent()) {
+            Character character = state.getCharacterService().getCharacter(event.characterId);
+            if (character instanceof PlayerCharacter) {
                 // player may died because logout it's something that have to be kept in mind
                 scenarioLogic.handlePlayerDead(event.characterId);
             } else {
