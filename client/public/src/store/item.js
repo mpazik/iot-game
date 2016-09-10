@@ -6,8 +6,8 @@ define(function (require, exports, module) {
     const Dispatcher = require('../component/dispatcher');
 
     var items = {
-        1: 4,
-        2: 20
+        1: 2,
+        2: 4
     };
     var pushEvent;
 
