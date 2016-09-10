@@ -2,6 +2,28 @@ define(function (require) {
     const Analytics = require('../../component/analytics');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
+    function goodbye(event) {
+        if (localStorage.getItem('feedback-sent') == "true") {
+            return
+        }
+
+        Analytics.sendEvent("feedback.reminder.opened");
+        userEventStream.publish('toggle-window', 'feedback-window');
+        if (!event) event = window.event;
+        event.cancelBubble = true;
+
+        if (event.stopPropagation) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+
+        const message = 'Give me feedback before leaving, please :)';
+        event.returnValue = message;
+        return message;
+    }
+
+    window.onbeforeunload = goodbye;
+
     const defaultFormData = JSON.stringify({
         age: NaN,
         bugDescription: "",
@@ -104,6 +126,8 @@ define(function (require) {
 
             const form = this.getElementsByTagName('form')[0];
             form.onsubmit = function () {
+                localStorage.setItem('feedback-sent', true);
+
                 const feedbackData = {
                     graphicScore: document.getElementById('score-graphic').valueAsNumber,
                     coopBattleScore: document.getElementById('score-co-op-battles').valueAsNumber,
@@ -119,7 +143,7 @@ define(function (require) {
                 };
 
                 if (JSON.stringify(feedbackData) == defaultFormData) {
-                    Analytics.sendEvent("feedback.from.empty")
+                    Analytics.sendEvent("feedback.form.empty")
                 } else {
                     Analytics.sendDataEvent("feedback.form", feedbackData)
                 }
