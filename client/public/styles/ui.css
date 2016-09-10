@@ -16,7 +16,7 @@ game-ui .window {
     transform: translate(-50%, -50%);
     position: fixed;
     max-height: 450px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 game-ui .window > * {
@@ -342,4 +342,16 @@ feedback-window label {
 feedback-window textarea {
     width: 100%;
     min-height: 60px;
+}
+
+::-webkit-scrollbar {
+    background-color: white;
+    width: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
