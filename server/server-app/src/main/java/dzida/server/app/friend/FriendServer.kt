@@ -5,11 +5,13 @@ import dzida.server.app.friend.FriendServer.ClientCommand.AcceptRequest
 import dzida.server.app.friend.FriendServer.ClientCommand.RequestForFriendShip
 import dzida.server.app.friend.FriendServer.ServerMessage.FriendshipEstablished
 import dzida.server.app.friend.FriendServer.ServerMessage.FriendshipRequest
+import dzida.server.app.instance.UserMessage
 import dzida.server.app.protocol.json.JsonProtocol
 import dzida.server.app.user.EncryptedLoginToken
 import dzida.server.app.user.User
 import dzida.server.app.user.UserStore
 import dzida.server.app.user.UserTokenVerifier
+import dzida.server.core.basic.Publisher
 import dzida.server.core.basic.Result
 import dzida.server.core.basic.connection.Connector
 import dzida.server.core.basic.connection.ServerConnection
@@ -25,6 +27,7 @@ class FriendServer(
     private val userTokenVerifier: UserTokenVerifier = UserTokenVerifier()
     private val protocol: JsonProtocol = JsonProtocol.create(ClientCommand.classes, ServerMessage.classes)
     private val userNicks: MutableMap<Id<User>, String> = hashMapOf()
+    val friendshipPublisher = Publisher<UserFriendShipMessage>()
 
     private fun userNick(userId: Id<User>): String {
         return userNicks.getOrPut(userId, { userStore.getUserNick(userId) })
@@ -39,6 +42,8 @@ class FriendServer(
         }
         val friendshipEvent = Friendship(userId1, userId2)
         friendsStore.save(friendshipEvent)
+        friendshipPublisher.notify(UserFriendShipMessage(userId1, FriendShipEvent.Introduction(userId2)))
+        friendshipPublisher.notify(UserFriendShipMessage(userId2, FriendShipEvent.Introduction(userId1)))
         sendToUser(userId1, FriendshipEstablished(userId2, userNick(userId2)))
         sendToUser(userId2, FriendshipEstablished(userId1, userNick(userId1)))
     }
@@ -104,4 +109,13 @@ class FriendServer(
         data class RequestForFriendShip(val userId: Id<User>) : ClientCommand
         data class AcceptRequest(val userId: Id<User>) : ClientCommand
     }
+
+    interface FriendShipEvent {
+        data class Introduction(val userId: Id<User>) : FriendShipEvent
+    }
+
+    data class UserFriendShipMessage(
+            override val userId: Id<User>,
+            override val message: FriendShipEvent
+    ) : UserMessage<FriendShipEvent>
 }

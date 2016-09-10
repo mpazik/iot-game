@@ -99,7 +99,7 @@ public final class GameServer {
             instanceServer.userCommandPublisher.subscribe(achievementServer::processUserCommand);
             instanceServer.victorySurvivalPublisher.subscribe(achievementServer::processVictorySurvival);
         });
-
+        friendServer.getFriendshipPublisher().subscribe(achievementServer::processUserFriendship);
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);

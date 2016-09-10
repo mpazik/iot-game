@@ -6,6 +6,7 @@ import com.google.gson.FieldAttributes
 import com.google.gson.Gson
 import dzida.server.app.achievement.AchievementChange.AchievementProgressed
 import dzida.server.app.achievement.AchievementChange.AchievementUnlocked
+import dzida.server.app.friend.FriendServer
 import dzida.server.app.instance.UserMessage
 import dzida.server.app.leaderboard.Leaderboard
 import dzida.server.app.map.descriptor.Survival
@@ -51,6 +52,10 @@ class AchievementServer : VerifyingConnectionServer<String, String> {
 
     fun processUserCommand(userCommand: UserMessage.UserCommand): Unit {
         processUserMessage(userCommand, "instance-command")
+    }
+
+    fun processUserFriendship(userCommand: FriendServer.UserFriendShipMessage): Unit {
+        processUserMessage(userCommand, "friends")
     }
 
     fun processVictorySurvival(survival: Survival): Unit {
