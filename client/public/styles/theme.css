@@ -69,7 +69,7 @@ button:hover, .button:hover, input[type=submit]:hover {
     border-color: var(--highlight-color);
 }
 
-button.large {
+button.large, input[type=submit].large {
     font-size: 18px;
 }
 
@@ -89,7 +89,6 @@ input[type=url],
 input[type=tel],
 input[type=number],
 input[type=color],
-input[type=range],
 input[type=email] {
     background: rgba(0, 0, 0, 0.5);
     color: var(--main-color);
@@ -98,6 +97,15 @@ input[type=email] {
     border-radius: 3px;
     padding: 4px;
     font-weight: bold;
+}
+
+textarea {
+    color: var(--highlight-color);
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 1px 0 0 #41557d;
+    border: var(--main-color) solid 1px;
+    border-radius: 3px;
+    padding: 4px;
 }
 
 input::-webkit-inner-spin-button {
@@ -129,7 +137,6 @@ form .error-message {
 .large-input input[type=tel],
 .large-input input[type=number],
 .large-input input[type=color],
-input[type=range],
 .large-input input[type=email] {
     width: 220px;
 }

@@ -6,7 +6,7 @@ define(function (require) {
     const fragments = [
         require('./ui-fragments/profiling-display'),
         require('./ui-fragments/respawnScreen'),
-        require('./ui-fragments/join-battle-button'),
+        require('./ui-fragments/top-buttons'),
         require('./ui-fragments/action-bar'),
         require('./ui-fragments/cooldown-bar'),
         require('./ui-fragments/game-message'),
@@ -28,7 +28,9 @@ define(function (require) {
         require('./windows/achievement-window'),
         require('./windows/tutorial-window'),
         require('./windows/friendship-request-window'),
-        require('./windows/friends-window')
+        require('./windows/friends-window'),
+        require('./windows/feedback-window'),
+        require('./windows/thank-you-window')
     ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {
