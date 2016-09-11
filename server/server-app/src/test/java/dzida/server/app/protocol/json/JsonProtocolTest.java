@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class JsonProtocolTest {
     private static final TypeAdapter<Key> keyTypeAdapter = new TypeAdapter<Key>() {
@@ -94,14 +95,16 @@ public class JsonProtocolTest {
 
     @Test
     public void serializing_ifMessageIsUnRegistered_returnsNull() {
-        String data = serializer.serializeMessage(new UnregisteredMessage("test"));
-        assertThat(data).isNull();
+        assertThatThrownBy(() -> {
+            serializer.serializeMessage(new UnregisteredMessage("test"));
+        });
     }
 
     @Test
     public void parsing_ifMessageIsUnRegistered_returnsNull() {
-        Object message = serializer.parseMessage("[" + 1234 + ",{\"text\":\"some text\"}]");
-        assertThat(message).isNull();
+        assertThatThrownBy(() -> {
+            serializer.parseMessage("[" + 1234 + ",{\"text\":\"some text\"}]");
+        });
     }
 
     @Test
