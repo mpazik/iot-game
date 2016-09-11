@@ -27,7 +27,6 @@ class FriendsStoreDb : FriendsStore {
             val sqlQuery1 = SQLExpressions.select(friendship.userId1).from(friendship).where(friendship.userId2.eq(userId.intValue))
             val sqlQuery2 = SQLExpressions.select(friendship.userId2).from(friendship).where(friendship.userId1.eq(userId.intValue))
             val query = sqlQueryFactory.select(friendship.userId1).union(sqlQuery1, sqlQuery2)
-            println(query.toString())
             val ids: List<Int> = query.fetch()
             ids.map({ Id<User>(it.toLong()) })
         }
