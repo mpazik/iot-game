@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- The code some from https://github.com/zendesk/cross-storage. All warning are suppress. -->
+<!--suppress ALL -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -158,17 +160,17 @@
             };
 
             /**
-             * Sets a achievementKey to the specified value.
+             * Sets a key to the specified value.
              *
-             * @param {object} params An object with achievementKey and value
+             * @param {object} params An object with key and value
              */
             CrossStorageHub._set = function (params) {
-                window.localStorage.setItem(params.achievementKey, params.value);
+                window.localStorage.setItem(params.key, params.value);
             };
 
             /**
              * Accepts an object with an array of keys for which to retrieve their values.
-             * Returns a single value if only one achievementKey was supplied, otherwise message returns
+             * Returns a single value if only one key was supplied, otherwise message returns
              * an array. Any keys not set result in a null element in the resulting array.
              *
              * @param   {object} params An object with an array of keys
@@ -223,7 +225,7 @@
                 length = window.localStorage.length;
 
                 for (i = 0; i < length; i++) {
-                    keys.push(window.localStorage.achievementKey(i));
+                    keys.push(window.localStorage.key(i));
                 }
 
                 return keys;
@@ -278,9 +280,8 @@
     </script>
     <script>
         CrossStorageHub.init([
-            <!-- build:replace '{origin: /:\/\/(www\.)?islesoftales.com$/, allow: ['get', 'set', 'del']}' -->
-            {origin: /:\/\/localhost:8000\/?$/, allow: ['get', 'set', 'del']},
-            <!-- /build -->
+            {origin: /:\/\/(www\.)?islesoftales.com$/, allow: ['get', 'set', 'del']},
+            {origin: /:\/\/localhost:8000\/?$/, allow: ['get', 'set', 'del']}
         ]);
     </script>
 </head>

@@ -1,7 +1,7 @@
 const gulp = require('gulp');
 const del = require('del');
 const gulpSequence = require('gulp-sequence');
-const processHtml = require('gulp-processhtml')
+const processHtml = require('gulp-processhtml');
 const AwsPublish = require('gulp-awspublish');
 
 const distPath = 'dist';
@@ -24,7 +24,7 @@ gulp.task('copy-libs', function () {
 gulp.task('process-html', function () {
     return gulp.src('public/index.html')
         .pipe(processHtml({}))
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest(distPath));
 });
 
 gulp.task('replace-dev-files', function () {
@@ -34,13 +34,13 @@ gulp.task('replace-dev-files', function () {
 
 gulp.task('build-prod', gulpSequence('clean', 'copy-public', 'copy-libs', 'process-html', 'replace-dev-files'));
 
-gulp.task('deploy', ['build-prod'],function () {
+gulp.task('publish', ['build-prod'], function () {
         process.env['AWS_PROFILE'] = 's3_deploy';
 
         const publisher = AwsPublish.create({
             region: 'eu-central-1',
             params: {
-                Bucket: 'game.dzida-online.pl'
+                Bucket: 'game.islesoftales.com'
             }
         });
 
