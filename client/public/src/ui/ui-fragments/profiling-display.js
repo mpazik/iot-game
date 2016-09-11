@@ -10,10 +10,10 @@ define(function (require) {
         },
         created: function () {
             this.innerHTML =  `
-<div class="fps">FPS - <span></span></div>
-<div class="ping">PING - <span></span></div>
-<div class="x">x - <span></span></div>
-<div class="y">y - <span></span></div>
+<div class="fps">FPS: <span></span></div>
+<div class="ping">PING: <span></span></div>
+<div class="x">x: <span></span></div>
+<div class="y">y: <span></span></div>
 `;
         },
         attached: function () {

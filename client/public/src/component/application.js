@@ -52,7 +52,7 @@ define(function (require, exports, module) {
     }
 
     var setState = null;
-    const statePublisher = new Publisher.StatePublisher('started', function (f) {
+    const statePublisher = new Publisher.StatePublisher('connecting', function (f) {
         return setState = f;
     });
 
@@ -96,6 +96,7 @@ define(function (require, exports, module) {
             UserService.tryLoginUsingClientData()
                 .catch(goToAuthenticationPage)
                 .then(connect)
+                .catch(console.error)
         } else {
             connectToArbiter(userToken);
             Analytics.connect(userToken);

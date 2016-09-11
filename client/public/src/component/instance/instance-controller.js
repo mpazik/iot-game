@@ -28,6 +28,7 @@ define(function (require, exports, module) {
     const MainPlayer = require('../../store/main-player');
     const ItemStore = require('../../store/item');
     const Skills = require('../../common/model/skills');
+    const Analytics = require('../analytics');
     const network = new InstanceNetwork();
     var currentInstanceKey = null;
 
@@ -129,6 +130,7 @@ define(function (require, exports, module) {
             const effects = ['invert', 'twist'];
             const randomEffect = effects[Math.floor(Math.random() * effects.length)];
             Render.runEffect(randomEffect);
+            Analytics.sendEvent('eat-rotten-apple');
             network.sendCommand(new Commands.EatRottenApple());
         } else {
             network.sendCommand(new Commands.EatApple());
