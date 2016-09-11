@@ -20,7 +20,6 @@ import dzida.server.app.serialization.MessageSerializer;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.scenario.ScenarioEnd;
-import org.postgresql.util.PGobject;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -91,9 +90,7 @@ public class ScenarioStoreDb implements ScenarioStore {
                     .where(scenarioEvent.createdAt.goe(new Timestamp(timestamp)))
                     .fetch();
             return fetch.stream().map(tuple -> {
-                PGobject pGobject = (PGobject) tuple.get(scenarioEvent.data);
-                assert pGobject != null;
-                String data = pGobject.getValue();
+                String data = tuple.get(scenarioEvent.data);
                 String type = tuple.get(scenarioEvent.type);
                 ScenarioEvent event = (ScenarioEvent) scenarioEventSerializer.parseEvent(data, type);
                 Integer id = tuple.get(scenarioEvent.scenarioId);
