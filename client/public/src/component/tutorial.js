@@ -3,8 +3,21 @@ define((require, exports, module) => {
     const Achievements = require('./achievement');
     const UserEventStream = require('./dispatcher').userEventStream;
     const Timer = require('./timer');
+    const UiState = require('../store/ui-state');
 
     var tutorialToDisplay = {};
+    var displayTutorialWindowWhenOnOpenWorldInstance = false;
+
+    function displayTutorialWindow() {
+        UserEventStream.publish('toggle-window', 'tutorial-window');
+    }
+
+    UiState.scenarioType.subscribe((instanceType) => {
+        if (instanceType == 'open-world' && displayTutorialWindowWhenOnOpenWorldInstance) {
+            displayTutorialWindowWhenOnOpenWorldInstance = false;
+            displayTutorialWindow();
+        }
+    });
 
     Achievements.achievementChangePublisher.subscribe(Achievements.Changes.AchievementUnlocked, (change) => {
         const achievementUnlockedKey = change.key;
@@ -25,7 +38,11 @@ define((require, exports, module) => {
         const unlockTime = Achievements.state.achievementsUnlocked.get(achievementUnlockedKey);
         // Achievement unlocked within last minute. We want display tutorial again in case that page was refreshed.
         if (unlockTime > Timer.currentTimeOnServer() - 5000) {
-            UserEventStream.publish('toggle-window', 'tutorial-window');
+            if (UiState.scenarioType.valueOf == 'open-world') {
+                setTimeout(displayTutorialWindow, 1000);
+            } else {
+                displayTutorialWindowWhenOnOpenWorldInstance = true;
+            }
         }
 
     });
