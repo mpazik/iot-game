@@ -6,14 +6,15 @@ import dzida.server.app.user.EncryptedReissueToken;
 import dzida.server.app.user.UserService;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
-import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 public class UserResource extends AbstractResource {
-    private static final Logger log = Logger.getLogger(UserResource.class);
+    private static final Logger log = LoggerFactory.getLogger(UserResource.class);
 
     private final UserService userService;
 

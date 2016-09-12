@@ -4,7 +4,8 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import dzida.server.app.Configuration;
 import dzida.server.app.serialization.BasicJsonSerializer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -15,7 +16,7 @@ import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
 public class StaticDataLoader {
-    private static final Logger log = Logger.getLogger(StaticDataLoader.class);
+    private static final Logger log = LoggerFactory.getLogger(StaticDataLoader.class);
 
     public <T> T loadJsonFromServer(String path, Class<T> clazz) {
         return loadJsonFromServer(path, TypeToken.of(clazz));

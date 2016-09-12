@@ -1,6 +1,7 @@
 package dzida.server.app;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -8,7 +9,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 public class Configuration {
-    private static final Logger log = Logger.getLogger(Configuration.class);
+    private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
     public static String getContainerHost() {
         return getProperty("containerHost", "localhost");

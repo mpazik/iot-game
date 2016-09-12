@@ -1,7 +1,8 @@
 package dzida.server.app.database;
 
 import dzida.server.app.Configuration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -9,7 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionManager {
-    private static final Logger log = Logger.getLogger(ConnectionManager.class);
+    private static final Logger log = LoggerFactory.getLogger(ConnectionManager.class);
     private Connection connection;
 
     public void connect() {

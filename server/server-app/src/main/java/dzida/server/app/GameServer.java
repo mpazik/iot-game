@@ -36,13 +36,16 @@ import dzida.server.app.timesync.TimeSynchroniser;
 import dzida.server.app.user.UserService;
 import dzida.server.app.user.UserStore;
 import dzida.server.core.profiling.Profilings;
-import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.LogManager;
 
 public final class GameServer {
-    private static final Logger log = Logger.getLogger(GameServer.class);
+    private static final Logger log = LoggerFactory.getLogger(GameServer.class);
 
     private NettyHttpService service;
     private WebSocketServer webSocketServer;
@@ -51,12 +54,22 @@ public final class GameServer {
 
     public static void main(String[] args) throws IOException {
         GameServer gameServer = new GameServer();
+        gameServer.configureLogger();
 
         Configuration.print();
 
         Profilings.printTime("Server start time", gameServer::start);
 
         gameServer.service.awaitTerminated();
+    }
+
+    private void configureLogger() {
+        InputStream fis = getClass().getClassLoader().getResourceAsStream("logging.properties");
+        try {
+            LogManager.getLogManager().readConfiguration(fis);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void start() {

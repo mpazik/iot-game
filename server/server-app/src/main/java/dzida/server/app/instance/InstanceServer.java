@@ -26,7 +26,8 @@ import dzida.server.core.event.CharacterEvent;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
 import dzida.server.core.scenario.ScenarioEnd;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import java.util.function.Consumer;
 import static com.nurkiewicz.typeof.TypeOf.whenTypeOf;
 
 public class InstanceServer implements VerifyingConnectionServer<String, String> {
-    private static final Logger log = Logger.getLogger(InstanceServer.class);
+    private static final Logger log = LoggerFactory.getLogger(InstanceServer.class);
 
     public final Publisher<UserMessage.UserGameEvent> userGameEventPublisher = new Publisher<>();
     public final Publisher<UserMessage.UserCommand> userCommandPublisher = new Publisher<>();
