@@ -123,7 +123,7 @@ public class Leaderboard {
 
         private List<Id<User>> getTopUsers() {
             return highScores.entrySet().stream()
-                    .sorted((o1, o2) -> o1.getValue() - o2.getValue())
+                    .sorted((o1, o2) -> o2.getValue() - o1.getValue())
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
         }
