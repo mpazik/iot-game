@@ -89,22 +89,33 @@ define(function (require, exports, module) {
         window.location.href = Configuration.authenticationUrl;
     }
 
+    function connectSubSystems(userToken) {
+        connectToArbiter(userToken);
+        Analytics.connect(userToken);
+        Chat.connect(userToken);
+        Timer.connect();
+        Achievement.connect(userToken);
+        Friends.connect(userToken);
+        setState('connecting');
+    }
+
     function connect() {
         InstanceController.readyToConnect();
         const userToken = UserService.userToken;
         if (userToken == null) {
             UserService.tryLoginUsingClientData()
                 .catch(goToAuthenticationPage)
-                .then(connect)
+                .then(() => {
+                    const userToken = UserService.userToken;
+                    if (userToken != null) {
+                        connectSubSystems(userToken);
+                    } else {
+                        goToAuthenticationPage();
+                    }
+                })
                 .catch(console.error)
         } else {
-            connectToArbiter(userToken);
-            Analytics.connect(userToken);
-            Chat.connect(userToken);
-            Timer.connect();
-            Achievement.connect(userToken);
-            Friends.connect(userToken);
-            setState('connecting');
+            connectSubSystems(userToken)
         }
     }
 
