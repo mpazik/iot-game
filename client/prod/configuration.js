@@ -5,6 +5,6 @@ Configuration = {
     devMode: false,
     serverAddress: "ws://inst1.islesoftales.com:7001",
     containerRestAddress: "http://inst1.islesoftales.com:7000",
-    assetsLocalization: "http://game.islesoftales.com/assets",
+    assetsLocalization: "http://assets.islesoftales.com",
     authenticationUrl: "http://islesoftales.com/login"
 };
