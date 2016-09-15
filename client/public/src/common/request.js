@@ -1,4 +1,4 @@
-define(() => {
+define(['configuration'], (Configuration) => {
     return {
         request(method, path, data) {
             return new Promise(function (resolve, reject) {

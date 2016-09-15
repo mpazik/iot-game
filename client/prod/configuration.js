@@ -1,4 +1,4 @@
-Configuration = {
+define('configuration', [], {
     playerSpeed: 5,
     tileSize: 48,
     spawnTime: 4000,
@@ -7,4 +7,4 @@ Configuration = {
     containerRestAddress: "http://inst1.islesoftales.com:7000",
     assetsLocalization: "http://assets.islesoftales.com",
     authenticationUrl: "http://islesoftales.com/login"
-};
+});

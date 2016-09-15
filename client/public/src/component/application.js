@@ -10,6 +10,7 @@
  */
 
 define(function (require, exports, module) {
+    const Configuration = require('configuration');
     const Publisher = require('../common/basic/publisher');
     const Dispatcher = require('./dispatcher');
     const NetworkDispatcher = require('./network-dispatcher');

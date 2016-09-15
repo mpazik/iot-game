@@ -1,4 +1,4 @@
-define(['../common/request'], (request) => {
+define(['configuration', '../common/request'], (Configuration, request) => {
     const reissueTokenKey = 'reissueToken';
 
     var userToken = null;

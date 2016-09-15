@@ -1,4 +1,5 @@
 define(function (require, exports, module) {
+    const Configuration = require('configuration');
     const JsonProtocol = require('../common/basic/json-protocol');
 
     const dispatcherServerKey = 'dispatcher';
