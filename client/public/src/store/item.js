@@ -60,7 +60,7 @@ define(function (require, exports, module) {
 
         // clone array in order to omit equality check in the publisher
         const newObject = {};
-        Object.extend(newObject, items);
+        Object.assign(newObject, items);
         pushEvent(newObject);
     }
 

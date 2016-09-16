@@ -42,7 +42,7 @@ define(function (require, exports, module) {
 
     StoreRegistrar.registerStore({
         key,
-        state: () => Map.toObject(state),
+        state,
         init: (initialState) => {
             state.clear();
             initialState.forEach(elem => state.set(elem.characterId, elem.skillData));

@@ -55,24 +55,27 @@ define(function (require, exports, module) {
             duration: 1500
         }
     };
-    const runningAnimations = [];
+    var runningAnimations = [];
 
     function processAnimations() {
         const timeNow = Date.now();
-        runningAnimations.remove(function (animation) {
+        runningAnimations = runningAnimations.filter((animation) => {
             const animationTime = timeNow - animation.started;
             const animationType = animationTypes[animation.type];
-            if (animationTime >= animationType.duration) {
+            const animationEnded = animationTime >= animationType.duration;
+            if (animationEnded) {
                 // remove animation
                 if (typeof animation.onFinish === 'function') {
                     animation.onFinish();
                 }
-                return true;
             }
-
+            return !animationEnded;
+        });
+        runningAnimations.forEach((animation) => {
+            const animationTime = timeNow - animation.started;
+            const animationType = animationTypes[animation.type];
             const ratio = animationTime / animationType.duration;
             animate(ratio, animation.object, animation.offset, animationType);
-            return false;
         });
     }
 

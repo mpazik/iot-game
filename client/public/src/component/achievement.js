@@ -26,7 +26,7 @@ define((require, exports, module) => {
         achievementsUnlocked: new Map()
     };
 
-    const trackedAchievements = [];
+    var trackedAchievements = [];
 
     var publishAchievementChange = null;
     const achievementChangePublisher = new Publisher.TypePublisher(function (f) {
@@ -59,8 +59,8 @@ define((require, exports, module) => {
                 if (state.achievementsProgress.has(achievementKey)) {
                     state.achievementsProgress.delete(achievementKey)
                 }
-                trackedAchievements.remove(key => key == achievementKey);
-                setTrackedAchievements(trackedAchievements.slice());
+                trackedAchievements = trackedAchievements.filter(key => key != achievementKey);
+                setTrackedAchievements(trackedAchievements);
                 const achievement = ResourcesStore.achievements.find(achievement => achievement.key == achievementKey);
                 const rewards = achievement['rewards'];
                 if (rewards) {

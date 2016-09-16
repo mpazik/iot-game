@@ -22,7 +22,7 @@ define(function (require, exports, module) {
 
     StoreRegistrar.registerStore({
         key,
-        state: () => Map.toObject(state),
+        state,
         init: (initialState) => {
             state.clear();
             initialState.forEach(addWorldObject);

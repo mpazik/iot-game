@@ -204,7 +204,7 @@ define(function (require) {
         }
 
         function renderUiFragments() {
-            activeUiFragments.clear();
+            activeUiFragments.length = 0;
             const uiFragmentsToDisplay = [...uiFragmentsRegister.keys()].filter((key) => {
                 const requirements = uiFragmentsRegister.get(key).requirements;
                 return shouldDisplay(requirements)
@@ -214,7 +214,8 @@ define(function (require) {
         }
 
         function renderWindow() {
-            const autoDisplayWindow = windowRegister.filterValues(uiWindow => uiWindow.autoDisplay == true && shouldDisplay(uiWindow.requirements));
+            const autoDisplayWindow = Array.from(windowRegister.values())
+                .filter(uiWindow => uiWindow.autoDisplay == true && shouldDisplay(uiWindow.requirements));
             if (autoDisplayWindow.length > 1) {
                 throw "can not display two auto displayable windows at the same time";
             }

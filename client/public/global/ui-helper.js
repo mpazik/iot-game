@@ -31,6 +31,6 @@ const UiElement = Object.create(HTMLElement.prototype, {
 
 function createUiElement(key, prototype) {
     const fragmentPrototype = Object.create(UiElement);
-    Object.extend(fragmentPrototype, prototype);
+    Object.assign(fragmentPrototype, prototype);
     return document.registerElement(key, {prototype: fragmentPrototype});
 }

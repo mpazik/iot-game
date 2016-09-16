@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     const WorldObjects = require('./world-objects');
     const Animation = require('../common/animation');
 
-    const runningEffects = [];
+    var runningEffects = [];
     const EffectAnimations = {
         twist: [
             {time: 0, values: {angle: 0}, ease: Animation.ease.quad},
@@ -60,7 +60,7 @@ define(function (require, exports, module) {
         //noinspection AmdModulesDependencies
         const time = Date.now();
         runningEffects.forEach(animation => animation.setValuesAtTime(time));
-        runningEffects.remove(animation => animation.isFinished(time));
+        runningEffects = runningEffects.filter(animation => !animation.isFinished(time));
         const filters = runningEffects.map(animation => animation.object);
         container.filters = filters.length == 0 ? null : filters;
 

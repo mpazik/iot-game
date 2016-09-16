@@ -9,7 +9,7 @@ define(function (require, exports, module) {
     const MoveStore = require('../store/move');
     const Timer = require('../component/timer');
 
-    const animations = [];
+    var animations = [];
     const projectileSpeed = 20;
     const lengthOfArrow = 1;
     const layer = new Pixi.Container();
@@ -21,8 +21,8 @@ define(function (require, exports, module) {
         return animation.targetPosition;
     }
 
-    MainLoop.renderStream.subscribe(function (delta) {
-        animations.remove(function (animation) {
+    MainLoop.renderStream.subscribe((delta) => {
+        animations = animations.filter((animation) => {
             const targetPosition = getAnimationTargetPosition(animation);
             animations.targetPosition = targetPosition;
             // speed is in meters per second but delta is in millis.
@@ -31,15 +31,14 @@ define(function (require, exports, module) {
             const movedDistanceRatio = movedDistance / distanceToMove;
             if (distanceToMove < lengthOfArrow || movedDistanceRatio >= 1) {
                 layer.removeChild(animation.projectile);
-                return true;
+                return false;
             }
-            //noinspection JSPrimitiveTypeWrapperUsage
             animation.position = Point.interpolate(movedDistanceRatio, animation.position, targetPosition);
             animation.projectile.position.x = animation.position.x * TileSize;
             animation.projectile.position.y = animation.position.y * TileSize;
             animation.projectile.rotation = Point.angleFromTo(animation.position, targetPosition);
-            return false;
-        })
+            return true;
+        });
     });
 
     Dispatcher.messageStream.subscribe(Messages.SkillUsedOnCharacter, (event) => {
