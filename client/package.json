@@ -21,6 +21,7 @@
     "dzida-assets": "^0.1.0",
     "pixi-spine": "^1.0.9",
     "pixi.js": "^3.0.9",
-    "requirejs": "^2.1.22"
+    "requirejs": "^2.3.1",
+    "almond": "^0.3.3"
   }
 }

@@ -7,37 +7,16 @@
     <link rel="stylesheet" href="styles/ui.css">
     <link rel="stylesheet" href="styles/icon.css">
     <link rel="shortcut icon" type="image/png" href="images/icon.png">
-    <script src="src/global/functions.js"></script>
-    <script src="src/global/polyfill.js"></script>
-    <script src="src/global/ui-helper.js"></script>
-    <script src="src/global/predicates.js"></script>
-    <script src="src/global/key-codes.js"></script>
+    <script src="global/functions.js"></script>
+    <script src="global/polyfill.js"></script>
+    <script src="global/ui-helper.js"></script>
+    <script src="global/predicates.js"></script>
+    <script src="global/key-codes.js"></script>
 
     <!-- build:include ../prod/prod-imports.html -->
     <script src="dev/lib/pixi.js/bin/pixi.js"></script>
     <script src="dev/lib/pixi-spine/bin/pixi-spine.js"></script>
-    <script src="dev/lib/requirejs/require.js"></script>
-
-    <script>
-        //noinspection JSFileReferences
-        require.config({
-            shim: {
-                'configuration': {
-                    exports: 'Configuration'
-                },
-                'pixi': {
-                    exports: 'PIXI'
-                },
-                'pixi-spine': {
-                    exports: 'PIXI.spine'
-                }
-            },
-            paths: {
-                "pixi": "src/pixi/value",
-                "configuration": "../dev/configuration"
-            }
-        });
-    </script>
+    <script data-main="src/main" src="dev/lib/requirejs/require.js"></script>
     <!-- /build -->
 
     <style>
@@ -48,47 +27,6 @@
             height: 100%;
         }
     </style>
-    <script>
-        function deffer(func) {
-            setTimeout(func, 0)
-        }
-
-        function isArrowFunctionSupported() {
-            try {
-                eval('()=>{}');
-                return true;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        function isCustomElementsSupported() {
-            return document.registerElement && typeof document.registerElement === 'function';
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            if (!(isArrowFunctionSupported() && isCustomElementsSupported())) {
-                document.body.innerHTML = '<div id="not-supported-browser" style="' +
-                        'background: rgba(0, 0, 0, 0.7); border: #777 solid 1px; border-radius: 5px;' +
-                        'width: 400px; margin: 120px auto 0 auto; padding: 20px;' +
-                        'line-height: 30px; font-size: 20px; color: #EEE;">' +
-                        '<p>Only the latest version of <a href="https://www.google.com/chrome">chrome browser</a> is currently supported.</p>' +
-                        '<p>Sorry for inconvenience.</p></div>';
-                return;
-            }
-
-            require(['src/ui/game', 'src/ui/game-ui'], function () {
-                const game = document.createElement("dzida-game");
-                document.body.appendChild(game);
-
-                const ui = document.createElement("game-ui");
-                ui.addEventListener('element-attached', function () {
-                    ui.init();
-                });
-                document.body.appendChild(ui);
-            });
-        });
-    </script>
 </head>
 <body>
 </body>

@@ -21,7 +21,7 @@ define(function (require, exports, module) {
     const Publisher = require('../../common/basic/publisher');
     const InstanceNetwork = require('./instance-network');
     const Targeting = require('../targeting');
-    const Render = require('../../pixi/render');
+    const Render = require('../../render/render');
     const Dispatcher = require('../dispatcher');
     const Commands = require('./commands');
     const Messages = require('./messages');

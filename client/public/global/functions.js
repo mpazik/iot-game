@@ -12,3 +12,7 @@ function ordinalSuffixOf(i) {
     }
     return i + "th";
 }
+
+function deffer(func) {
+    setTimeout(func, 0)
+}

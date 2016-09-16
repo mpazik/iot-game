@@ -2,7 +2,7 @@ define(function (require) {
     const uiState = require('../store/ui-state');
     const userEventStream = require('../component/dispatcher').userEventStream;
 
-    const extraComponents = require('./extra');
+    const extraComponents = require('extra-ui');
     const fragments = [
         require('./ui-fragments/profiling-display'),
         require('./ui-fragments/respawnScreen'),
