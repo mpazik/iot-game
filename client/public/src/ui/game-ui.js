@@ -80,6 +80,13 @@ define(function (require) {
 
         var activeWindow = null;
         var activeWindowElement = null;
+        var closeWindowButton = (() => {
+            const button = document.createElement('button');
+            button.addEventListener('click', hideWindow);
+            button.setAttribute('id', 'close-window-button');
+            return button;
+        })();
+
 
         windowElement.style.display = 'none';
         document.addEventListener('keydown', keyListener);
@@ -98,7 +105,7 @@ define(function (require) {
 
         function cleanWindow() {
             windowElement.style.display = 'none';
-            windowElement.removeChild(activeWindowElement);
+            windowElement.innerHTML = '';
             activeWindow = null;
             activeWindowElement = null;
         }
@@ -124,6 +131,9 @@ define(function (require) {
             activeWindow = key;
 
             const windowInstance = document.createElement(window.tagName);
+            if (window.closeable) {
+                windowElement.appendChild(closeWindowButton);
+            }
             windowElement.appendChild(windowInstance);
             windowElement.style.display = 'block';
             activeWindowElement = windowInstance;

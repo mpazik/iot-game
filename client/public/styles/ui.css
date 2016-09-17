@@ -28,6 +28,16 @@ game-ui .window .window-actions {
     margin-top: 45px;
 }
 
+#close-window-button {
+    position: absolute;
+    margin: -15px 0 0 -15px;
+    padding: 4px 5px;
+}
+
+#close-window-button:before {
+    content: "✕";
+}
+
 game-ui {
     position: absolute;
     top: 0;
