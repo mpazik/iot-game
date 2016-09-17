@@ -24,9 +24,11 @@ define(function (require) {
 
     window.onbeforeunload = goodbye;
 
-    const defaultFormData = '{"gameScore":3,"graphicScore":3,"gameIdeaScore":3,' +
-        '"coopBattleScore":3,"fightingScore":3,"craftingScore":3,"tradingScore":3,' +
-        '"buildingScore":3,"foundAnyBug":false,"bugDescription":"","age":null,"gender":"","comment":""}';
+    const defaultFormData = {
+        gameScore: 3, graphicScore: 3, gameIdeaScore: 3,
+        coopBattleScore: 3, fightingScore: 3, craftingScore: 3, tradingScore: 3, buildingScore: 3,
+        foundAnyBug: false, bugDescription: "", age: null, gender: "", comment: ""
+    };
 
     return createUiElement('feedback-window', {
         type: 'window',
@@ -147,8 +149,17 @@ define(function (require) {
                     gender: document.getElementById('feedback-gender').value,
                     comment: document.getElementById('feedback-comment').value
                 };
+                if (isNaN(feedbackData.age)) {
+                    feedbackData.age = null;
+                }
+                Object.keys(defaultFormData).forEach((key) => {
+                    const value = feedbackData[key];
+                    if (value == defaultFormData[key]) {
+                        delete feedbackData[key];
+                    }
+                });
 
-                if (JSON.stringify(feedbackData) == defaultFormData) {
+                if (Object.keys(feedbackData).length === 0) {
                     Analytics.sendEvent("feedback.form.empty")
                 } else {
                     Analytics.sendDataEvent("feedback.form", feedbackData)

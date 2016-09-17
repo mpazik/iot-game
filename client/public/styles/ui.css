@@ -335,6 +335,10 @@ objective-tracker li span {
     color: var(--highlight-color);
 }
 
+feedback-window {
+    width: 300px;
+}
+
 feedback-window label {
     width: 120px;
 }
