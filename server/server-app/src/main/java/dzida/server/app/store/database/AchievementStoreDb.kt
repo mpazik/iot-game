@@ -43,6 +43,7 @@ class AchievementStoreDb : AchievementStore {
                     .select(achievementEvent.type, achievementEvent.achievementKey, achievementEvent.createdAt)
                     .from(achievementEvent)
                     .where(achievementEvent.userId.eq(userId.intValue))
+                    .orderBy(achievementEvent.createdAt.asc())
                     .fetch()
             fetch.map({ tuple ->
                 val achievementType = tuple.get(achievementEvent.type)!!

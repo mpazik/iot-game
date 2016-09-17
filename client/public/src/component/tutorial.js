@@ -38,7 +38,7 @@ define((require, exports, module) => {
         const unlockTime = Achievements.state.achievementsUnlocked.get(achievementUnlockedKey);
         // Achievement unlocked within last minute. We want display tutorial again in case that page was refreshed.
         if (unlockTime > Timer.currentTimeOnServer() - 5000) {
-            if (UiState.scenarioType.valueOf == 'open-world') {
+            if (UiState.scenarioType.value == 'open-world') {
                 setTimeout(displayTutorialWindow, 1000);
             } else {
                 displayTutorialWindowWhenOnOpenWorldInstance = true;
