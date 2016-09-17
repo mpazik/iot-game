@@ -5,8 +5,18 @@ define(function (require, exports, module) {
     const MainPlayerStore = require('./main-player');
     const Dispatcher = require('../component/dispatcher');
 
-    var items = {
-    };
+    var items = (() => {
+        const items = localStorage.getItem('items');
+        if (items) {
+            try {
+                return JSON.parse(items);
+            } catch (e) {
+                return {};
+            }
+        } else {
+            return {}
+        }
+    })();
     var pushEvent;
 
     Dispatcher.messageStream.subscribe(Messages.SkillUsed, function (event) {
@@ -55,6 +65,7 @@ define(function (require, exports, module) {
         } else {
             items[item] = quantityChange;
         }
+        localStorage.setItem('items', JSON.stringify(items));
 
         // clone array in order to omit equality check in the publisher
         const newObject = {};
