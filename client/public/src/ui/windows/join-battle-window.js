@@ -30,6 +30,13 @@ define(function (require) {
 `;
         },
         attached: function () {
+            const inputs = Array.prototype.slice.call(this.getElementsByTagName('input'));
+            inputs.forEach((input) => input.addEventListener('keydown', (event) => {
+                if (event.keyCode != KEY_CODES.ESC) {
+                    event.stopPropagation();
+                }
+            }));
+
             function getLastDifficultyLevel() {
                 const storageItem = localStorage.getItem('lastDifficultyLevel');
                 return storageItem == null ? 1 : storageItem;

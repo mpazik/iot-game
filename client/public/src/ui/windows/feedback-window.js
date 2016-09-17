@@ -122,7 +122,15 @@ define(function (require) {
         attached: function () {
             const textareas = Array.prototype.slice.call(this.getElementsByTagName('textarea'));
             textareas.forEach((textarea) => textarea.addEventListener('keydown', (event) => {
-                event.stopPropagation();
+                if (event.keyCode != KEY_CODES.ESC) {
+                    event.stopPropagation();
+                }
+            }));
+            const inputs = Array.prototype.slice.call(this.getElementsByTagName('input'));
+            inputs.forEach((input) => input.addEventListener('keydown', (event) => {
+                if (event.keyCode != KEY_CODES.ESC) {
+                    event.stopPropagation();
+                }
             }));
             const bugDescriptionBox = document.getElementById('feedback-bug-description-box');
             bugDescriptionBox.style.display = 'none';
