@@ -69,8 +69,8 @@ class AchievementServer : VerifyingConnectionServer<String, String> {
                 } else {
                     when (entry.key) {
                         "WinFirstBattle" -> listOf(AchievementUnlocked(userId, achievementKey))
-                        "WinBattleLevel5" ->
-                            if (survival.difficultyLevel >= 5) {
+                        "WinBattleLevel4" ->
+                            if (survival.difficultyLevel >= 4) {
                                 listOf(AchievementUnlocked(userId, achievementKey))
                             } else {
                                 emptyList()
