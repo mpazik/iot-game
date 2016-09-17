@@ -92,7 +92,7 @@ public class SkillService {
             return new SkillData(25, 25, 0);
         }
         if (characterType == Character.Type.Player) {
-            return new SkillData(200, 200, 0);
+            return new SkillData(300, 300, 0);
         }
         throw new IllegalStateException("If this is throw that means there is time to change implementation to use enums");
     }
