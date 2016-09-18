@@ -89,7 +89,7 @@ public class SkillService {
 
     public SkillData getInitialSkillData(int characterType) {
         if (characterType == Character.Type.Bot) {
-            return new SkillData(25, 25, 0);
+            return new SkillData(20, 20, 0);
         }
         if (characterType == Character.Type.Player) {
             return new SkillData(300, 300, 0);

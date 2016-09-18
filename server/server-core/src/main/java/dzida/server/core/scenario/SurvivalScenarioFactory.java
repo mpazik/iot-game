@@ -4,18 +4,18 @@ import java.time.Duration;
 
 public class SurvivalScenarioFactory {
 
+    private static int countNumberOfNpcToKill(int difficultyLevel) {
+        return difficultyLevel;
+    }
+
     public SurvivalScenario createSurvivalScenario(int difficultyLevel) {
         int numberOfNpcToKill = countNumberOfNpcToKill(difficultyLevel);
         int botLevel = countBotLevel(difficultyLevel);
-        return new SurvivalScenario(difficultyLevel, numberOfNpcToKill, botLevel, Duration.ofSeconds(2));
+        return new SurvivalScenario(difficultyLevel, numberOfNpcToKill, botLevel, Duration.ofSeconds(5));
     }
 
     private int countBotLevel(int difficultyLevel) {
         return (int)(Math.pow(1.1, difficultyLevel) * 100);
-    }
-
-    private static int countNumberOfNpcToKill(int difficultyLevel) {
-        return difficultyLevel;
     }
 
     public final static class SurvivalScenario {
