@@ -25,6 +25,7 @@ import dzida.server.core.character.model.Character;
 import dzida.server.core.event.CharacterEvent;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
+import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.scenario.ScenarioEnd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +75,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     public void start() {
         instance.subscribeChange(stateSynchroniser::syncStateChange);
         instance.subscribeChange(gameEvent -> {
+            if (gameEvent instanceof CharacterMoved) {
+                return;
+            }
             instanceStore.saveEvent(instanceKey, gameEvent);
         });
         instance.subscribeChange(gameEvent -> {
