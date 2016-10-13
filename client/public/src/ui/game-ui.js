@@ -30,7 +30,8 @@ define(function (require) {
         require('./windows/friendship-request-window'),
         require('./windows/friends-window'),
         require('./windows/feedback-window'),
-        require('./windows/thank-you-window')
+        require('./windows/thank-you-window'),
+        require('./windows/building-window')
     ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {

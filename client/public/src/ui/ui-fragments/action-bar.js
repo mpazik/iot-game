@@ -62,6 +62,11 @@ define(function (require) {
                 Analytics.sendEvent('ui.action-bar.trigger.friends')
             });
             systemBar.appendChild(friendsButton);
+
+            var buildingButton = createSystemIcon('building', 'icon-hammer-nails', 'B', 'Building', function () {
+                userEventStream.publish('toggle-window', 'building-window');
+            });
+            systemBar.appendChild(buildingButton);
         },
         _renderSkillBar: function (skillIds) {
             const skillBar = this.getElementsByClassName("skill-bar")[0];
