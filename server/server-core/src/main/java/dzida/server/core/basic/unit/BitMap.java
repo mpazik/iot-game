@@ -1,43 +1,16 @@
 package dzida.server.core.basic.unit;
 
 import java.util.BitSet;
+import java.util.Objects;
 
 public interface BitMap {
-
-    boolean isSetUnsafe(int x, int y);
-
-    int getWidth();
-
-    int getHeight();
-
-    int getX();
-
-    int getY();
-
-    default boolean isSet(int x, int y) {
-        return isOnBitMap(x, y) && isSetUnsafe(x, y);
-    }
-
-    default boolean isOnBitMap(int x, int y) {
-        return x >= getX() && x < getX() + getWidth() && y >= getY() && y < getY() + getHeight();
-    }
-
-    default void forEach(Geometry2D.IntPointOperator function) {
-        for (int y = getY(); y < getY() + getHeight(); y++) {
-            for (int x = getX(); x < getX() + getWidth(); x++) {
-                if (isSet(x, y)) {
-                    function.apply(x, y);
-                }
-            }
-        }
-    }
 
     @SuppressWarnings("unused")
     static String visualise(BitMap bitMap) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int y = 0; y < bitMap.getHeight(); y++) {
             for (int x = 0; x < bitMap.getWidth(); x++) {
-                stringBuilder.append(bitMap.isSet(x, y) ? '#' : ' ');
+                stringBuilder.append(bitMap.isSet(x + bitMap.getStartX(), y + bitMap.getStartY()) ? '#' : ' ');
             }
             stringBuilder.append('\n');
         }
@@ -59,6 +32,34 @@ public interface BitMap {
         return builder.build();
     }
 
+    boolean isSetUnsafe(int x, int y);
+
+    int getWidth();
+
+    int getHeight();
+
+    int getStartX();
+
+    int getStartY();
+
+    default boolean isSet(int x, int y) {
+        return isOnBitMap(x, y) && isSetUnsafe(x, y);
+    }
+
+    default boolean isOnBitMap(int x, int y) {
+        return x >= getStartX() && x < getStartX() + getWidth() && y >= getStartY() && y < getStartY() + getHeight();
+    }
+
+    default void forEach(Geometry2D.IntPointOperator function) {
+        for (int y = getStartY(); y < getStartY() + getHeight(); y++) {
+            for (int x = getStartX(); x < getStartX() + getWidth(); x++) {
+                if (isSet(x, y)) {
+                    function.apply(x, y);
+                }
+            }
+        }
+    }
+
     class InverseBitMap implements BitMap {
         private final BitMap bitMap;
 
@@ -75,7 +76,7 @@ public interface BitMap {
 
         @Override
         public boolean isSetUnsafe(int x, int y) {
-            return !bitMap.isSet(x, y);
+            return !bitMap.isSetUnsafe(x, y);
         }
 
         @Override
@@ -89,29 +90,43 @@ public interface BitMap {
         }
 
         @Override
-        public int getX() {
-            return bitMap.getX();
+        public int getStartX() {
+            return bitMap.getStartX();
         }
 
         @Override
-        public int getY() {
-            return bitMap.getY();
+        public int getStartY() {
+            return bitMap.getStartY();
+        }
+
+        public ImmutableBitMap toImmutableBitMap() {
+            ImmutableBitMap.Builder builder = ImmutableBitMap.builder(getStartX(), getStartY(), getWidth(), getHeight());
+            this.forEach((x, y) -> builder.set(x, y, true));
+            return builder.build();
         }
     }
 
     class ImmutableBitMap implements BitMap {
         private final BitSet bitSet;
-        private final int x;
-        private final int y;
+        private final int startX;
+        private final int startY;
         private final int width;
         private final int height;
 
-        private ImmutableBitMap(BitSet bitSet, int x, int y, int width, int height) {
-            this.x = x;
-            this.y = y;
+        private ImmutableBitMap(BitSet bitSet, int startX, int startY, int width, int height) {
+            this.startX = startX;
+            this.startY = startY;
             this.bitSet = BitSet.valueOf(bitSet.toLongArray());
             this.width = width;
             this.height = height;
+        }
+
+        public static Builder builder(int width, int height) {
+            return new Builder(0, 0, width, height);
+        }
+
+        public static Builder builder(int startX, int startY, int width, int height) {
+            return new Builder(startX, startY, width, height);
         }
 
         @Override
@@ -128,21 +143,17 @@ public interface BitMap {
         }
 
         @Override
-        public int getX() {
-            return x;
+        public int getStartX() {
+            return startX;
         }
 
         @Override
-        public int getY() {
-            return y;
+        public int getStartY() {
+            return startY;
         }
 
         private int bitSetPos(int x, int y) {
-            return y * width + x;
-        }
-
-        public static Builder builder(int width, int height) {
-            return new Builder(width, height);
+            return (y - startY) * width + (x - startX);
         }
 
         @Override
@@ -154,23 +165,40 @@ public interface BitMap {
                     '}';
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            ImmutableBitMap that = (ImmutableBitMap) o;
+            return startX == that.startX &&
+                    startY == that.startY &&
+                    width == that.width &&
+                    height == that.height &&
+                    Objects.equals(bitSet, that.bitSet);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(bitSet, startX, startY, width, height);
+        }
+
         final static public class Builder {
             private final BitSet bitSet;
             private final int width;
             private final int height;
-            private int x = 0;
-            private int y = 0;
+            private final int startX;
+            private final int startY;
 
-            public Builder(int width, int height) {
+            public Builder(int startX, int y, int width, int height) {
                 bitSet = new BitSet(width * height);
                 this.width = width;
                 this.height = height;
-            }
-
-            public Builder setCords(int x, int y) {
-                this.x = x;
-                this.y = y;
-                return this;
+                this.startX = startX;
+                this.startY = y;
             }
 
             public Builder set(int x, int y, boolean value) {
@@ -180,16 +208,16 @@ public interface BitMap {
                 return this;
             }
 
-            public BitMap build() {
-                return new ImmutableBitMap(bitSet, x, y, width, height);
+            public ImmutableBitMap build() {
+                return new ImmutableBitMap(bitSet, startX, startY, width, height);
             }
 
             private boolean isOnBitMap(int x, int y) {
-                return x >= 0 && x < width && y >= 0 && y < height;
+                return x >= startX && x < startX + width && y >= startY && y < startY + height;
             }
 
             private int bitSetPos(int x, int y) {
-                return y * width + x;
+                return (y - startY) * width + (x - startX);
             }
         }
     }

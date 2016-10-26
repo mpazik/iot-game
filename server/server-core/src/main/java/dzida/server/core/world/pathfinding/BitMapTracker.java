@@ -9,16 +9,12 @@ import dzida.server.core.basic.unit.TreeNode;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.*;
+import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.BOTTOM;
+import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.LEFT;
+import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.RIGHT;
+import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.TOP;
 
 public class BitMapTracker {
-    enum Direction {
-        TOP,
-        RIGHT,
-        BOTTOM,
-        LEFT
-    }
-
     public List<TreeNode<Polygon>> track(BitMap bitMap) {
         List<TreeNode<Polygon>> polygons = new ArrayList<>();
 
@@ -117,8 +113,15 @@ public class BitMapTracker {
         Polygon polygon = new Polygon(points.build());
 
         // +1 and -2 because we do not need to track borders.
-        List<TreeNode<Polygon>> children = track(new PolygonBitMap(minX, minY, maxX - startX, maxY - startY, bitMap, polygon));
+        List<TreeNode<Polygon>> children = track(new PolygonBitMap(minX, minY, maxX - minX, maxY - minY, bitMap, polygon));
         return new TreeNode<>(polygon, children);
+    }
+
+    enum Direction {
+        TOP,
+        RIGHT,
+        BOTTOM,
+        LEFT
     }
 
     private static final class PolygonBitMap implements BitMap {
@@ -151,12 +154,12 @@ public class BitMapTracker {
         }
 
         @Override
-        public int getX() {
+        public int getStartX() {
             return x;
         }
 
         @Override
-        public int getY() {
+        public int getStartY() {
             return y;
         }
     }

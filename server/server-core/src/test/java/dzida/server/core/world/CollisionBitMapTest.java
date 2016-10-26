@@ -11,8 +11,8 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CollisionBitMapTest {
-    public static final Tileset.TerrainTypes NON_COLLIDABLE_TERRAIN = Tileset.TerrainTypes.GRASS;
-    public static final Tileset.TerrainTypes COLLIDABLE_TERRAIN = Tileset.TerrainTypes.WATER;
+    public static final Tileset.TerrainType NON_COLLIDABLE_TERRAIN = Tileset.TerrainType.GRASS;
+    public static final Tileset.TerrainType COLLIDABLE_TERRAIN = Tileset.TerrainType.WATER;
 
     @Test
     public void collidableAndNonCollidableTerrainsForTestsArePickedCorrectly() {
@@ -30,7 +30,7 @@ public class CollisionBitMapTest {
                 2, 1, 1, 2,
                 2, 2, 2, 2
         };
-        WorldMap worldMap = new WorldMap(4, 4, tilesetKey, new Point(0, 0), tiles);
+        WorldMap worldMap = new WorldMap(4, 4, tilesetKey, new Point(0, 0), tiles, 0);
 
         CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, tileset);
         assertThat(collisionBitMap.isColliding(0, 0)).isTrue();
