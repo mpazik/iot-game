@@ -14,7 +14,15 @@ public class Graph<T> {
         this.ids = ids;
     }
 
-    public int[] getNodeIds(int nodeId) {
+    public static <T> Builder<T> builder() {
+        return new Builder<>();
+    }
+
+    public static <T> Builder<T> builder(Graph<T> graph) {
+        return new Builder<>(graph);
+    }
+
+    public int[] getNeighbourIds(int nodeId) {
         return ids[nodeId];
     }
 
@@ -31,6 +39,18 @@ public class Graph<T> {
         return elements.get(nodeId);
     }
 
+    public List<T> getNeighbours(T node) {
+        int nodeId = getNodeId(node);
+        int[] neighbourIds = getNeighbourIds(nodeId);
+
+        ImmutableList.Builder<T> builder = ImmutableList.builder();
+        for (int id : neighbourIds) {
+            builder.add(getElement(id));
+        }
+
+        return builder.build();
+    }
+
     public int size() {
         return elements.size();
     }
@@ -38,14 +58,6 @@ public class Graph<T> {
     public List<T> getAllNodes() {
         //noinspection unchecked
         return elements;
-    }
-
-    public static <T> Builder<T> builder() {
-        return new Builder<>();
-    }
-
-    public static <T> Builder<T> builder(Graph<T> graph) {
-        return new Builder<>(graph);
     }
 
     public static final class Builder<T> {
@@ -64,9 +76,9 @@ public class Graph<T> {
             elements.addAll(allNodes);
             ids = new ArrayList<>(size + 2);
             for (int i = 0; i < size; i++) {
-                int[] nodeIds = graph.getNodeIds(i);
-                List<Integer> childList =  new ArrayList<>(nodeIds.length);
-                for (int nodeId: nodeIds){
+                int[] nodeIds = graph.getNeighbourIds(i);
+                List<Integer> childList = new ArrayList<>(nodeIds.length);
+                for (int nodeId : nodeIds) {
                     childList.add(nodeId);
                 }
                 ids.add(childList);

@@ -34,9 +34,14 @@ package org.sample;
 import dzida.server.core.basic.unit.BitMap;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.pathfinding.CollisionBitMap;
+import dzida.server.core.world.pathfinding.CollisionMapFactory;
 import dzida.server.core.world.pathfinding.PathFinder;
-import dzida.server.core.world.pathfinding.PathFinderFactory;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.profile.StackProfiler;
 import org.openjdk.jmh.runner.Runner;
@@ -100,15 +105,7 @@ public class PathFindingBenchmark {
             "################################################################################################"
     );
 
-    private final PathFinder pathFinder = new PathFinderFactory().createPathFinder(new CollisionBitMap(bitMap));
-
-    @Benchmark
-    @BenchmarkMode(Mode.SampleTime)
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    public List<Point> lineIntersection() throws InterruptedException {
-        return pathFinder.findPathToDestination(new Point(58, 27), new Point(70, 40));
-    }
-
+    private final PathFinder pathFinder = new PathFinder(new CollisionMapFactory(5).createCollisionMap(new CollisionBitMap(bitMap)));
 
     public static void main(String[] args) throws RunnerException, InterruptedException {
         Options opt = new OptionsBuilder()
@@ -122,5 +119,12 @@ public class PathFindingBenchmark {
                 .build();
 
         new Runner(opt).run();
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.SampleTime)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    public List<Point> lineIntersection() throws InterruptedException {
+        return pathFinder.findPathToDestination(new Point(58, 27), new Point(70, 40));
     }
 }

@@ -38,8 +38,8 @@ import dzida.server.core.world.map.WorldMap;
 import dzida.server.core.world.map.WorldMapService;
 import dzida.server.core.world.object.WorldObjectService;
 import dzida.server.core.world.pathfinding.CollisionBitMap;
+import dzida.server.core.world.pathfinding.CollisionMapFactory;
 import dzida.server.core.world.pathfinding.PathFinder;
-import dzida.server.core.world.pathfinding.PathFinderFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -76,7 +76,7 @@ public class Instance {
         PositionService positionService = PositionService.create(positionStore, timeService);
 
         CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, worldMapStore.getTileset(worldMap.getTileset()));
-        PathFinder pathFinder = Profilings.printTime("Collision map built", () -> new PathFinderFactory().createPathFinder(collisionBitMap));
+        PathFinder pathFinder = Profilings.printTime("Collision map built", () -> new PathFinder(new CollisionMapFactory(5).createCollisionMap(collisionBitMap)));
         PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService, pathFinder);
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService, characterService);

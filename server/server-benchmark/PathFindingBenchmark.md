@@ -1,6 +1,6 @@
 # Path finding benchmark results
 
-## Objectinve approach to geometric primitives.
+## Object approach to geometric primitives.
 Bellow are results of first naive implementation of path finding algorithm.
 
 #### Results

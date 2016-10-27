@@ -53,7 +53,7 @@ public interface BitMap {
     default void forEach(Geometry2D.IntPointOperator function) {
         for (int y = getStartY(); y < getStartY() + getHeight(); y++) {
             for (int x = getStartX(); x < getStartX() + getWidth(); x++) {
-                if (isSet(x, y)) {
+                if (isSetUnsafe(x, y)) {
                     function.apply(x, y);
                 }
             }

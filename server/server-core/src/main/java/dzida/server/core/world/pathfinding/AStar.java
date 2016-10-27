@@ -3,7 +3,14 @@ package dzida.server.core.world.pathfinding;
 import dzida.server.core.basic.unit.Graph;
 import dzida.server.core.basic.unit.Point;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Set;
+
 
 public class AStar {
     private final int startId;
@@ -46,8 +53,10 @@ public class AStar {
             }
             nodesEvaluated.add(currentId);
 
-            for (int neighborId : graph.getNodeIds(currentId)) {
-                if (nodesEvaluated.contains(neighborId)) continue;
+            for (int neighborId : graph.getNeighbourIds(currentId)) {
+                if (nodesEvaluated.contains(neighborId)) {
+                    continue;
+                }
 
                 Point neighborPoint = graph.getElement(neighborId);
                 double distanceBetweenTwoNodes = currentPoint.distanceTo(neighborPoint);
@@ -77,7 +86,7 @@ public class AStar {
     }
 
     private List<Point> reconstructPath(int destinationId) {
-        final List<Point> pathList = new ArrayList<>();
+        List<Point> pathList = new ArrayList<>();
         while (destinationId != startId) {
             pathList.add(graph.getElement(destinationId));
             destinationId = cameFrom[destinationId];

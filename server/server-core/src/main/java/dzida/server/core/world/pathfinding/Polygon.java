@@ -8,14 +8,27 @@ import dzida.server.core.basic.unit.PointList;
 import java.util.List;
 import java.util.Optional;
 
-import static dzida.server.core.basic.unit.Geometry2D.*;
-import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.*;
+import static dzida.server.core.basic.unit.Geometry2D.distance;
+import static dzida.server.core.basic.unit.Geometry2D.getIntersection;
+import static dzida.server.core.basic.unit.Geometry2D.getLength;
+import static dzida.server.core.basic.unit.Geometry2D.interpolate;
+import static dzida.server.core.basic.unit.Geometry2D.isBetween;
+import static dzida.server.core.basic.unit.Geometry2D.isIntersecting;
+import static dzida.server.core.basic.unit.Geometry2D.isPointOnLine;
+import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.BOTTOM;
+import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.LEFT;
+import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.RIGHT;
+import static dzida.server.core.world.pathfinding.BitMapTracker.Direction.TOP;
 
 class Polygon {
     private final PointList points;
 
     Polygon(PointList points) {
         this.points = points;
+    }
+
+    public PointList getPoints() {
+        return points;
     }
 
     public boolean isLineOutside(double l1x, double l1y, double l2x, double l2y) {

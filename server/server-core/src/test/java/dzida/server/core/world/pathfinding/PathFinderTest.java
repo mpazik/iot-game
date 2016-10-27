@@ -10,14 +10,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PathFinderTest {
 
-    private final PathFinderFactory pathFinderFactory = new PathFinderFactory();
+    private final CollisionMapFactory collisionMapFactory = new CollisionMapFactory(5);
 
     @Test
     public void shouldFindPathThatAvoidBottomRightCorner() {
         BitMap bitMap = BitMap.createBitMap(
                 "  ",
                 " #");
-        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+        PathFinder pathFinder = createPathFinder(bitMap);
 
         Point begin = Point.of(0.9, 1.9);
         Point end = Point.of(1.9, 0.9);
@@ -33,7 +33,7 @@ public class PathFinderTest {
                 "    ",
                 " ## ",
                 " #  ");
-        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+        PathFinder pathFinder = createPathFinder(bitMap);
 
         Point begin = Point.of(1, 1.5);
         Point end = Point.of(1.5, 1.5);
@@ -49,7 +49,7 @@ public class PathFinderTest {
                 "    ",
                 " ## ",
                 " #  ");
-        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+        PathFinder pathFinder = createPathFinder(bitMap);
 
         Point begin = Point.of(0.99, 2.99);
         Point end = Point.of(2, 2);
@@ -64,7 +64,7 @@ public class PathFinderTest {
         BitMap bitMap = BitMap.createBitMap(
                 "  ",
                 " #");
-        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+        PathFinder pathFinder = createPathFinder(bitMap);
 
         Point begin = Point.of(0.5, 1.5);
         Point end = Point.of(1.5, 0.5);
@@ -84,7 +84,7 @@ public class PathFinderTest {
                 " #   # ",
                 " ##### ",
                 "       ");
-        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+        PathFinder pathFinder = createPathFinder(bitMap);
 
         Point begin = Point.of(0.5, 0.5);
         Point end = Point.of(6.5, 6.0);
@@ -104,7 +104,7 @@ public class PathFinderTest {
                 " #   # ",
                 " ##### ",
                 "       ");
-        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+        PathFinder pathFinder = createPathFinder(bitMap);
 
         Point begin = Point.of(2.9, 2.9);
         Point end = Point.of(4.1, 3.9);
@@ -120,7 +120,7 @@ public class PathFinderTest {
                 "      ",
                 " # # #",
                 "      ");
-        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+        PathFinder pathFinder = createPathFinder(bitMap);
 
         Point begin = Point.of(0.5, 1.1);
         Point end = Point.of(5.5, 1.1);
@@ -136,7 +136,7 @@ public class PathFinderTest {
                 "   ",
                 " # ",
                 "   ");
-        PathFinder pathFinder = pathFinderFactory.createPathFinder(new CollisionBitMap(bitMap));
+        PathFinder pathFinder = createPathFinder(bitMap);
 
         Point begin = Point.of(1, 1);
         Point end = Point.of(2.5, 2);
@@ -144,5 +144,9 @@ public class PathFinderTest {
         List<Point> path = pathFinder.findPathToDestination(begin, end);
 
         assertThat(path).containsExactly(begin, Point.of(2, 1), end);
+    }
+
+    public PathFinder createPathFinder(BitMap bitMap) {
+        return new PathFinder(collisionMapFactory.createCollisionMap(new CollisionBitMap(bitMap)));
     }
 }

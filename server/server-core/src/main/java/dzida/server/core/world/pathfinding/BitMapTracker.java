@@ -2,7 +2,6 @@ package dzida.server.core.world.pathfinding;
 
 import com.google.common.collect.ImmutableList;
 import dzida.server.core.basic.unit.BitMap;
-import dzida.server.core.basic.unit.Point;
 import dzida.server.core.basic.unit.PointList;
 import dzida.server.core.basic.unit.TreeNode;
 
@@ -19,8 +18,7 @@ public class BitMapTracker {
         List<TreeNode<Polygon>> polygons = new ArrayList<>();
 
         bitMap.forEach((x, y) -> {
-            // added epsilon since is isInside doesn't count polygon borders
-            if (!polygons.stream().anyMatch(p -> p.getData().isInsideTile(x, y))) {
+            if (!isPointOnAnyPolygon(x, y, polygons)) {
                 TreeNode<Polygon> polygon = trackPath(bitMap, x, y);
                 polygons.add(polygon);
             }
@@ -29,13 +27,21 @@ public class BitMapTracker {
         return ImmutableList.copyOf(polygons);
     }
 
+    private boolean isPointOnAnyPolygon(int x, int y, List<TreeNode<Polygon>> polygons) {
+        for (TreeNode<Polygon> polygon : polygons) {
+            if (polygon.getData().isInside(x, y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private TreeNode<Polygon> trackPath(BitMap bitMap, int startX, int startY) {
         PointList.Builder points = PointList.builder();
 
         int x = startX;
         int y = startY;
-        Point point = new Point(x, y);
-        points.add(point);
+        points.add(x, y);
         // we are assuming that start position is top left corner;
         x += 1;
         int maxX = x, maxY = y, minX = x, minY = y;
@@ -47,13 +53,13 @@ public class BitMapTracker {
                     minY = Math.min(minY, y);
                     if (bitMap.isSet(x - 1, y - 1)) {
                         direction = LEFT;
-                        points.add(new Point(x, y));
+                        points.add(x, y);
                         x -= 1;
                         break;
                     }
                     if (!bitMap.isSet(x, y - 1)) {
                         direction = RIGHT;
-                        points.add(new Point(x, y));
+                        points.add(x, y);
                         x += 1;
                         break;
                     }
@@ -63,13 +69,13 @@ public class BitMapTracker {
                     maxY = Math.max(maxY, y);
                     if (bitMap.isSet(x, y)) {
                         direction = RIGHT;
-                        points.add(new Point(x, y));
+                        points.add(x, y);
                         x += 1;
                         break;
                     }
                     if (!bitMap.isSet(x - 1, y)) {
                         direction = LEFT;
-                        points.add(new Point(x, y));
+                        points.add(x, y);
                         x -= 1;
                         break;
                     }
@@ -79,13 +85,13 @@ public class BitMapTracker {
                     maxX = Math.max(maxX, x);
                     if (bitMap.isSet(x, y - 1)) {
                         direction = TOP;
-                        points.add(new Point(x, y));
+                        points.add(x, y);
                         y -= 1;
                         break;
                     }
                     if (!bitMap.isSet(x, y)) {
                         direction = BOTTOM;
-                        points.add(new Point(x, y));
+                        points.add(x, y);
                         y += 1;
                         break;
                     }
@@ -95,13 +101,13 @@ public class BitMapTracker {
                     minX = Math.min(minX, x);
                     if (bitMap.isSet(x - 1, y)) {
                         direction = BOTTOM;
-                        points.add(new Point(x, y));
+                        points.add(x, y);
                         y += 1;
                         break;
                     }
                     if (!bitMap.isSet(x - 1, y - 1)) {
                         direction = TOP;
-                        points.add(new Point(x, y));
+                        points.add(x, y);
                         y -= 1;
                         break;
                     }
