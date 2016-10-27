@@ -4,19 +4,21 @@ define(function (require, exports, module) {
     const ResourcesStore = require('../store/resources');
     const Dispatcher = require('../component/dispatcher');
     const tileSize = require('configuration').tileSize;
+    const tileImageSize = require('configuration').tileImageSize;
+    const tileZoom = tileSize / tileImageSize;
     const Publisher = require('../common/basic/publisher');
 
     function createTileTextures(tileset) {
-        var fileName = tileset.image;
         var tileTextures = [];
-        var texture = Pixi.Texture.fromImage("tilesets/" + fileName);
-        for (var i = 0; i < texture.height / tileSize; i++) {
-            for (var j = 0; j < texture.width / tileSize; j++) {
+        const texture = Pixi.utils.TextureCache["tilesets/" + tileset.image];
+        texture.baseTexture.scaleMode = Pixi.SCALE_MODES.NEAREST;
+        for (var i = 0; i < texture.height / tileImageSize; i++) {
+            for (var j = 0; j < texture.width / tileImageSize; j++) {
                 var tileTexture = new Pixi.Texture(texture, {
-                    x: j * tileSize,
-                    y: i * tileSize,
-                    width: tileSize,
-                    height: tileSize
+                    x: j * tileImageSize,
+                    y: i * tileImageSize,
+                    width: tileImageSize,
+                    height: tileImageSize
                 });
                 tileTextures.push(tileTexture);
             }
@@ -38,6 +40,7 @@ define(function (require, exports, module) {
                 var sprite = new Pixi.Sprite(tileTextures[tile - 1]);
                 sprite.position.x = tx * tileSize;
                 sprite.position.y = ty * tileSize;
+                sprite.scale = {x: tileZoom, y: tileZoom};
                 tilesLayer.addChild(sprite);
             }
         }
@@ -69,7 +72,7 @@ define(function (require, exports, module) {
                     x: tileCordX,
                     y: tileCordY
                 });
-                push({x :tileCordX, y: tileCordY})
+                push({x: tileCordX, y: tileCordY})
             };
         }),
         mousePositionStream: new Publisher.StatePublisher({x: 0, y: 0}, push => {

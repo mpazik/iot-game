@@ -109,8 +109,8 @@ define(function (require, exports, module) {
             return Promise.all([
                 loadSpines(spines),
                 loadAssets(spritesPaths),
-                loadJson('tilesets/basic').then(function (tileset) {
-                    tilesets[tileset.key] = tileset;
+                loadJson('tilesets/tiles_16x16').then(function (tileset) {
+                    tilesets[tileset.name] = tileset;
                     return loadImage("tilesets/" + tileset.image);
                 }),
                 loadJson('entities/objects').then(function (downloadedObjectKinds) {
