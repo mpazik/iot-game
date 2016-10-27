@@ -47,7 +47,7 @@ public class Configuration {
     }
 
     public static String[] getInitialInstances() {
-        return getProperty("instances", "eden").split(",");
+        return getProperty("instances", "archipelag").split(",");
     }
 
     public static boolean isDevMode() {

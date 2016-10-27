@@ -9,13 +9,15 @@ public class WorldMap {
     private final Key<Tileset> tileset;
     private final Point spawnPoint;
     private final int[] tiles;
+    private final int firstgid;
 
-    public WorldMap(int width, int height, Key<Tileset> tileset, Point spawnPoint, int[] tiles) {
+    public WorldMap(int width, int height, Key<Tileset> tileset, Point spawnPoint, int[] tiles, int firstgid) {
         this.width = width;
         this.height = height;
         this.tileset = tileset;
         this.spawnPoint = spawnPoint;
         this.tiles = tiles;
+        this.firstgid = firstgid;
     }
 
     public int getWidth() {
@@ -38,5 +40,7 @@ public class WorldMap {
         return tiles;
     }
 
-
+    public int getFirstgid() {
+        return firstgid;
+    }
 }
