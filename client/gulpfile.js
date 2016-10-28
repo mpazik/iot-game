@@ -17,18 +17,13 @@ gulp.task('copy-public', function () {
         .pipe(gulp.dest(distPath));
 });
 
-gulp.task('copy-libs', function () {
-    return gulp.src(['node_modules/pixi-spine/bin/pixi-spine.js'])
-        .pipe(gulp.dest(distPath + '/lib'));
-});
-
 gulp.task('process-html', function () {
     return gulp.src('public/index.html')
         .pipe(processHtml({}))
         .pipe(gulp.dest(distPath));
 });
 
-gulp.task('build-prod', gulpSequence('clean', 'copy-public', 'copy-libs', 'optimize-sources', 'process-html'));
+gulp.task('build-prod', gulpSequence('clean', 'copy-public', 'optimize-sources', 'process-html'));
 
 gulp.task('optimize-sources', function () {
     requirejs.optimize({

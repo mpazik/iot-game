@@ -15,7 +15,6 @@ define(function (require, exports, module) {
     };
 
     const sprites = ["objects"];
-    const spines = [];
 
     function loadCss(path) {
         const head = document.getElementsByTagName('head')[0];
@@ -43,16 +42,6 @@ define(function (require, exports, module) {
                 Pixi.utils.TextureCache[name] = Pixi.utils.TextureCache[absoluteUrl];
                 resolve();
             });
-        });
-    }
-
-    function loadSpines(spines) {
-        spines.forEach(function (file) {
-            const path = assetPath("spines", file);
-            Pixi.loader.add(path);
-        });
-        return new Promise((resolve) => {
-            Pixi.loader.load(resolve);
         });
     }
 
@@ -93,7 +82,6 @@ define(function (require, exports, module) {
         item: id => throwIfNull(id, items[id], 'Item'),
         objectKind: id => throwIfNull(id, objectKinds[id], 'WorldObject'),
         tileset: name => throwIfNull(name, tilesets[name], 'TileSet'),
-        spine: name => throwIfNull(name, Pixi.loader.resources[assetPath("spines", name)], 'Spine'),
         get achievements() {
             return achievements
         },
@@ -107,7 +95,6 @@ define(function (require, exports, module) {
             });
 
             return Promise.all([
-                loadSpines(spines),
                 loadAssets(spritesPaths),
                 loadJson('tilesets/tiles_16x16').then(function (tileset) {
                     tilesets[tileset.name] = tileset;
