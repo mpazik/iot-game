@@ -15,7 +15,7 @@ define(function (require, exports, module) {
     };
 
     const sprites = ["objects"];
-    const spines = ["player"];
+    const spines = [];
 
     function loadCss(path) {
         const head = document.getElementsByTagName('head')[0];
@@ -113,6 +113,7 @@ define(function (require, exports, module) {
                     tilesets[tileset.name] = tileset;
                     return loadImage("tilesets/" + tileset.image);
                 }),
+                loadImage('sprites/character.png'),
                 loadJson('entities/objects').then(function (downloadedObjectKinds) {
                     downloadedObjectKinds.forEach(obj => objectKinds[obj.id] = obj)
                 }),

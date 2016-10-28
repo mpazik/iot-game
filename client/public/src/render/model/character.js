@@ -1,8 +1,8 @@
 define(function (require, exports, module) {
     const Pixi = require('pixi');
-    const Resources = require('../../store/resources');
-    const CharacterType = require('../../store/character').CharacterType;
     const Dispatcher = require('../../component/dispatcher');
+    const tileImageSize = require('configuration').tileImageSize;
+    const tileZoom = require('configuration').tileSize / tileImageSize;
 
     const hoverFilter = new Pixi.filters.GrayFilter();
     hoverFilter.gray = -2.0;
@@ -23,9 +23,20 @@ define(function (require, exports, module) {
         this.rotatable = new Pixi.Container();
         this.addChild(this.rotatable);
 
-        this.spine = new Pixi.spine.Spine(Resources.spine('player').spineData);
-        this.spine.skeleton.setToSetupPose();
-        this.rotatable.addChild(this.spine);
+        const characterTexture = Pixi.Texture.fromFrame('sprites/character.png');
+        characterTexture.baseTexture.scaleMode = Pixi.SCALE_MODES.NEAREST;
+
+        this.sprite = new AnimatedSprite(
+            characterTexture,
+            tileImageSize,
+            tileImageSize * 2,
+            characterAnimation
+        );
+        this.sprite.setState('lookDown');
+        this.sprite.scale = {x: tileZoom, y: tileZoom};
+        this.sprite.position.x = (-tileImageSize * tileZoom) / 2;
+        this.sprite.position.y = (-tileImageSize * tileZoom) * 1.7;
+        this.rotatable.addChild(this.sprite);
 
         this.createHpBar();
         this.updateHpBar(health);
@@ -53,13 +64,6 @@ define(function (require, exports, module) {
         if (character.nick) {
             this.createNick(character.nick);
         }
-
-        if (character.type === CharacterType.Bot) {
-            const chest = this.spine.skeleton.findSlot('chest');
-            chest.b = 0.5;
-            chest.g = 0.5;
-            this.spine.scale = {x: 0.9, y: 0.9};
-        }
     }
 
     CharacterModel.prototype = Object.create(Pixi.Container.prototype);
@@ -79,11 +83,11 @@ define(function (require, exports, module) {
     CharacterModel.prototype.createHpBar = function () {
         var healthBarBg = new Pixi.Graphics();
         healthBarBg.beginFill(0x000000, 1);
-        healthBarBg.drawRect(-healthBarBgLength / 2, -36, healthBarBgLength, 10);
+        healthBarBg.drawRect(-healthBarBgLength / 2, -86, healthBarBgLength, 10);
         this.addChild(healthBarBg);
         var healthBar = new Pixi.Graphics();
         healthBar.beginFill(0x00FF00, 1);
-        healthBar.drawRect(-healthBarLength / 2, -34, healthBarLength, 6);
+        healthBar.drawRect(-healthBarLength / 2, -84, healthBarLength, 6);
         this.healthBar = healthBar;
         this.addChild(healthBar);
     };
@@ -100,8 +104,78 @@ define(function (require, exports, module) {
             fill: 0xffffff
         });
         nick.position.x = -(nick.width / 2);
-        nick.position.y = 20;
+        nick.position.y = 13;
         this.addChild(nick);
+    };
+
+    const characterAnimation = {
+        lookDown: [0],
+        lookUp: [4],
+        lookRight: [8],
+        lookLeft: [12],
+        moveDown: [0, 1, 2, 3],
+        moveUp: [4, 5, 6, 7],
+        moveRight: [8, 9, 10, 11],
+        moveLeft: [12, 13, 14, 15]
+    };
+
+    function AnimatedSprite(texture, frameWidth, frameHeight, animations) {
+        this.frames = [];
+        this.animations = animations;
+
+        for (var i = 0; i < texture.height / frameHeight; i++) {
+            for (var j = 0; j < texture.width / frameWidth; j++) {
+                var frame = new Pixi.Texture(texture, {
+                    x: j * frameWidth,
+                    y: i * frameHeight,
+                    width: frameWidth,
+                    height: frameHeight
+                });
+                this.frames.push(frame);
+            }
+        }
+
+        Pixi.Sprite.call(this, this.frames[0]);
+    }
+
+    AnimatedSprite.prototype = Object.create(Pixi.Sprite.prototype);
+    AnimatedSprite.prototype.setState = function (name, startTime) {
+        this.startTime = startTime || 0;
+        console.log(name);
+        if (!this.animations.hasOwnProperty(name)) {
+            throw `Animation state ${name} is undefined`
+        }
+        this.state = name;
+        this.texture = this.frames[this.animations[this.state][0]]
+    };
+    AnimatedSprite.prototype.getState = function () {
+        return this.state;
+    };
+    AnimatedSprite.prototype._getCurrentFrame = function (time) {
+        return Math.round((time - this.startTime) / 200);
+    };
+    AnimatedSprite.prototype.isFinished = function (time) {
+        return this._getCurrentFrame(time) >= this.animations[this.state].length;
+    };
+    AnimatedSprite.prototype.setState = function (name, startTime) {
+        this.startTime = startTime || 0;
+        if (!this.animations.hasOwnProperty(name)) {
+            throw `Animation state ${name} is undefined`
+        }
+        this.state = name;
+        this.texture = this.frames[this.animations[this.state][0]]
+    };
+    AnimatedSprite.prototype.update = function (time) {
+        if (this.startTime == 0) {
+            return;
+        }
+        const animationFrames = this.animations[this.state];
+        const frameIndex = this._getCurrentFrame(time);
+        if (frameIndex >= animationFrames.length) {
+            this.texture = this.frames[animationFrames[0]];
+            return;
+        }
+        this.texture = this.frames[animationFrames[frameIndex]]
     };
 
     module.exports = CharacterModel;

@@ -204,7 +204,7 @@ define(function (require, exports, module) {
         }
         const animation = SkillStore.characterAnimation(event.skill.id);
         if (animation) {
-            characterModel.spine.state.setAnimationByName(0, animation, false);
+            characterModel.sprite.setState(animation, Timer.currentTimeOnServer());
         }
     });
 
@@ -215,17 +215,29 @@ define(function (require, exports, module) {
             CharacterStore.characters().forEach(createCharacterModel);
         },
         recalculatePositions: function () {
+            function setStateIfAnimationIsDifferentOnFinished(characterModel, state, time) {
+                if (characterModel.sprite.getState(state) !== state || characterModel.sprite.isFinished(time)) {
+                    characterModel.sprite.setState(state, time)
+                }
+            }
+
             processAnimations();
             const time = Timer.currentTimeOnServer();
             characterModels.forEach(function (characterModel) {
                 const newPosition = characterPosition(characterModel, time);
                 if (!Point.equal(newPosition, characterModel.position)) {
-                    characterModel.rotatable.rotation = MoveStore.angleAtTime(characterModel.id, time);
-
-                    if (characterModel.spine.state.getCurrent(0) == null) {
-                        characterModel.spine.state.setAnimationByName(0, 'walk', false);
+                    const angle = MoveStore.angleAtTime(characterModel.id, time) / Math.PI + 1;
+                    if (angle > 0.25 && angle <= 0.75) {
+                        setStateIfAnimationIsDifferentOnFinished(characterModel, 'moveLeft', time);
+                    } else if (angle > 0.75 && angle <= 1.25) {
+                        setStateIfAnimationIsDifferentOnFinished(characterModel, 'moveUp', time);
+                    } else if (angle > 1.25 && angle <= 1.75) {
+                        setStateIfAnimationIsDifferentOnFinished(characterModel, 'moveRight', time);
+                    } else {
+                        setStateIfAnimationIsDifferentOnFinished(characterModel, 'moveDown', time);
                     }
                 }
+                characterModel.sprite.update(time);
                 characterModel.position = newPosition;
             });
             if (mainPlayerModel) {
