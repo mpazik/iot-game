@@ -70,13 +70,13 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.subscribe('move-to', sendMoveCommand);
             Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
-            Dispatcher.userEventStream.subscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
+            Dispatcher.userEventStream.subscribe('build-object', sendBuildObjectCommand);
             Dispatcher.userEventStream.subscribe('skill-used-on-world-object', sendUseSkillOnWorldObjectCommand);
             Dispatcher.userEventStream.subscribe('eat-apple', eatAppleCommand);
         } else {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
-            Dispatcher.userEventStream.unsubscribe('skill-used-on-world-map', sendUseSkillOnWorldMapCommand);
+            Dispatcher.userEventStream.unsubscribe('build-object', sendBuildObjectCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-world-object', sendUseSkillOnWorldObjectCommand);
             Dispatcher.userEventStream.unsubscribe('eat-apple', eatAppleCommand);
         }
@@ -110,9 +110,8 @@ define(function (require, exports, module) {
         network.sendCommand(new Commands.UseSkillOnCharacter(data.skillId, data.characterId));
     }
 
-    function sendUseSkillOnWorldMapCommand(data) {
-        if (!ItemStore.checkSkillItemRequirements(data.skillId)) return;
-        network.sendCommand(new Commands.UseSkillOnWorldMap(data.skillId, data.x, data.y));
+    function sendBuildObjectCommand(data) {
+        network.sendCommand(new Commands.BuildObject(data.objectKindId, data.x, data.y));
     }
 
     function sendUseSkillOnWorldObjectCommand(data) {

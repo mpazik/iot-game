@@ -36,6 +36,7 @@ define(function (require, exports, module) {
     const container = new Pixi.Container();
     const stage = new Pixi.Container();
     stage.addChild(container);
+    Pixi.SCALE_MODES.DEFAULT = Pixi.SCALE_MODES.NEAREST;
     const renderer = Pixi.autoDetectRenderer(width, height);
     renderer.backgroundColor = 0x156c99;
 

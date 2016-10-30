@@ -22,7 +22,7 @@ define(function (require, exports, module) {
     });
 
     Targeting.targetingState.subscribe(function (skill) {
-        publishActive(skill == null ? null : skill.id);
+        publishActive(skill == null || skill.type === Skills.Types.BUILD ? null : skill.id);
     });
 
     module.exports = {

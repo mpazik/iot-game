@@ -1,21 +1,22 @@
 package dzida.server.app.instance;
 
 import com.google.common.collect.ImmutableSet;
+import dzida.server.app.instance.command.BuildObjectCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
-import dzida.server.app.instance.command.SkillUseOnWorldMapCommand;
 import dzida.server.app.instance.command.SkillUseOnWorldObjectCommand;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.world.object.WorldObject;
+import dzida.server.core.world.object.WorldObjectKind;
 
 public interface CharacterCommand {
     ImmutableSet<Class<?>> classes = ImmutableSet.of(
             Move.class,
             UseSkillOnCharacter.class,
-            UseSkillOnWorldMap.class,
+            BuildObject.class,
             UseSkillOnWorldObject.class,
             EatApple.class,
             EatRottenApple.class
@@ -55,20 +56,20 @@ public interface CharacterCommand {
         }
     }
 
-    class UseSkillOnWorldMap implements CharacterCommand {
-        public final Id<Skill> skillId;
+    class BuildObject implements CharacterCommand {
+        public final Id<WorldObjectKind> objectKindId;
         public final double x;
         public final double y;
 
-        private UseSkillOnWorldMap(Id<Skill> skillId, double x, double y) {
-            this.skillId = skillId;
+        private BuildObject(Id<WorldObjectKind> objectKindId, double x, double y) {
+            this.objectKindId = objectKindId;
             this.x = x;
             this.y = y;
         }
 
         @Override
         public InstanceCommand getInstanceCommand(Id<Character> characterId) {
-            return new SkillUseOnWorldMapCommand(characterId, skillId, x, y);
+            return new BuildObjectCommand(characterId, objectKindId, x, y);
         }
     }
 

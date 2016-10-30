@@ -10,8 +10,7 @@ define(function (require, exports, module) {
 
     function createTileTextures(tileset) {
         var tileTextures = [];
-        const texture = Pixi.utils.TextureCache["tilesets/" + tileset.image];
-        texture.baseTexture.scaleMode = Pixi.SCALE_MODES.NEAREST;
+        const texture = Pixi.Texture.fromFrame(["tilesets/" + tileset['image']]);
         for (var i = 0; i < texture.height / tileImageSize; i++) {
             for (var j = 0; j < texture.width / tileImageSize; j++) {
                 var tileTexture = new Pixi.Texture(texture, {

@@ -2,6 +2,7 @@ define(function (require, exports, module) {
     const Pixi = require('pixi');
     const WorldObjectStore = require('../store/world-object');
     const tileSize = require('configuration').tileSize;
+    const zoom = require('configuration').zoom;
     const Targeting = require('../component/targeting');
     const Skills = require('../common/model/skills');
     const Dispatcher = require('../component/dispatcher');
@@ -21,9 +22,10 @@ define(function (require, exports, module) {
     const worldObjects = [];
 
     function createWorldObject(objectData) {
-        const kind = WorldObjectStore.kindDefinition(objectData.kind);
-        const worldObject = Pixi.Sprite.fromImage(kind.sprite);
+        const objectKind = WorldObjectStore.kindDefinition(objectData.kind);
+        const worldObject = Pixi.Sprite.fromImage(objectKind['sprite'] + '.png');
         worldObject.id = objectData.id;
+        worldObject.scale = {x: zoom, y: zoom};
         worldObject.position.x = objectData.x * tileSize;
         worldObject.position.y = objectData.y * tileSize;
         worldObject.kind = objectData.kind;
@@ -44,7 +46,46 @@ define(function (require, exports, module) {
         };
 
         worldObjects.push(worldObject);
-        worldObjects.isHover = kind.isHover;
+
+        // const collisionLayer = objectKind['collisionLayer'];
+        // const graphics = new Pixi.Graphics();
+        // graphics.lineStyle(5, 0xFFFF00);
+        // graphics.drawRect(
+        //     objectData.x * tileSize,
+        //     objectData.y * tileSize,
+        //     objectKind.width * tileSize,
+        //     objectKind.height * tileSize);
+        // highObjectLayer.addChild(graphics);
+        //
+        // if (objectKind['collisionLayer']) {
+        //     const collisionLayer = objectKind['collisionLayer'];
+        //     const collisionGraphics = new Pixi.Graphics();
+        //     collisionGraphics.lineStyle(4, 0xFF0000);
+        //     const collisionX = objectData.x + (collisionLayer['offsetX'] || 0);
+        //     const collisionY = objectData.y + (collisionLayer['offsetY'] || 0);
+        //     collisionGraphics.drawRect(
+        //         collisionX * tileSize,
+        //         collisionY * tileSize,
+        //         collisionLayer['width'] * tileSize,
+        //         collisionLayer['height'] * tileSize);
+        //     highObjectLayer.addChild(collisionGraphics);
+        // }
+        //
+        // if (objectKind['treeCollisionLayer']) {
+        //     const collisionLayer = objectKind['treeCollisionLayer'];
+        //     const collisionGraphics = new Pixi.Graphics();
+        //     collisionGraphics.lineStyle(4, 0x00FF00);
+        //     const collisionX = objectData.x + (collisionLayer['offsetX'] || 0);
+        //     const collisionY = objectData.y + (collisionLayer['offsetY'] || 0);
+        //     collisionGraphics.drawRect(
+        //         collisionX * tileSize,
+        //         collisionY * tileSize,
+        //         collisionLayer['width'] * tileSize,
+        //         collisionLayer['height'] * tileSize);
+        //     highObjectLayer.addChild(collisionGraphics);
+        // }
+
+        worldObjects.isHover = objectKind.isHover;
         if (worldObjects.isHover)
             highObjectLayer.addChild(worldObject);
         else
@@ -56,7 +97,7 @@ define(function (require, exports, module) {
         worldObject.filters = [interactiveFilter];
     }
 
-    function makeWorldObjectNonInteractive (worldObject) {
+    function makeWorldObjectNonInteractive(worldObject) {
         if (worldObject.interactive) {
             worldObject.interactive = false;
             worldObject.filters = null;
@@ -64,7 +105,7 @@ define(function (require, exports, module) {
     }
 
     function removeObject(worldObjectId) {
-        const index = worldObjects.findIndex(function(worldObject){
+        const index = worldObjects.findIndex(function (worldObject) {
             return worldObject.id === worldObjectId
         });
         const worldObject = worldObjects[index];

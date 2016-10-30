@@ -30,18 +30,29 @@ define(function (require, exports, module) {
     });
     const kindDefinition = (kind) => Resources.objectKind(kind);
 
-    function isTileOnObject(tx, ty, object) {
-        const kind = kindDefinition(object.kind);
-        for (var i = 0; i < kind.width; i++) {
-            for (var j = 0; j < kind.height; j++) {
-                var currentTileX = object.x + i;
-                var currentTileY = object.y + j;
-                if (currentTileX == tx && currentTileY == ty) {
-                    return true;
-                }
-            }
+    function areRectanglesOverlapping(r1, r2) {
+        return r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y;
+    }
+
+    function getCollisionRectangleFromLayer(x, y, layer) {
+        return {
+            x: x + (layer['offsetX'] || 0),
+            y: y + (layer['offsetY'] || 0),
+            width: layer.width,
+            height: layer.height
         }
-        return false;
+    }
+
+    function getCollisionRectangle(x, y, objectKind) {
+        if (objectKind['collisionLayer']) {
+            return getCollisionRectangleFromLayer(x, y, objectKind['collisionLayer'])
+        }
+        return {
+            x,
+            y: y,
+            width: objectKind.width,
+            height: objectKind.height
+        }
     }
 
     module.exports = {
@@ -54,11 +65,24 @@ define(function (require, exports, module) {
             Dispatcher.messageStream.subscribeLast(Messages.WorldObjectRemoved, (event) => push(event.worldObjectId));
         }),
         kindDefinition,
-        isAnyObjectOnTile: (tx, ty) => {
-            for (var obj of state.values()) {
-                if (isTileOnObject(tx, ty, obj)) return true;
+        isFreePlaceForObject: (x, y, objectKind) => {
+            const treeCollisionRectangle = objectKind['treeCollisionLayer'] ? getCollisionRectangleFromLayer(x, y, objectKind['treeCollisionLayer']) : null;
+            const collisionRectangle = getCollisionRectangle(x, y, objectKind);
+            for (var object of state.values()) {
+                const objectKind2 = kindDefinition(object.kind);
+                if (treeCollisionRectangle && objectKind2['treeCollisionLayer']) {
+                    const collisionRectangle2 = getCollisionRectangleFromLayer(object.x, object.y, objectKind2['treeCollisionLayer']);
+                    if (areRectanglesOverlapping(treeCollisionRectangle, collisionRectangle2)) {
+                        return false;
+                    }
+                } else {
+                    const collisionRectangle2 = getCollisionRectangle(object.x, object.y, objectKind2);
+                    if (areRectanglesOverlapping(collisionRectangle, collisionRectangle2)) {
+                        return false;
+                    }
+                }
             }
-            return false;
+            return true;
         }
     };
 });

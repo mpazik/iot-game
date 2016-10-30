@@ -33,9 +33,8 @@ public class WorldObjectStoreInMemory implements WorldObjectStore {
     }
 
     @Override
-    public GeneralEntity<WorldObject> createWorldObject(int objectKind, int x, int y) {
-        Id<WorldObjectKind> id = new Id<>((long) objectKind);
-        WorldObject worldObject = new WorldObject(id, x, y);
+    public GeneralEntity<WorldObject> createWorldObject(Id<WorldObjectKind> objectKindId, int x, int y) {
+        WorldObject worldObject = new WorldObject(objectKindId, x, y);
         return new GeneralEntity<>(
                 new Id<>(newId()),
                 worldObject

@@ -1,12 +1,13 @@
 define(function (require, exports, module) {
     const Pixi = require('pixi');
     const TileSize = require('configuration').tileSize;
+    const zoom = require('configuration').zoom;
     const WorldMap = require('./world');
     const Targeting = require('../component/targeting');
     const Skills = require('../common/model/skills');
     const Resources = require('../store/resources');
-    const WorldMapStore = require('../store/world');
     const WorldObjectStore = require('../store/world-object');
+    const WorldMapStore = require('../store/world');
     const Dispatcher = require('../component/dispatcher');
 
     const lowLayer = new Pixi.Container();
@@ -29,21 +30,41 @@ define(function (require, exports, module) {
     }
 
     function canObjectBeBuild(startTileX, startTileY, objectKind) {
-        function canObjectBeBuildOnTile(tx, ty) {
-            return objectKind.terrains.includes(WorldMapStore.terrain(tx, ty));
+        if (!WorldObjectStore.isFreePlaceForObject(startTileX, startTileY, objectKind)) {
+            return false;
         }
 
-        for (var i = 0; i < objectKind.width; i++) {
-            for (var j = 0; j < objectKind.height; j++) {
-                // ct stands for current tile
-                var ctx = startTileX + i;
-                var cty = startTileY + j;
-                if (!canObjectBeBuildOnTile(ctx, cty) || WorldObjectStore.isAnyObjectOnTile(ctx, cty)) {
-                    return false;
+        const collisionLayer = objectKind['collisionLayer'];
+        if (collisionLayer) {
+            const offsetX = collisionLayer['offsetX'] || 0;
+            const offsetY = collisionLayer['offsetY'] || 0;
+            return checkAllTileInRectangle(startTileX + offsetX, startTileY + offsetY, collisionLayer.width, collisionLayer.height);
+        } else {
+            return checkAllTileInRectangle(startTileX, startTileY, objectKind.width, objectKind.height);
+        }
+
+        function checkAllTileInRectangle(startX, startY, width, height) {
+            // ct stands for current tile
+            for (var ctx = startX; ctx < startX + width; ctx++) {
+                for (var cty = startY; cty < startY + height; cty++) {
+                    if (!canObjectBeBuildOnTile(ctx, cty)) {
+                        return false;
+                    }
                 }
             }
+            return true;
         }
-        return true;
+
+        function canObjectBeBuildOnTile(tx, ty) {
+            const availableTerrains = targetingData.objectKind['terrains'];
+            if (!availableTerrains) {
+                return true;
+            }
+            const terrainIds = WorldMapStore.tileTerrains(tx, ty);
+            const terrainNames = terrainIds.map(id => WorldMapStore.terrainName(id));
+
+            return terrainNames.every(terrain => availableTerrains.includes(terrain))
+        }
     }
 
     function buildOnPosition(data) {
@@ -51,8 +72,8 @@ define(function (require, exports, module) {
         const ty = Math.floor(data.y - targetingData.spriteOffset.y);
         if (!canObjectBeBuild(tx, ty, targetingData.objectKind)) return;
 
-        Dispatcher.userEventStream.publish('skill-used-on-world-map', {
-            skillId: targetingData.skill.id,
+        Dispatcher.userEventStream.publish('build-object', {
+            objectKindId: targetingData.objectKind.id,
             x: tx,
             y: ty
         })
@@ -70,8 +91,9 @@ define(function (require, exports, module) {
         if (skill == null) return;
 
         if (skill.type === Skills.Types.BUILD) {
-            const objectKind = Resources.objectKind(skill.worldObject);
-            const sprite = Pixi.Sprite.fromImage(objectKind.sprite);
+            const objectKind = Resources.objectKind(skill.objectKind);
+            const sprite = Pixi.Sprite.fromImage(objectKind['sprite'] + '.png');
+            sprite.scale = {x: zoom, y: zoom};
             const spriteOffset = {x: (objectKind.width - 1) * 0.5, y: (objectKind.height - 1) * 0.5};
             targetingData = {objectKind, spriteOffset, sprite, skill};
             recalculateSpritePosition(WorldMap.mousePositionStream.value);

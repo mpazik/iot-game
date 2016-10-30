@@ -8,8 +8,8 @@ define(function (require, exports, module) {
             this.skillId = skillId;
             this.target = target;
         },
-        UseSkillOnWorldMap: function (skillId, x, y) {
-            this.skillId = skillId;
+        BuildObject: function (objectKindId, x, y) {
+            this.objectKindId = objectKindId;
             this.x = x;
             this.y = y;
         },

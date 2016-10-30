@@ -13,12 +13,12 @@ import dzida.server.core.position.PositionService;
 import dzida.server.core.skill.event.CharacterGotDamage;
 import dzida.server.core.skill.event.CharacterHealed;
 import dzida.server.core.skill.event.SkillUsedOnCharacter;
-import dzida.server.core.skill.event.SkillUsedOnWorldMap;
 import dzida.server.core.skill.event.SkillUsedOnWorldObject;
 import dzida.server.core.time.TimeService;
 import dzida.server.core.world.event.WorldObjectCreated;
 import dzida.server.core.world.event.WorldObjectRemoved;
 import dzida.server.core.world.object.WorldObject;
+import dzida.server.core.world.object.WorldObjectKind;
 import dzida.server.core.world.object.WorldObjectService;
 
 import java.util.ArrayList;
@@ -70,24 +70,19 @@ public class SkillCommandHandler {
         return Outcome.ok(handleAttackOnCreature(casterId, skill, targetId));
     }
 
-    public Outcome<List<GameEvent>> useSkillOnWorldMap(Id<Character> casterId, Id<Skill> skillId, double x, double y) {
+    public Outcome<List<GameEvent>> buildObject(Id<Character> casterId, Id<WorldObjectKind> objectKindId, double x, double y) {
         if (!characterService.isCharacterLive(casterId)) {
             return Outcome.error("Skill can not be used by a not living character.");
         }
 
-        Skill skill = skillService.getSkill(skillId);
         if (!isReadyForAbility(casterId)) {
             return Outcome.error("You are not ready yet to use ability");
         }
-        if (skill.getType() != Skills.Types.BUILDING) {
-            return Outcome.error("Server can not understand received message");
-        }
-        Optional<GeneralEntity<WorldObject>> worldObject = worldObjectService.createWorldObject(skill.getWorldObject(), (int) x, (int) y);
+        Optional<GeneralEntity<WorldObject>> worldObject = worldObjectService.createWorldObject(objectKindId, (int) x, (int) y);
         if (!worldObject.isPresent()) {
             return Outcome.error("You can not build object on that position");
         }
         return Outcome.ok(ImmutableList.of(
-                new SkillUsedOnWorldMap(casterId, skill.getId(), x, y),
                 new WorldObjectCreated(worldObject.get())
         ));
     }

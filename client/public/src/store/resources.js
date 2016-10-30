@@ -90,6 +90,7 @@ define(function (require, exports, module) {
         },
         load: function () {
             loadCss(assetsPath + "icons/icons.css");
+            loadCss(assetsPath + "sprites/objects.css");
             const spritesPaths = sprites.map(function (file) {
                 return assetPath("sprites", file);
             });

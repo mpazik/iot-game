@@ -1,11 +1,11 @@
 package dzida.server.app.instance;
 
 import dzida.server.app.Configuration;
+import dzida.server.app.instance.command.BuildObjectCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
 import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
-import dzida.server.app.instance.command.SkillUseOnWorldMapCommand;
 import dzida.server.app.instance.command.SkillUseOnWorldObjectCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
 import dzida.server.core.basic.Outcome;
@@ -52,8 +52,8 @@ public class CommandResolver {
                 .is(SkillUseOnCharacterCommand.class)
                 .thenReturn(command -> skillCommandHandler.useSkillOnCharacter(command.characterId, command.skillId, command.target))
 
-                .is(SkillUseOnWorldMapCommand.class)
-                .thenReturn(command -> skillCommandHandler.useSkillOnWorldMap(command.characterId, command.skillId, command.x, command.y))
+                .is(BuildObjectCommand.class)
+                .thenReturn(command -> skillCommandHandler.buildObject(command.characterId, command.objectKindId, command.x, command.y))
 
                 .is(SkillUseOnWorldObjectCommand.class)
                 .thenReturn(command -> skillCommandHandler.useSkillOnWorldObject(command.characterId, command.skillId, command.target))

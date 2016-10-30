@@ -2,6 +2,7 @@ define('configuration', [], {
     playerSpeed: 5,
     tileSize: 48,
     tileImageSize: 16,
+    zoom: 3,
     spawnTime: 4000,
     devMode: true,
     serverAddress: "ws://localhost:7001",

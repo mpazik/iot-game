@@ -107,13 +107,13 @@ public class WorldMapStoreHttp implements WorldMapStore {
         if (terrains.size() == 1) {
             Integer terrain = terrains.iterator().next();
             String terrainName = terrainTypes.get(terrain).getName();
-            if (terrainName.equals("Water")) {
+            if (terrainName.equals("water")) {
                 return TerrainType.WATER;
             }
-            if (terrainName.equals("Grass")) {
+            if (terrainName.equals("grass")) {
                 return TerrainType.GRASS;
             }
-            if (terrainName.equals("Soil")) {
+            if (terrainName.equals("soil")) {
                 return TerrainType.SOIL;
             }
         }
@@ -121,8 +121,8 @@ public class WorldMapStoreHttp implements WorldMapStore {
             Iterator<Integer> terrainIterator = terrains.iterator();
             String terrainOne = terrainTypes.get(terrainIterator.next()).getName();
             String terrainTwo = terrainTypes.get(terrainIterator.next()).getName();
-            if ((terrainOne.equals("Water") && terrainTwo.equals("Grass")) ||
-                    (terrainOne.equals("Grass") && terrainTwo.equals("Water"))) {
+            if ((terrainOne.equals("water") && terrainTwo.equals("grass")) ||
+                    (terrainOne.equals("grass") && terrainTwo.equals("water"))) {
                 return TerrainType.WATER_GRASS;
             }
         }

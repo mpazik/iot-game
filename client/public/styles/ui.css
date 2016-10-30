@@ -369,3 +369,23 @@ feedback-window textarea {
     background-color: rgba(0, 0, 0, .5);
     -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
+
+building-window {
+    overflow-y: auto;
+}
+
+building-window .object:first-child {
+    border-top: none;
+}
+
+building-window .object {
+    width: 200px;
+    border-top: var(--main-color) 1px solid;
+    margin: 10px 0;
+    padding: 10px 0
+}
+
+building-window .object-icon {
+    float: left;
+    margin-right: 20px
+}

@@ -22,14 +22,20 @@ define(function (require, exports, module) {
         init
     });
     const tile = (tx, ty) => state.tiles[ty * state.width + tx];
-    const terrain = (tx, ty) => tileset().terrains[tile(tx, ty)];
-
     module.exports = {
         key,
         init,
         state: () => state,
         tileSize: () => state.tileset.tileSize,
         spawnPoint: () => state.spawnPoint,
-        tile, terrain
+        tile,
+        tileTerrains(tx, ty) {
+            const tileInfo = tileset()['tiles'][tile(tx, ty) - 1];
+            const terrains = tileInfo['terrain'];
+            return Array.from(new Set(terrains));
+        },
+        terrainName(terrainId) {
+            return tileset()['terrains'][terrainId].name;
+        }
     };
 });

@@ -24,7 +24,6 @@ define(function (require, exports, module) {
         this.addChild(this.rotatable);
 
         const characterTexture = Pixi.Texture.fromFrame('sprites/character.png');
-        characterTexture.baseTexture.scaleMode = Pixi.SCALE_MODES.NEAREST;
 
         this.sprite = new AnimatedSprite(
             characterTexture,

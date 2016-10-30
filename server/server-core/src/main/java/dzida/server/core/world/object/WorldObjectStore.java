@@ -8,7 +8,7 @@ import java.util.List;
 public interface WorldObjectStore {
     List<GeneralEntity<WorldObject>> getAll();
 
-    GeneralEntity<WorldObject> createWorldObject(int objectKind, int x, int y);
+    GeneralEntity<WorldObject> createWorldObject(Id<WorldObjectKind> objectKindId, int x, int y);
 
     void createObject(GeneralEntity<WorldObject> worldObject);
 

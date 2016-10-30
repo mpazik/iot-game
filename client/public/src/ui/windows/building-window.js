@@ -1,28 +1,17 @@
 define(function (require) {
+    const objectKindById = require('../../store/resources').objectKind;
+    const userEventStream = require('../../component/dispatcher').userEventStream;
     const Skills = require('../../common/model/skills');
-    const skillById = require('../../store/resources').skill;
+    const unlockedObjects = [1, 2, 3];
 
-    function getBuildingSkills() {
-        function values(obj) {
-            const vals = [];
-            for (var key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    vals.push(obj[key]);
-                }
-            }
-            return vals;
-        }
-
-        return values(Skills.Ids).map(skillById).filter(skill => skill.type == Skills.Types.BUILD);
-    }
-
-    function renderSkill(skill) {
-        return `<div class="skill">
-<h3>${skill['title']}</h3>
-${renderUnlockDate(achievement)}
-<span>${achievement['imperative']}</span>
-${renderAchievementProgress(achievement)}
-${renderRewards(achievement)}
+    function renderObject(objectKind) {
+        return `<div class="object">
+    <div class="object-icon ${objectKind['sprite']}"></div>
+    <div>
+        <h3>${objectKind['name']}</h3>
+        <button data-object-kind-id="${objectKind['id']}" class="build-button">Build</button>
+    </div>
+    <div style="clear: both"></div>
 </div>
 `;
     }
@@ -35,19 +24,29 @@ ${renderRewards(achievement)}
             }
         },
         created: function () {
-            this.innerHTML = `
-<div>
-    
-</div>
-`;
+            this.innerHTML = `<div></div>`;
         },
         attached: function () {
-            console.log(getBuildingSkills());
+            this._update();
         },
         detached: function () {
         },
         _update: function () {
-            this.innerHTML = Skills.achievementList.map(achievement => renderAchievement(achievement)).join('\n');
+            this.innerHTML = unlockedObjects.map(objectKindId => renderObject(objectKindById(objectKindId))).join('\n');
+            const buildButtons = this.getElementsByClassName('build-button');
+            for (const buildButton of buildButtons) {
+                buildButton.addEventListener('click', function () {
+                    const objectKindId = this.getAttribute('data-object-kind-id');
+                    userEventStream.publish('toggle-window', 'building-window');
+                    userEventStream.publish('skill-triggered', {
+                        skill: {
+                            id: 1,
+                            type: Skills.Types.BUILD,
+                            objectKind: objectKindId
+                        }
+                    });
+                });
+            }
         }
     });
 });
