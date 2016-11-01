@@ -1,5 +1,4 @@
 define(function (require, exports, module) {
-    const Pixi = require('pixi');
     const CharacterStore = require('../store/character');
     const MainPlayer = require('../store/main-player');
     const MoveStore = require('../store/move');
@@ -11,101 +10,10 @@ define(function (require, exports, module) {
     const Skills = require('../common/model/skills');
     const Timer = require('../component/timer');
     const Friends = require('../component/friends');
+    const WorldBoard = require('../render/world-board');
 
-    const layer = new Pixi.Container();
-    const pointsLayer = new Pixi.Container();
     const characterModels = [];
     var mainPlayerModel = null;
-
-    const damageFont = {
-        font: "16px Arial",
-        fill: 0xff3333,
-        stroke: 0x000000,
-        strokeThickness: 2
-    };
-
-    const healedFont = {
-        font: "16px Arial",
-        fill: 0x33ff33,
-        stroke: 0x000000,
-        strokeThickness: 2
-    };
-
-    function interpolate(ratio, begin, end) {
-        return begin + (end - begin) * ratio
-    }
-
-    function animate(ratio, object, offset, animation) {
-        animation.properties.forEach(function (property) {
-            const start = animation.start[property];
-            const end = animation.end[property];
-            object[property] = offset[property] + interpolate(ratio, start, end);
-        })
-    }
-
-    const animationTypes = {
-        point: {
-            properties: ['y'],
-            start: {
-                y: -20
-            },
-            end: {
-                y: -60
-            },
-            duration: 1500
-        }
-    };
-    var runningAnimations = [];
-
-    function processAnimations() {
-        const timeNow = Date.now();
-        runningAnimations = runningAnimations.filter((animation) => {
-            const animationTime = timeNow - animation.started;
-            const animationType = animationTypes[animation.type];
-            const animationEnded = animationTime >= animationType.duration;
-            if (animationEnded) {
-                // remove animation
-                if (typeof animation.onFinish === 'function') {
-                    animation.onFinish();
-                }
-            }
-            return !animationEnded;
-        });
-        runningAnimations.forEach((animation) => {
-            const animationTime = timeNow - animation.started;
-            const animationType = animationTypes[animation.type];
-            const ratio = animationTime / animationType.duration;
-            animate(ratio, animation.object, animation.offset, animationType);
-        });
-    }
-
-    function registerAnimation(object, offset, type, onFinish) {
-        // initialise offset
-        animationTypes[type].properties.forEach(function (property) {
-            if (!offset[property]) {
-                offset[property] = 0;
-            }
-        });
-        const animation = {
-            started: Date.now(),
-            object: object,
-            offset: offset,
-            type: type,
-            onFinish: onFinish
-        };
-        runningAnimations.push(animation);
-    }
-
-    function startDamagePointsAnimation(position, value) {
-        const font = value < 0 ? damageFont : healedFont;
-        const point = new Pixi.Text(value, font);
-        point.position.x = position.x - point.width / 2;
-        point.position.y = position.y;
-        registerAnimation(point, {y: position.y}, 'point', function () {
-            pointsLayer.removeChild(point);
-        });
-        pointsLayer.addChild(point)
-    }
 
     function isSkillTarget(mainCharacterId, characterId, skill) {
         if (skill.target == Skills.Targets.ENEMIES) {
@@ -155,7 +63,7 @@ define(function (require, exports, module) {
         model.position = characterPosition(model, time);
         model.rotatable.rotation = MoveStore.angleAtTime(model.id, time);
         characterModels.push(model);
-        layer.addChild(model);
+        WorldBoard.addObject(model);
         if (character.id === MainPlayer.characterId()) {
             mainPlayerModel = model;
         }
@@ -165,7 +73,7 @@ define(function (require, exports, module) {
         const index = characterModels.findIndex(function (character) {
             return character.id === characterId;
         });
-        layer.removeChild(characterModels[index]);
+        WorldBoard.removeObject(characterModels[index]);
         characterModels.splice(index, 1);
         if (characterId === MainPlayer.characterId()) {
             mainPlayerModel = null;
@@ -192,7 +100,6 @@ define(function (require, exports, module) {
 
     SkillStore.characterHealthChangeStream.subscribe(function (event) {
         const characterModel = findCharacterModel(event.characterId);
-        startDamagePointsAnimation(characterModel.position, event.change);
         characterModel.updateHpBar(SkillStore.percentHealth(event.characterId));
     });
 
@@ -210,7 +117,6 @@ define(function (require, exports, module) {
 
     module.exports = {
         init: function () {
-            layer.removeChildren();
             characterModels.length = 0;
             CharacterStore.characters().forEach(createCharacterModel);
         },
@@ -221,10 +127,10 @@ define(function (require, exports, module) {
                 }
             }
 
-            processAnimations();
             const time = Timer.currentTimeOnServer();
             characterModels.forEach(function (characterModel) {
                 const newPosition = characterPosition(characterModel, time);
+                newPosition.y -= 80;
                 if (!Point.equal(newPosition, characterModel.position)) {
                     const angle = MoveStore.angleAtTime(characterModel.id, time) / Math.PI + 1;
                     if (angle > 0.25 && angle <= 0.75) {
@@ -246,12 +152,7 @@ define(function (require, exports, module) {
                 MainPlayer.position.x = mainPlayerModel.position.x / TileSize;
                 MainPlayer.position.y = mainPlayerModel.position.y / TileSize;
             }
-        },
-        get layer() {
-            return layer;
-        },
-        get pointsLayer() {
-            return pointsLayer;
+            WorldBoard.sortDisplayOrder();
         }
     };
 });

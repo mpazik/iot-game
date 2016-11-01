@@ -25,11 +25,11 @@ define(function (require, exports, module) {
         this.sprite.setState('lookDown');
         this.sprite.scale = {x: tileZoom, y: tileZoom};
         this.sprite.position.x = (-tileImageSize * tileZoom) / 2;
-        this.sprite.position.y = (-tileImageSize * tileZoom) * 1.7;
+        this.sprite.position.y = 0;
         this.rotatable.addChild(this.sprite);
 
-        this.createHpBar();
-        this.updateHpBar(health);
+        // this.createHpBar();
+        // this.updateHpBar(health);
 
         this.mousedown = function () {
             Dispatcher.userEventStream.publish({
@@ -92,7 +92,7 @@ define(function (require, exports, module) {
             fill: 0xffffff
         });
         nick.position.x = -(nick.width / 2);
-        nick.position.y = 13;
+        nick.position.y = -10;
         this.addChild(nick);
     };
 

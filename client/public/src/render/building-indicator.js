@@ -9,9 +9,7 @@ define(function (require, exports, module) {
     const WorldObjectStore = require('../store/world-object');
     const WorldMapStore = require('../store/world');
     const Dispatcher = require('../component/dispatcher');
-
-    const lowLayer = new Pixi.Container();
-    const highLayer = new Pixi.Container();
+    const WorldBoard = require('../render/world-board');
 
     var targetingData = null;
 
@@ -21,6 +19,7 @@ define(function (require, exports, module) {
         const ty = Math.floor(position.y - targetingData.spriteOffset.y);
         sprite.position.x = tx * TileSize;
         sprite.position.y = ty * TileSize;
+        WorldBoard.sortDisplayOrder();
 
         if (canObjectBeBuild(tx, ty, targetingData.objectKind)) {
             sprite.tint = 0x66FF66;
@@ -81,8 +80,7 @@ define(function (require, exports, module) {
 
     Targeting.targetingState.subscribe(function (skill) {
         if (targetingData != null) {
-            lowLayer.removeChildren();
-            highLayer.removeChildren();
+            WorldBoard.removeObject(targetingData.sprite);
             targetingData = null;
             WorldMap.mousePositionStream.unsubscribe(recalculateSpritePosition);
             WorldMap.worldMapClicked.unsubscribe(buildOnPosition);
@@ -99,23 +97,7 @@ define(function (require, exports, module) {
             recalculateSpritePosition(WorldMap.mousePositionStream.value);
             WorldMap.mousePositionStream.subscribe(recalculateSpritePosition);
             WorldMap.worldMapClicked.subscribe(buildOnPosition);
-
-            if (objectKind.isHover)
-                highLayer.addChild(sprite);
-            else
-                lowLayer.addChild(sprite);
+            WorldBoard.addObject(sprite);
         }
     });
-
-    module.exports = {
-        init: function () {
-            highLayer.removeChildren();
-        },
-        get lowLayer() {
-            return lowLayer
-        },
-        get highLayer() {
-            return highLayer
-        }
-    };
 });

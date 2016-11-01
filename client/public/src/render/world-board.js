@@ -7,8 +7,7 @@ define(function (require, exports, module) {
     const Skills = require('../common/model/skills');
     const Dispatcher = require('../component/dispatcher');
 
-    var lowObjectLayer = new Pixi.Container();
-    var highObjectLayer = new Pixi.Container();
+    const boardLayer = new Pixi.Container();
 
     const worldObjects = [];
 
@@ -35,50 +34,8 @@ define(function (require, exports, module) {
         };
 
         worldObjects.push(worldObject);
-
-        // const collisionLayer = objectKind['collisionLayer'];
-        // const graphics = new Pixi.Graphics();
-        // graphics.lineStyle(5, 0xFFFF00);
-        // graphics.drawRect(
-        //     objectData.x * tileSize,
-        //     objectData.y * tileSize,
-        //     objectKind.width * tileSize,
-        //     objectKind.height * tileSize);
-        // highObjectLayer.addChild(graphics);
-        //
-        // if (objectKind['collisionLayer']) {
-        //     const collisionLayer = objectKind['collisionLayer'];
-        //     const collisionGraphics = new Pixi.Graphics();
-        //     collisionGraphics.lineStyle(4, 0xFF0000);
-        //     const collisionX = objectData.x + (collisionLayer['offsetX'] || 0);
-        //     const collisionY = objectData.y + (collisionLayer['offsetY'] || 0);
-        //     collisionGraphics.drawRect(
-        //         collisionX * tileSize,
-        //         collisionY * tileSize,
-        //         collisionLayer['width'] * tileSize,
-        //         collisionLayer['height'] * tileSize);
-        //     highObjectLayer.addChild(collisionGraphics);
-        // }
-        //
-        // if (objectKind['treeCollisionLayer']) {
-        //     const collisionLayer = objectKind['treeCollisionLayer'];
-        //     const collisionGraphics = new Pixi.Graphics();
-        //     collisionGraphics.lineStyle(4, 0x00FF00);
-        //     const collisionX = objectData.x + (collisionLayer['offsetX'] || 0);
-        //     const collisionY = objectData.y + (collisionLayer['offsetY'] || 0);
-        //     collisionGraphics.drawRect(
-        //         collisionX * tileSize,
-        //         collisionY * tileSize,
-        //         collisionLayer['width'] * tileSize,
-        //         collisionLayer['height'] * tileSize);
-        //     highObjectLayer.addChild(collisionGraphics);
-        // }
-
-        worldObjects.isHover = objectKind.isHover;
-        if (worldObjects.isHover)
-            highObjectLayer.addChild(worldObject);
-        else
-            lowObjectLayer.addChild(worldObject);
+        addSprite(worldObject);
+        sortDisplayOrder();
     }
 
     function makeWorldObjectInteractive(worldObject) {
@@ -98,10 +55,7 @@ define(function (require, exports, module) {
             return worldObject.id === worldObjectId
         });
         const worldObject = worldObjects[index];
-        if (worldObjects.isHover)
-            highObjectLayer.removeChild(worldObject);
-        else
-            lowObjectLayer.removeChild(worldObject);
+        boardLayer.removeChild(worldObject);
         worldObjects.splice(index, 1);
     }
 
@@ -117,16 +71,31 @@ define(function (require, exports, module) {
         }
     });
 
+    function addSprite(sprite) {
+        boardLayer.addChild(sprite);
+    }
+
+    function sortDisplayOrder() {
+        boardLayer.children.sort(function (a, b) {
+            return (a.position.y + a.height) - (b.position.y + b.height);
+        });
+    }
+
     module.exports = {
         init: function () {
+            boardLayer.removeChildren();
             const rawWorldObjects = WorldObjectStore.objects();
             rawWorldObjects.forEach(createWorldObject);
         },
-        get lowObjectLayer() {
-            return lowObjectLayer;
+        addObject: function (sprite) {
+            addSprite(sprite);
         },
-        get highObjectLayer() {
-            return highObjectLayer;
+        sortDisplayOrder,
+        removeObject: function (sprite) {
+            boardLayer.removeChild(sprite);
+        },
+        get boardLayer() {
+            return boardLayer;
         }
     };
 });

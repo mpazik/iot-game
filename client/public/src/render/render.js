@@ -5,10 +5,10 @@ define(function (require, exports, module) {
     const MainLoop = require('../store/main-loop');
     const Characters = require('./characters');
     const GroundIndicators = require('./ground-indicators');
-    const BuildingIndicator = require('./building-indicator');
     const Projectiles = require('./projectiles');
-    const WorldObjects = require('./world-objects');
+    const WorldBoard = require('./world-board');
     const Animation = require('../common/animation');
+    require('./building-indicator');
 
     var runningEffects = [];
     const EffectAnimations = {
@@ -92,20 +92,15 @@ define(function (require, exports, module) {
         },
         initWorld: function () {
             World.init();
-            WorldObjects.init();
+            WorldBoard.init();
             GroundIndicators.init();
             Characters.init();
 
             container.addChild(World.tilesLayer);
+            container.addChild(WorldBoard.boardLayer);
             container.addChild(GroundIndicators.layer);
-            container.addChild(WorldObjects.lowObjectLayer);
-            container.addChild(BuildingIndicator.lowLayer);
             container.addChild(World.eventLayer);
-            container.addChild(Characters.layer);
-            container.addChild(Characters.pointsLayer);
             container.addChild(Projectiles.layer);
-            container.addChild(WorldObjects.highObjectLayer);
-            container.addChild(BuildingIndicator.highLayer);
             resize();
             MainLoop.start();
         },
