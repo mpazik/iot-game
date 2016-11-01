@@ -26,8 +26,9 @@ public class PathFinder {
         Optional<CollisionMap.MovableArea> childPolygonOpt = collisionMap.getMovableAreaForPosition(begin);
 
         if (!childPolygonOpt.isPresent()) {
-            // Player can not have be inside collidable polygon.
-            return Collections.singletonList(begin);
+            // If player somehow mange to be in collidable block. Ignore collision for him.
+            // That open space for many overuses/abuses.
+            return ImmutableList.of(begin, end);
         }
         CollisionMap.MovableArea movableArea = childPolygonOpt.get();
 

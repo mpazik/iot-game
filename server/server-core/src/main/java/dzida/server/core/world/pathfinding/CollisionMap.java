@@ -14,18 +14,21 @@ public class CollisionMap {
     }
 
     public Optional<MovableArea> getMovableAreaForPosition(Point position) {
-        return Optional.of(getMovableAreaForPosition(position, movableAreas));
+        return getMovableAreaForPosition(position, movableAreas);
     }
 
-    private MovableArea getMovableAreaForPosition(Point position, List<MovableArea> movableAreas) {
-        MovableArea movableAreaForPosition = movableAreas.stream()
+    private Optional<MovableArea> getMovableAreaForPosition(Point position, List<MovableArea> movableAreas) {
+        Optional<MovableArea> movableAreaForPosition = movableAreas.stream()
                 .filter(movableArea -> {
                     Polygon polygon = movableArea.getPolygon();
                     return polygon.isInside(position.getX(), position.getY()) || polygon.isOnBorder(position);
                 })
-                .findAny().get();
+                .findAny();
 
-        Optional<CollisionBlock> blackPolygon = movableAreaForPosition.getCollisionBlocks().stream()
+        if (!movableAreaForPosition.isPresent()) {
+            return movableAreaForPosition;
+        }
+        Optional<CollisionBlock> blackPolygon = movableAreaForPosition.get().getCollisionBlocks().stream()
                 .filter(block -> {
                     Polygon polygon = block.getPolygon();
                     return polygon.isInside(position.getX(), position.getY()) && !polygon.isOnBorder(position);

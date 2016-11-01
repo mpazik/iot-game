@@ -146,6 +146,26 @@ public class PathFinderTest {
         assertThat(path).containsExactly(begin, Point.of(2, 1), end);
     }
 
+    @Test
+    public void shouldIgnoreCollidableAreaInWhichStartPointIs() {
+        BitMap bitMap = BitMap.createBitMap(
+                "       ",
+                " ##### ",
+                " #   # ",
+                " # # # ",
+                " #   # ",
+                " ##### ",
+                "       ");
+        PathFinder pathFinder = createPathFinder(bitMap);
+
+        Point begin = Point.of(3.5, 3.5);
+        Point end = Point.of(4.1, 3.9);
+
+        List<Point> path = pathFinder.findPathToDestination(begin, end);
+
+        assertThat(path).containsExactly(begin, end);
+    }
+
     public PathFinder createPathFinder(BitMap bitMap) {
         return new PathFinder(collisionMapFactory.createCollisionMap(bitMap));
     }
