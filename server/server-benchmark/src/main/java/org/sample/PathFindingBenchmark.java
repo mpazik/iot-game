@@ -33,7 +33,6 @@ package org.sample;
 
 import dzida.server.core.basic.unit.BitMap;
 import dzida.server.core.basic.unit.Point;
-import dzida.server.core.world.pathfinding.CollisionBitMap;
 import dzida.server.core.world.pathfinding.CollisionMapFactory;
 import dzida.server.core.world.pathfinding.PathFinder;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -105,7 +104,7 @@ public class PathFindingBenchmark {
             "################################################################################################"
     );
 
-    private final PathFinder pathFinder = new PathFinder(new CollisionMapFactory(5).createCollisionMap(new CollisionBitMap(bitMap)));
+    private final PathFinder pathFinder = new PathFinder(new CollisionMapFactory(5).createCollisionMap(bitMap));
 
     public static void main(String[] args) throws RunnerException, InterruptedException {
         Options opt = new OptionsBuilder()

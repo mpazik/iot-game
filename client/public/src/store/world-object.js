@@ -12,7 +12,7 @@ define(function (require, exports, module) {
         addWorldObject(event.worldObject);
     });
     Dispatcher.messageStream.subscribe(Messages.WorldObjectRemoved, (event) => {
-        state.delete(event.worldObjectId);
+        state.delete(event.worldObject.id);
     });
 
     function addWorldObject(worldObject) {
@@ -62,7 +62,7 @@ define(function (require, exports, module) {
             Dispatcher.messageStream.subscribeLast(Messages.WorldObjectCreated, (event) => push(event.worldObject.data));
         }),
         worldObjectRemoved: new Publisher.StreamPublisher((push) => {
-            Dispatcher.messageStream.subscribeLast(Messages.WorldObjectRemoved, (event) => push(event.worldObjectId));
+            Dispatcher.messageStream.subscribeLast(Messages.WorldObjectRemoved, (event) => push(event.worldObject.id));
         }),
         kindDefinition,
         isFreePlaceForObject: (x, y, objectKind) => {

@@ -9,6 +9,7 @@ import dzida.server.app.store.http.WorldMapStoreHttp;
 import dzida.server.app.store.http.loader.SkillLoader;
 import dzida.server.app.store.http.loader.StaticDataLoader;
 import dzida.server.app.store.http.loader.WorldMapLoader;
+import dzida.server.app.store.http.loader.WorldObjectKindLoader;
 import dzida.server.app.store.memory.PositionStoreInMemory;
 import dzida.server.app.store.memory.SkillStoreInMemory;
 import dzida.server.app.store.memory.WorldObjectStoreInMemory;
@@ -19,6 +20,7 @@ import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
+import dzida.server.core.basic.unit.BitMap;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
@@ -26,7 +28,6 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.position.PositionStore;
-import dzida.server.core.profiling.Profilings;
 import dzida.server.core.scenario.SurvivalScenarioFactory;
 import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 import dzida.server.core.skill.Skill;
@@ -36,10 +37,9 @@ import dzida.server.core.skill.SkillStore;
 import dzida.server.core.time.TimeService;
 import dzida.server.core.world.map.WorldMap;
 import dzida.server.core.world.map.WorldMapService;
+import dzida.server.core.world.object.WorldObjectKind;
 import dzida.server.core.world.object.WorldObjectService;
 import dzida.server.core.world.pathfinding.CollisionBitMap;
-import dzida.server.core.world.pathfinding.CollisionMapFactory;
-import dzida.server.core.world.pathfinding.PathFinder;
 
 import java.util.List;
 import java.util.Map;
@@ -67,17 +67,18 @@ public class Instance {
 
         WorldMap worldMap = worldMapStore.getMap(worldMapKey);
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
-        WorldObjectService worldObjectService = WorldObjectService.create(new WorldObjectStoreInMemory());
+        List<WorldObjectKind> worldObjectKinds = new WorldObjectKindLoader(staticDataLoader).loadWorldObjectKinds();
+        WorldObjectStoreInMemory worldObjectStore = new WorldObjectStoreInMemory(worldObjectKinds);
+        WorldObjectService worldObjectService = WorldObjectService.create(worldObjectStore);
+        BitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, worldMapStore.getTileset(worldMap.getTileset()));
 
         TimeService timeService = new TimeServiceImpl();
         CharacterService characterService = CharacterService.create();
         WorldMapService worldMapService = WorldMapService.create(worldMapStore, worldMapKey);
         SkillService skillService = SkillService.create(skillStore, timeService);
-        PositionService positionService = PositionService.create(positionStore, timeService);
+        PositionService positionService = PositionService.create(positionStore, timeService, worldObjectStore, collisionBitMap);
 
-        CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, worldMapStore.getTileset(worldMap.getTileset()));
-        PathFinder pathFinder = Profilings.printTime("Collision map built", () -> new PathFinder(new CollisionMapFactory(5).createCollisionMap(collisionBitMap)));
-        PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService, pathFinder);
+        PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService);
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService, characterService);
 

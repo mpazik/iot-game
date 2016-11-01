@@ -1,7 +1,6 @@
 package dzida.server.app.store.memory;
 
-import com.google.gson.Gson;
-import dzida.server.app.serialization.BasicJsonSerializer;
+import com.google.common.collect.ImmutableList;
 import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.world.object.WorldObject;
@@ -14,22 +13,23 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class WorldObjectStoreInMemory implements WorldObjectStore {
-    private final Gson serializer = BasicJsonSerializer.getSerializer();
-    private final Map<Long, String> worldObjects;
+    private final Map<Id<WorldObject>, GeneralEntity<WorldObject>> worldObjects;
+    private final Map<Id<WorldObjectKind>, WorldObjectKind> worldObjectKinds;
     long idGenerator = 0;
 
-    public WorldObjectStoreInMemory() {
+    public WorldObjectStoreInMemory(List<WorldObjectKind> worldObjectKinds) {
         worldObjects = new HashMap<>();
+        this.worldObjectKinds = worldObjectKinds.stream().collect(Collectors.toMap(WorldObjectKind::getId, worldObjectKind -> worldObjectKind));
     }
 
     @Override
     public List<GeneralEntity<WorldObject>> getAll() {
-        return worldObjects.entrySet().stream()
-                .map(entry -> {
-                    WorldObject data = serializer.fromJson(entry.getValue(), WorldObject.class);
-                    Id<WorldObject> id = new Id<>(entry.getKey());
-                    return new GeneralEntity<>(id, data);
-                }).collect(Collectors.toList());
+        return ImmutableList.copyOf(worldObjects.values());
+    }
+
+    @Override
+    public GeneralEntity<WorldObject> getWorldObject(Id<WorldObject> id) {
+        return worldObjects.get(id);
     }
 
     @Override
@@ -42,13 +42,18 @@ public class WorldObjectStoreInMemory implements WorldObjectStore {
     }
 
     @Override
+    public WorldObjectKind getWorldObjectKind(Id<WorldObjectKind> id) {
+        return worldObjectKinds.get(id);
+    }
+
+    @Override
     public void createObject(GeneralEntity<WorldObject> worldObject) {
-        worldObjects.put(worldObject.getId().getValue(), serializer.toJson(worldObject.getData()));
+        worldObjects.put(worldObject.getId(), worldObject);
     }
 
     @Override
     public void removeObject(Id<WorldObject> worldObjectId) {
-        worldObjects.remove(worldObjectId.getValue());
+        worldObjects.remove(worldObjectId);
     }
 
     private Long newId() {

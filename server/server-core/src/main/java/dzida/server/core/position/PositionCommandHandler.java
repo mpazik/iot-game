@@ -10,7 +10,6 @@ import dzida.server.core.character.model.Character;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.event.CharacterMoved;
 import dzida.server.core.time.TimeService;
-import dzida.server.core.world.pathfinding.PathFinder;
 
 import java.util.List;
 
@@ -18,13 +17,11 @@ public class PositionCommandHandler {
     private final CharacterService characterService;
     private final PositionService positionService;
     private final TimeService timeService;
-    private final PathFinder pathFinder;
 
-    public PositionCommandHandler(CharacterService characterService, PositionService positionService, TimeService timeService, PathFinder pathFinder) {
+    public PositionCommandHandler(CharacterService characterService, PositionService positionService, TimeService timeService) {
         this.characterService = characterService;
         this.positionService = positionService;
         this.timeService = timeService;
-        this.pathFinder = pathFinder;
     }
 
     public Outcome<List<GameEvent>> move(Id<Character> characterId, Point destination, double velocity) {
@@ -32,8 +29,7 @@ public class PositionCommandHandler {
             return Outcome.ok(ImmutableList.of());
         }
         Move move = positionService.getMove(characterId);
-        Point currentPosition = move.getPositionAtTime(timeService.getCurrentMillis());
-        List<Point> pathToDestination = pathFinder.findPathToDestination(currentPosition, destination);
+        List<Point> pathToDestination = positionService.findPathToDestination(characterId, destination);
 
         Point[] positions = pathToDestination.toArray(new Point[pathToDestination.size()]);
         Move newMove = move.continueMoveTo(timeService.getCurrentMillis(), velocity, positions);

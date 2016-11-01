@@ -101,7 +101,7 @@ public class SkillCommandHandler {
         }
         return Outcome.ok(ImmutableList.of(
                 new SkillUsedOnWorldObject(casterId, skill.getId(), targetId),
-                new WorldObjectRemoved(targetId)
+                new WorldObjectRemoved(worldObjectService.getObject(targetId))
         ));
     }
 

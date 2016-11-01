@@ -3,7 +3,6 @@ package dzida.server.core.world.pathfinding;
 import com.google.common.collect.ImmutableSet;
 import dzida.server.core.basic.unit.BitMap;
 import dzida.server.core.basic.unit.BitMap.ImmutableBitMap;
-import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.map.Tileset;
 import dzida.server.core.world.map.Tileset.TerrainType;
 import dzida.server.core.world.map.WorldMap;
@@ -13,13 +12,7 @@ import java.util.Set;
 public class CollisionBitMap {
     public static final Set<TerrainType> COLLISION_TERRAINS = ImmutableSet.of(TerrainType.WATER, TerrainType.WATER_GRASS);
 
-    private final BitMap bitMap;
-
-    public CollisionBitMap(BitMap bitMap) {
-        this.bitMap = bitMap;
-    }
-
-    public static CollisionBitMap createForWorldMap(WorldMap worldMap, Tileset tileset) {
+    public static BitMap createForWorldMap(WorldMap worldMap, Tileset tileset) {
         int width = worldMap.getWidth();
         int height = worldMap.getHeight();
         ImmutableBitMap.Builder bitMapBuilder = ImmutableBitMap.builder(width, height);
@@ -30,26 +23,10 @@ public class CollisionBitMap {
             bitMapBuilder.set(i % width, i / height, isTileCollidable(tile, tileset));
         }
 
-        return new CollisionBitMap(bitMapBuilder.build());
+        return bitMapBuilder.build();
     }
 
     private static boolean isTileCollidable(int tile, Tileset tileset) {
         return COLLISION_TERRAINS.contains(tileset.terrains.get(tile));
-    }
-
-    public boolean isColliding(int x, int y) {
-        return bitMap.isSet(x, y);
-    }
-
-    public BitMap toBitMap() {
-        return bitMap;
-    }
-
-    public boolean isColliding(Point point) {
-        return isColliding(doubleToInt(point.getX()), doubleToInt(point.getY()));
-    }
-
-    private int doubleToInt(double num) {
-        return Math.toIntExact(Math.round(num));
     }
 }

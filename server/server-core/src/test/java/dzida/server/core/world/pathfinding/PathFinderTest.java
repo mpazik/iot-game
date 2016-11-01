@@ -147,6 +147,6 @@ public class PathFinderTest {
     }
 
     public PathFinder createPathFinder(BitMap bitMap) {
-        return new PathFinder(collisionMapFactory.createCollisionMap(new CollisionBitMap(bitMap)));
+        return new PathFinder(collisionMapFactory.createCollisionMap(bitMap));
     }
 }

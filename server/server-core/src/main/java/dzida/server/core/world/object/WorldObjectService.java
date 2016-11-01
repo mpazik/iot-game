@@ -34,7 +34,11 @@ public class WorldObjectService {
     public void processEvent(GameEvent gameEvent) {
         whenTypeOf(gameEvent)
                 .is(WorldObjectCreated.class).then(event -> worldObjectStore.createObject(event.worldObject))
-                .is(WorldObjectRemoved.class).then(event -> worldObjectStore.removeObject(event.worldObjectId));
+                .is(WorldObjectRemoved.class).then(event -> worldObjectStore.removeObject(event.worldObject.getId()));
+    }
+
+    public GeneralEntity<WorldObject> getObject(Id<WorldObject> worldObjectId) {
+        return worldObjectStore.getWorldObject(worldObjectId);
     }
 
     public Optional<GeneralEntity<WorldObject>> createWorldObject(Id<WorldObjectKind> objectKind, int x, int y) {

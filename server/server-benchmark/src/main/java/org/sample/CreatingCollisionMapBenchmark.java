@@ -32,7 +32,6 @@
 package org.sample;
 
 import dzida.server.core.basic.unit.BitMap;
-import dzida.server.core.world.pathfinding.CollisionBitMap;
 import dzida.server.core.world.pathfinding.CollisionMap;
 import dzida.server.core.world.pathfinding.CollisionMapFactory;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -172,6 +171,6 @@ public class CreatingCollisionMapBenchmark {
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public CollisionMap createPathFinder() throws InterruptedException {
-        return new CollisionMapFactory(10).createCollisionMap(new CollisionBitMap(bitMap));
+        return new CollisionMapFactory(10).createCollisionMap(bitMap);
     }
 }

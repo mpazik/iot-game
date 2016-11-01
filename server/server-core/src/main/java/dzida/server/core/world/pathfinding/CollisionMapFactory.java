@@ -20,9 +20,9 @@ public class CollisionMapFactory {
         this.lineOfSightRange = lineOfSightRange;
     }
 
-    public CollisionMap createCollisionMap(CollisionBitMap collisionBitMap) {
+    public CollisionMap createCollisionMap(BitMap collisionBitMap) {
         BitMapTracker bitMapTracker = new BitMapTracker();
-        BitMap movableBitMap = BitMap.InverseBitMap.of(collisionBitMap.toBitMap());
+        BitMap movableBitMap = BitMap.InverseBitMap.of(collisionBitMap);
         List<TreeNode<Polygon>> movablePolygons = bitMapTracker.track(movableBitMap);
 
         List<MovableArea> movableAreas = movablePolygons.stream().map(this::createMovableArea).collect(Collectors.toList());

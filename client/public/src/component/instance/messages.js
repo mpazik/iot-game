@@ -45,6 +45,9 @@ define(function (require, exports, module) {
         WorldObjectCreated: function (worldObject) {
             this.worldObject = worldObject
         },
+        WorldObjectRemoved: function (worldObject) {
+            this.worldObject = worldObject;
+        },
         SkillUsedOnWorldObject: function (casterId, skillId, worldObjectId) {
             this.casterId = casterId;
             this.skillId = skillId;
@@ -53,9 +56,6 @@ define(function (require, exports, module) {
         SkillUsed: function (casterId, skillId) {
             this.casterId = casterId;
             this.skillId = skillId;
-        },
-        WorldObjectRemoved: function (worldObjectId) {
-            this.worldObjectId = worldObjectId;
         },
         UserCharacter: function (characterId, userId, userNick) {
             this.characterId = characterId;

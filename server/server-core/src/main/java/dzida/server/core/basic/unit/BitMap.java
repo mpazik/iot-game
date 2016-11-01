@@ -121,6 +121,10 @@ public interface BitMap {
             this.height = height;
         }
 
+        public static Builder builder(BitMap bitMap) {
+            return new Builder(bitMap);
+        }
+
         public static Builder builder(int width, int height) {
             return new Builder(0, 0, width, height);
         }
@@ -199,6 +203,11 @@ public interface BitMap {
                 this.height = height;
                 this.startX = startX;
                 this.startY = y;
+            }
+
+            public Builder(BitMap bitMap) {
+                this(bitMap.getStartX(), bitMap.getStartY(), bitMap.getWidth(), bitMap.getHeight());
+                bitMap.forEach((x, y) -> set(x, y, true));
             }
 
             public Builder set(int x, int y, boolean value) {

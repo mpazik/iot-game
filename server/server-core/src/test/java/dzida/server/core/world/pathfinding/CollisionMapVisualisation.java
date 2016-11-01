@@ -74,7 +74,7 @@ public class CollisionMapVisualisation {
         JFrame f = new JFrame("Swing Paint Demo");
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setSize(mapWidth * zoom, mapHeight * zoom);
-        CollisionMap collisionMap = new CollisionMapFactory(5).createCollisionMap(new CollisionBitMap(bitMap));
+        CollisionMap collisionMap = new CollisionMapFactory(5).createCollisionMap(bitMap);
         f.add(new Visualizer(collisionMap));
         f.setVisible(true);
     }

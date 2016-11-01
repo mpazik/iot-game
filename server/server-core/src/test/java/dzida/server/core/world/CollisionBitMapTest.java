@@ -2,6 +2,7 @@ package dzida.server.core.world;
 
 import com.google.common.collect.ImmutableMap;
 import dzida.server.core.basic.entity.Key;
+import dzida.server.core.basic.unit.BitMap;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.map.Tileset;
 import dzida.server.core.world.map.WorldMap;
@@ -32,11 +33,11 @@ public class CollisionBitMapTest {
         };
         WorldMap worldMap = new WorldMap(4, 4, tilesetKey, new Point(0, 0), tiles, 0);
 
-        CollisionBitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, tileset);
-        assertThat(collisionBitMap.isColliding(0, 0)).isTrue();
-        assertThat(collisionBitMap.isColliding(2, 0)).isFalse();
-        assertThat(collisionBitMap.isColliding(3, 0)).isTrue();
-        assertThat(collisionBitMap.isColliding(0, 1)).isFalse();
-        assertThat(collisionBitMap.isColliding(3, 3)).isTrue();
+        BitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, tileset);
+        assertThat(collisionBitMap.isSet(0, 0)).isTrue();
+        assertThat(collisionBitMap.isSet(2, 0)).isFalse();
+        assertThat(collisionBitMap.isSet(3, 0)).isTrue();
+        assertThat(collisionBitMap.isSet(0, 1)).isFalse();
+        assertThat(collisionBitMap.isSet(3, 3)).isTrue();
     }
 }
