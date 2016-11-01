@@ -10,15 +10,6 @@ define(function (require, exports, module) {
     var lowObjectLayer = new Pixi.Container();
     var highObjectLayer = new Pixi.Container();
 
-    const hoverFilter = new Pixi.filters.GrayFilter();
-    hoverFilter.gray = -2.0;
-
-    const interactiveFilter = new Pixi.filters.DropShadowFilter();
-    interactiveFilter.blur = 10;
-    interactiveFilter.angle = 0;
-    interactiveFilter.distance = 0;
-    interactiveFilter.alpha = 1;
-
     const worldObjects = [];
 
     function createWorldObject(objectData) {
@@ -38,11 +29,9 @@ define(function (require, exports, module) {
         };
 
         worldObject.mouseover = function () {
-            worldObject.filters = [interactiveFilter, hoverFilter];
         };
 
         worldObject.mouseout = function () {
-            worldObject.filters = [interactiveFilter];
         };
 
         worldObjects.push(worldObject);

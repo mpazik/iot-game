@@ -27,8 +27,6 @@ define(function (require, exports, module) {
     };
 
     const Filters = {
-        twist: Object.assign(new Pixi.filters.TwistFilter(), {radius: 1.0, angle: 0}),
-        invert: Object.assign(new Pixi.filters.InvertFilter(), {invert: 0}),
     };
 
     var width = window.innerWidth;

@@ -4,15 +4,6 @@ define(function (require, exports, module) {
     const tileImageSize = require('configuration').tileImageSize;
     const tileZoom = require('configuration').tileSize / tileImageSize;
 
-    const hoverFilter = new Pixi.filters.GrayFilter();
-    hoverFilter.gray = -2.0;
-
-    const interactiveFilter = new Pixi.filters.DropShadowFilter();
-    interactiveFilter.blur = 10;
-    interactiveFilter.angle = 0;
-    interactiveFilter.distance = 0;
-    interactiveFilter.alpha = 1;
-
     const healthBarLength = 50;
     const healthBarBgLength = 56;
 
@@ -52,12 +43,10 @@ define(function (require, exports, module) {
 
         //noinspection JSUnusedGlobalSymbols
         this.mouseover = function () {
-            this.filters = [interactiveFilter, hoverFilter];
         };
 
         //noinspection JSUnusedGlobalSymbols
         this.mouseout = function () {
-            this.filters = [interactiveFilter];
         };
 
         if (character.nick) {
