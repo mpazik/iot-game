@@ -34,39 +34,39 @@ define(function (require) {
             ActionBar.activeState.unsubscribe(this._updateActive.bind(this));
         },
         _renderSystemBar: function () {
-            function createSystemIcon(key, icon, keyBind, title, action) {
+            const systemBar = this.getElementsByClassName("system-bar")[0];
+            createSystemButton('leaderboard', 'icon-ranking', 'L', 'Leaderboard', function () {
+                userEventStream.publish('toggle-window', 'leaderboard-window');
+                Analytics.sendEvent('ui.action-bar.trigger.leaderboard');
+            });
+            createSystemButton('achievements', 'icon-achievement', 'A', 'Achievements', function () {
+                userEventStream.publish('toggle-window', 'achievement-window');
+                Analytics.sendEvent('ui.action-bar.trigger.achievement');
+            });
+            createSystemButton('friends', 'icon-backup', 'F', 'Friends', function () {
+                userEventStream.publish('toggle-window', 'friends-window');
+                Analytics.sendEvent('ui.action-bar.trigger.friends')
+            });
+            createSystemButton('building', 'icon-hammer-nails', 'B', 'Build', function () {
+                userEventStream.publish('toggle-window', 'building-window');
+            });
+            createSystemButton('last-tip', 'icon-help', 'H', 'Show last tip', function () {
+                userEventStream.publish('toggle-window', 'tutorial-window');
+            });
+            createSystemButton('feedback', 'icon-checklist', 'F', 'Feedback', function () {
+                userEventStream.publish('toggle-window', 'feedback-window');
+            });
+
+            function createSystemButton(key, icon, keyBind, title, action) {
                 var socket = document.createElement('action-socket');
                 if (icon) socket.setAttribute('icon', icon);
                 if (key) socket.setAttribute('key', key);
                 if (action) socket.addEventListener('action-triggered', action);
                 if (keyBind) socket.setAttribute('keyBind', keyBind);
                 if (title) socket.setAttribute('title', title);
-                return socket;
+                systemBar.appendChild(socket);
             }
 
-            const systemBar = this.getElementsByClassName("system-bar")[0];
-            var leaderboardButton = createSystemIcon('leaderboard', 'icon-ranking', 'L', 'Leaderboard', function () {
-                userEventStream.publish('toggle-window', 'leaderboard-window');
-                Analytics.sendEvent('ui.action-bar.trigger.leaderboard');
-            });
-            systemBar.appendChild(leaderboardButton);
-
-            var achievementsButton = createSystemIcon('achievements', 'icon-achievement', 'A', 'Achievements', function () {
-                userEventStream.publish('toggle-window', 'achievement-window');
-                Analytics.sendEvent('ui.action-bar.trigger.achievement');
-            });
-            systemBar.appendChild(achievementsButton);
-
-            var friendsButton = createSystemIcon('friends', 'icon-backup', 'F', 'Friends', function () {
-                userEventStream.publish('toggle-window', 'friends-window');
-                Analytics.sendEvent('ui.action-bar.trigger.friends')
-            });
-            systemBar.appendChild(friendsButton);
-
-            var buildingButton = createSystemIcon('building', 'icon-hammer-nails', 'B', 'Building', function () {
-                userEventStream.publish('toggle-window', 'building-window');
-            });
-            systemBar.appendChild(buildingButton);
         },
         _renderSkillBar: function (skillIds) {
             const skillBar = this.getElementsByClassName("skill-bar")[0];

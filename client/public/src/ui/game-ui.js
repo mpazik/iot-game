@@ -6,7 +6,6 @@ define(function (require) {
     const fragments = [
         require('./ui-fragments/profiling-display'),
         require('./ui-fragments/respawnScreen'),
-        require('./ui-fragments/top-buttons'),
         require('./ui-fragments/action-bar'),
         require('./ui-fragments/cooldown-bar'),
         require('./ui-fragments/game-message'),
