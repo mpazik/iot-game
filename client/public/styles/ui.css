@@ -128,7 +128,7 @@ action-bar .system-bar {
     margin-left: 2px;
 }
 
-join-battle-button {
+current-parcel {
     display: inline-block;
     left: 50%;
     transform: translateX(-50%);

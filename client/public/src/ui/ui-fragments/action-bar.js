@@ -3,6 +3,7 @@ define(function (require) {
     const skillById = require('../../store/resources').skill;
     const userEventStream = require('../../component/dispatcher').userEventStream;
     const Analytics = require('../../component/analytics');
+    const Parcel = require('../../component/parcel');
     const ActionBar = require('../../store/action-bar');
 
     const keyBinds = ['Q', 'W', 'E', 'R', '1', '2', '3', '4', '5'];
@@ -35,6 +36,11 @@ define(function (require) {
         },
         _renderSystemBar: function () {
             const systemBar = this.getElementsByClassName("system-bar")[0];
+
+            createSystemButton('building', 'icon-hammer-nails', 'B', 'Build', function () {
+                userEventStream.publish('toggle-window', 'building-window');
+            });
+
             createSystemButton('leaderboard', 'icon-ranking', 'L', 'Leaderboard', function () {
                 userEventStream.publish('toggle-window', 'leaderboard-window');
                 Analytics.sendEvent('ui.action-bar.trigger.leaderboard');
@@ -47,9 +53,6 @@ define(function (require) {
                 userEventStream.publish('toggle-window', 'friends-window');
                 Analytics.sendEvent('ui.action-bar.trigger.friends')
             });
-            createSystemButton('building', 'icon-hammer-nails', 'B', 'Build', function () {
-                userEventStream.publish('toggle-window', 'building-window');
-            });
             createSystemButton('last-tip', 'icon-help', 'H', 'Show last tip', function () {
                 userEventStream.publish('toggle-window', 'tutorial-window');
             });
@@ -58,13 +61,14 @@ define(function (require) {
             });
 
             function createSystemButton(key, icon, keyBind, title, action) {
-                var socket = document.createElement('action-socket');
-                if (icon) socket.setAttribute('icon', icon);
-                if (key) socket.setAttribute('key', key);
-                if (action) socket.addEventListener('action-triggered', action);
-                if (keyBind) socket.setAttribute('keyBind', keyBind);
-                if (title) socket.setAttribute('title', title);
-                systemBar.appendChild(socket);
+                var button = document.createElement('action-socket');
+                if (icon) button.setAttribute('icon', icon);
+                if (key) button.setAttribute('key', key);
+                if (action) button.addEventListener('action-triggered', action);
+                if (keyBind) button.setAttribute('keyBind', keyBind);
+                if (title) button.setAttribute('title', title);
+                systemBar.appendChild(button);
+                return button;
             }
 
         },

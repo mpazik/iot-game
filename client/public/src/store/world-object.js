@@ -65,6 +65,7 @@ define(function (require, exports, module) {
             Dispatcher.messageStream.subscribeLast(Messages.WorldObjectRemoved, (event) => push(event.worldObject.id));
         }),
         kindDefinition,
+        getCollisionRectangle,
         isFreePlaceForObject: (x, y, objectKind) => {
             const treeCollisionRectangle = objectKind['treeCollisionLayer'] ? getCollisionRectangleFromLayer(x, y, objectKind['treeCollisionLayer']) : null;
             const collisionRectangle = getCollisionRectangle(x, y, objectKind);

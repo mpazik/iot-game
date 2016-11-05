@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     const GroundIndicators = require('./ground-indicators');
     const Projectiles = require('./projectiles');
     const WorldBoard = require('./world-board');
+    const ParcelIndicator = require('./parcel-indicator');
     const Animation = require('../common/animation');
     require('./building-indicator');
 
@@ -98,6 +99,7 @@ define(function (require, exports, module) {
 
             container.addChild(World.tilesLayer);
             container.addChild(WorldBoard.boardLayer);
+            container.addChild(ParcelIndicator.layer);
             container.addChild(GroundIndicators.layer);
             container.addChild(World.eventLayer);
             container.addChild(Projectiles.layer);

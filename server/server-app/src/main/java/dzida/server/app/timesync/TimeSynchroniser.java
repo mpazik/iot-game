@@ -18,8 +18,8 @@ public class TimeSynchroniser implements VerifyingConnectionServer<String, Strin
     public Result onConnection(Connector<String> connector, String connectionData) {
         connector.onOpen(new ServerConnection<String>() {
             @Override
-            public void send(String message) {
-                connector.onMessage(message + " " + timeService.getCurrentMillis());
+            public void send(String data) {
+                connector.onMessage(data + " " + timeService.getCurrentMillis());
             }
 
             @Override

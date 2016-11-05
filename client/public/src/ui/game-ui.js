@@ -16,7 +16,8 @@ define(function (require) {
         require('./ui-fragments/screen/connecting-to-instnace'),
         require('./ui-fragments/chat-ui'),
         require('./ui-fragments/inventory'),
-        require('./ui-fragments/objectives-tracker')
+        require('./ui-fragments/objectives-tracker'),
+        require('./ui-fragments/current-parcel')
     ].concat(extraComponents.fragments);
 
     const windows = [
@@ -30,7 +31,8 @@ define(function (require) {
         require('./windows/friends-window'),
         require('./windows/feedback-window'),
         require('./windows/thank-you-window'),
-        require('./windows/building-window')
+        require('./windows/building-window'),
+        require('./windows/parcel-window')
     ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {

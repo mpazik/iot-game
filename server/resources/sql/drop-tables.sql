@@ -7,5 +7,6 @@ DROP TABLE user_password;
 DROP TABLE friendship;
 DROP TABLE analytics_event;
 DROP TABLE analytics_event_data;
+DROP TABLE parcels_event;
 
 DROP TABLE user_registration;

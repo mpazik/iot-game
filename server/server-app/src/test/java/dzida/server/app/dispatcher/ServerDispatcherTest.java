@@ -240,8 +240,8 @@ class ProbeServer implements VerifyingConnectionServer<String, String> {
     public Result onConnection(Connector<String> connector, String connectionData) {
         connector.onOpen(new ServerConnection<String>() {
             @Override
-            public void send(String message) {
-                messages.add(message);
+            public void send(String data) {
+                messages.add(data);
             }
 
             @Override

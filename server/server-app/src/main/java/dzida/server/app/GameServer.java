@@ -21,6 +21,8 @@ import dzida.server.app.instance.InstanceStore;
 import dzida.server.app.instance.scenario.ScenarioStore;
 import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.network.WebSocketServer;
+import dzida.server.app.parcel.ParcelServer;
+import dzida.server.app.parcel.ParcelStore;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.rest.UserResource;
 import dzida.server.app.store.database.AchievementStoreDb;
@@ -29,6 +31,7 @@ import dzida.server.app.store.database.ArbiterStoreDb;
 import dzida.server.app.store.database.ChatStoreDb;
 import dzida.server.app.store.database.FriendsStoreDb;
 import dzida.server.app.store.database.InstanceStoreDb;
+import dzida.server.app.store.database.ParcelStoreDB;
 import dzida.server.app.store.database.ScenarioStoreDb;
 import dzida.server.app.store.database.UserStoreDb;
 import dzida.server.app.timesync.TimeServiceImpl;
@@ -92,6 +95,7 @@ public final class GameServer {
         AchievementStore achievementStore = new AchievementStoreDb(connectionProvider);
         FriendsStore friendsStore = new FriendsStoreDb(connectionProvider);
         AnalyticsStore analyticsStore = new AnalyticsStoreDb(connectionProvider);
+        ParcelStore parcelStore = new ParcelStoreDB(connectionProvider);
 
         int gameServerPort = Configuration.getGameServerPort();
         UserService userService = new UserService(userStore);
@@ -119,6 +123,7 @@ public final class GameServer {
         friendServer.getFriendshipPublisher().subscribe(achievementServer::processUserFriendship);
 
         AnalyticsServer analyticsServer = new AnalyticsServer(analyticsStore);
+        ParcelServer parcelServer = new ParcelServer(parcelStore);
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);
@@ -126,6 +131,7 @@ public final class GameServer {
         serverDispatcher.addServer("achievement", achievementServer);
         serverDispatcher.addServer("friends", friendServer);
         serverDispatcher.addServer("analytics", analyticsServer);
+        serverDispatcher.addServer("parcel", parcelServer);
 
         service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())

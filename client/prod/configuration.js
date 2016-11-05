@@ -5,6 +5,7 @@ define('configuration', [], {
     zoom: 3,
     spawnTime: 4000,
     devMode: false,
+    parcelSize: 16,
     serverAddress: "ws://inst1.islesoftales.com:7001",
     containerRestAddress: "http://inst1.islesoftales.com:7000",
     assetsLocalization: "http://assets.islesoftales.com",

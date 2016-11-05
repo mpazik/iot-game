@@ -174,8 +174,8 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         }
 
         @Override
-        public void send(String message) {
-            Object commandToProcess = serializer.parseMessage(message);
+        public void send(String data) {
+            Object commandToProcess = serializer.parseMessage(data);
             whenTypeOf(commandToProcess)
                     .is(CharacterCommand.class)
                     .then(command -> {

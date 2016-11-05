@@ -71,3 +71,10 @@ CREATE TABLE analytics_event_data (
   data       TEXT               NOT NULL,
   created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE parcels_event (
+  id         SERIAL PRIMARY KEY NOT NULL,
+  type       TEXT               NOT NULL,
+  data       TEXT               NOT NULL,
+  created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

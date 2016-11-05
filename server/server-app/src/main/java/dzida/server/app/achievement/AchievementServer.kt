@@ -144,7 +144,7 @@ class AchievementServer : VerifyingConnectionServer<String, String> {
             sendToUser(it)
         }
         connector.onOpen(object : ServerConnection<String> {
-            override fun send(message: String) {
+            override fun send(data: String) {
             }
 
             override fun close() {

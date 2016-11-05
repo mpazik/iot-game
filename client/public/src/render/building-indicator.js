@@ -1,6 +1,7 @@
 define(function (require, exports, module) {
     const Pixi = require('pixi');
     const TileSize = require('configuration').tileSize;
+    const parcelSize = require('configuration').parcelSize;
     const zoom = require('configuration').zoom;
     const WorldMap = require('./world');
     const Targeting = require('../component/targeting');
@@ -9,6 +10,7 @@ define(function (require, exports, module) {
     const WorldObjectStore = require('../store/world-object');
     const WorldMapStore = require('../store/world');
     const Dispatcher = require('../component/dispatcher');
+    const Parcel = require('../component/parcel');
     const WorldBoard = require('../render/world-board');
 
     var targetingData = null;
@@ -33,14 +35,12 @@ define(function (require, exports, module) {
             return false;
         }
 
-        const collisionLayer = objectKind['collisionLayer'];
-        if (collisionLayer) {
-            const offsetX = collisionLayer['offsetX'] || 0;
-            const offsetY = collisionLayer['offsetY'] || 0;
-            return checkAllTileInRectangle(startTileX + offsetX, startTileY + offsetY, collisionLayer.width, collisionLayer.height);
-        } else {
-            return checkAllTileInRectangle(startTileX, startTileY, objectKind.width, objectKind.height);
+        const collisionRectangle = WorldObjectStore.getCollisionRectangle(startTileX, startTileY, objectKind);
+        if (!isObjectOnPlayerParcel(collisionRectangle)) {
+            return false
         }
+
+        return checkAllTileInRectangle(collisionRectangle.x, collisionRectangle.y, collisionRectangle.width, collisionRectangle.height);
 
         function checkAllTileInRectangle(startX, startY, width, height) {
             // ct stands for current tile
@@ -64,6 +64,25 @@ define(function (require, exports, module) {
 
             return terrainNames.every(terrain => availableTerrains.includes(terrain))
         }
+
+        function isObjectOnPlayerParcel(object) {
+            const parcel = Parcel.playerParcel;
+            if (!parcel) {
+                return false
+            }
+            const parcelRectangle = {
+                x: parcel.x * parcelSize,
+                y: parcel.y * parcelSize,
+                width: parcelSize,
+                height: parcelSize
+            };
+            return isRectangleInside(parcelRectangle, object)
+        }
+
+        function isRectangleInside(r1, r2) {
+            return r1.x <= r2.x && r1.x + r1.width >= r2.x + r2.width &&
+                r1.y <= r2.y && r1.y + r1.height >= r2.y + r2.height;
+        }
     }
 
     function buildOnPosition(data) {
@@ -84,6 +103,7 @@ define(function (require, exports, module) {
             targetingData = null;
             WorldMap.mousePositionStream.unsubscribe(recalculateSpritePosition);
             WorldMap.worldMapClicked.unsubscribe(buildOnPosition);
+            Parcel.highlightCurrentParcel(false);
         }
 
         if (skill == null) return;
@@ -98,6 +118,7 @@ define(function (require, exports, module) {
             WorldMap.mousePositionStream.subscribe(recalculateSpritePosition);
             WorldMap.worldMapClicked.subscribe(buildOnPosition);
             WorldBoard.addObject(sprite);
+            Parcel.highlightCurrentParcel(true);
         }
     });
 });
