@@ -3,20 +3,24 @@ package dzida.server.app.store.http;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import dzida.server.app.store.http.loader.WorldMapLoader;
 import dzida.server.app.world.map.Layer;
+import dzida.server.app.world.map.TailObjectProperty;
 import dzida.server.app.world.map.Terrain;
 import dzida.server.app.world.map.TilesetData;
 import dzida.server.app.world.map.TilesetRef;
 import dzida.server.app.world.map.WorldMapData;
+import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.basic.unit.Point;
 import dzida.server.core.world.map.Tileset;
 import dzida.server.core.world.map.Tileset.TerrainType;
 import dzida.server.core.world.map.WorldMap;
 import dzida.server.core.world.map.WorldMapStore;
+import dzida.server.core.world.object.WorldObject;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
@@ -27,19 +31,19 @@ import java.util.concurrent.ExecutionException;
 public class WorldMapStoreHttp implements WorldMapStore {
     private final WorldMapLoader worldMapLoader;
 
-    private final LoadingCache<Key<WorldMap>, WorldMap> worldMaps = CacheBuilder.newBuilder()
+    private final LoadingCache<Key<WorldMap>, WorldMapData> worldMaps = CacheBuilder.newBuilder()
             .maximumSize(100)
-            .build(new CacheLoader<Key<WorldMap>, WorldMap>() {
-                public WorldMap load(@Nonnull Key<WorldMap> key) {
-                    return transformMap(worldMapLoader.loadMap(key));
+            .build(new CacheLoader<Key<WorldMap>, WorldMapData>() {
+                public WorldMapData load(@Nonnull Key<WorldMap> key) {
+                    return worldMapLoader.loadMap(key);
                 }
             });
 
-    private final LoadingCache<Key<Tileset>, Tileset> tilesets = CacheBuilder.newBuilder()
+    private final LoadingCache<Key<Tileset>, TilesetData> tilesets = CacheBuilder.newBuilder()
             .maximumSize(100)
-            .build(new CacheLoader<Key<Tileset>, Tileset>() {
-                public Tileset load(@Nonnull Key<Tileset> key) {
-                    return transformTileset(worldMapLoader.loadTileset(key));
+            .build(new CacheLoader<Key<Tileset>, TilesetData>() {
+                public TilesetData load(@Nonnull Key<Tileset> key) {
+                    return worldMapLoader.loadTileset(key);
                 }
             });
 
@@ -72,16 +76,50 @@ public class WorldMapStoreHttp implements WorldMapStore {
     @Override
     public WorldMap getMap(Key<WorldMap> worldMapKey) {
         try {
-            return worldMaps.get(worldMapKey);
+            return transformMap(worldMaps.get(worldMapKey));
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
+    public List<WorldObject> getInitialMapObjects(Key<WorldMap> worldMapKey) {
+        try {
+            return getObjects(worldMaps.get(worldMapKey));
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<WorldObject> getObjects(WorldMapData worldMapData) throws ExecutionException {
+        List<Layer> layers = worldMapData.getLayers();
+        ImmutableList.Builder<WorldObject> builder = ImmutableList.builder();
+        if (layers.size() != 2 || worldMapData.getTilesets().size() != 2) {
+            return builder.build();
+        }
+        Layer objectLayer = layers.get(1);
+        TilesetRef tilesetRef = worldMapData.getTilesets().get(1);
+        String tilesetName = removeExtension(tilesetRef.getSource());
+        TilesetData objectTileset = tilesets.get(new Key<>(tilesetName));
+        int[] objectData = objectLayer.getData();
+        for (int y = 0; y < objectLayer.getHeight(); y++) {
+            for (int x = 0; x < objectLayer.getWidth(); x++) {
+                int tileObjectId = objectData[y * objectLayer.getHeight() + x];
+                if (tileObjectId == 0) {
+                    continue;
+                }
+                TailObjectProperty tailObjectProperty = objectTileset.getTileproperties().get(Integer.toString(tileObjectId - tilesetRef.getFirstgid()));
+                int objectKind = Integer.parseInt(tailObjectProperty.getObjectId());
+                builder.add(new WorldObject(new Id<>(objectKind), x, y));
+            }
+        }
+        return builder.build();
+    }
+
+    @Override
     public Tileset getTileset(Key<Tileset> tilesetKey) {
         try {
-            return tilesets.get(tilesetKey);
+            return transformTileset(tilesets.get(tilesetKey));
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }

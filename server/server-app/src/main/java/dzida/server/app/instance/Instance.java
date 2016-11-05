@@ -18,6 +18,7 @@ import dzida.server.app.user.User;
 import dzida.server.core.Scheduler;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.basic.Result;
+import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.basic.unit.BitMap;
@@ -35,8 +36,10 @@ import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
 import dzida.server.core.skill.SkillStore;
 import dzida.server.core.time.TimeService;
+import dzida.server.core.world.event.WorldObjectCreated;
 import dzida.server.core.world.map.WorldMap;
 import dzida.server.core.world.map.WorldMapService;
+import dzida.server.core.world.object.WorldObject;
 import dzida.server.core.world.object.WorldObjectKind;
 import dzida.server.core.world.object.WorldObjectService;
 import dzida.server.core.world.pathfinding.CollisionBitMap;
@@ -90,6 +93,16 @@ public class Instance {
         AiService aiService = new AiService(npcBehaviour);
 
         this.gameLogic = new GameLogic(scheduler, instanceStateManager, survivalScenario, scenario, aiService, this::handleCommand);
+
+        if (worldObjectService.getState().isEmpty()) {
+            List<WorldObject> initialMapObjects = worldMapStore.getInitialMapObjects(worldMapKey);
+            initialMapObjects.forEach(worldObject -> {
+                WorldObjectKind worldObjectKind = worldObjectStore.getWorldObjectKind(worldObject.getKind());
+                int y = worldObject.getY() - worldObjectKind.getHeight() + 1;
+                Optional<GeneralEntity<WorldObject>> objectEntity = worldObjectService.createWorldObject(worldObject.getKind(), worldObject.getX(), y);
+                objectEntity.map(WorldObjectCreated::new).ifPresent(instanceStateManager::dispatchEvent);
+            });
+        }
     }
 
     public void start() {
