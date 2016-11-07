@@ -1,5 +1,6 @@
 define(function (require, exports, module) {
     const Pixi = require('pixi');
+    const Animation = require('../common/animation');
     const MainPlayer = require('../store/main-player');
     const World = require('./world');
     const MainLoop = require('../store/main-loop');
@@ -8,7 +9,7 @@ define(function (require, exports, module) {
     const Projectiles = require('./projectiles');
     const WorldBoard = require('./world-board');
     const ParcelIndicator = require('./parcel-indicator');
-    const Animation = require('../common/animation');
+    const CharacterNotification = require('./character-notification');
     require('./building-indicator');
 
     var runningEffects = [];
@@ -98,10 +99,11 @@ define(function (require, exports, module) {
             Characters.init();
 
             container.addChild(World.tilesLayer);
+            container.addChild(World.eventLayer);
             container.addChild(WorldBoard.boardLayer);
             container.addChild(ParcelIndicator.layer);
+            container.addChild(CharacterNotification.layer);
             container.addChild(GroundIndicators.layer);
-            container.addChild(World.eventLayer);
             container.addChild(Projectiles.layer);
             resize();
             MainLoop.start();

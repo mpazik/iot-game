@@ -17,7 +17,9 @@ define(function (require) {
         require('./ui-fragments/chat-ui'),
         require('./ui-fragments/inventory'),
         require('./ui-fragments/objectives-tracker'),
-        require('./ui-fragments/current-parcel')
+        require('./ui-fragments/current-parcel'),
+        require('./ui-fragments/cursor'),
+        require('./ui-fragments/casting-bar')
     ].concat(extraComponents.fragments);
 
     const windows = [
@@ -65,7 +67,7 @@ define(function (require) {
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
         'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage',
         'serverError', 'chatState', 'achievementConnectionState',
-        'friendshipRequest', 'friendsConnectionState'];
+        'friendshipRequest', 'friendsConnectionState', 'customCursor', 'casting'];
 
     function initUi(gameUiElement) {
         const windowRegister = new Map();

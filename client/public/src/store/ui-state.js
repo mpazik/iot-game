@@ -10,6 +10,8 @@ define(function (require, exports, module) {
     const Chat = require('../component/chat');
     const Achievement = require('../component/achievement');
     const Friends = require('../component/friends');
+    const Cursor = require('../store/cursor');
+    const Actions = require('../store/actions');
 
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
@@ -46,6 +48,8 @@ define(function (require, exports, module) {
         playerItems: Item.itemsChange,
         achievementConnectionState: Achievement.connectionStatePublisher,
         friendsConnectionState: Friends.connectionStatePublisher,
-        friendshipRequest: Friends.friendshipRequestPublisher
+        friendshipRequest: Friends.friendshipRequestPublisher,
+        customCursor: Cursor.cursorType,
+        casting: Actions.playerCasting
     };
 });

@@ -48,13 +48,6 @@ define(function (require, exports, module) {
             });
         }),
         playerCooldown: new Publisher.StatePublisher(null, push => {
-            const checkAndSetCooldown = function (event) {
-                if (event.casterId != characterId) return;
-                const skill = SkillStore.skill(event.skillId);
-                push({cooldown: skill.cooldown});
-                clearTimeout(timeOutToResetCooldown);
-                timeOutToResetCooldown = setTimeout(() => push(null), skill.cooldown)
-            };
             Dispatcher.messageStream.subscribe(Messages.SkillUsedOnCharacter, checkAndSetCooldown);
             Dispatcher.messageStream.subscribe(Messages.SkillUsedOnWorldMap, checkAndSetCooldown);
             Dispatcher.messageStream.subscribe(Messages.SkillUsedOnWorldObject, checkAndSetCooldown);
@@ -65,6 +58,18 @@ define(function (require, exports, module) {
                 clearTimeout(timeOutToResetCooldown);
                 push(null);
             });
+
+            function checkAndSetCooldown(event) {
+                if (event.casterId != characterId) return;
+                const skill = SkillStore.skill(event.skillId);
+                setCooldown(skill.cooldown);
+            }
+
+            function setCooldown(cooldown) {
+                push({cooldown: cooldown});
+                clearTimeout(timeOutToResetCooldown);
+                timeOutToResetCooldown = setTimeout(() => push(null), cooldown)
+            }
         })
     };
 });

@@ -4,6 +4,8 @@ define(function (require, exports, module) {
     const ResourcesStore = require('./resources');
     const MainPlayerStore = require('./main-player');
     const Dispatcher = require('../component/dispatcher');
+    const Items = require('../common/model/items').Ids;
+    const CharacterNotification = require('./character-notification');
 
     var items = (() => {
         const items = localStorage.getItem('items');
@@ -59,6 +61,12 @@ define(function (require, exports, module) {
         }
     });
 
+    Dispatcher.messageStream.subscribe('action-completed-on-world-object', (action) => {
+        if (action.key == 'cut-tree') {
+            changeItemQuantity(Items.WOOD, 10);
+        }
+    });
+
     function changeItemQuantity(item, quantityChange) {
         if (items[item]) {
             items[item] += quantityChange
@@ -71,6 +79,9 @@ define(function (require, exports, module) {
         const newObject = {};
         Object.assign(newObject, items);
         pushEvent(newObject);
+        if (quantityChange > 0) {
+            CharacterNotification.notify(ResourcesStore.item(Items.WOOD).name + ' +' + quantityChange);
+        }
     }
 
     const getItemQuantity = (item) => items[item] ? items[item] : 0;

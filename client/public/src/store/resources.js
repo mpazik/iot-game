@@ -11,7 +11,8 @@ define(function (require, exports, module) {
     const items = {
         [Items.ARROW]: {name: 'Arrow'},
         [Items.STICK]: {name: 'Stick'},
-        [Items.APPLE]: {name: 'Apple'}
+        [Items.APPLE]: {name: 'Apple'},
+        [Items.WOOD]: {name: 'Wood'}
     };
 
     const sprites = ["objects"];

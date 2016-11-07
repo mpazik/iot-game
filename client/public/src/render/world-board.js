@@ -3,11 +3,13 @@ define(function (require, exports, module) {
     const WorldObjectStore = require('../store/world-object');
     const tileSize = require('configuration').tileSize;
     const zoom = require('configuration').zoom;
-    const Targeting = require('../component/targeting');
-    const Skills = require('../common/model/skills');
     const Dispatcher = require('../component/dispatcher');
+    const Cursor = require('../store/cursor');
 
     const boardLayer = new Pixi.Container();
+
+    const hoverFilter = new Pixi.filters.GrayFilter();
+    hoverFilter.gray = -2.0;
 
     const worldObjects = [];
 
@@ -22,32 +24,40 @@ define(function (require, exports, module) {
 
         worldObject.mousedown = function () {
             Dispatcher.userEventStream.publish({
-                type: 'world-object-clicked',
-                worldObjectId: worldObject.id
+                type: 'world-object-targeted',
+                worldObjectId: worldObject.id,
+                action: {
+                    key: 'cut-tree',
+                    range: 2,
+                    casting: 2000
+                },
+                x: objectData.x + (objectKind['width'] / 2),
+                y: objectData.y + objectKind['height'],
             });
         };
 
-        worldObject.mouseover = function () {
-        };
-
-        worldObject.mouseout = function () {
-        };
+        if (objectKind['key'] == 'pine' || objectKind['key'] == 'tree') {
+            worldObject.interactive = true;
+            const collisionLayer = objectKind['collisionLayer'];
+            worldObject.hitArea = new Pixi.Rectangle(
+                collisionLayer['offsetX'] * tileSize / zoom,
+                collisionLayer['offsetY'] * tileSize / zoom,
+                collisionLayer['width'] * tileSize / zoom,
+                collisionLayer['height'] * tileSize / zoom
+            );
+            worldObject.mouseover = function () {
+                worldObject.filters = [hoverFilter];
+                Cursor.setCursor('wood-axe');
+            };
+            worldObject.mouseout = function () {
+                worldObject.filters = null;
+                Cursor.setDefault('default');
+            };
+        }
 
         worldObjects.push(worldObject);
         addSprite(worldObject);
         sortDisplayOrder();
-    }
-
-    function makeWorldObjectInteractive(worldObject) {
-        worldObject.interactive = true;
-        worldObject.filters = [interactiveFilter];
-    }
-
-    function makeWorldObjectNonInteractive(worldObject) {
-        if (worldObject.interactive) {
-            worldObject.interactive = false;
-            worldObject.filters = null;
-        }
     }
 
     function removeObject(worldObjectId) {
@@ -61,15 +71,6 @@ define(function (require, exports, module) {
 
     WorldObjectStore.worldObjectCreated.subscribe(createWorldObject);
     WorldObjectStore.worldObjectRemoved.subscribe(removeObject);
-
-    Targeting.targetingState.subscribe(function (skill) {
-        worldObjects.forEach(worldObject => makeWorldObjectNonInteractive(worldObject));
-        if (skill !== null && skill.type === Skills.Types.GATHER) {
-            worldObjects
-                .filter(worldObject => worldObject.kind == skill.worldObject)
-                .forEach(worldObject => makeWorldObjectInteractive(worldObject));
-        }
-    });
 
     function addSprite(sprite) {
         boardLayer.addChild(sprite);

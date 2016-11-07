@@ -4,8 +4,6 @@ define(function (require, exports, module) {
     const Dispatcher = require('./dispatcher');
     const Skills = require('../common/model/skills');
     const MainPlayer = require('../store/main-player');
-    const MoveStore = require('../store/move');
-    const Timer = require('./timer');
 
     var pushTargeting;
     const targetingState = new Publisher.StatePublisher(null, push => pushTargeting = push);
@@ -57,74 +55,38 @@ define(function (require, exports, module) {
 
     var target = null;
 
-    function huntTarget() {
-        if (target === null) {
-            return
-        }
-        const characterPos = MoveStore.positionAtTime(target.characterId, Timer.currentTimeOnServer());
-        const userPos = MainPlayer.position;
-        const skillRange = target.skillToUse.range;
-        if (userPos.isInRange(characterPos, skillRange)) {
-            Dispatcher.userEventStream.publish('skill-used-on-character', {
-                characterId: target.characterId,
-                skillId: target.skillToUse.id
-            });
-        } else {
-            // move is expensive so it's done every x huntTarget operation
-            if (target.attemptToMove === 5) {
-                target.attemptToMove = 0;
-                const distanceToCreature = userPos.distanceTo(characterPos);
-                const ratio = (distanceToCreature - skillRange) / distanceToCreature;
-                // there +10% to make sure that player will be in distance to creature.
-                const targetVector = Point.interpolate(ratio * 1.1, userPos, characterPos);
-                Dispatcher.userEventStream.publish('move-to', {x: targetVector.x, y: targetVector.y});
-            } else {
-                target.attemptToMove += 1;
-            }
-            setTimeout(huntTarget, 100);
-        }
-    }
-
     function isTargetingSkill(skill) {
         return skill.type != Skills.Types.CRAFT && skill.type != Skills.Types.USE
     }
 
-    function stopHunting() {
+    function goToPosition() {
+        if (target === null) {
+            return
+        }
+
+        const userPos = MainPlayer.position;
+        if (userPos.isInRange(target, target.action.range)) {
+            Dispatcher.messageStream.publish('action-started-on-world-object', target.action);
+        } else {
+            // move is expensive so it's done every x huntTarget operation
+            if (target.attemptToMove == null || target.attemptToMove == 0) {
+                target.attemptToMove = 20;
+                Dispatcher.userEventStream.publish('move-to', {x: target.x, y: target.y});
+            } else {
+                target.attemptToMove -= 1;
+            }
+            setTimeout(goToPosition, 100);
+        }
+    }
+
+    function stopGoing() {
         target = null;
     }
 
-    Dispatcher.userEventStream.subscribe('character-clicked', function (data) {
-        if (!isTargeting()) return; // ignore character clicks if skill is not triggered.
-        const skill = targetingState.value;
-
-        if (skill.type === Skills.Types.ATTACK) {
-            target = {
-                characterId: data.characterId,
-                skillToUse: skill,
-                attemptToMove: 5
-            };
-            huntTarget();
-            // deferred because which is invoked by 'left-click' an we want to listen to the next 'left-click'
-            deffer(() => Dispatcher.userEventStream.subscribeOnce('left-click', stopHunting));
-        }
-        if (skill.type === Skills.Types.SPECIAL) {
-            Dispatcher.userEventStream.publish('special-skill-used-on-character', {
-                characterId: data.characterId,
-                skillId: skill.id
-            });
-        }
-    });
-
-    Dispatcher.userEventStream.subscribe('world-object-clicked', function (data) {
-        if (!isTargeting()) return; // ignore character clicks if skill is not triggered.
-        const skill = targetingState.value;
-
-        if (skill.type === Skills.Types.GATHER) {
-            Dispatcher.userEventStream.publish('skill-used-on-world-object', {
-                worldObjectId: data.worldObjectId,
-                skillId: skill.id
-            });
-        }
+    Dispatcher.userEventStream.subscribe('world-object-targeted', function (data) {
+        target = data;
+        goToPosition();
+        deffer(() => Dispatcher.userEventStream.subscribeOnce('left-click', stopGoing));
     });
 
     module.exports = {
