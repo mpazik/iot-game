@@ -38,12 +38,12 @@ define(function (require, exports, module) {
 
         if (objectKind['key'] == 'pine' || objectKind['key'] == 'tree') {
             worldObject.interactive = true;
-            const collisionLayer = objectKind['collisionLayer'];
+            const groundLayer = objectKind['groundLayer'];
             worldObject.hitArea = new Pixi.Rectangle(
-                collisionLayer['offsetX'] * tileSize / zoom,
-                collisionLayer['offsetY'] * tileSize / zoom,
-                collisionLayer['width'] * tileSize / zoom,
-                collisionLayer['height'] * tileSize / zoom
+                groundLayer['offsetX'] * tileSize / zoom,
+                groundLayer['offsetY'] * tileSize / zoom,
+                groundLayer['width'] * tileSize / zoom,
+                groundLayer['height'] * tileSize / zoom
             );
             worldObject.mouseover = function () {
                 worldObject.filters = [hoverFilter];

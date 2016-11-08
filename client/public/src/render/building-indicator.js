@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+define(function (require) {
     const Pixi = require('pixi');
     const TileSize = require('configuration').tileSize;
     const parcelSize = require('configuration').parcelSize;
@@ -35,12 +35,12 @@ define(function (require, exports, module) {
             return false;
         }
 
-        const collisionRectangle = WorldObjectStore.getCollisionRectangle(startTileX, startTileY, objectKind);
-        if (!isObjectOnPlayerParcel(collisionRectangle)) {
+        const groundRectangle = WorldObjectStore.getGroundRectangle(startTileX, startTileY, objectKind);
+        if (!isObjectOnPlayerParcel(groundRectangle)) {
             return false
         }
 
-        return checkAllTileInRectangle(collisionRectangle.x, collisionRectangle.y, collisionRectangle.width, collisionRectangle.height);
+        return checkAllTileInRectangle(groundRectangle.x, groundRectangle.y, groundRectangle.width, groundRectangle.height);
 
         function checkAllTileInRectangle(startX, startY, width, height) {
             // ct stands for current tile

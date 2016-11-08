@@ -34,7 +34,7 @@ define(function (require, exports, module) {
         return r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y;
     }
 
-    function getCollisionRectangleFromLayer(x, y, layer) {
+    function getRectangleFromLayer(x, y, layer) {
         return {
             x: x + (layer['offsetX'] || 0),
             y: y + (layer['offsetY'] || 0),
@@ -43,9 +43,9 @@ define(function (require, exports, module) {
         }
     }
 
-    function getCollisionRectangle(x, y, objectKind) {
-        if (objectKind['collisionLayer']) {
-            return getCollisionRectangleFromLayer(x, y, objectKind['collisionLayer'])
+    function getGroundRectangle(x, y, objectKind) {
+        if (objectKind['groundLayer']) {
+            return getRectangleFromLayer(x, y, objectKind['groundLayer'])
         }
         return {
             x,
@@ -65,20 +65,20 @@ define(function (require, exports, module) {
             Dispatcher.messageStream.subscribeLast(Messages.WorldObjectRemoved, (event) => push(event.worldObject.id));
         }),
         kindDefinition,
-        getCollisionRectangle,
+        getGroundRectangle,
         isFreePlaceForObject: (x, y, objectKind) => {
-            const treeCollisionRectangle = objectKind['treeCollisionLayer'] ? getCollisionRectangleFromLayer(x, y, objectKind['treeCollisionLayer']) : null;
-            const collisionRectangle = getCollisionRectangle(x, y, objectKind);
+            const upperRectangle = objectKind['upperLayer'] ? getRectangleFromLayer(x, y, objectKind['upperLayer']) : null;
+            const groundRectangle = getGroundRectangle(x, y, objectKind);
             for (var object of state.values()) {
                 const objectKind2 = kindDefinition(object.kind);
-                if (treeCollisionRectangle && objectKind2['treeCollisionLayer']) {
-                    const collisionRectangle2 = getCollisionRectangleFromLayer(object.x, object.y, objectKind2['treeCollisionLayer']);
-                    if (areRectanglesOverlapping(treeCollisionRectangle, collisionRectangle2)) {
+                if (upperRectangle && objectKind2['upperLayer']) {
+                    const upperRectangle2 = getRectangleFromLayer(object.x, object.y, objectKind2['upperLayer']);
+                    if (areRectanglesOverlapping(upperRectangle, upperRectangle2)) {
                         return false;
                     }
                 } else {
-                    const collisionRectangle2 = getCollisionRectangle(object.x, object.y, objectKind2);
-                    if (areRectanglesOverlapping(collisionRectangle, collisionRectangle2)) {
+                    const groundRectangle2 = getGroundRectangle(object.x, object.y, objectKind2);
+                    if (areRectanglesOverlapping(groundRectangle, groundRectangle2)) {
                         return false;
                     }
                 }

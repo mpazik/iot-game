@@ -89,11 +89,14 @@ final class PositionServiceImpl implements PositionService {
 
     private void setWorldObjectCollsion(WorldObject worldObject, boolean value) {
         WorldObjectKind worldObjectKind = worldObjectStore.getWorldObjectKind(worldObject.getKind());
-        WorldObjectKind.CollisionLayer collisionLayer = worldObjectKind.getCollisionLayer();
-        if (collisionLayer != null) {
-            int startX = worldObject.getX() + collisionLayer.getOffsetX();
-            int startY = worldObject.getY() + collisionLayer.getOffsetY();
-            setRectangleCollision(startX, collisionLayer.getWidth(), startY, collisionLayer.getHeight(), value);
+        if (!worldObjectKind.isCollidable()) {
+            return;
+        }
+        WorldObjectKind.GroundLayer groundLayer = worldObjectKind.getGroundLayer();
+        if (groundLayer != null) {
+            int startX = worldObject.getX() + groundLayer.getOffsetX();
+            int startY = worldObject.getY() + groundLayer.getOffsetY();
+            setRectangleCollision(startX, groundLayer.getWidth(), startY, groundLayer.getHeight(), value);
         } else {
             setRectangleCollision(worldObject.getX(), worldObjectKind.getWidth(), worldObject.getY(), worldObjectKind.getHeight(), value);
         }

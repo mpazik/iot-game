@@ -10,14 +10,16 @@ public class WorldObjectKind implements GeneralData<WorldObjectKind> {
     private final String key;
     private final int width;
     private final int height;
-    private final CollisionLayer collisionLayer;
+    private final GroundLayer groundLayer;
+    private final boolean collidable;
 
-    public WorldObjectKind(Id<WorldObjectKind> id, String key, int width, int height, CollisionLayer collisionLayer) {
+    public WorldObjectKind(Id<WorldObjectKind> id, String key, int width, int height, GroundLayer groundLayer, boolean collidable) {
         this.id = id;
         this.key = key;
         this.width = width;
         this.height = height;
-        this.collisionLayer = collisionLayer;
+        this.groundLayer = groundLayer;
+        this.collidable = collidable;
     }
 
     public Id<WorldObjectKind> getId() {
@@ -36,8 +38,12 @@ public class WorldObjectKind implements GeneralData<WorldObjectKind> {
         return height;
     }
 
-    public CollisionLayer getCollisionLayer() {
-        return collisionLayer;
+    public GroundLayer getGroundLayer() {
+        return groundLayer;
+    }
+
+    public boolean isCollidable() {
+        return collidable;
     }
 
     @Override
@@ -53,21 +59,21 @@ public class WorldObjectKind implements GeneralData<WorldObjectKind> {
                 height == that.height &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(key, that.key) &&
-                Objects.equals(collisionLayer, that.collisionLayer);
+                Objects.equals(groundLayer, that.groundLayer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, key, width, height, collisionLayer);
+        return Objects.hash(id, key, width, height, groundLayer);
     }
 
-    public static final class CollisionLayer {
+    public static final class GroundLayer {
         private final int width;
         private final int height;
         private final int offsetX;
         private final int offsetY;
 
-        public CollisionLayer(int width, int height, int offsetX, int offsetY) {
+        public GroundLayer(int width, int height, int offsetX, int offsetY) {
             this.width = width;
             this.height = height;
             this.offsetX = offsetX;

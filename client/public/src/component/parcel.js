@@ -118,7 +118,9 @@ define(function (require, exports, module) {
         currentParcelHighlighting,
         highlightCurrentParcel,
         isPlayerOnOwnParcel,
-        playerParcel,
+        get playerParcel() {
+            return playerParcel;
+        },
         canClaimCurrentLand () {
             return !playerParcel && !currentParcel.value.owner
         }
