@@ -50,6 +50,7 @@ define(function (require, exports, module) {
 
     function render() {
         Characters.recalculatePositions();
+        WorldBoard.updateAnimatedObjects();
         container.position.x = Math.round(-MainPlayer.positionInPixels.x + width / 2);
         container.position.y = Math.round(-MainPlayer.positionInPixels.y + height / 2);
         renderer.render(stage);

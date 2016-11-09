@@ -34,7 +34,8 @@ define(function (require) {
         require('./windows/feedback-window'),
         require('./windows/thank-you-window'),
         require('./windows/building-window'),
-        require('./windows/parcel-window')
+        require('./windows/parcel-window'),
+        require('./windows/cooking-window')
     ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {

@@ -5,6 +5,7 @@ define(function (require, exports, module) {
     const zoom = require('configuration').zoom;
     const Dispatcher = require('../component/dispatcher');
     const Cursor = require('../store/cursor');
+    const Timer = require('../component/timer');
 
     const boardLayer = new Pixi.Container();
 
@@ -12,15 +13,20 @@ define(function (require, exports, module) {
     hoverFilter.gray = -2.0;
 
     const worldObjects = [];
+    const animatedWorldObjects = [];
 
     const actionIcons = {
         'cut-tree': 'wood-axe',
-        'harvest': 'hand'
+        'harvest': 'hand',
+        'cook': 'cooking-pot',
     };
 
     function createWorldObject(objectData) {
         const objectKind = WorldObjectStore.kindDefinition(objectData.kind);
-        const worldObject = Pixi.Sprite.fromImage(getSprite());
+        const worldObject = getSprite();
+        if (objectKind['animationSteps']) {
+            animatedWorldObjects.push(worldObject);
+        }
         worldObject.id = objectData.id;
         worldObject.scale = {x: zoom, y: zoom};
         worldObject.position.x = objectData.x * tileSize;
@@ -60,7 +66,7 @@ define(function (require, exports, module) {
             };
         }
 
-        if (objectKind['key'] == 'pine' || objectKind['key'] == 'tree' ||
+        if (objectKind['key'] == 'pine' || objectKind['key'] == 'tree' || objectKind['key'] == 'campfire' ||
             (objectKind['growingSteps'] && objectKind['growingSteps'] == objectData.step)) {
             worldObject.interactive = true;
         }
@@ -77,16 +83,20 @@ define(function (require, exports, module) {
                 case 'tomato':
                 case 'corn':
                 case 'paprika':
-                    return 'harvest'
+                    return 'harvest';
+                case 'campfire':
+                    return 'cook';
             }
         }
 
         function getSprite() {
-            if (objectKind['growingSteps']) {
-                return objectKind['sprite'] + objectData.step + '.png'
-            } else {
-                return objectKind['sprite'] + '.png'
+            if (objectKind['animationSteps']) {
+                return new AnimatedSprite(objectKind['sprite'], objectKind['animationSteps'], objectData.created)
             }
+            if (objectKind['growingSteps']) {
+                return Pixi.Sprite.fromImage(objectKind['sprite'] + objectData.step + '.png');
+            }
+            return Pixi.Sprite.fromImage(objectKind['sprite'] + '.png');
         }
     }
 
@@ -109,6 +119,13 @@ define(function (require, exports, module) {
         const worldObject = worldObjects[index];
         boardLayer.removeChild(worldObject);
         worldObjects.splice(index, 1);
+
+        if (worldObject.kind['animationSteps']) {
+            const index = animatedWorldObjects.findIndex(function (worldObject) {
+                return worldObject.id === worldObjectId
+            });
+            animatedWorldObjects.splice(index, 1);
+        }
     }
 
     WorldObjectStore.worldObjectCreated.subscribe(createWorldObject);
@@ -125,6 +142,28 @@ define(function (require, exports, module) {
         });
     }
 
+    function AnimatedSprite(textureName, frameNumber, startTime) {
+        this.frames = [];
+        this.frameNumber = frameNumber;
+        this.startTime = startTime || 0;
+
+        for (var i = 1; i <= frameNumber; i++) {
+            this.frames.push(Pixi.Texture.fromFrame(textureName + i + '.png'));
+        }
+
+        Pixi.Sprite.call(this, this.frames[0]);
+    }
+
+    AnimatedSprite.prototype = Object.create(Pixi.Sprite.prototype);
+    AnimatedSprite.prototype._getCurrentFrame = function (time) {
+        return Math.floor((time - this.startTime) / 150);
+    };
+    AnimatedSprite.prototype.update = function (time) {
+        const frameIndex = this._getCurrentFrame(time) % this.frameNumber;
+        //noinspection JSUnusedGlobalSymbols
+        this.texture = this.frames[frameIndex]
+    };
+
     module.exports = {
         init: function () {
             boardLayer.removeChildren();
@@ -137,6 +176,12 @@ define(function (require, exports, module) {
         sortDisplayOrder,
         removeObject: function (sprite) {
             boardLayer.removeChild(sprite);
+        },
+        updateAnimatedObjects () {
+            const time = Timer.currentTimeOnServer();
+            animatedWorldObjects.forEach(obj => {
+                obj.update(time)
+            })
         },
         get boardLayer() {
             return boardLayer;

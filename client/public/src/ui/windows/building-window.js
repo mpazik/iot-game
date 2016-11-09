@@ -4,7 +4,6 @@ define(function (require) {
     const Skills = require('../../common/model/skills');
     const ActionBar = require('../../store/action-bar');
     const ItemStore = require('../../store/item');
-    const Parcel = require('../../component/parcel');
 
     function renderCost(objectKind) {
         const cost = objectKind['cost'];
@@ -32,11 +31,22 @@ define(function (require) {
         });
     }
 
+    function getSprite(objectKind) {
+        if (objectKind['width'] < 5 && objectKind['height'] < 5) {
+            return objectKind['sprite'] + '-icon';
+        }
+        if (objectKind['growingSteps']) {
+            return objectKind['sprite'] + objectKind['growingSteps'];
+        }
+        if (objectKind['animationSteps']) {
+            return objectKind['sprite'] + '1';
+        }
+        return objectKind['sprite'];
+    }
+
     function renderObject(objectKind) {
-        // if there are growing steps, display the last one
-        const sprite = objectKind['growingSteps'] ? objectKind['sprite'] + '-icon' : objectKind['sprite'];
         return `<div class="object">
-    <div class="object-icon ${sprite}"></div>
+    <div class="object-icon ${getSprite(objectKind)}"></div>
     <div class="object-description">
         <h3>${objectKind['name']}</h3>
         ${renderCost(objectKind)}
@@ -61,10 +71,8 @@ define(function (require) {
         },
         attached: function () {
             this._update();
-            Parcel.highlightPlayerParcel(true);
         },
         detached: function () {
-            Parcel.highlightPlayerParcel(false);
         },
         _update: function () {
             this.innerHTML = ActionBar.unlockedObjects.map(objectKindId => renderObject(objectKindById(objectKindId))).join('\n');

@@ -127,18 +127,6 @@ define(function (require, exports, module) {
     }
 
     AnimatedSprite.prototype = Object.create(Pixi.Sprite.prototype);
-    AnimatedSprite.prototype.setState = function (name, startTime) {
-        this.startTime = startTime || 0;
-        console.log(name);
-        if (!this.animations.hasOwnProperty(name)) {
-            throw `Animation state ${name} is undefined`
-        }
-        this.state = name;
-        this.texture = this.frames[this.animations[this.state][0]]
-    };
-    AnimatedSprite.prototype.getState = function () {
-        return this.state;
-    };
     AnimatedSprite.prototype._getCurrentFrame = function (time) {
         return Math.round((time - this.startTime) / 200);
     };
@@ -152,6 +140,9 @@ define(function (require, exports, module) {
         }
         this.state = name;
         this.texture = this.frames[this.animations[this.state][0]]
+    };
+    AnimatedSprite.prototype.getState = function () {
+        return this.state;
     };
     AnimatedSprite.prototype.update = function (time) {
         if (this.startTime == 0) {

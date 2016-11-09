@@ -108,6 +108,7 @@ define(function (require) {
         if (skill == null) return;
 
         if (skill.type === Skills.Types.BUILD) {
+            Parcel.highlightPlayerParcel(true);
             const objectKind = Resources.objectKind(skill.objectKind);
             const sprite = Pixi.Sprite.fromImage(getSprite());
             sprite.scale = {x: zoom, y: zoom};
@@ -117,13 +118,16 @@ define(function (require) {
             WorldMap.mousePositionStream.subscribe(recalculateSpritePosition);
             WorldMap.worldMapClicked.subscribe(buildOnPosition);
             WorldBoard.addObject(sprite);
+            Parcel.highlightPlayerParcel(false);
 
             function getSprite() {
+                if (objectKind['animationSteps']) {
+                    return objectKind['sprite'] + '1' + '.png'
+                }
                 if (objectKind['growingSteps']) {
                     return objectKind['sprite'] + objectKind['growingSteps'] + '.png'
-                } else {
-                    return objectKind['sprite'] + '.png'
                 }
+                return objectKind['sprite'] + '.png'
             }
         }
     });

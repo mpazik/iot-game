@@ -21,6 +21,10 @@ define(function (require, exports, module) {
 
     Dispatcher.messageStream.subscribe('action-started-on-world-object', (data) => {
         clearTimeout(castingFinishTimeout);
+        if (data.action.key == 'cook') {
+            Dispatcher.userEventStream.publish('toggle-window', 'cooking-window');
+            return;
+        }
         castingFinishTimeout = setTimeout(() => doAction(data), data.action.casting);
         pushCastingTime(data.action.casting);
         // current action is triggered by left click so we don't want to subscribe to current mouse click
