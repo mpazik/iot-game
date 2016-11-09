@@ -4,6 +4,7 @@ define(function (require) {
     const Skills = require('../../common/model/skills');
     const ActionBar = require('../../store/action-bar');
     const ItemStore = require('../../store/item');
+    const Parcel = require('../../component/parcel');
 
     function renderCost(objectKind) {
         const cost = objectKind['cost'];
@@ -60,8 +61,10 @@ define(function (require) {
         },
         attached: function () {
             this._update();
+            Parcel.highlightPlayerParcel(true);
         },
         detached: function () {
+            Parcel.highlightPlayerParcel(false);
         },
         _update: function () {
             this.innerHTML = ActionBar.unlockedObjects.map(objectKindId => renderObject(objectKindById(objectKindId))).join('\n');

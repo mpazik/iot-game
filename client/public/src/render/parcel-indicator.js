@@ -6,18 +6,25 @@ define(function (require, exports, module) {
     const layer = new Pixi.Container();
     var parcelIndicator;
 
-    Parcel.currentParcelHighlighting.subscribe(function (highlight) {
+    function highlightParcel(highlight, parcel) {
         if (highlight) {
-            const currentParcel = Parcel.currentParcel.value;
             parcelIndicator = new Pixi.Graphics();
             parcelIndicator.beginFill(0x74C0FF, 0.2);
             parcelIndicator.lineStyle(3, 0x74C0FF, 0.4);
-            parcelIndicator.drawRect(currentParcel.x * parcelPixelSize, currentParcel.y * parcelPixelSize, parcelPixelSize, parcelPixelSize);
+            parcelIndicator.drawRect(parcel.x * parcelPixelSize, parcel.y * parcelPixelSize, parcelPixelSize, parcelPixelSize);
             layer.addChild(parcelIndicator)
         } else {
             layer.removeChild(parcelIndicator);
             parcelIndicator = null;
         }
+    }
+
+    Parcel.currentParcelHighlighting.subscribe(function (highlight) {
+        highlightParcel(highlight, Parcel.currentParcel.value);
+    });
+
+    Parcel.playerParcelHighlighting.subscribe(function (highlight) {
+        highlightParcel(highlight, Parcel.playerParcel);
     });
 
     module.exports = {

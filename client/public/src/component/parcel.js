@@ -17,10 +17,16 @@ define(function (require, exports, module) {
         return setCurrentParcel = f;
     });
 
-    var highlightCurrentParcel;
+    var highlightCurrentParcel = null;
     const currentParcelHighlighting = new Publisher.StatePublisher(null, function (f) {
         return highlightCurrentParcel = f;
     });
+
+    var highlightPlayerParcel = null;
+    const playerParcelHighlighting = new Publisher.StatePublisher(null, function (f) {
+        return highlightPlayerParcel = f;
+    });
+
 
     const isPlayerOnOwnParcel = new Publisher.StatePublisher('not-connected', publish => {
         currentParcel.subscribe(parcel => publish(parcel == playerParcel))
@@ -117,6 +123,8 @@ define(function (require, exports, module) {
         currentParcel,
         currentParcelHighlighting,
         highlightCurrentParcel,
+        playerParcelHighlighting,
+        highlightPlayerParcel,
         isPlayerOnOwnParcel,
         get playerParcel() {
             return playerParcel;
