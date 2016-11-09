@@ -5,6 +5,9 @@ define(function (require, exports, module) {
         STICK: 1,
         APPLE: 2,
         WOOD: 3,
+        CORN: 4,
+        TOMATO: 5,
+        PAPRIKA: 6,
     };
 
     module.exports = {

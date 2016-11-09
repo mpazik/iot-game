@@ -2,11 +2,13 @@ define(function (require) {
     const objectKindById = require('../../store/resources').objectKind;
     const userEventStream = require('../../component/dispatcher').userEventStream;
     const Skills = require('../../common/model/skills');
-    const unlockedObjects = [1, 2, 3];
+    const ActionBar = require('../../store/action-bar');
 
     function renderObject(objectKind) {
+        // if there are growing steps, display the last one
+        const sprite = objectKind['growingSteps'] ? objectKind['sprite'] + '-icon' : objectKind['sprite'];
         return `<div class="object">
-    <div class="object-icon ${objectKind['sprite']}"></div>
+    <div class="object-icon ${sprite}"></div>
     <div>
         <h3>${objectKind['name']}</h3>
         <button data-object-kind-id="${objectKind['id']}" class="build-button">Build</button>
@@ -32,7 +34,7 @@ define(function (require) {
         detached: function () {
         },
         _update: function () {
-            this.innerHTML = unlockedObjects.map(objectKindId => renderObject(objectKindById(objectKindId))).join('\n');
+            this.innerHTML = ActionBar.unlockedObjects.map(objectKindId => renderObject(objectKindById(objectKindId))).join('\n');
             const buildButtons = this.getElementsByClassName('build-button');
             for (const buildButton of buildButtons) {
                 buildButton.addEventListener('click', function () {

@@ -3,6 +3,7 @@ package dzida.server.app.store.memory;
 import com.google.common.collect.ImmutableList;
 import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
+import dzida.server.core.time.TimeService;
 import dzida.server.core.world.object.WorldObject;
 import dzida.server.core.world.object.WorldObjectKind;
 import dzida.server.core.world.object.WorldObjectStore;
@@ -15,9 +16,11 @@ import java.util.stream.Collectors;
 public class WorldObjectStoreInMemory implements WorldObjectStore {
     private final Map<Id<WorldObject>, GeneralEntity<WorldObject>> worldObjects;
     private final Map<Id<WorldObjectKind>, WorldObjectKind> worldObjectKinds;
+    private final TimeService timeService;
     long idGenerator = 0;
 
-    public WorldObjectStoreInMemory(List<WorldObjectKind> worldObjectKinds) {
+    public WorldObjectStoreInMemory(List<WorldObjectKind> worldObjectKinds, TimeService timeService) {
+        this.timeService = timeService;
         worldObjects = new HashMap<>();
         this.worldObjectKinds = worldObjectKinds.stream().collect(Collectors.toMap(WorldObjectKind::getId, worldObjectKind -> worldObjectKind));
     }
@@ -34,7 +37,7 @@ public class WorldObjectStoreInMemory implements WorldObjectStore {
 
     @Override
     public GeneralEntity<WorldObject> createWorldObject(Id<WorldObjectKind> objectKindId, int x, int y) {
-        WorldObject worldObject = new WorldObject(objectKindId, x, y);
+        WorldObject worldObject = new WorldObject(objectKindId, x, y, timeService.getCurrentTime());
         return new GeneralEntity<>(
                 new Id<>(newId()),
                 worldObject

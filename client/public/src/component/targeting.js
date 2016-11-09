@@ -1,6 +1,5 @@
 define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
-    const Point = require('../unit/point');
     const Dispatcher = require('./dispatcher');
     const Skills = require('../common/model/skills');
     const MainPlayer = require('../store/main-player');
@@ -66,7 +65,11 @@ define(function (require, exports, module) {
 
         const userPos = MainPlayer.position;
         if (userPos.isInRange(target, target.action.range)) {
-            Dispatcher.messageStream.publish('action-started-on-world-object', target.action);
+            Dispatcher.messageStream.publish('action-started-on-world-object', {
+                action: target.action,
+                worldObjectId: target.worldObjectId,
+                worldObjectKind: target.worldObjectKind
+            });
         } else {
             // move is expensive so it's done every x huntTarget operation
             if (target.attemptToMove == null || target.attemptToMove == 0) {

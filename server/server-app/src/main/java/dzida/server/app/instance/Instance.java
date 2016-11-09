@@ -63,19 +63,19 @@ public class Instance {
 
         Key<WorldMap> worldMapKey = scenario.getWorldMapKey();
         StaticDataLoader staticDataLoader = new StaticDataLoader();
+        TimeService timeService = new TimeServiceImpl();
 
         Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
-        WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader));
+        WorldMapStoreHttp worldMapStore = new WorldMapStoreHttp(new WorldMapLoader(staticDataLoader), timeService);
         SkillStore skillStore = new SkillStoreInMemory(skills);
 
         WorldMap worldMap = worldMapStore.getMap(worldMapKey);
         PositionStore positionStore = new PositionStoreInMemory(worldMap.getSpawnPoint());
         List<WorldObjectKind> worldObjectKinds = new WorldObjectKindLoader(staticDataLoader).loadWorldObjectKinds();
-        WorldObjectStoreInMemory worldObjectStore = new WorldObjectStoreInMemory(worldObjectKinds);
+        WorldObjectStoreInMemory worldObjectStore = new WorldObjectStoreInMemory(worldObjectKinds, timeService);
         WorldObjectService worldObjectService = WorldObjectService.create(worldObjectStore);
         BitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, worldMapStore.getTileset(worldMap.getTileset()));
 
-        TimeService timeService = new TimeServiceImpl();
         CharacterService characterService = CharacterService.create();
         WorldMapService worldMapService = WorldMapService.create(worldMapStore, worldMapKey);
         SkillService skillService = SkillService.create(skillStore, timeService);

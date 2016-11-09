@@ -4,16 +4,20 @@ import com.google.common.base.Objects;
 import dzida.server.core.basic.entity.GeneralData;
 import dzida.server.core.basic.entity.Id;
 
+import java.time.Instant;
+
 
 public final class WorldObject implements GeneralData<WorldObject> {
         private final Id<WorldObjectKind> kind;
         private final int x;
         private final int y;
+    private final Instant created;
 
-        public WorldObject(Id<WorldObjectKind> kind, int x, int y) {
+    public WorldObject(Id<WorldObjectKind> kind, int x, int y, Instant created) {
                 this.kind = kind;
                 this.x = x;
                 this.y = y;
+        this.created = created;
         }
 
         public Id<WorldObjectKind> getKind() {

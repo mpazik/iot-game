@@ -110,7 +110,7 @@ define(function (require) {
 
         if (skill.type === Skills.Types.BUILD) {
             const objectKind = Resources.objectKind(skill.objectKind);
-            const sprite = Pixi.Sprite.fromImage(objectKind['sprite'] + '.png');
+            const sprite = Pixi.Sprite.fromImage(getSprite());
             sprite.scale = {x: zoom, y: zoom};
             const spriteOffset = {x: (objectKind.width - 1) * 0.5, y: (objectKind.height - 1) * 0.5};
             targetingData = {objectKind, spriteOffset, sprite, skill};
@@ -119,6 +119,14 @@ define(function (require) {
             WorldMap.worldMapClicked.subscribe(buildOnPosition);
             WorldBoard.addObject(sprite);
             Parcel.highlightCurrentParcel(true);
+
+            function getSprite() {
+                if (objectKind['growingSteps']) {
+                    return objectKind['sprite'] + objectKind['growingSteps'] + '.png'
+                } else {
+                    return objectKind['sprite'] + '.png'
+                }
+            }
         }
     });
 });

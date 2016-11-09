@@ -416,7 +416,9 @@ building-window .object {
 
 building-window .object-icon {
     float: left;
-    margin-right: 20px
+    margin-right: 20px;
+    /* min-width: 32px; */
+    /* transform: scale(2,2); */
 }
 
 #custom-cursor {
@@ -425,4 +427,3 @@ building-window .object-icon {
     width: 48px;
     height: 48px;
     color: #999;
-}

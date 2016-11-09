@@ -16,6 +16,7 @@ import dzida.server.app.world.map.WorldMapData;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.basic.unit.Point;
+import dzida.server.core.time.TimeService;
 import dzida.server.core.world.map.Tileset;
 import dzida.server.core.world.map.Tileset.TerrainType;
 import dzida.server.core.world.map.WorldMap;
@@ -30,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 
 public class WorldMapStoreHttp implements WorldMapStore {
     private final WorldMapLoader worldMapLoader;
+    private final TimeService timeService;
 
     private final LoadingCache<Key<WorldMap>, WorldMapData> worldMaps = CacheBuilder.newBuilder()
             .maximumSize(100)
@@ -47,8 +49,9 @@ public class WorldMapStoreHttp implements WorldMapStore {
                 }
             });
 
-    public WorldMapStoreHttp(WorldMapLoader worldMapLoader) {
+    public WorldMapStoreHttp(WorldMapLoader worldMapLoader, TimeService timeService) {
         this.worldMapLoader = worldMapLoader;
+        this.timeService = timeService;
     }
 
     private static String removeExtension(String s) {
@@ -110,7 +113,7 @@ public class WorldMapStoreHttp implements WorldMapStore {
                 }
                 TailObjectProperty tailObjectProperty = objectTileset.getTileproperties().get(Integer.toString(tileObjectId - tilesetRef.getFirstgid()));
                 int objectKind = Integer.parseInt(tailObjectProperty.getObjectId());
-                builder.add(new WorldObject(new Id<>(objectKind), x, y));
+                builder.add(new WorldObject(new Id<>(objectKind), x, y, timeService.getCurrentTime()));
             }
         }
         return builder.build();

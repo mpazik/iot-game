@@ -61,9 +61,20 @@ define(function (require, exports, module) {
         }
     });
 
-    Dispatcher.messageStream.subscribe('action-completed-on-world-object', (action) => {
-        if (action.key == 'cut-tree') {
+    Dispatcher.messageStream.subscribe('action-completed-on-world-object', (event) => {
+        if (event.action.key == 'cut-tree') {
             changeItemQuantity(Items.WOOD, 10);
+        } else if (event.action.key == 'harvest') {
+            switch (event.worldObjectKind.key) {
+                case 'tomatoes':
+                    changeItemQuantity(Items.TOMATO, 10);
+                    break;
+                case 'corn':
+                    changeItemQuantity(Items.CORN, 10);
+                    break;
+                case 'paprika':
+                    changeItemQuantity(Items.PAPRIKA, 10);
+            }
         }
     });
 
@@ -80,7 +91,7 @@ define(function (require, exports, module) {
         Object.assign(newObject, items);
         pushEvent(newObject);
         if (quantityChange > 0) {
-            CharacterNotification.notify(ResourcesStore.item(Items.WOOD).name + ' +' + quantityChange);
+            CharacterNotification.notify(ResourcesStore.item(item).name + ' +' + quantityChange);
         }
     }
 

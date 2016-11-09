@@ -12,7 +12,10 @@ define(function (require, exports, module) {
         [Items.ARROW]: {name: 'Arrow'},
         [Items.STICK]: {name: 'Stick'},
         [Items.APPLE]: {name: 'Apple'},
-        [Items.WOOD]: {name: 'Wood'}
+        [Items.WOOD]: {name: 'Wood'},
+        [Items.CORN]: {name: 'Corn'},
+        [Items.TOMATO]: {name: 'Tomato'},
+        [Items.PAPRIKA]: {name: 'Paprika'}
     };
 
     const sprites = ["objects"];

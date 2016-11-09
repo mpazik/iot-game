@@ -21,4 +21,10 @@ public class TimeServiceImpl implements TimeService {
     public long getCurrentMillis() {
         return getServerTime();
     }
+
+    @Override
+    public Instant getCurrentTime() {
+        return getServerInstant();
+    }
+
 }

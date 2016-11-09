@@ -4,9 +4,13 @@ define(function (require, exports, module) {
     const Resources = require('./resources');
     const Messages = require('../component/instance/messages');
     const Dispatcher = require('../component/dispatcher');
+    const Timer = require('../component/timer');
 
     const key = 'worldObject';
     const state = new Map();
+    const growingStepDuration = 10000;
+
+    var growObject = null;
 
     Dispatcher.messageStream.subscribe(Messages.WorldObjectCreated, (event) => {
         addWorldObject(event.worldObject);
@@ -16,8 +20,26 @@ define(function (require, exports, module) {
     });
 
     function addWorldObject(worldObject) {
-        worldObject.data.id = worldObject.id;
-        state.set(worldObject.id, worldObject.data)
+        const objectData = worldObject.data;
+        objectData.id = worldObject.id;
+        const objectKind = kindDefinition(objectData.kind);
+        if (objectKind['growingSteps']) {
+            const growingSteps = objectKind['growingSteps'];
+            const createdAgo = Timer.currentTimeOnServer() - objectData.created;
+            const stepsAgo = Math.floor(createdAgo / growingStepDuration) + 1;
+            const currentStep = Math.min(Math.max(1, stepsAgo), objectKind['growingSteps']);
+            objectData.step = currentStep;
+            if (currentStep < growingSteps) {
+                const timeToNextStep = createdAgo - (stepsAgo * growingSteps);
+                for (let i = 0; i < growingSteps - currentStep; i++) {
+                    setTimeout(() => {
+                        objectData.step += 1;
+                        growObject(objectData)
+                    }, timeToNextStep + (i * growingStepDuration));
+                }
+            }
+        }
+        state.set(worldObject.id, objectData)
     }
 
     StoreRegistrar.registerStore({
@@ -63,6 +85,9 @@ define(function (require, exports, module) {
         }),
         worldObjectRemoved: new Publisher.StreamPublisher((push) => {
             Dispatcher.messageStream.subscribeLast(Messages.WorldObjectRemoved, (event) => push(event.worldObject.id));
+        }),
+        worldObjectGrown: new Publisher.StreamPublisher((push) => {
+            growObject = push;
         }),
         kindDefinition,
         getGroundRectangle,

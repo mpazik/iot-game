@@ -13,31 +13,36 @@ define(function (require, exports, module) {
 
     const worldObjects = [];
 
+    const actionIcons = {
+        'cut-tree': 'wood-axe',
+        'harvest': 'hand'
+    };
+
     function createWorldObject(objectData) {
         const objectKind = WorldObjectStore.kindDefinition(objectData.kind);
-        const worldObject = Pixi.Sprite.fromImage(objectKind['sprite'] + '.png');
+        const worldObject = Pixi.Sprite.fromImage(getSprite());
         worldObject.id = objectData.id;
         worldObject.scale = {x: zoom, y: zoom};
         worldObject.position.x = objectData.x * tileSize;
         worldObject.position.y = objectData.y * tileSize;
         worldObject.kind = objectData.kind;
 
-        worldObject.mousedown = function () {
-            Dispatcher.userEventStream.publish({
-                type: 'world-object-targeted',
-                worldObjectId: worldObject.id,
-                action: {
-                    key: 'cut-tree',
-                    range: 2,
-                    casting: 2000
-                },
-                x: objectData.x + (objectKind['width'] / 2),
-                y: objectData.y + objectKind['height'],
-            });
-        };
-
-        if (objectKind['key'] == 'pine' || objectKind['key'] == 'tree') {
-            worldObject.interactive = true;
+        const action = getObjectAction();
+        if (action) {
+            worldObject.mousedown = function () {
+                Dispatcher.userEventStream.publish({
+                    type: 'world-object-targeted',
+                    action: {
+                        key: action,
+                        range: 2,
+                        casting: 2000
+                    },
+                    worldObjectId: worldObject.id,
+                    worldObjectKind: objectKind,
+                    x: objectData.x + (objectKind['width'] / 2),
+                    y: objectData.y + objectKind['height'],
+                });
+            };
             const groundLayer = objectKind['groundLayer'];
             worldObject.hitArea = new Pixi.Rectangle(
                 groundLayer['offsetX'] * tileSize / zoom,
@@ -47,7 +52,7 @@ define(function (require, exports, module) {
             );
             worldObject.mouseover = function () {
                 worldObject.filters = [hoverFilter];
-                Cursor.setCursor('wood-axe');
+                Cursor.setCursor(actionIcons[action]);
             };
             worldObject.mouseout = function () {
                 worldObject.filters = null;
@@ -55,9 +60,46 @@ define(function (require, exports, module) {
             };
         }
 
+        if (objectKind['key'] == 'pine' || objectKind['key'] == 'tree' ||
+            (objectKind['growingSteps'] && objectKind['growingSteps'] == objectData.step)) {
+            worldObject.interactive = true;
+        }
+
         worldObjects.push(worldObject);
         addSprite(worldObject);
         sortDisplayOrder();
+
+        function getObjectAction() {
+            switch (objectKind['key']) {
+                case 'tree':
+                case 'pine':
+                    return 'cut-tree';
+                case 'tomatoes':
+                case 'corn':
+                case 'paprika':
+                    return 'harvest'
+            }
+        }
+
+        function getSprite() {
+            if (objectKind['growingSteps']) {
+                return objectKind['sprite'] + objectData.step + '.png'
+            } else {
+                return objectKind['sprite'] + '.png'
+            }
+        }
+    }
+
+    function growWorldObject(objectData) {
+        const objectKind = WorldObjectStore.kindDefinition(objectData.kind);
+        const index = worldObjects.findIndex(function (worldObject) {
+            return worldObject.id === objectData.id
+        });
+        const worldObject = worldObjects[index];
+        worldObject.texture = Pixi.Texture.fromFrame(objectKind['sprite'] + objectData.step + '.png');
+        if (objectData.step == objectKind['growingSteps']) {
+            worldObject.interactive = true;
+        }
     }
 
     function removeObject(worldObjectId) {
@@ -70,6 +112,7 @@ define(function (require, exports, module) {
     }
 
     WorldObjectStore.worldObjectCreated.subscribe(createWorldObject);
+    WorldObjectStore.worldObjectGrown.subscribe(growWorldObject);
     WorldObjectStore.worldObjectRemoved.subscribe(removeObject);
 
     function addSprite(sprite) {
