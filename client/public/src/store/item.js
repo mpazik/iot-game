@@ -7,7 +7,7 @@ define(function (require, exports, module) {
     const Items = require('../common/model/items').Ids;
     const CharacterNotification = require('./character-notification');
 
-    var items = (() => {
+    var playerItems = (() => {
         const items = localStorage.getItem('items');
         if (items) {
             try {
@@ -41,7 +41,7 @@ define(function (require, exports, module) {
         if (event.casterId != MainPlayerStore.characterId()) return;
 
         Object.keys(quantities).forEach(item => {
-            changeItemQuantity(item, -items[item])
+            changeItemQuantity(item, -playerItems[item])
         });
     });
 
@@ -61,41 +61,54 @@ define(function (require, exports, module) {
         }
     });
 
+    Dispatcher.userEventStream.subscribe('build-object', (event) => {
+        const objectKind = ResourcesStore.objectKind(event.objectKindId);
+        const cost = objectKind['cost'];
+        if (!cost) {
+            return
+        }
+        Object.keys(cost).forEach((itemKey) => {
+            const itemId = Items[itemKey];
+            const itemCost = cost[itemKey];
+            changeItemQuantity(itemId, -itemCost);
+        });
+    });
+
     Dispatcher.messageStream.subscribe('action-completed-on-world-object', (event) => {
         if (event.action.key == 'cut-tree') {
             changeItemQuantity(Items.WOOD, 10);
         } else if (event.action.key == 'harvest') {
             switch (event.worldObjectKind.key) {
-                case 'tomatoes':
-                    changeItemQuantity(Items.TOMATO, 10);
+                case 'tomato':
+                    changeItemQuantity(Items.TOMATO, 1);
                     break;
                 case 'corn':
-                    changeItemQuantity(Items.CORN, 10);
+                    changeItemQuantity(Items.CORN, 1);
                     break;
                 case 'paprika':
-                    changeItemQuantity(Items.PAPRIKA, 10);
+                    changeItemQuantity(Items.PAPRIKA, 1);
             }
         }
     });
 
     function changeItemQuantity(item, quantityChange) {
-        if (items[item]) {
-            items[item] += quantityChange
+        if (playerItems[item]) {
+            playerItems[item] += quantityChange
         } else {
-            items[item] = quantityChange;
+            playerItems[item] = quantityChange;
         }
-        localStorage.setItem('items', JSON.stringify(items));
+        localStorage.setItem('items', JSON.stringify(playerItems));
 
         // clone array in order to omit equality check in the publisher
         const newObject = {};
-        Object.assign(newObject, items);
+        Object.assign(newObject, playerItems);
         pushEvent(newObject);
         if (quantityChange > 0) {
             CharacterNotification.notify(ResourcesStore.item(item).name + ' +' + quantityChange);
         }
     }
 
-    const getItemQuantity = (item) => items[item] ? items[item] : 0;
+    const getItemQuantity = (item) => playerItems[item] ? playerItems[item] : 0;
 
     function checkSkillItemRequirements(skillId) {
         var serverMessage;
@@ -120,6 +133,14 @@ define(function (require, exports, module) {
 
     module.exports = {
         checkSkillItemRequirements,
-        itemsChange: new Publisher.StatePublisher(items, (push) => pushEvent = push)
+        byKey(itemKey) {
+            const itemId = Items[itemKey];
+            return ResourcesStore.item(itemId);
+        },
+        numberOfItem(itemKey) {
+            const itemId = Items[itemKey];
+            return playerItems[itemId] ? playerItems[itemId] : 0;
+        },
+        itemsChange: new Publisher.StatePublisher(playerItems, (push) => pushEvent = push)
     };
 });

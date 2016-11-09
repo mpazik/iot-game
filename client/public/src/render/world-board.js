@@ -74,7 +74,7 @@ define(function (require, exports, module) {
                 case 'tree':
                 case 'pine':
                     return 'cut-tree';
-                case 'tomatoes':
+                case 'tomato':
                 case 'corn':
                 case 'paprika':
                     return 'harvest'

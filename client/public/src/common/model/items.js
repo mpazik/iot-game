@@ -8,6 +8,9 @@ define(function (require, exports, module) {
         CORN: 4,
         TOMATO: 5,
         PAPRIKA: 6,
+        CORN_SEED: 7,
+        TOMATO_SEED: 8,
+        PAPRIKA_SEED: 9,
     };
 
     module.exports = {

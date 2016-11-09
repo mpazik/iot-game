@@ -15,7 +15,10 @@ define(function (require, exports, module) {
         [Items.WOOD]: {name: 'Wood'},
         [Items.CORN]: {name: 'Corn'},
         [Items.TOMATO]: {name: 'Tomato'},
-        [Items.PAPRIKA]: {name: 'Paprika'}
+        [Items.PAPRIKA]: {name: 'Paprika'},
+        [Items.CORN_SEED]: {name: 'Corn seed'},
+        [Items.TOMATO_SEED]: {name: 'Tomato seed'},
+        [Items.PAPRIKA_SEED]: {name: 'Paprika seed'}
     };
 
     const sprites = ["objects"];

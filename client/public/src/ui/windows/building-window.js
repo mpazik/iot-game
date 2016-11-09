@@ -3,15 +3,45 @@ define(function (require) {
     const userEventStream = require('../../component/dispatcher').userEventStream;
     const Skills = require('../../common/model/skills');
     const ActionBar = require('../../store/action-bar');
+    const ItemStore = require('../../store/item');
+
+    function renderCost(objectKind) {
+        const cost = objectKind['cost'];
+        if (!cost) {
+            return ''
+        }
+        const list = Object.keys(cost).map((itemKey) => {
+            const itemName = ItemStore.byKey(itemKey).name;
+            const itemCost = cost[itemKey];
+            const numberOfItem = ItemStore.numberOfItem(itemKey);
+            const liClass = (numberOfItem < itemCost) ? 'class="not-enough"' : '';
+            return `<li ${liClass}>${itemName}: ${itemCost}</li>`
+        }).join(', ');
+        return `Cost: <ul class="object-cost">${list}</ul>`
+    }
+
+    function isEnoughItems(objectKind) {
+        const cost = objectKind['cost'];
+        if (!cost) {
+            return true;
+        }
+        return Object.keys(cost).every((itemKey) => {
+            const numberOfItem = ItemStore.numberOfItem(itemKey);
+            return numberOfItem >= cost[itemKey];
+        });
+    }
 
     function renderObject(objectKind) {
         // if there are growing steps, display the last one
         const sprite = objectKind['growingSteps'] ? objectKind['sprite'] + '-icon' : objectKind['sprite'];
         return `<div class="object">
     <div class="object-icon ${sprite}"></div>
-    <div>
+    <div class="object-description">
         <h3>${objectKind['name']}</h3>
-        <button data-object-kind-id="${objectKind['id']}" class="build-button">Build</button>
+        ${renderCost(objectKind)}
+        ${isEnoughItems(objectKind) ?
+            `<button data-object-kind-id="${objectKind['id']}" class="build-button">Build</button>` : ''
+            }
     </div>
     <div style="clear: both"></div>
 </div>

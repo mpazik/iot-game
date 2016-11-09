@@ -417,8 +417,28 @@ building-window .object {
 building-window .object-icon {
     float: left;
     margin-right: 20px;
-    /* min-width: 32px; */
-    /* transform: scale(2,2); */
+}
+
+building-window .object-description {
+    float: left;
+}
+
+building-window h3 {
+    margin: 0;
+}
+
+building-window li {
+    font-size: 0.8em
+}
+
+building-window .object-cost {
+    margin: 0;
+    list-style: none;
+    padding-left: 10px;
+}
+
+building-window li.not-enough {
+    color: var(--failure-color);
 }
 
 #custom-cursor {
@@ -427,3 +447,4 @@ building-window .object-icon {
     width: 48px;
     height: 48px;
     color: #999;
+}
