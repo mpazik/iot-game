@@ -61,17 +61,21 @@ define(function (require, exports, module) {
         }
     });
 
+    function payItemCost(cost) {
+        Object.keys(cost).forEach((itemKey) => {
+            const itemId = Items[itemKey];
+            const itemCost = cost[itemKey];
+            changeItemQuantity(itemId, -itemCost);
+        });
+    }
+
     Dispatcher.userEventStream.subscribe('build-object', (event) => {
         const objectKind = ResourcesStore.objectKind(event.objectKindId);
         const cost = objectKind['cost'];
         if (!cost) {
             return
         }
-        Object.keys(cost).forEach((itemKey) => {
-            const itemId = Items[itemKey];
-            const itemCost = cost[itemKey];
-            changeItemQuantity(itemId, -itemCost);
-        });
+        payItemCost(cost);
     });
 
     Dispatcher.messageStream.subscribe('action-completed-on-world-object', (event) => {
@@ -83,12 +87,16 @@ define(function (require, exports, module) {
                     changeItemQuantity(Items.TOMATO, 1);
                     break;
                 case 'corn':
-                    changeItemQuantity(Items.CORN, 1);
+                    changeItemQuantity(Items.CORN, 2);
                     break;
                 case 'paprika':
                     changeItemQuantity(Items.PAPRIKA, 1);
             }
         }
+    });
+
+    Dispatcher.messageStream.subscribe('action-cooked', (recipe) => {
+        payItemCost(recipe.cost);
     });
 
     function changeItemQuantity(item, quantityChange) {

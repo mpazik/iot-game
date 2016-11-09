@@ -16,8 +16,8 @@ define(function (require) {
             const numberOfItem = ItemStore.numberOfItem(itemKey);
             const liClass = (numberOfItem < itemCost) ? 'class="not-enough"' : '';
             return `<li ${liClass}>${itemName}: ${itemCost}</li>`
-        }).join(', ');
-        return `Cost: <ul class="object-cost">${list}</ul>`
+        }).join('');
+        return `Cost: <ul class="cost">${list}</ul>`
     }
 
     function isEnoughItems(objectKind) {
@@ -45,7 +45,7 @@ define(function (require) {
     }
 
     function renderObject(objectKind) {
-        return `<div class="object">
+        return `<div class="element">
     <div class="object-icon ${getSprite(objectKind)}"></div>
     <div class="object-description">
         <h3>${objectKind['name']}</h3>
@@ -67,7 +67,8 @@ define(function (require) {
             }
         },
         created: function () {
-            this.innerHTML = `<div></div>`;
+            //noinspection JSUnusedGlobalSymbols
+            this.className += 'list-window';
         },
         attached: function () {
             this._update();

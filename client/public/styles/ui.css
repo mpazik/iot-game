@@ -399,19 +399,22 @@ feedback-window textarea {
     -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
 }
 
-building-window {
+.list-window {
     overflow-y: auto;
 }
 
-building-window .object:first-child {
+.list-window .element:first-child {
     border-top: none;
 }
 
-building-window .object {
-    width: 200px;
+.list-window .element {
     border-top: var(--main-color) 1px solid;
     margin: 10px 0;
     padding: 10px 0
+}
+
+building-window .element {
+    width: 200px;
 }
 
 building-window .object-icon {
@@ -427,17 +430,25 @@ building-window h3 {
     margin: 0;
 }
 
-building-window li {
-    font-size: 0.8em
+cooking-window h3 {
+    margin: 0;
 }
 
-building-window .object-cost {
+cooking-window .element {
+    width: 150px;
+}
+
+.cost {
     margin: 0;
     list-style: none;
     padding-left: 10px;
 }
 
-building-window li.not-enough {
+.cost li {
+    font-size: 0.8em
+}
+
+.cost .not-enough {
     color: var(--failure-color);
 }
 
