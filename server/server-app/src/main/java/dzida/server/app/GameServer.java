@@ -4,8 +4,6 @@ import co.cask.http.ExceptionHandler;
 import co.cask.http.HttpResponder;
 import co.cask.http.NettyHttpService;
 import com.google.common.collect.ImmutableList;
-import dzida.server.app.achievement.AchievementServer;
-import dzida.server.app.achievement.AchievementStore;
 import dzida.server.app.analytics.AnalyticsServer;
 import dzida.server.app.analytics.AnalyticsStore;
 import dzida.server.app.arbiter.Arbiter;
@@ -25,7 +23,6 @@ import dzida.server.app.parcel.ParcelServer;
 import dzida.server.app.parcel.ParcelStore;
 import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.rest.UserResource;
-import dzida.server.app.store.database.AchievementStoreDb;
 import dzida.server.app.store.database.AnalyticsStoreDb;
 import dzida.server.app.store.database.ArbiterStoreDb;
 import dzida.server.app.store.database.ChatStoreDb;
@@ -92,7 +89,6 @@ public final class GameServer {
         UserStore userStore = new UserStoreDb(connectionProvider);
         ChatStore chatStore = new ChatStoreDb(connectionProvider);
         InstanceStore instanceStore = new InstanceStoreDb(connectionProvider);
-        AchievementStore achievementStore = new AchievementStoreDb(connectionProvider);
         FriendsStore friendsStore = new FriendsStoreDb(connectionProvider);
         AnalyticsStore analyticsStore = new AnalyticsStoreDb(connectionProvider);
         ParcelStore parcelStore = new ParcelStoreDB(connectionProvider);
@@ -114,21 +110,12 @@ public final class GameServer {
 
         FriendServer friendServer = new FriendServer(userStore, friendsStore);
 
-        AchievementServer achievementServer = new AchievementServer(achievementStore, leaderboard);
-        arbiter.instanceStartedPublisher.subscribe(instanceServer -> {
-            instanceServer.userGameEventPublisher.subscribe(achievementServer::processUserGameEvent);
-            instanceServer.userCommandPublisher.subscribe(achievementServer::processUserCommand);
-            instanceServer.victorySurvivalPublisher.subscribe(achievementServer::processVictorySurvival);
-        });
-        friendServer.getFriendshipPublisher().subscribe(achievementServer::processUserFriendship);
-
         AnalyticsServer analyticsServer = new AnalyticsServer(analyticsStore);
         ParcelServer parcelServer = new ParcelServer(parcelStore);
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);
         serverDispatcher.addServer("time", timeSynchroniser);
-        serverDispatcher.addServer("achievement", achievementServer);
         serverDispatcher.addServer("friends", friendServer);
         serverDispatcher.addServer("analytics", analyticsServer);
         serverDispatcher.addServer("parcel", parcelServer);

@@ -21,7 +21,6 @@ define(function (require, exports, module) {
     const Chat = require('./chat');
     const UserService = require('./user-service');
     const Timer = require('./timer');
-    const Achievement = require('./achievement');
     const Friends = require('./friends');
     const Analytics = require('./analytics');
     const Parcel = require('./parcel');
@@ -96,7 +95,6 @@ define(function (require, exports, module) {
         Analytics.connect(userToken);
         Chat.connect(userToken);
         Timer.connect();
-        Achievement.connect(userToken);
         Friends.connect(userToken);
         InstanceController.state.subscribeState('running', () => Parcel.connect(userToken));
         setState('connecting');

@@ -6,8 +6,6 @@ define(function (require, exports, module) {
     var tilesets = {};
     var skills = {};
     var objectKinds = {};
-    var achievements = [];
-    var tutorials = [];
     var quests = [];
     const items = {
         [Items.ARROW]: {key: 'arrow', name: 'Arrow'},
@@ -90,12 +88,6 @@ define(function (require, exports, module) {
         item: id => throwIfNull(id, items[id], 'Item'),
         objectKind: id => throwIfNull(id, objectKinds[id], 'WorldObject'),
         tileset: name => throwIfNull(name, tilesets[name], 'TileSet'),
-        get achievements() {
-            return achievements
-        },
-        get tutorials() {
-            return tutorials
-        },
         get quests() {
             return quests
         },
@@ -118,12 +110,6 @@ define(function (require, exports, module) {
                 }),
                 loadJson('skills').then(function (downloaded) {
                     skills = downloaded;
-                }),
-                loadJson('achievements').then(function (downloaded) {
-                    achievements = downloaded;
-                }),
-                loadJson('tutorials').then(function (downloaded) {
-                    tutorials = downloaded;
                 }),
                 loadJson('entities/quests').then(function (downloaded) {
                     quests = downloaded

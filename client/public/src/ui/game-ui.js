@@ -27,8 +27,6 @@ define(function (require) {
         require('./windows/survival-end-victory-window'),
         require('./windows/survival-end-defeat-window'),
         require('./windows/leaderboard-window'),
-        require('./windows/achievement-window'),
-        require('./windows/tutorial-window'),
         require('./windows/friendship-request-window'),
         require('./windows/friends-window'),
         require('./windows/feedback-window'),
@@ -69,7 +67,7 @@ define(function (require) {
 
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
         'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage', 'serverError',
-        'chatState', 'achievementConnectionState', 'friendshipRequest', 'friendsConnectionState',
+        'chatState', 'friendshipRequest', 'friendsConnectionState',
         'customCursor', 'casting', 'questToDisplay', 'activeQuests', 'completeQuestToDisplay',
         'isPlayerOnOwnParcel'];
 

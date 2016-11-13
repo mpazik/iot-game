@@ -294,52 +294,6 @@ player-inventory {
     color: var(--highlight-color);
 }
 
-achievement-window {
-    width: 350px;
-}
-
-achievement-window > div {
-    overflow-y: scroll;
-    height: 300px;
-}
-
-achievement-window ul.navigation-list {
-    width: 170px;
-}
-
-achievement-window .achievement-progress {
-    float: right;
-    color: var(--highlight-color);
-}
-
-achievement-window .achievement {
-    border: #666 1px solid;
-    border-radius: 4px;
-    padding: 15px;
-}
-
-achievement-window .achievement.unlocked {
-    border-color: var(--main-color);
-}
-
-achievement-window .achievement h3 {
-    margin: 0 0 2px 0
-}
-
-achievement-window .achievement.unlocked h3 {
-    color: var(--main-color);
-}
-
-achievement-window .achievement-rewards {
-    margin-top: 2px;
-    font-size: 0.8em;
-}
-
-achievement-window .achievement-unlock-date {
-    float: right;
-    margin-top: -25px
-}
-
 objective-tracker {
     top: 200px;
     right: 1px;

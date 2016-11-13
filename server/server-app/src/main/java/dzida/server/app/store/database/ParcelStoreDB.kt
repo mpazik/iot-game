@@ -27,7 +27,7 @@ class ParcelStoreDB : ParcelStore {
                 val type = tuple.get(parcelsEvent.type)!!
                 val data = tuple.get(parcelsEvent.data)!!
                 val messageClass = eventSerializer.getMessageClass(type)
-                checkNotNull(messageClass, { "Achievement type <$type> does not exists. Wrong data in DB?" })
+                checkNotNull(messageClass, { "Parcel type <$type> does not exists. Wrong data in DB?" })
 
                 eventSerializer.parseEvent(data, type) as ParcelChange
             })

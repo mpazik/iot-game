@@ -8,7 +8,6 @@ define(function (require, exports, module) {
     const Instance = require('../component/instance/instance-controller');
     const Item = require('./item');
     const Chat = require('../component/chat');
-    const Achievement = require('../component/achievement');
     const Friends = require('../component/friends');
     const Cursor = require('../store/cursor');
     const Actions = require('../store/actions');
@@ -48,7 +47,6 @@ define(function (require, exports, module) {
         serverError: ServerMessagesStore.errorToShowState,
         chatState: Chat.state,
         playerItems: Item.itemsChange,
-        achievementConnectionState: Achievement.connectionStatePublisher,
         friendsConnectionState: Friends.connectionStatePublisher,
         friendshipRequest: Friends.friendshipRequestPublisher,
         customCursor: Cursor.cursorType,
