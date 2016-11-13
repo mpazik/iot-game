@@ -133,7 +133,6 @@ define(function (require, exports, module) {
     }
 
     Dispatcher.userEventStream.subscribe('quest-started', (questKey) => {
-        pushDisplayQuest(null);
         if (!activeQuests.includes(questKey)) {
             trackQuest(questKey);
         }
@@ -155,6 +154,7 @@ define(function (require, exports, module) {
         questToDisplay: new Publisher.StatePublisher(initialQuest, (push) => {
             pushDisplayQuest = push
         }),
+        displayQuest: pushDisplayQuest,
         completeQuestToDisplay: new Publisher.StatePublisher(null, (push) => {
             pushDisplayCompletedQuest = push
         }),

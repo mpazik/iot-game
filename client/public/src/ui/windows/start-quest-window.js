@@ -86,7 +86,10 @@ ${renderRewards(quest['rewards'])}
             })
         },
         detached (){
-            deffer(() => userEventStream.publish('quest-started', this.currentQuest));
+            Quest.displayQuest(null);
+            if (!Quest.activeQuests.value.some(quest => quest.key == this.currentQuest)) {
+                deffer(() => userEventStream.publish('quest-started', this.currentQuest));
+            }
         }
     });
 });

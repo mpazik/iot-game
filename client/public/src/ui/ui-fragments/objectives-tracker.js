@@ -14,7 +14,7 @@ define(function (require) {
     }
 
     function renderQuestContent(quest, status) {
-        return `${quest['imperative']} ${renderQuestProgress(status)}`;
+        return `<a data-quest-key="${quest['key']}">${quest['imperative']}</a> ${renderQuestProgress(status)}`;
     }
 
     function renderQuest(quest, status) {
@@ -51,12 +51,23 @@ define(function (require) {
         _updateQuestProgress(questStatus) {
             const questElement = document.getElementById(questId(questStatus.key));
             questElement.innerHTML = renderQuestContent(Quest.questByKey(questStatus.key), questStatus);
+            const anchor = questElement.getElementsByTagName('a')[0];
+            anchor.addEventListener('click', () => {
+                const questKey = anchor.getAttribute('data-quest-key');
+                Quest.displayQuest(questKey);
+            });
         },
         _updateQuests(activeQuests) {
             const list = this.getElementsByTagName('ul')[0];
             list.innerHTML = activeQuests.map(questStatus => {
                 return renderQuest(Quest.questByKey(questStatus.key), questStatus)
             }).join('');
+            for (let anchor of this.getElementsByTagName('a')) {
+                anchor.addEventListener('click', () => {
+                    const questKey = anchor.getAttribute('data-quest-key');
+                    Quest.displayQuest(questKey);
+                })
+            }
         }
     });
 });
