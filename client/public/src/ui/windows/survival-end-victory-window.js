@@ -1,7 +1,6 @@
 define(function (require) {
     const uiState = require('../../store/ui-state');
     const userEventStream = require('../../component/dispatcher').userEventStream;
-    const Leaderboard = require('../../component/leaderboard');
 
     return createUiElement('survival-end-victory-window', {
         type: 'window',
@@ -33,9 +32,6 @@ define(function (require) {
             localStorage.setItem('lastDifficultyLevel', scenario.difficultyLevel);
 
             const ranking = this.getElementsByClassName('ranking')[0];
-            Leaderboard.userLeaderboardResult(uiState.userId()).then(function (data) {
-                ranking.innerText = ordinalSuffixOf(data.position);
-            });
 
             const goBackButton = this.getElementsByClassName('go-back')[0];
             goBackButton.onclick = function () {

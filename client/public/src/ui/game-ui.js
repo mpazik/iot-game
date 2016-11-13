@@ -26,7 +26,6 @@ define(function (require) {
         require('./windows/join-battle-window'),
         require('./windows/survival-end-victory-window'),
         require('./windows/survival-end-defeat-window'),
-        require('./windows/leaderboard-window'),
         require('./windows/friendship-request-window'),
         require('./windows/friends-window'),
         require('./windows/feedback-window'),
