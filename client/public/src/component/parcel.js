@@ -1,6 +1,7 @@
 define(function (require, exports, module) {
     const NetworkDispatcher = require('./network-dispatcher');
     const Publisher = require('../common/basic/publisher');
+    const Dispatcher = require('./dispatcher');
     const MainPlayerStore = require('../store/main-player');
     const MainLoop = require('../store/main-loop');
     const JsonProtocol = require('../common/basic/json-protocol');
@@ -40,7 +41,8 @@ define(function (require, exports, module) {
             case ServerMessage.ParcelClaimed:
                 const parcel = message;
                 if (parcel.owner == MainPlayerStore.userId()) {
-                    playerParcel = parcel
+                    playerParcel = parcel;
+                    Dispatcher.messageStream.publish('player-claimed-parcel', parcel)
                 }
                 parcels.push(parcel);
                 checkCurrentParcel();
@@ -106,6 +108,7 @@ define(function (require, exports, module) {
         },
         connectionStatePublisher: connectionStatePublisher,
         connect (userToken) {
+            //noinspection JSUnusedAssignment
             socket = NetworkDispatcher.newSocket('parcel', userToken);
             socket.onMessage = (data) => {
                 const message = protocol.parse(data);

@@ -35,7 +35,9 @@ define(function (require) {
         require('./windows/thank-you-window'),
         require('./windows/building-window'),
         require('./windows/parcel-window'),
-        require('./windows/cooking-window')
+        require('./windows/cooking-window'),
+        require('./windows/start-quest-window'),
+        require('./windows/complete-quest-window')
     ].concat(extraComponents.windows);
 
     var gameUiTag = Object.create(HTMLElement.prototype, {
@@ -66,9 +68,9 @@ define(function (require) {
     document.registerElement('game-ui', {prototype: gameUiTag});
 
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
-        'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage',
-        'serverError', 'chatState', 'achievementConnectionState',
-        'friendshipRequest', 'friendsConnectionState', 'customCursor', 'casting'];
+        'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage', 'serverError',
+        'chatState', 'achievementConnectionState', 'friendshipRequest', 'friendsConnectionState',
+        'customCursor', 'casting', 'questToDisplay', 'activeQuests', 'completeQuestToDisplay'];
 
     function initUi(gameUiElement) {
         const windowRegister = new Map();
@@ -121,6 +123,9 @@ define(function (require) {
         }
 
         function showWindow(key) {
+            if (activeWindow == key) {
+                return;
+            }
             if (activeWindow) {
                 if (windowRegister.get(activeWindow).closeable) {
                     cleanWindow();
@@ -232,7 +237,7 @@ define(function (require) {
             const autoDisplayWindow = Array.from(windowRegister.values())
                 .filter(uiWindow => uiWindow.autoDisplay == true && shouldDisplay(uiWindow.requirements));
             if (autoDisplayWindow.length > 1) {
-                throw "can not display two auto displayable windows at the same time";
+                throw "can not display two auto displayable windows at the same time:" + JSON.stringify(autoDisplayWindow);
             }
 
             // first check if window is displayed and hide it if it is.

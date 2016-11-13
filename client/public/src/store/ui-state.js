@@ -12,6 +12,7 @@ define(function (require, exports, module) {
     const Friends = require('../component/friends');
     const Cursor = require('../store/cursor');
     const Actions = require('../store/actions');
+    const Quest = require('../store/quest');
 
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
@@ -50,6 +51,9 @@ define(function (require, exports, module) {
         friendsConnectionState: Friends.connectionStatePublisher,
         friendshipRequest: Friends.friendshipRequestPublisher,
         customCursor: Cursor.cursorType,
-        casting: Actions.playerCasting
+        casting: Actions.playerCasting,
+        questToDisplay: Quest.questToDisplay,
+        completeQuestToDisplay: Quest.completeQuestToDisplay,
+        activeQuests: Quest.activeQuests
     };
 });

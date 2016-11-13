@@ -8,15 +8,16 @@ define(function (require, exports, module) {
     var objectKinds = {};
     var achievements = [];
     var tutorials = [];
+    var quests = [];
     const items = {
-        [Items.ARROW]: {name: 'Arrow'},
-        [Items.STICK]: {name: 'Stick'},
-        [Items.APPLE]: {name: 'Apple'},
-        [Items.WOOD]: {name: 'Wood'},
-        [Items.CORN]: {name: 'Corn'},
-        [Items.TOMATO]: {name: 'Tomato'},
-        [Items.PAPRIKA]: {name: 'Paprika'},
-        [Items.CORN_SEED]: {name: 'Corn seed'},
+        [Items.ARROW]: {key: 'arrow', name: 'Arrow'},
+        [Items.STICK]: {key: 'stick', name: 'Stick'},
+        [Items.APPLE]: {key: 'apple', name: 'Apple'},
+        [Items.WOOD]: {key: 'wood', name: 'Wood'},
+        [Items.CORN]: {key: 'corn', name: 'Corn'},
+        [Items.TOMATO]: {key: 'tomato', name: 'Tomato'},
+        [Items.PAPRIKA]: {key: 'paprika', name: 'Paprika'},
+        [Items.CORN_SEED]: {key: 'corn-seed', name: 'Corn seed'},
         [Items.TOMATO_SEED]: {name: 'Tomato seed'},
         [Items.PAPRIKA_SEED]: {name: 'Paprika seed'}
     };
@@ -95,6 +96,9 @@ define(function (require, exports, module) {
         get tutorials() {
             return tutorials
         },
+        get quests() {
+            return quests
+        },
         load: function () {
             loadCss(assetsPath + "icons/icons.css");
             loadCss(assetsPath + "sprites/objects.css");
@@ -120,7 +124,10 @@ define(function (require, exports, module) {
                 }),
                 loadJson('tutorials').then(function (downloaded) {
                     tutorials = downloaded;
-                })
+                }),
+                loadJson('entities/quests').then(function (downloaded) {
+                    quests = downloaded
+                }),
             ]);
         }
     };

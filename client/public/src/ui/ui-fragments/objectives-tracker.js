@@ -1,54 +1,62 @@
 define(function (require) {
-    const Achievement = require('../../component/achievement');
+    const Quest = require('../../store/quest');
 
-    function renderAchievementProgress(achievement) {
-        const steps = achievement['unlock']['steps'];
-        if (steps == null) return '';
-        const progress = Achievement.state.achievementsProgress.get(achievement.key) || 0;
-        return `<span>${progress}/${steps}</span>`;
+    function renderQuestProgress(status) {
+        const goal = status['goal'];
+        if (!goal) {
+            return '';
+        }
+        return `<span>${status['progress']}/${goal}</span>`;
     }
 
-    function renderAchievement(achievement) {
-        return `<li>${achievement['imperative']} ${renderAchievementProgress(achievement)}</li>`
+    function questId(questKey) {
+        return 'quest-status_' + questKey;
+    }
+
+    function renderQuestContent(quest, status) {
+        return `${quest['imperative']} ${renderQuestProgress(status)}`;
+    }
+
+    function renderQuest(quest, status) {
+        return `<li id="${questId(quest.key)}">${renderQuestContent(quest, status)}</li>`
+    }
+
+    function isNonEmpty(array) {
+        return array.length > 0;
     }
 
     return createUiElement('objective-tracker', {
         type: 'fragment',
         properties: {
             requirements: {
-                playerAlive: Predicates.is(true),
-                achievementConnectionState: Predicates.is('connected')
+                activeQuests: isNonEmpty
             }
         },
         created: function () {
+            this.classList.add('area');
             this.innerHTML = `
 <h3 style="margin-top: 0">Objectives</h3>
 <ul></ul>
 `;
         },
         attached: function () {
-            this._updateStats();
-            this.classList.add('area');
-            Achievement.trackedAchievementPublisher.subscribe(this._updateStats.bind(this));
-            Achievement.achievementChangePublisher.subscribe(Achievement.Changes.AchievementProgressed, this._updateStats.bind(this));
+            this._updateQuests(Quest.activeQuests.value);
+            Quest.activeQuests.subscribe(this._updateQuests.bind(this));
+            Quest.questProgress.subscribe(this._updateQuestProgress.bind(this));
         },
         detached: function () {
-            Achievement.trackedAchievementPublisher.unsubscribe(this._updateStats.bind(this));
-            Achievement.achievementChangePublisher.unsubscribe(Achievement.Changes.AchievementProgressed, this._updateStats.bind(this));
+            Quest.activeQuests.unsubscribe(this._updateQuests.bind(this));
+            Quest.questProgress.unsubscribe(this._updateQuestProgress.bind(this));
         },
-        _updateStats: function () {
-            const trackedAchievements = Achievement.trackedAchievementPublisher.value;
-            if (trackedAchievements.length == 0) {
-                this.style.display = 'none';
-                return
-            } else if (this.style.display == 'none') {
-                this.style.display = 'block';
-            }
+        _updateQuestProgress(questStatus) {
+            const questElement = document.getElementById(questId(questStatus.key));
+            questElement.innerHTML = renderQuestContent(Quest.questByKey(questStatus.key), questStatus);
+        },
+        _updateQuests(activeQuests) {
             const list = this.getElementsByTagName('ul')[0];
-            list.innerHTML = trackedAchievements
-                .map(key => Achievement.achievement(key))
-                .map(renderAchievement)
-                .join('')
+            list.innerHTML = activeQuests.map(questStatus => {
+                return renderQuest(Quest.questByKey(questStatus.key), questStatus)
+            }).join('');
         }
     });
 });

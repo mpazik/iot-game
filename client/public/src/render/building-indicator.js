@@ -103,6 +103,7 @@ define(function (require) {
             targetingData = null;
             WorldMap.mousePositionStream.unsubscribe(recalculateSpritePosition);
             WorldMap.worldMapClicked.unsubscribe(buildOnPosition);
+            Parcel.highlightPlayerParcel(false);
         }
 
         if (skill == null) return;
@@ -118,7 +119,6 @@ define(function (require) {
             WorldMap.mousePositionStream.subscribe(recalculateSpritePosition);
             WorldMap.worldMapClicked.subscribe(buildOnPosition);
             WorldBoard.addObject(sprite);
-            Parcel.highlightPlayerParcel(false);
 
             function getSprite() {
                 if (objectKind['animationSteps']) {

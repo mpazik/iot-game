@@ -356,7 +356,7 @@ achievement-window .achievement-unlock-date {
 }
 
 objective-tracker {
-    top: 150px;
+    top: 200px;
     right: 1px;
     padding: 10px;
     width: 180px;
@@ -458,4 +458,10 @@ cooking-window .element {
     width: 48px;
     height: 48px;
     color: #999;
+}
+
+.rewards ul {
+    margin: 0;
+    list-style: none;
+    padding: 0
 }

@@ -2,7 +2,7 @@ define(function (require) {
     const objectKindById = require('../../store/resources').objectKind;
     const userEventStream = require('../../component/dispatcher').userEventStream;
     const Skills = require('../../common/model/skills');
-    const ActionBar = require('../../store/action-bar');
+    const BuildingSkills = require('../../store/building-skills');
     const ItemStore = require('../../store/item');
 
     function renderCost(objectKind) {
@@ -76,7 +76,7 @@ define(function (require) {
         detached: function () {
         },
         _update: function () {
-            this.innerHTML = ActionBar.unlockedObjects.map(objectKindId => renderObject(objectKindById(objectKindId))).join('\n');
+            this.innerHTML = BuildingSkills.recipes.map(objectKindId => renderObject(objectKindById(objectKindId))).join('\n');
             const buildButtons = this.getElementsByClassName('build-button');
             for (const buildButton of buildButtons) {
                 buildButton.addEventListener('click', function () {

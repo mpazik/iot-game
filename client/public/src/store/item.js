@@ -8,10 +8,10 @@ define(function (require, exports, module) {
     const CharacterNotification = require('./character-notification');
 
     var playerItems = (() => {
-        const items = localStorage.getItem('items');
-        if (items) {
+        const data = localStorage.getItem('items');
+        if (data) {
             try {
-                return JSON.parse(items);
+                return JSON.parse(data);
             } catch (e) {
                 return {};
             }
@@ -19,7 +19,7 @@ define(function (require, exports, module) {
             return {}
         }
     })();
-    var pushEvent;
+    var pushItemChange;
 
     Dispatcher.messageStream.subscribe(Messages.SkillUsed, function (event) {
         if (event.casterId != MainPlayerStore.characterId()) return;
@@ -99,6 +99,32 @@ define(function (require, exports, module) {
         payItemCost(recipe.cost);
     });
 
+    Dispatcher.messageStream.subscribe('quest-completed', quest => {
+        const rewards = quest['rewards'];
+        if (rewards['items']) {
+            changeItemsQuantity(rewards['items'])
+        }
+    });
+
+    function changeItemsQuantity(itemsChanges) {
+        itemsChanges.forEach(itemChange => {
+            changeItemQuantity(Items[itemChange.item], itemChange.quantity)
+        })
+    }
+
+    function partitionArray(array, predicate) {
+        const falseArray = [];
+        const trueArray = [];
+        array.forEach(element => {
+            if (predicate(element)) {
+                falseArray.push(element);
+            } else {
+                trueArray.push(element);
+            }
+        });
+        return [falseArray, trueArray]
+    }
+
     function changeItemQuantity(item, quantityChange) {
         if (playerItems[item]) {
             playerItems[item] += quantityChange
@@ -107,10 +133,7 @@ define(function (require, exports, module) {
         }
         localStorage.setItem('items', JSON.stringify(playerItems));
 
-        // clone array in order to omit equality check in the publisher
-        const newObject = {};
-        Object.assign(newObject, playerItems);
-        pushEvent(newObject);
+        pushItemChange({item, quantity: playerItems[item], quantityChange});
         if (quantityChange > 0) {
             CharacterNotification.notify(ResourcesStore.item(item).name + ' +' + quantityChange);
         }
@@ -149,6 +172,27 @@ define(function (require, exports, module) {
             const itemId = Items[itemKey];
             return playerItems[itemId] ? playerItems[itemId] : 0;
         },
-        itemsChange: new Publisher.StatePublisher(playerItems, (push) => pushEvent = push)
+        lootItems(lootTable) {
+            const result = partitionArray(lootTable, (row) => !row['weight']);
+            const itemsLooted = result[0].reduce((items, row) => items.concat(row['items']), []);
+            const rowsToLoot = result[1];
+
+            return itemsLooted.concat(chooseByWeight());
+
+            function chooseByWeight() {
+                const weightSum = rowsToLoot.reduce((sum, row) =>sum + row['weight'], 0);
+                const chosenWeight = Math.round(Math.random() * weightSum);
+                let currentSum = 0;
+                for (let row of rowsToLoot) {
+                    currentSum += row['weight'];
+                    if (currentSum > chosenWeight) {
+                        return row['items'];
+                    }
+                }
+                throw 'error in algorithm'
+            }
+        },
+        playerItems,
+        itemsChange: new Publisher.StatePublisher(playerItems, (push) => pushItemChange = push)
     };
 });
