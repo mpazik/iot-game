@@ -23,9 +23,6 @@ define(function (require) {
     ].concat(extraComponents.fragments);
 
     const windows = [
-        require('./windows/join-battle-window'),
-        require('./windows/survival-end-victory-window'),
-        require('./windows/survival-end-defeat-window'),
         require('./windows/friendship-request-window'),
         require('./windows/friends-window'),
         require('./windows/feedback-window'),
@@ -64,9 +61,8 @@ define(function (require) {
     });
     document.registerElement('game-ui', {prototype: gameUiTag});
 
-    const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
-        'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage', 'serverError',
-        'chatState', 'friendshipRequest', 'friendsConnectionState',
+    const supportableRequirements = ['playerAlive', 'applicationState', 'instanceState', 'cooldown', 'gameMessage',
+        'serverError', 'chatState', 'friendshipRequest', 'friendsConnectionState',
         'customCursor', 'casting', 'questToDisplay', 'activeQuests', 'completeQuestToDisplay',
         'isPlayerOnOwnParcel'];
 

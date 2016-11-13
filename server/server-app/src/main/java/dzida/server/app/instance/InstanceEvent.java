@@ -5,7 +5,6 @@ import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.event.ServerMessage;
 import dzida.server.core.position.event.CharacterMoved;
-import dzida.server.core.scenario.ScenarioEnd;
 import dzida.server.core.skill.event.CharacterGotDamage;
 import dzida.server.core.skill.event.CharacterHealed;
 import dzida.server.core.skill.event.SkillUsedOnCharacter;
@@ -23,7 +22,6 @@ public interface InstanceEvent {
             CharacterGotDamage.class,
             StateSynchroniser.InitialData.class,
             ServerMessage.class,
-            ScenarioEnd.class,
             SkillUsedOnWorldMap.class,
             WorldObjectCreated.class,
             SkillUsedOnWorldObject.class,

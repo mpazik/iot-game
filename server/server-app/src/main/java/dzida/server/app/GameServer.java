@@ -16,12 +16,9 @@ import dzida.server.app.dispatcher.ServerDispatcher;
 import dzida.server.app.friend.FriendServer;
 import dzida.server.app.friend.FriendsStore;
 import dzida.server.app.instance.InstanceStore;
-import dzida.server.app.instance.scenario.ScenarioStore;
-import dzida.server.app.leaderboard.Leaderboard;
 import dzida.server.app.network.WebSocketServer;
 import dzida.server.app.parcel.ParcelServer;
 import dzida.server.app.parcel.ParcelStore;
-import dzida.server.app.rest.LeaderboardResource;
 import dzida.server.app.rest.UserResource;
 import dzida.server.app.store.database.AnalyticsStoreDb;
 import dzida.server.app.store.database.ArbiterStoreDb;
@@ -29,7 +26,6 @@ import dzida.server.app.store.database.ChatStoreDb;
 import dzida.server.app.store.database.FriendsStoreDb;
 import dzida.server.app.store.database.InstanceStoreDb;
 import dzida.server.app.store.database.ParcelStoreDB;
-import dzida.server.app.store.database.ScenarioStoreDb;
 import dzida.server.app.store.database.UserStoreDb;
 import dzida.server.app.timesync.TimeServiceImpl;
 import dzida.server.app.timesync.TimeSynchroniser;
@@ -85,7 +81,6 @@ public final class GameServer {
         ConnectionProvider connectionProvider = connectionManager.getConnectionProvider();
 
         ArbiterStore arbiterStore = new ArbiterStoreDb(connectionProvider);
-        ScenarioStore scenarioStore = new ScenarioStoreDb(connectionProvider);
         UserStore userStore = new UserStoreDb(connectionProvider);
         ChatStore chatStore = new ChatStoreDb(connectionProvider);
         InstanceStore instanceStore = new InstanceStoreDb(connectionProvider);
@@ -98,10 +93,9 @@ public final class GameServer {
         webSocketServer = new WebSocketServer();
 
         SchedulerImpl scheduler = new SchedulerImpl(webSocketServer.getEventLoop());
-        Leaderboard leaderboard = new Leaderboard(userService, scenarioStore);
 
         ServerDispatcher serverDispatcher = new ServerDispatcher();
-        arbiter = new Arbiter(serverDispatcher, scheduler, arbiterStore, scenarioStore, instanceStore);
+        arbiter = new Arbiter(serverDispatcher, scheduler, arbiterStore, instanceStore);
         TimeSynchroniser timeSynchroniser = new TimeSynchroniser(new TimeServiceImpl());
 
         Chat chat = new Chat(chatStore);
@@ -131,7 +125,6 @@ public final class GameServer {
                     }
                 })
                 .addHttpHandlers(ImmutableList.of(
-                        new LeaderboardResource(leaderboard),
                         new UserResource(userService)
                 ))
                 .build();

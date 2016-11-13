@@ -35,8 +35,7 @@ define(function (require) {
         properties: {
             activateKeyBind: KEY_CODES.fromLetter('G'),
             requirements: {
-                playerAlive: Predicates.is(true),
-                scenarioType: Predicates.is('open-world')
+                playerAlive: Predicates.is(true)
             }
         },
         created: function () {

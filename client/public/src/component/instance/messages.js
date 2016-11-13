@@ -23,18 +23,14 @@ define(function (require, exports, module) {
             this.characterId = characterId;
             this.damage = damage;
         },
-        InitialData: function (state, scenario) {
+        InitialData: function (state) {
             this.state = state;
-            this.scenario = scenario;
         },
         ServerMessage: function (message) {
             this.message = message;
         },
         ServerError: function (error) {
             this.message = error;
-        },
-        ScenarioEnd: function (resolution) {
-            this.resolution = resolution;
         },
         SkillUsedOnWorldMap: function (casterId, skillId, x, y) {
             this.casterId = casterId;

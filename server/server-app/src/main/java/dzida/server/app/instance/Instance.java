@@ -1,10 +1,7 @@
 package dzida.server.app.instance;
 
 import dzida.server.app.instance.command.InstanceCommand;
-import dzida.server.app.instance.npc.AiService;
-import dzida.server.app.instance.npc.NpcBehaviour;
 import dzida.server.app.map.descriptor.Scenario;
-import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.store.http.WorldMapStoreHttp;
 import dzida.server.app.store.http.loader.SkillLoader;
 import dzida.server.app.store.http.loader.StaticDataLoader;
@@ -29,8 +26,6 @@ import dzida.server.core.event.GameEvent;
 import dzida.server.core.position.PositionCommandHandler;
 import dzida.server.core.position.PositionService;
 import dzida.server.core.position.PositionStore;
-import dzida.server.core.scenario.SurvivalScenarioFactory;
-import dzida.server.core.scenario.SurvivalScenarioFactory.SurvivalScenario;
 import dzida.server.core.skill.Skill;
 import dzida.server.core.skill.SkillCommandHandler;
 import dzida.server.core.skill.SkillService;
@@ -88,11 +83,7 @@ public class Instance {
         instanceStateManager = new InstanceStateManager(positionService, characterService, worldMapService, skillService, worldObjectService);
         commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler);
 
-        Optional<SurvivalScenario> survivalScenario = createSurvivalScenario(scenario);
-        NpcBehaviour npcBehaviour = new NpcBehaviour(timeService, instanceStateManager);
-        AiService aiService = new AiService(npcBehaviour);
-
-        this.gameLogic = new GameLogic(scheduler, instanceStateManager, survivalScenario, scenario, aiService, this::handleCommand);
+        this.gameLogic = new GameLogic(scheduler, instanceStateManager);
 
         if (worldObjectService.getState().isEmpty()) {
             List<WorldObject> initialMapObjects = worldMapStore.getInitialMapObjects(worldMapKey);
@@ -106,7 +97,6 @@ public class Instance {
     }
 
     public void start() {
-        instanceStateManager.getEventPublisherBeforeChanges().subscribe(gameLogic::processEventBeforeChanges);
         gameLogic.start();
     }
 
@@ -116,15 +106,6 @@ public class Instance {
 
     public void subscribeChange(Consumer<GameEvent> subscriber) {
         instanceStateManager.getEventPublisher().subscribe(subscriber);
-    }
-
-    private Optional<SurvivalScenario> createSurvivalScenario(Scenario scenario) {
-        SurvivalScenarioFactory survivalScenarioFactory = new SurvivalScenarioFactory();
-        if (scenario instanceof Survival) {
-            Survival survival = (Survival) scenario;
-            return Optional.of(survivalScenarioFactory.createSurvivalScenario(survival.getDifficultyLevel()));
-        }
-        return Optional.empty();
     }
 
     public Result handleCommand(InstanceCommand command) {

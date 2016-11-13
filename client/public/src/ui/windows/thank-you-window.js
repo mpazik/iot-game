@@ -3,8 +3,7 @@ define(function () {
         type: 'window',
         properties: {
             requirements: {
-                playerAlive: Predicates.is(true),
-                scenarioType: Predicates.is('open-world')
+                playerAlive: Predicates.is(true)
             }
         },
         created: function () {

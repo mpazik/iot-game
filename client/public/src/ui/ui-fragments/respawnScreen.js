@@ -16,7 +16,6 @@ define(function (require) {
         properties: {
             requirements: {
                 playerAlive: Predicates.is(false),
-                scenarioType: Predicates.is('open-world'),
                 instanceState: Predicates.is('running')
             }
         },

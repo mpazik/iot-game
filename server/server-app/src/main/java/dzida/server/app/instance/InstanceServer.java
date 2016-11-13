@@ -5,9 +5,7 @@ import dzida.server.app.arbiter.Arbiter;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
-import dzida.server.app.instance.scenario.ScenarioStore;
 import dzida.server.app.map.descriptor.Scenario;
-import dzida.server.app.map.descriptor.Survival;
 import dzida.server.app.protocol.json.JsonProtocol;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
@@ -26,7 +24,6 @@ import dzida.server.core.event.CharacterEvent;
 import dzida.server.core.event.GameEvent;
 import dzida.server.core.event.ServerMessage;
 import dzida.server.core.position.event.CharacterMoved;
-import dzida.server.core.scenario.ScenarioEnd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +39,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
 
     public final Publisher<UserMessage.UserGameEvent> userGameEventPublisher = new Publisher<>();
     public final Publisher<UserMessage.UserCommand> userCommandPublisher = new Publisher<>();
-    public final Publisher<Survival> victorySurvivalPublisher = new Publisher<>();
 
     private final Instance instance;
     private final InstanceStore instanceStore;
@@ -50,18 +46,14 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     private final JsonProtocol serializer;
     private final StateSynchroniser stateSynchroniser;
     private final UserTokenVerifier userTokenVerifier;
-    private final ScenarioStore scenarioStore;
 
     private final Key<Instance> instanceKey;
-    private final Scenario scenario;
     private final Map<Id<User>, ContainerConnection> connections = new HashMap<>();
     private final Map<Id<Character>, Id<User>> userIds = new HashMap<>();
-    private Id<Scenario> scenarioId;
 
-    public InstanceServer(Scheduler scheduler, InstanceStore instanceStore, Arbiter arbiter, ScenarioStore scenarioStore, Key<Instance> instanceKey, Scenario scenario) {
+    public InstanceServer(Scheduler scheduler, InstanceStore instanceStore, Arbiter arbiter, Key<Instance> instanceKey, Scenario scenario) {
         this.instanceStore = instanceStore;
         this.arbiter = arbiter;
-        this.scenarioStore = scenarioStore;
         userTokenVerifier = new UserTokenVerifier();
 
         serializer = JsonProtocol.create(CharacterCommand.classes, InstanceEvent.classes);
@@ -69,7 +61,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         stateSynchroniser = new StateSynchroniser(instance, scenario);
 
         this.instanceKey = instanceKey;
-        this.scenario = scenario;
     }
 
     public void start() {
@@ -81,16 +72,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
             instanceStore.saveEvent(instanceKey, gameEvent);
         });
         instance.subscribeChange(gameEvent -> {
-            if (gameEvent instanceof ScenarioEnd) {
-                ScenarioEnd scenarioEnd = (ScenarioEnd) gameEvent;
-                scenarioStore.scenarioFinished(scenarioId, scenarioEnd);
-                if (scenario instanceof Survival && scenarioEnd.resolution == ScenarioEnd.Resolution.Victory) {
-                    victorySurvivalPublisher.notify((Survival) scenario);
-                }
-                arbiter.instanceFinished(instanceKey);
-            }
-        });
-        instance.subscribeChange(gameEvent -> {
             if (gameEvent instanceof CharacterEvent) {
                 CharacterEvent characterEvent = (CharacterEvent) gameEvent;
                 if (!userIds.containsKey(characterEvent.getCharacterId())) {
@@ -100,8 +81,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
                 userGameEventPublisher.notify(new UserMessage.UserGameEvent(userId, characterEvent));
             }
         });
-        scenarioId = scenarioStore.scenarioStarted(scenario);
-
         instance.start();
     }
 
@@ -120,9 +99,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
         String userNick = loginToken.get().nick;
         if (connections.containsKey(userId)) {
             return Result.error("User is already logged in.");
-        }
-        if (scenario instanceof Survival && !((Survival) scenario).getAttendees().contains(userId)) {
-            return Result.error("Player is not playing the scenario.");
         }
         if (!arbiter.isUserOnInstance(instanceKey, userId)) {
             return Result.error("Player is not assigned to the instance: " + instanceKey);
@@ -149,9 +125,6 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     }
 
     public void closeInstance() {
-        if (!scenarioStore.isScenarioFinished(scenarioId)) {
-            scenarioStore.scenarioFinished(scenarioId, new ScenarioEnd(ScenarioEnd.Resolution.Terminated));
-        }
     }
 
     public void disconnectPlayer(Id<User> userId) {

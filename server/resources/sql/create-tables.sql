@@ -19,14 +19,6 @@ CREATE TABLE arbiter_event (
   created_at TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE scenario_event (
-  id          SERIAL PRIMARY KEY NOT NULL,
-  scenario_id SERIAL             NOT NULL,
-  type        TEXT               NOT NULL,
-  data        TEXT               NOT NULL,
-  created_at  TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE chat_command (
   id         SERIAL PRIMARY KEY NOT NULL,
   user_id    INT REFERENCES user_registration (id),
