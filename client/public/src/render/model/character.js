@@ -4,10 +4,7 @@ define(function (require, exports, module) {
     const tileImageSize = require('configuration').tileImageSize;
     const tileZoom = require('configuration').tileSize / tileImageSize;
 
-    const healthBarLength = 50;
-    const healthBarBgLength = 56;
-
-    function CharacterModel(character, health) {
+    function CharacterModel(character) {
         this.id = character.id;
         Pixi.Container.call(this);
 
@@ -27,9 +24,6 @@ define(function (require, exports, module) {
         this.sprite.position.x = (-tileImageSize * tileZoom) / 2;
         this.sprite.position.y = 0;
         this.rotatable.addChild(this.sprite);
-
-        // this.createHpBar();
-        // this.updateHpBar(health);
 
         this.mousedown = function () {
             Dispatcher.userEventStream.publish({
@@ -66,24 +60,6 @@ define(function (require, exports, module) {
             this.interactive = false;
             this.filters = null;
         }
-    };
-
-    CharacterModel.prototype.createHpBar = function () {
-        var healthBarBg = new Pixi.Graphics();
-        healthBarBg.beginFill(0x000000, 1);
-        healthBarBg.drawRect(-healthBarBgLength / 2, -86, healthBarBgLength, 10);
-        this.addChild(healthBarBg);
-        var healthBar = new Pixi.Graphics();
-        healthBar.beginFill(0x00FF00, 1);
-        healthBar.drawRect(-healthBarLength / 2, -84, healthBarLength, 6);
-        this.healthBar = healthBar;
-        this.addChild(healthBar);
-    };
-
-    CharacterModel.prototype.updateHpBar = function (healthPerCent) {
-        var width = healthBarLength * healthPerCent;
-        this.healthBar.width = width;
-        this.healthBar.x = -25 + width / 2;
     };
 
     CharacterModel.prototype.createNick = function (nickName) {

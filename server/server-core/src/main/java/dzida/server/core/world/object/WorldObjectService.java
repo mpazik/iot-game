@@ -45,4 +45,8 @@ public class WorldObjectService {
         GeneralEntity<WorldObject> worldObject = worldObjectStore.createWorldObject(objectKind, x, y);
         return Optional.of(worldObject);
     }
+
+    public WorldObjectKind getObjectKind(Id<WorldObjectKind> objectKindId) {
+        return worldObjectStore.getWorldObjectKind(objectKindId);
+    }
 }

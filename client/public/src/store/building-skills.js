@@ -3,7 +3,7 @@ define(function (require, exports, module) {
     const Dispatcher = require('../component/dispatcher');
     const CharacterNotification = require('./character-notification');
 
-    const recipes = [];
+    const recipes = [7];
 
     Dispatcher.messageStream.subscribe('quest-completed', quest => {
         const rewards = quest['rewards'];

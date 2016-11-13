@@ -12,14 +12,16 @@ public class WorldObjectKind implements GeneralData<WorldObjectKind> {
     private final int height;
     private final GroundLayer groundLayer;
     private final boolean collidable;
+    private final int decay;
 
-    public WorldObjectKind(Id<WorldObjectKind> id, String key, int width, int height, GroundLayer groundLayer, boolean collidable) {
+    public WorldObjectKind(Id<WorldObjectKind> id, String key, int width, int height, GroundLayer groundLayer, boolean collidable, int decay) {
         this.id = id;
         this.key = key;
         this.width = width;
         this.height = height;
         this.groundLayer = groundLayer;
         this.collidable = collidable;
+        this.decay = decay;
     }
 
     public Id<WorldObjectKind> getId() {
@@ -44,6 +46,10 @@ public class WorldObjectKind implements GeneralData<WorldObjectKind> {
 
     public boolean isCollidable() {
         return collidable;
+    }
+
+    public int getDecay() {
+        return decay;
     }
 
     @Override

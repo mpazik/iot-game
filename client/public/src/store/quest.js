@@ -11,7 +11,7 @@ define(function (require, exports, module) {
     var pushUpdateQuestProgress = null;
     var pushDisplayCompletedQuest = null;
     const activeQuests = [];
-    const initialQuest = 'welcome';
+    const initialQuest = null;
     const newQuestDelay = 1000;
 
     function questByKey(questKey) {

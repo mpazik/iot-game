@@ -13,7 +13,6 @@ define(function (require, exports, module) {
     hoverFilter.gray = -2.0;
 
     const worldObjects = [];
-    const animatedWorldObjects = [];
 
     const actionIcons = {
         'cut-tree': 'wood-axe',
@@ -25,7 +24,7 @@ define(function (require, exports, module) {
         const objectKind = WorldObjectStore.kindDefinition(objectData.kind);
         const worldObject = getSprite();
         if (objectKind['animationSteps']) {
-            animatedWorldObjects.push(worldObject);
+            worldObject.animated = true;
         }
         worldObject.id = objectData.id;
         worldObject.scale = {x: zoom, y: zoom};
@@ -49,12 +48,12 @@ define(function (require, exports, module) {
                     y: objectData.y + objectKind['height'],
                 });
             };
-            const groundLayer = objectKind['groundLayer'];
+            const groundRectangle = WorldObjectStore.getGroundRectangle(0, 0, objectKind);
             worldObject.hitArea = new Pixi.Rectangle(
-                groundLayer['offsetX'] * tileSize / zoom,
-                groundLayer['offsetY'] * tileSize / zoom,
-                groundLayer['width'] * tileSize / zoom,
-                groundLayer['height'] * tileSize / zoom
+                groundRectangle.x * tileSize / zoom,
+                groundRectangle.y * tileSize / zoom,
+                groundRectangle.width * tileSize / zoom,
+                groundRectangle.height * tileSize / zoom
             );
             worldObject.mouseover = function () {
                 worldObject.filters = [hoverFilter];
@@ -69,6 +68,10 @@ define(function (require, exports, module) {
         if (objectKind['key'] == 'pine' || objectKind['key'] == 'tree' || objectKind['key'] == 'campfire' ||
             (objectKind['growingSteps'] && objectKind['growingSteps'] == objectData.step)) {
             worldObject.interactive = true;
+        }
+
+        if (objectKind['decay']) {
+            addDecayBar();
         }
 
         worldObjects.push(worldObject);
@@ -87,6 +90,45 @@ define(function (require, exports, module) {
                 case 'campfire':
                     return 'cook';
             }
+        }
+
+        function addDecayBar() {
+            const decayDuration = objectKind['decay'] * 1000;
+            const liveTime = Timer.currentTimeOnServer() - objectData.created;
+            const decayBarLength = objectKind['width'] * tileSize / zoom;
+            const decayBarHeight = 4;
+            const border = 1;
+            if (liveTime >= decayDuration) {
+                // this is some kind of error. This object shouldn't exist any more or time is counted badly.
+                return
+            }
+            const decayBar = new Pixi.Container();
+            decayBar.objectId = objectData.id;
+            decayBar.position = {x: objectData.x * tileSize, y: (objectData.y + objectKind['height'] ) * tileSize};
+            decayBar.scale = {x: zoom, y: zoom};
+            var decayBarBg = new Pixi.Graphics();
+            decayBarBg.beginFill(0x000000, 1);
+            decayBarBg.drawRect(0, 0, decayBarLength, decayBarHeight);
+            decayBar.addChild(decayBarBg);
+            var decayBarInside = new Pixi.Graphics();
+            decayBarInside.beginFill(0x4088FF, 1);
+            decayBarInside.drawRect(0, 0, decayBarLength - (2 * border), decayBarHeight - (2 * border));
+            decayBarInside.position = {x: border, y: border};
+            decayBar.inside = decayBarInside;
+            decayBar.addChild(decayBarInside);
+            worldObject.decay = {
+                bar: decayBar,
+                update(time) {
+                    const liveTime = time - objectData.created;
+                    const decayPercent = liveTime / decayDuration;
+                    if (decayPercent >= 1) {
+                        decayBarInside.width = 0;
+                    } else {
+                        decayBarInside.width = (decayBarLength - (2 * border)) * (1 - decayPercent);
+                    }
+                }
+            };
+            addSprite(decayBar);
         }
 
         function getSprite() {
@@ -120,11 +162,8 @@ define(function (require, exports, module) {
         boardLayer.removeChild(worldObject);
         worldObjects.splice(index, 1);
 
-        if (worldObject.kind['animationSteps']) {
-            const index = animatedWorldObjects.findIndex(function (worldObject) {
-                return worldObject.id === worldObjectId
-            });
-            animatedWorldObjects.splice(index, 1);
+        if (worldObject.decay) {
+            boardLayer.removeChild(worldObject.decay.bar);
         }
     }
 
@@ -179,8 +218,13 @@ define(function (require, exports, module) {
         },
         updateAnimatedObjects () {
             const time = Timer.currentTimeOnServer();
-            animatedWorldObjects.forEach(obj => {
-                obj.update(time)
+            worldObjects.forEach(obj => {
+                if (obj.animated) {
+                    obj.update(time)
+                }
+                if (obj.decay) {
+                    obj.decay.update(time);
+                }
             })
         },
         get boardLayer() {
