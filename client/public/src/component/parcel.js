@@ -28,7 +28,6 @@ define(function (require, exports, module) {
         return highlightPlayerParcel = f;
     });
 
-
     const isPlayerOnOwnParcel = new Publisher.StatePublisher('not-connected', publish => {
         currentParcel.subscribe(parcel => publish(parcel == playerParcel))
     });

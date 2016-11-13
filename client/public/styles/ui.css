@@ -142,21 +142,6 @@ casting-bar .progress-bar {
     font-size: 16px;
 }
 
-action-bar {
-    bottom: 0;
-    width: 100%;
-    text-align: center;
-}
-
-action-bar div {
-    display: inline-block;
-}
-
-action-bar .system-bar {
-    /* float: left; */
-    margin-left: 2px;
-}
-
 current-parcel {
     display: inline-block;
     left: 50%;
@@ -464,4 +449,8 @@ cooking-window .element {
     margin: 0;
     list-style: none;
     padding: 0
+}
+
+feedback-button {
+    left: 2px;
 }

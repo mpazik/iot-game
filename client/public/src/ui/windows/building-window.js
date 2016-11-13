@@ -62,7 +62,9 @@ define(function (require) {
     return createUiElement('building-window', {
         type: 'window',
         properties: {
+            activateKeyBind: KEY_CODES.fromLetter('B'),
             requirements: {
+                isPlayerOnOwnParcel: Predicates.is(true),
                 playerAlive: Predicates.is(true),
             }
         },
@@ -76,6 +78,10 @@ define(function (require) {
         detached: function () {
         },
         _update: function () {
+            if (BuildingSkills.recipes.length == 0) {
+                this.innerHTML = 'You don\'t know any building recipe';
+                return;
+            }
             this.innerHTML = BuildingSkills.recipes.map(objectKindId => renderObject(objectKindById(objectKindId))).join('\n');
             const buildButtons = this.getElementsByClassName('build-button');
             for (const buildButton of buildButtons) {

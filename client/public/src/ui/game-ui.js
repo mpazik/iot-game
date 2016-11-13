@@ -6,7 +6,6 @@ define(function (require) {
     const fragments = [
         require('./ui-fragments/profiling-display'),
         require('./ui-fragments/respawnScreen'),
-        require('./ui-fragments/action-bar'),
         require('./ui-fragments/cooldown-bar'),
         require('./ui-fragments/game-message'),
         require('./ui-fragments/server-error'),
@@ -19,7 +18,8 @@ define(function (require) {
         require('./ui-fragments/objectives-tracker'),
         require('./ui-fragments/current-parcel'),
         require('./ui-fragments/cursor'),
-        require('./ui-fragments/casting-bar')
+        require('./ui-fragments/casting-bar'),
+        require('./ui-fragments/feedback-button')
     ].concat(extraComponents.fragments);
 
     const windows = [
@@ -70,7 +70,8 @@ define(function (require) {
     const supportableRequirements = ['playerAlive', 'scenarioType', 'scenarioResolution',
         'endScenario', 'applicationState', 'instanceState', 'cooldown', 'gameMessage', 'serverError',
         'chatState', 'achievementConnectionState', 'friendshipRequest', 'friendsConnectionState',
-        'customCursor', 'casting', 'questToDisplay', 'activeQuests', 'completeQuestToDisplay'];
+        'customCursor', 'casting', 'questToDisplay', 'activeQuests', 'completeQuestToDisplay',
+        'isPlayerOnOwnParcel'];
 
     function initUi(gameUiElement) {
         const windowRegister = new Map();

@@ -13,6 +13,7 @@ define(function (require, exports, module) {
     const Cursor = require('../store/cursor');
     const Actions = require('../store/actions');
     const Quest = require('../store/quest');
+    const Parcel = require('../component/parcel');
 
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,
@@ -54,6 +55,7 @@ define(function (require, exports, module) {
         casting: Actions.playerCasting,
         questToDisplay: Quest.questToDisplay,
         completeQuestToDisplay: Quest.completeQuestToDisplay,
-        activeQuests: Quest.activeQuests
+        activeQuests: Quest.activeQuests,
+        isPlayerOnOwnParcel: Parcel.isPlayerOnOwnParcel
     };
 });

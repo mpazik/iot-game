@@ -1,4 +1,4 @@
-define(function (require) {
+define((require) => {
     const Parcel = require('../../component/parcel');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
@@ -9,20 +9,35 @@ define(function (require) {
                 playerAlive: Predicates.is(true)
             }
         },
-        created: function () {
-            this.innerHTML = `<div>
-    <span id="parcel-name" class="on-non-solid-background"></span>
-    <button id="parcel-info-button"><span class="action-key-shortcut">I</span>nfo</button>
-</div>`;
+        created () {
         },
-        attached: function () {
-            Parcel.currentParcel.subscribe(this._update);
+        attached () {
+            this._update();
+            Parcel.currentParcel.subscribe(this._update.bind(this));
+        },
+        detached () {
+            Parcel.currentParcel.unsubscribe(this._update.bind(this));
+        },
+        _update() {
+            const parcel = Parcel.currentParcel.value;
+            if (!parcel) {
+                return;
+            }
+            const isPlayerParcel = Parcel.isPlayerOnOwnParcel.value;
+            this.innerHTML = `<div>
+    <span class="on-non-solid-background">${parcel.parcelName}</span>
+    <button id="parcel-info-button"><span class="action-key-shortcut">I</span>nfo</button>
+    ${isPlayerParcel ? `<button id="parcel-build-button"><span class="action-key-shortcut">B</span>uild</button>` : ''}
+</div>`;
             document.getElementById('parcel-info-button').addEventListener('click', () => {
                 userEventStream.publish('toggle-window', 'parcel-window');
             });
-        },
-        _update(parcel) {
-            document.getElementById('parcel-name').innerText = parcel.parcelName;
+
+            if (isPlayerParcel) {
+                document.getElementById('parcel-build-button').addEventListener('click', () => {
+                    userEventStream.publish('toggle-window', 'building-window');
+                });
+            }
         }
     });
 });
