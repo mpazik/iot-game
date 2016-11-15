@@ -151,13 +151,12 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         public void send(String data) {
             Object message = arbiterProtocol.parseMessage(data);
             whenTypeOf(message)
-                    .is(ArbiterCommand.JoinBattleCommand.class)
+                    .is(ArbiterCommand.Travel.class)
                     .then(command -> {
-                    })
-                    .is(ArbiterCommand.GoHomeCommand.class)
-                    .then(command -> {
-                        removePlayerFromLastInstance();
-                        movePlayerToInstance(defaultInstance);
+                        Key<Instance> instanceKey = new Key<>(command.location);
+                        if (instances.containsKey(instanceKey)) {
+                            movePlayerToInstance(instanceKey);
+                        }
                     });
         }
 
@@ -165,16 +164,6 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
             usersInstances.put(userId, newInstanceKey);
             connector.onMessage(arbiterProtocol.serializeMessage(new ArbiterCommand.JoinToInstance(newInstanceKey)));
             arbiterStore.userJoinedInstance(userId, newInstanceKey);
-        }
-
-        private void removePlayerFromLastInstance() {
-            Key<Instance> lastInstanceKey = usersInstances.get(userId);
-            if (lastInstanceKey == null) {
-                return;
-            }
-            InstanceServer instanceServer = instances.get(lastInstanceKey);
-            instanceServer.disconnectPlayer(userId);
-            arbiterStore.playerLeftInstance(userId, lastInstanceKey);
         }
 
         @Override

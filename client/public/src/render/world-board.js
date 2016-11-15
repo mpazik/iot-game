@@ -18,6 +18,7 @@ define(function (require, exports, module) {
         'cut-tree': 'wood-axe',
         'harvest': 'hand',
         'cook': 'cooking-pot',
+        'travel': 'hand',
     };
 
     function createWorldObject(objectData) {
@@ -64,11 +65,11 @@ define(function (require, exports, module) {
                 worldObject.filters = null;
                 Cursor.setDefault('default');
             };
-        }
 
-        if (objectKind['key'] == 'pine' || objectKind['key'] == 'tree' || objectKind['key'] == 'campfire' ||
-            (objectKind['growingSteps'] && objectKind['growingSteps'] == objectData.step)) {
-            worldObject.interactive = true;
+            // make not riped plants non interactive
+            if (!objectKind['growingSteps'] || objectKind['growingSteps'] == objectData.step) {
+                worldObject.interactive = true;
+            }
         }
 
         if (objectKind['decay']) {
@@ -90,6 +91,10 @@ define(function (require, exports, module) {
                     return 'harvest';
                 case 'campfire':
                     return 'cook';
+                case 'cave-entrance':
+                    return 'travel';
+                case 'ladder':
+                    return 'travel';
             }
         }
 

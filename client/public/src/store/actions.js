@@ -34,6 +34,10 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.publish('toggle-window', 'cooking-window');
             return;
         }
+        if (data.action.key == 'travel') {
+            Dispatcher.userEventStream.publish('travel-to-location', data.worldObjectKind.key);
+            return;
+        }
         castingFinishTimeout = setTimeout(() => doActionOnObject(data), data.action.casting);
         pushCastingTime(data.action.casting);
         subscribeCanceling();

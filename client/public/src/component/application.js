@@ -23,14 +23,10 @@ define(function (require, exports, module) {
     const Timer = require('./timer');
     const Friends = require('./friends');
     const Analytics = require('./analytics');
-    const Parcel = require('./parcel');
 
     const ClientMessage = {
-        JoinBattleCommand: function (map, difficultyLevel) {
-            this.map = map;
-            this.difficultyLevel = difficultyLevel;
-        },
-        GoHomeCommand: function () {
+        Travel: function (location) {
+            this.location = location;
         }
     };
 
@@ -44,12 +40,16 @@ define(function (require, exports, module) {
 
     var arbiterSocket = null;
 
-    function sendJoinBattle(data) {
-        arbiterSocket.send(arbiterProtocol.serialize(new ClientMessage.JoinBattleCommand(data.map, data.difficultyLevel)));
-    }
-
-    function sendGoToHome() {
-        arbiterSocket.send(arbiterProtocol.serialize(new ClientMessage.GoHomeCommand()));
+    function travel(objectKey) {
+        const location = (() => {
+            switch (objectKey) {
+                case 'cave-entrance':
+                    return 'cave';
+                case 'ladder':
+                    return 'archipelago';
+            }
+        })();
+        arbiterSocket.send(arbiterProtocol.serialize(new ClientMessage.Travel(location)));
     }
 
     var setState = null;
@@ -67,13 +67,11 @@ define(function (require, exports, module) {
             }
         };
         arbiterSocket.onOpen = () => {
-            Dispatcher.userEventStream.subscribe('join-battle', sendJoinBattle);
-            Dispatcher.userEventStream.subscribe('go-to-home', sendGoToHome);
+            Dispatcher.userEventStream.subscribe('travel-to-location', travel);
             setState('connected');
         };
         arbiterSocket.onClose = () => {
-            Dispatcher.userEventStream.unsubscribe('join-battle', sendJoinBattle);
-            Dispatcher.userEventStream.unsubscribe('go-to-home', sendGoToHome);
+            Dispatcher.userEventStream.unsubscribe('travel-to-location', travel);
             setState('disconnected');
 
             // connection could be closed due to invalid user token.
@@ -96,7 +94,6 @@ define(function (require, exports, module) {
         Chat.connect(userToken);
         Timer.connect();
         Friends.connect(userToken);
-        InstanceController.state.subscribeState('running', () => Parcel.connect(userToken));
         setState('connecting');
     }
 

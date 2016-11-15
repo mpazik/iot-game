@@ -11,8 +11,6 @@ public interface ArbiterStore {
 
     void systemStopped();
 
-    Key<Instance> createInstance();
-
     void instanceStarted(Key<Instance> instanceKey);
 
     void instanceStopped(Key<Instance> instanceKey);

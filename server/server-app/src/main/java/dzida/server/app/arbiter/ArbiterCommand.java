@@ -6,24 +6,18 @@ import dzida.server.core.basic.entity.Key;
 
 public interface ArbiterCommand {
     ImmutableSet<Class<?>> clientCommandClasses = ImmutableSet.of(
-            GoHomeCommand.class,
-            JoinBattleCommand.class
+            Travel.class
     );
 
     ImmutableSet<Class<?>> serverCommandClasses = ImmutableSet.of(
             JoinToInstance.class
     );
 
-    class GoHomeCommand implements ArbiterCommand {
-    }
+    class Travel implements ArbiterCommand {
+        public final String location;
 
-    class JoinBattleCommand implements ArbiterCommand {
-        public final String map;
-        public final int difficultyLevel;
-
-        public JoinBattleCommand(String map, int difficultyLevel) {
-            this.map = map;
-            this.difficultyLevel = difficultyLevel;
+        public Travel(String location) {
+            this.location = location;
         }
     }
 
