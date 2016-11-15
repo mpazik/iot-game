@@ -1,7 +1,9 @@
 package dzida.server.app.instance;
 
+import dzida.server.app.Configuration;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.map.descriptor.Scenario;
+import dzida.server.app.parcel.ParcelChange;
 import dzida.server.app.parcel.ParcelCommandHandler;
 import dzida.server.app.parcel.ParcelService;
 import dzida.server.app.store.http.WorldMapStoreHttp;
@@ -21,6 +23,7 @@ import dzida.server.core.basic.entity.GeneralEntity;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 import dzida.server.core.basic.unit.BitMap;
+import dzida.server.core.basic.unit.Point;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.character.model.Character;
@@ -89,6 +92,18 @@ public class Instance {
 
         this.gameLogic = new GameLogic(scheduler, instanceStateManager);
 
+        createSpawningParcel(worldMap, parcelService);
+        initGameObjects(worldMapKey, worldMapStore, worldObjectStore, worldObjectService);
+    }
+
+    private void createSpawningParcel(WorldMap worldMap, ParcelService parcelService) {
+        Point spawnPoint = worldMap.getSpawnPoint();
+        int spawningParcelX = (int) (spawnPoint.getX()) / Configuration.ParcelSize;
+        int spawningParcelY = (int) (spawnPoint.getY()) / Configuration.ParcelSize;
+        parcelService.processEvent(new ParcelChange.ParcelClaimed(spawningParcelX, spawningParcelY, new Id<>(0), "Kingdom", "Common land"));
+    }
+
+    private void initGameObjects(Key<WorldMap> worldMapKey, WorldMapStoreHttp worldMapStore, WorldObjectStoreInMemory worldObjectStore, WorldObjectService worldObjectService) {
         if (worldObjectService.getState().isEmpty()) {
             List<WorldObject> initialMapObjects = worldMapStore.getInitialMapObjects(worldMapKey);
             initialMapObjects.forEach(worldObject -> {

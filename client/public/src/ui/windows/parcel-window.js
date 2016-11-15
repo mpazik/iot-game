@@ -19,7 +19,7 @@ define(function (require) {
 <div class="form-group">    
     <div><label>Cords:</label><span>x: ${parcel.x} y: ${parcel.y}</span></div>
 </div>
-    ${parcel.owner ? `
+    ${parcel.ownerName ? `
 <div class="form-group">
     <div><label>Owner:</label><span>${parcel.ownerName}</span></div>
 </div>

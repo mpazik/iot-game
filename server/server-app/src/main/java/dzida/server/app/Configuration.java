@@ -11,6 +11,8 @@ import java.util.Properties;
 public class Configuration {
     private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
+    public static int ParcelSize = 16;
+
     public static String getContainerHost() {
         return getProperty("containerHost", "localhost");
     }
