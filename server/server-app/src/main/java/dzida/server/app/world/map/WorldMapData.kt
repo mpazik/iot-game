@@ -12,4 +12,4 @@ data class TilesetRef(val firstgid: Int, val source: String)
 
 data class Layer(val width: Int, val height: Int, val data: IntArray)
 
-data class Properties(val spawnPointX: Int, val spawnPointY: Int)
+data class Properties(val spawnPointX: Int, val spawnPointY: Int, val backgroundColor: String)

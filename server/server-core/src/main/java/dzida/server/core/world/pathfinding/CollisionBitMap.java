@@ -10,7 +10,12 @@ import dzida.server.core.world.map.WorldMap;
 import java.util.Set;
 
 public class CollisionBitMap {
-    public static final Set<TerrainType> COLLISION_TERRAINS = ImmutableSet.of(TerrainType.WATER, TerrainType.WATER_GRASS);
+    public static final Set<TerrainType> COLLISION_TERRAINS = ImmutableSet.of(
+            TerrainType.WATER,
+            TerrainType.WATER_GRASS,
+            TerrainType.LAVA,
+            TerrainType.VOID
+    );
 
     public static BitMap createForWorldMap(WorldMap worldMap, Tileset tileset) {
         int width = worldMap.getWidth();

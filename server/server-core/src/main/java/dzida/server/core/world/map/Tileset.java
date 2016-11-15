@@ -18,6 +18,8 @@ public class Tileset {
         SOIL,
         GRASS,
         WATER_GRASS,
+        LAVA,
+        VOID,
         OTHER
     }
 }

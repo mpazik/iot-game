@@ -10,14 +10,17 @@ public class WorldMap {
     private final Point spawnPoint;
     private final int[] tiles;
     private final int firstgid;
+    @SuppressWarnings("FieldCanBeLocal") // used in client side
+    private final String backgroundColor;
 
-    public WorldMap(int width, int height, Key<Tileset> tileset, Point spawnPoint, int[] tiles, int firstgid) {
+    public WorldMap(int width, int height, Key<Tileset> tileset, Point spawnPoint, int[] tiles, int firstgid, String backgroundColor) {
         this.width = width;
         this.height = height;
         this.tileset = tileset;
         this.spawnPoint = spawnPoint;
         this.tiles = tiles;
         this.firstgid = firstgid;
+        this.backgroundColor = backgroundColor;
     }
 
     public int getWidth() {

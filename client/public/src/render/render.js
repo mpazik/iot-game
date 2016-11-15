@@ -2,6 +2,7 @@ define(function (require, exports, module) {
     const Pixi = require('pixi');
     const Animation = require('../common/animation');
     const MainPlayer = require('../store/main-player');
+    const WorldStore = require('../store/world');
     const World = require('./world');
     const MainLoop = require('../store/main-loop');
     const Characters = require('./characters');
@@ -97,6 +98,7 @@ define(function (require, exports, module) {
         },
         initWorld: function () {
             World.init();
+            renderer.backgroundColor = parseInt(WorldStore.state().backgroundColor, 16);
             WorldBoard.init();
             GroundIndicators.init();
             Characters.init();

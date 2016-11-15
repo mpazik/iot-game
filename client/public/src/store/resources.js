@@ -55,6 +55,13 @@ define(function (require, exports, module) {
         return assetsPath + asset + "/" + file + ".json";
     }
 
+    function loadTileset(url) {
+        return loadJson(url).then(function (tileset) {
+            tilesets[tileset.name] = tileset;
+            return loadImage("tilesets/" + tileset.image);
+        })
+    }
+
     function loadJson(url) {
         var absoluteUrl = assetsPath + url + '.json';
         var xobj = new XMLHttpRequest();
@@ -100,10 +107,8 @@ define(function (require, exports, module) {
 
             return Promise.all([
                 loadAssets(spritesPaths),
-                loadJson('tilesets/tiles_16x16').then(function (tileset) {
-                    tilesets[tileset.name] = tileset;
-                    return loadImage("tilesets/" + tileset.image);
-                }),
+                loadTileset('tilesets/tiles_16x16'),
+                loadTileset('tilesets/tiles_cave'),
                 loadImage('sprites/character.png'),
                 loadJson('entities/objects').then(function (downloadedObjectKinds) {
                     downloadedObjectKinds.forEach(obj => objectKinds[obj.id] = obj)

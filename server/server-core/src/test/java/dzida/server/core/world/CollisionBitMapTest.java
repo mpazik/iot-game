@@ -31,7 +31,7 @@ public class CollisionBitMapTest {
                 2, 1, 1, 2,
                 2, 2, 2, 2
         };
-        WorldMap worldMap = new WorldMap(4, 4, tilesetKey, new Point(0, 0), tiles, 0);
+        WorldMap worldMap = new WorldMap(4, 4, tilesetKey, new Point(0, 0), tiles, 0, "#FF000000");
 
         BitMap collisionBitMap = CollisionBitMap.createForWorldMap(worldMap, tileset);
         assertThat(collisionBitMap.isSet(0, 0)).isTrue();

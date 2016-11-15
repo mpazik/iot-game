@@ -157,6 +157,12 @@ public class WorldMapStoreHttp implements WorldMapStore {
             if (terrainName.equals("soil")) {
                 return TerrainType.SOIL;
             }
+            if (terrainName.equals("lava")) {
+                return TerrainType.LAVA;
+            }
+            if (terrainName.equals("void")) {
+                return TerrainType.VOID;
+            }
         }
         if (terrains.size() == 2) {
             Iterator<Integer> terrainIterator = terrains.iterator();
@@ -165,6 +171,12 @@ public class WorldMapStoreHttp implements WorldMapStore {
             if ((terrainOne.equals("water") && terrainTwo.equals("grass")) ||
                     (terrainOne.equals("grass") && terrainTwo.equals("water"))) {
                 return TerrainType.WATER_GRASS;
+            }
+            if (terrainOne.equals("lava") || terrainTwo.equals("lava")) {
+                return TerrainType.LAVA;
+            }
+            if (terrainOne.equals("void") || terrainTwo.equals("void")) {
+                return TerrainType.VOID;
             }
         }
         return TerrainType.OTHER;
@@ -176,6 +188,7 @@ public class WorldMapStoreHttp implements WorldMapStore {
         Point spawnPoint = new Point(worldMapData.getProperties().getSpawnPointX(), worldMapData.getProperties().getSpawnPointY());
 
         Layer groundLayer = worldMapData.getLayers().get(0);
+        String backgroundColor = worldMapData.getProperties().getBackgroundColor().substring(3);
 
         return new WorldMap(
                 worldMapData.getWidth(),
@@ -183,7 +196,7 @@ public class WorldMapStoreHttp implements WorldMapStore {
                 new Key<>(tilesetName),
                 spawnPoint,
                 groundLayer.getData(),
-                tilesetRef.getFirstgid()
-        );
+                tilesetRef.getFirstgid(),
+                backgroundColor);
     }
 }
