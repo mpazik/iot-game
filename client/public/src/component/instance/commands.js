@@ -24,6 +24,13 @@ define(function (require, exports, module) {
         EatApple: function () {
         },
         EatRottenApple: function () {
+        },
+        ClaimParcel: function (x, y, owner, ownerName, parcelName) {
+            this.x = x;
+            this.y = y;
+            this.owner = owner;
+            this.ownerName = ownerName;
+            this.parcelName = parcelName;
         }
     };
 });

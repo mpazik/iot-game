@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
     const Pixi = require('pixi');
     const parcelPixelSize = require('configuration').parcelSize * require('configuration').tileSize;
-    const Parcel = require('../component/parcel');
+    const Parcel = require('../store/parcel');
 
     const layer = new Pixi.Container();
     var parcelIndicator;

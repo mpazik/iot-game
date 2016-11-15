@@ -10,7 +10,7 @@ define(function (require, exports, module) {
     const Cursor = require('../store/cursor');
     const Actions = require('../store/actions');
     const Quest = require('../store/quest');
-    const Parcel = require('../component/parcel');
+    const Parcel = require('../store/parcel');
 
     module.exports = {
         playerAlive: MainPlayerStore.playerLiveState,

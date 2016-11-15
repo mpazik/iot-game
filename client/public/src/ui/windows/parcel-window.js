@@ -1,5 +1,5 @@
 define(function (require) {
-    const Parcel = require('../../component/parcel');
+    const Parcel = require('../../store/parcel');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
     return createUiElement('parcel-window', {
@@ -53,7 +53,7 @@ define(function (require) {
             });
             document.getElementById('claim-land-form').addEventListener('submit', (event) => {
                 event.preventDefault();
-                Parcel.claimLand(parcelName.value);
+                userEventStream.publish('claim-land', parcelName.value);
                 userEventStream.publish('toggle-window', 'parcel-window');
             });
         }

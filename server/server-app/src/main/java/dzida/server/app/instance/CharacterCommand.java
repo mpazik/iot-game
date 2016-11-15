@@ -6,6 +6,7 @@ import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
 import dzida.server.app.instance.command.SkillUseOnWorldObjectCommand;
+import dzida.server.app.parcel.ParcelCommand;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.character.model.Character;
 import dzida.server.core.skill.Skill;
@@ -19,7 +20,8 @@ public interface CharacterCommand {
             BuildObject.class,
             UseSkillOnWorldObject.class,
             EatApple.class,
-            EatRottenApple.class
+            EatRottenApple.class,
+            ParcelCommand.ClaimParcel.class
     );
 
     InstanceCommand getInstanceCommand(Id<Character> characterId);

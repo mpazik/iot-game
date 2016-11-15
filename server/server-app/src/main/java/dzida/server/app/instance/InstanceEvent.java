@@ -1,6 +1,7 @@
 package dzida.server.app.instance;
 
 import com.google.common.collect.ImmutableSet;
+import dzida.server.app.parcel.ParcelChange;
 import dzida.server.core.character.event.CharacterDied;
 import dzida.server.core.character.event.CharacterSpawned;
 import dzida.server.core.event.ServerMessage;
@@ -27,6 +28,7 @@ public interface InstanceEvent {
             SkillUsedOnWorldObject.class,
             WorldObjectRemoved.class,
             Instance.UserCharacter.class,
-            CharacterHealed.class
+            CharacterHealed.class,
+            ParcelChange.ParcelClaimed.class
     );
 }

@@ -3,8 +3,9 @@ package dzida.server.app.parcel
 import com.google.common.collect.ImmutableSet
 import dzida.server.app.user.User
 import dzida.server.core.basic.entity.Id
+import dzida.server.core.event.GameEvent
 
-interface ParcelChange {
+interface ParcelChange : GameEvent {
     companion object {
         val classes: ImmutableSet<Class<*>> = ImmutableSet.of<Class<*>>(
                 ParcelClaimed::class.java)

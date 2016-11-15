@@ -17,15 +17,12 @@ import dzida.server.app.friend.FriendServer;
 import dzida.server.app.friend.FriendsStore;
 import dzida.server.app.instance.InstanceStore;
 import dzida.server.app.network.WebSocketServer;
-import dzida.server.app.parcel.ParcelServer;
-import dzida.server.app.parcel.ParcelStore;
 import dzida.server.app.rest.UserResource;
 import dzida.server.app.store.database.AnalyticsStoreDb;
 import dzida.server.app.store.database.ArbiterStoreDb;
 import dzida.server.app.store.database.ChatStoreDb;
 import dzida.server.app.store.database.FriendsStoreDb;
 import dzida.server.app.store.database.InstanceStoreDb;
-import dzida.server.app.store.database.ParcelStoreDB;
 import dzida.server.app.store.database.UserStoreDb;
 import dzida.server.app.timesync.TimeServiceImpl;
 import dzida.server.app.timesync.TimeSynchroniser;
@@ -86,7 +83,6 @@ public final class GameServer {
         InstanceStore instanceStore = new InstanceStoreDb(connectionProvider);
         FriendsStore friendsStore = new FriendsStoreDb(connectionProvider);
         AnalyticsStore analyticsStore = new AnalyticsStoreDb(connectionProvider);
-        ParcelStore parcelStore = new ParcelStoreDB(connectionProvider);
 
         int gameServerPort = Configuration.getGameServerPort();
         UserService userService = new UserService(userStore);
@@ -105,14 +101,12 @@ public final class GameServer {
         FriendServer friendServer = new FriendServer(userStore, friendsStore);
 
         AnalyticsServer analyticsServer = new AnalyticsServer(analyticsStore);
-        ParcelServer parcelServer = new ParcelServer(parcelStore);
 
         serverDispatcher.addServer("arbiter", arbiter);
         serverDispatcher.addServer("chat", chat);
         serverDispatcher.addServer("time", timeSynchroniser);
         serverDispatcher.addServer("friends", friendServer);
         serverDispatcher.addServer("analytics", analyticsServer);
-        serverDispatcher.addServer("parcel", parcelServer);
 
         service = NettyHttpService.builder()
                 .setHost(Configuration.getContainerHost())

@@ -11,6 +11,7 @@ define(function (require, exports, module) {
     const Timer = require('../component/timer');
     const Friends = require('../component/friends');
     const WorldBoard = require('../render/world-board');
+    const Parcel = require('../store/parcel');
 
     const characterModels = [];
     var mainPlayerModel = null;
@@ -151,6 +152,7 @@ define(function (require, exports, module) {
                 MainPlayer.positionInPixels.y = mainPlayerModel.position.y;
                 MainPlayer.position.x = mainPlayerModel.position.x / TileSize;
                 MainPlayer.position.y = mainPlayerModel.position.y / TileSize;
+                Parcel.checkCurrentParcel();
             }
             WorldBoard.sortDisplayOrder();
         }

@@ -8,6 +8,8 @@ import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
 import dzida.server.app.instance.command.SkillUseOnWorldObjectCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
+import dzida.server.app.parcel.ParcelCommand;
+import dzida.server.app.parcel.ParcelCommandHandler;
 import dzida.server.core.basic.Outcome;
 import dzida.server.core.character.CharacterCommandHandler;
 import dzida.server.core.event.GameEvent;
@@ -23,15 +25,17 @@ public class CommandResolver {
     private final PositionCommandHandler positionCommandHandler;
     private final SkillCommandHandler skillCommandHandler;
     private final CharacterCommandHandler characterCommandHandler;
+    private final ParcelCommandHandler parcelCommandHandler;
     private final BackdoorCommandResolver backdoorCommandResolver;
 
     public CommandResolver(
             PositionCommandHandler positionCommandHandler,
             SkillCommandHandler skillCommandHandler,
-            CharacterCommandHandler characterCommandHandler) {
+            CharacterCommandHandler characterCommandHandler, ParcelCommandHandler parcelCommandHandler) {
         this.positionCommandHandler = positionCommandHandler;
         this.skillCommandHandler = skillCommandHandler;
         this.characterCommandHandler = characterCommandHandler;
+        this.parcelCommandHandler = parcelCommandHandler;
 
         if (Configuration.isDevMode()) {
             backdoorCommandResolver = new BackdoorCommandResolver();
@@ -73,6 +77,8 @@ public class CommandResolver {
                 .is(KillCharacterCommand.class)
                 .thenReturn(command -> characterCommandHandler.killCharacter(command.characterId))
 
+                .is(ParcelCommand.ClaimParcel.class)
+                .thenReturn(parcelCommandHandler::claimLand)
                 .get();
     }
 }

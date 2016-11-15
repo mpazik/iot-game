@@ -29,6 +29,7 @@ define(function (require, exports, module) {
     const ItemStore = require('../../store/item');
     const Skills = require('../../common/model/skills');
     const Analytics = require('../analytics');
+    const Parcel = require('../../store/parcel');
     const network = new InstanceNetwork();
     var currentInstanceKey = null;
 
@@ -72,11 +73,13 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.subscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
             Dispatcher.userEventStream.subscribe('build-object', sendBuildObjectCommand);
             Dispatcher.userEventStream.subscribe('eat-apple', eatAppleCommand);
+            Dispatcher.userEventStream.subscribe('claim-land', claimLand);
         } else {
             Dispatcher.userEventStream.unsubscribe('map-clicked', sendMoveCommand);
             Dispatcher.userEventStream.unsubscribe('skill-used-on-character', sendUseSkillOnCharacterCommand);
             Dispatcher.userEventStream.unsubscribe('build-object', sendBuildObjectCommand);
             Dispatcher.userEventStream.unsubscribe('eat-apple', eatAppleCommand);
+            Dispatcher.userEventStream.unsubscribe('claim-land', claimLand);
         }
     });
 
@@ -98,6 +101,12 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.subscribe('map-clicked', sendMoveCommand);
         }
     });
+
+    function claimLand(parcelName) {
+        const parcel = Parcel.currentParcel.value;
+        const command = new Commands.ClaimParcel(parcel.x, parcel.y, MainPlayer.userId(), MainPlayer.userNick(), parcelName);
+        network.sendCommand(command);
+    }
 
     function sendMoveCommand(data) {
         network.sendCommand(new Commands.Move(data.x, data.y));

@@ -1,10 +1,11 @@
 package dzida.server.app.parcel
 
 import com.google.common.collect.ImmutableSet
+import dzida.server.app.instance.command.InstanceCommand
 import dzida.server.app.user.User
 import dzida.server.core.basic.entity.Id
 
-interface ParcelCommand {
+interface ParcelCommand : InstanceCommand {
     companion object {
         val classes: ImmutableSet<Class<*>> = ImmutableSet.of<Class<*>>(
                 ClaimParcel::class.java)

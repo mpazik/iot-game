@@ -2,6 +2,8 @@ package dzida.server.app.instance;
 
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.map.descriptor.Scenario;
+import dzida.server.app.parcel.ParcelCommandHandler;
+import dzida.server.app.parcel.ParcelService;
 import dzida.server.app.store.http.WorldMapStoreHttp;
 import dzida.server.app.store.http.loader.SkillLoader;
 import dzida.server.app.store.http.loader.StaticDataLoader;
@@ -79,9 +81,11 @@ public class Instance {
         PositionCommandHandler positionCommandHandler = new PositionCommandHandler(characterService, positionService, timeService);
         SkillCommandHandler skillCommandHandler = new SkillCommandHandler(timeService, positionService, characterService, skillService, worldObjectService);
         CharacterCommandHandler characterCommandHandler = new CharacterCommandHandler(positionService, skillService, characterService);
+        ParcelCommandHandler parcelCommandHandler = new ParcelCommandHandler();
+        ParcelService parcelService = new ParcelService();
 
-        instanceStateManager = new InstanceStateManager(positionService, characterService, worldMapService, skillService, worldObjectService);
-        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler);
+        instanceStateManager = new InstanceStateManager(positionService, characterService, worldMapService, skillService, worldObjectService, parcelService);
+        commandResolver = new CommandResolver(positionCommandHandler, skillCommandHandler, characterCommandHandler, parcelCommandHandler);
 
         this.gameLogic = new GameLogic(scheduler, instanceStateManager);
 

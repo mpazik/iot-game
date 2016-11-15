@@ -9,8 +9,6 @@ import dzida.server.app.user.User;
 import dzida.server.core.basic.entity.Id;
 import dzida.server.core.basic.entity.Key;
 
-import java.util.Random;
-
 import static dzida.server.app.querydsl.QArbiterEvent.arbiterEvent;
 
 public class ArbiterStoreDb implements ArbiterStore {
@@ -33,11 +31,6 @@ public class ArbiterStoreDb implements ArbiterStore {
     }
 
     @Override
-    public Key<Instance> createInstance() {
-        return generateInstanceKey();
-    }
-
-    @Override
     public void instanceStarted(Key<Instance> instanceKey) {
         saveEvent(new ArbiterEvent.InstanceStarted(instanceKey));
     }
@@ -55,10 +48,6 @@ public class ArbiterStoreDb implements ArbiterStore {
     @Override
     public void playerLeftInstance(Id<User> userId, Key<Instance> instanceKey) {
         saveEvent(new ArbiterEvent.UserLeftInstance(instanceKey, userId));
-    }
-
-    private Key<Instance> generateInstanceKey() {
-        return new Key<>("inst" + new Random().nextInt(1000000));
     }
 
     private void saveEvent(ArbiterEvent event) {

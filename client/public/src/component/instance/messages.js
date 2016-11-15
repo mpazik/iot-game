@@ -62,5 +62,12 @@ define(function (require, exports, module) {
             this.characterId = characterId;
             this.healed = healed;
         },
+        ParcelClaimed: function (x, y, owner, ownerName, parcelName) {
+            this.x = x;
+            this.y = y;
+            this.owner = owner;
+            this.ownerName = ownerName;
+            this.parcelName = parcelName;
+        }
     };
 });

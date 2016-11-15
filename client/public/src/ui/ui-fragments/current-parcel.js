@@ -1,5 +1,5 @@
 define((require) => {
-    const Parcel = require('../../component/parcel');
+    const Parcel = require('../../store/parcel');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
     return createUiElement('current-parcel', {

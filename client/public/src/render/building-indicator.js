@@ -10,7 +10,7 @@ define(function (require) {
     const WorldObjectStore = require('../store/world-object');
     const WorldMapStore = require('../store/world');
     const Dispatcher = require('../component/dispatcher');
-    const Parcel = require('../component/parcel');
+    const Parcel = require('../store/parcel');
     const WorldBoard = require('../render/world-board');
 
     var targetingData = null;

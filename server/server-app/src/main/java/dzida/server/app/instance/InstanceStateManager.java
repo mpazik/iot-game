@@ -1,6 +1,7 @@
 package dzida.server.app.instance;
 
 import com.google.common.collect.ImmutableMap;
+import dzida.server.app.parcel.ParcelService;
 import dzida.server.core.basic.Publisher;
 import dzida.server.core.character.CharacterService;
 import dzida.server.core.event.GameEvent;
@@ -21,28 +22,32 @@ public class InstanceStateManager {
     private final WorldMapService worldMapService;
     private final SkillService skillService;
     private final WorldObjectService worldObjectService;
+    private final ParcelService parcelService;
 
     public InstanceStateManager(
             PositionService positionService,
             CharacterService characterService,
             WorldMapService worldMapService,
             SkillService skillService,
-            WorldObjectService worldObjectService) {
+            WorldObjectService worldObjectService,
+            ParcelService parcelService) {
         this.positionService = positionService;
         this.characterService = characterService;
         this.worldMapService = worldMapService;
         this.skillService = skillService;
         this.worldObjectService = worldObjectService;
+        this.parcelService = parcelService;
     }
 
     public Map<String, Object> getState() {
-        return ImmutableMap.of(
-                positionService.getKey(), positionService.getState(),
-                characterService.getKey(), characterService.getState(),
-                worldMapService.getKey(), worldMapService.getState(),
-                skillService.getKey(), skillService.getState(),
-                worldObjectService.getKey(), worldObjectService.getState()
-        );
+        return ImmutableMap.<String, Object>builder()
+                .put(positionService.getKey(), positionService.getState())
+                .put(characterService.getKey(), characterService.getState())
+                .put(worldMapService.getKey(), worldMapService.getState())
+                .put(skillService.getKey(), skillService.getState())
+                .put(worldObjectService.getKey(), worldObjectService.getState())
+                .put(parcelService.getKey(), parcelService.getState())
+                .build();
     }
 
     public void dispatchEvent(GameEvent gameEvent) {
@@ -51,6 +56,7 @@ public class InstanceStateManager {
         positionService.processEvent(gameEvent);
         skillService.processEvent(gameEvent);
         worldObjectService.processEvent(gameEvent);
+        parcelService.processEvent(gameEvent);
         eventPublisher.notify(gameEvent);
     }
 
