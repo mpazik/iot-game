@@ -25,6 +25,7 @@ define(function (require, exports, module) {
         const worldObject = getSprite();
         if (objectKind['animationSteps']) {
             worldObject.animated = true;
+            worldObject.frameDuration = objectKind['frameDuration'] || 500;
         }
         worldObject.id = objectData.id;
         worldObject.scale = {x: zoom, y: zoom};
@@ -195,7 +196,7 @@ define(function (require, exports, module) {
 
     AnimatedSprite.prototype = Object.create(Pixi.Sprite.prototype);
     AnimatedSprite.prototype._getCurrentFrame = function (time) {
-        return Math.floor((time - this.startTime) / 150);
+        return Math.floor((time - this.startTime) / this.frameDuration);
     };
     AnimatedSprite.prototype.update = function (time) {
         const frameIndex = this._getCurrentFrame(time) % this.frameNumber;
