@@ -42,7 +42,7 @@ define(function (require, exports, module) {
                     type: 'world-object-targeted',
                     action: {
                         key: action,
-                        range: 2,
+                        range: 3,
                         casting: 2000
                     },
                     worldObjectId: worldObject.id,
