@@ -214,6 +214,7 @@ define(function (require, exports, module) {
 
     module.exports = {
         init: function () {
+            Cursor.setDefault('default');
             boardLayer.removeChildren();
             const rawWorldObjects = WorldObjectStore.objects();
             rawWorldObjects.forEach(createWorldObject);
