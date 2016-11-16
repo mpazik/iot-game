@@ -38,6 +38,10 @@ define(function (require, exports, module) {
             Dispatcher.userEventStream.publish('travel-to-location', data.worldObjectKind.key);
             return;
         }
+        if (data.action.key == 'talk') {
+            Dispatcher.userEventStream.publish('toggle-window', 'feedback-window');
+            return;
+        }
         castingFinishTimeout = setTimeout(() => doActionOnObject(data), data.action.casting);
         pushCastingTime(data.action.casting);
         subscribeCanceling();

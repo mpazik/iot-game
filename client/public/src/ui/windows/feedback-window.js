@@ -42,7 +42,7 @@ define(function (require) {
             this.innerHTML = `
 <h2>Give feedback</h2>
 <form>
-    <h4>How do you like it?</h4>
+    <h4>Tell me how do you like the game?</h4>
     <div class="form-group">
         <label>Game:</label>
         1 <input type="range" id="score-game" value="3" min="1" max="5"> 5

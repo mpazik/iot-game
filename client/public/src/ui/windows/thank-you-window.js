@@ -1,4 +1,6 @@
-define(function () {
+define((require) => {
+    const userEventStream = require('../../component/dispatcher').userEventStream;
+
     return createUiElement('thank-you-window', {
         type: 'window',
         properties: {
@@ -6,14 +8,17 @@ define(function () {
                 playerAlive: Predicates.is(true)
             }
         },
-        created: function () {
+        created () {
             this.innerHTML = `
     <h3>Thank you for your feedback!</h3>
-    <p>If you liked the game or you want to stay in touch click the <b>Like</b> button.</p>
+    <p>If you liked the game and fallow it, click the <b>Like</b> button.</p>
     <iframe src="https://www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2Fislesoftales&width=181&layout=button&action=like&size=large&show_faces=true&share=true&height=65&appId=584554898422237" width="181" height="35" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
 `;
         },
-        attached: function () {
+        attached () {
+        },
+        detached() {
+            deffer(() => userEventStream.publish('feedback-sent', {}));
         }
     });
 });

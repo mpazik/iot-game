@@ -19,6 +19,7 @@ define(function (require, exports, module) {
         'harvest': 'hand',
         'cook': 'cooking-pot',
         'travel': 'hand',
+        'talk': 'hand',
     };
 
     function createWorldObject(objectData) {
@@ -95,6 +96,8 @@ define(function (require, exports, module) {
                     return 'travel';
                 case 'ladder':
                     return 'travel';
+                case 'programmer':
+                    return 'talk';
             }
         }
 

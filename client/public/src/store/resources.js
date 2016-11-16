@@ -17,7 +17,8 @@ define(function (require, exports, module) {
         [Items.PAPRIKA]: {key: 'paprika', name: 'Paprika'},
         [Items.CORN_SEED]: {key: 'corn-seed', name: 'Corn seed'},
         [Items.TOMATO_SEED]: {name: 'Tomato seed'},
-        [Items.PAPRIKA_SEED]: {name: 'Paprika seed'}
+        [Items.PAPRIKA_SEED]: {name: 'Paprika seed'},
+        [Items.GANDALF_STAFF]: {name: 'Gandalf\'s staff'}
     };
 
     const sprites = ["objects"];
