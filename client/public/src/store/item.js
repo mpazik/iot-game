@@ -11,7 +11,17 @@ define(function (require, exports, module) {
         const data = localStorage.getItem('items');
         if (data) {
             try {
-                return JSON.parse(data);
+                const items = JSON.parse(data);
+
+                function deleteItem(item) {
+                    if (items[item]) {
+                        delete items[item];
+                    }
+                }
+
+                [Items.APPLE, Items.ARROW, Items.STICK].forEach(deleteItem);
+
+                return items;
             } catch (e) {
                 return {};
             }
