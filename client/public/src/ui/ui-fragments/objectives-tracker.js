@@ -29,7 +29,8 @@ define(function (require) {
         type: 'fragment',
         properties: {
             requirements: {
-                activeQuests: isNonEmpty
+                activeQuests: isNonEmpty,
+                playerAlive: Predicates.is(true)
             }
         },
         created: function () {

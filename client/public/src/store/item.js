@@ -101,7 +101,7 @@ define(function (require, exports, module) {
 
     Dispatcher.messageStream.subscribe('quest-completed', quest => {
         const rewards = quest['rewards'];
-        if (rewards['items']) {
+        if (rewards && rewards['items']) {
             changeItemsQuantity(rewards['items'])
         }
     });

@@ -23,6 +23,7 @@ define(function (require, exports, module) {
     const Timer = require('./timer');
     const Friends = require('./friends');
     const Analytics = require('./analytics');
+    const QuestStore = require('../store/quest');
 
     const ClientMessage = {
         Travel: function (location) {
@@ -98,6 +99,7 @@ define(function (require, exports, module) {
     }
 
     function connect() {
+        QuestStore.init();
         InstanceController.readyToConnect();
         const userToken = UserService.userToken;
         if (userToken == null) {

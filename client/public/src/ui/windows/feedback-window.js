@@ -2,27 +2,27 @@ define(function (require) {
     const Analytics = require('../../component/analytics');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
-    function goodbye(event) {
-        if (localStorage.getItem('feedback-sent') == "true") {
-            return
-        }
-
-        Analytics.sendEvent("feedback.reminder.opened");
-        userEventStream.publish('toggle-window', 'feedback-window');
-        if (!event) event = window.event;
-        event.cancelBubble = true;
-
-        if (event.stopPropagation) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
-
-        const message = 'Give me feedback before leaving, please :)';
-        event.returnValue = message;
-        return message;
-    }
-
-    window.onbeforeunload = goodbye;
+    // function goodbye(event) {
+    //     if (localStorage.getItem('feedback-sent') == "true") {
+    //         return
+    //     }
+    //
+    //     Analytics.sendEvent("feedback.reminder.opened");
+    //     userEventStream.publish('toggle-window', 'feedback-window');
+    //     if (!event) event = window.event;
+    //     event.cancelBubble = true;
+    //
+    //     if (event.stopPropagation) {
+    //         event.stopPropagation();
+    //         event.preventDefault();
+    //     }
+    //
+    //     const message = 'Give me feedback before leaving, please :)';
+    //     event.returnValue = message;
+    //     return message;
+    // }
+    //
+    // window.onbeforeunload = goodbye;
 
     const defaultFormData = {
         gameScore: 3, graphicScore: 3, gameIdeaScore: 3,
@@ -40,7 +40,7 @@ define(function (require) {
         },
         created: function () {
             this.innerHTML = `
-<h2>Give feedback</h2>
+<h2>Give me feedback :)</h2>
 <form>
     <h4>Tell me how do you like the game?</h4>
     <div class="form-group">

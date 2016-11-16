@@ -5,12 +5,13 @@ define(function (require, exports, module) {
 
     const recipes = {
         snack: {
-            name: 'Snack',
+            name: 'Popcorn',
             cost: {
                 'CORN': 2,
             },
             effect: 'invert',
-            cookingTime: 1000
+            cookingTime: 1000,
+            food: 'POPCORN'
         },
         tomatoMeal: {
             name: 'Tomato meal',
@@ -19,7 +20,8 @@ define(function (require, exports, module) {
                 'TOMATO': 3,
             },
             effect: 'twist',
-            cookingTime: 5000
+            cookingTime: 5000,
+            food: 'PROPER_MEAL'
         },
         paprikaMeal: {
             name: 'Paprika meal',
@@ -28,7 +30,8 @@ define(function (require, exports, module) {
                 'PAPRIKA': 3,
             },
             effect: 'twist',
-            cookingTime: 5000
+            cookingTime: 5000,
+            food: 'PROPER_MEAL'
         }
     };
 

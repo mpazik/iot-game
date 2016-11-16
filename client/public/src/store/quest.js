@@ -3,6 +3,7 @@ define(function (require, exports, module) {
     const Publisher = require('../common/basic/publisher');
     const Dispatcher = require('../component/dispatcher');
     const Messages = require('../component/instance/messages');
+    const Analytics = require('../component/analytics');
     const Item = require('./item');
     const Items = require('../common/model/items').Ids;
 
@@ -10,15 +11,37 @@ define(function (require, exports, module) {
     var pushDisplayQuest = null;
     var pushUpdateQuestProgress = null;
     var pushDisplayCompletedQuest = null;
-    const activeQuests = [];
-    const initialQuest = null;
+    const activeQuests = (() => {
+        const data = localStorage.getItem('active-quests');
+        if (data) {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                return [];
+            }
+        } else {
+            return []
+        }
+    })();
+    var lastDisplayedQuest = (() => {
+        const data = localStorage.getItem('last-displayed-quests');
+        if (data) {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                return 'welcome';
+            }
+        } else {
+            return 'welcome'
+        }
+    })();
     const newQuestDelay = 1000;
 
     function questByKey(questKey) {
         return Resources.quests.find(quest => quest.key == questKey)
     }
 
-    function trackQuest(questKey) {
+    function initQuest(questKey) {
         const quest = questByKey(questKey);
         const requirement = quest['requirement'];
         const questStatus = {key: questKey};
@@ -28,21 +51,54 @@ define(function (require, exports, module) {
                     const quests = requirement['quests'];
                     questStatus.progress = 0;
                     questStatus.goal = quests.length;
-                    setTimeout(() => pushDisplayQuest(quests[0]), newQuestDelay);
+                    setTimeout(() => displayQuest(quests[0]), newQuestDelay);
+                })();
+                break;
+            }
+            case 'message':
+            case 'user-event': {
+                (function () {
+                    if (requirement['repetition']) {
+                        questStatus.progress = 0;
+                        questStatus.goal = requirement['repetition']
+                    }
+                })();
+                break;
+            }
+            case 'items-count':
+                (function () {
+                    questStatus.goal = requirement['quantity'];
+                })();
+                break;
+        }
+        Analytics.sendDataEvent("quest.started", {key: questKey});
+        activeQuests.push(questStatus);
+        localStorage.setItem('active-quests', JSON.stringify(activeQuests));
+        pushUpdateActiveQuests(activeQuests.slice());
+        trackQuest(questStatus);
+    }
+
+    function trackQuest(questStatus) {
+        const quest = questByKey(questStatus.key);
+        const requirement = quest['requirement'];
+        switch (requirement['type']) {
+            case 'sub-quests': {
+                (function () {
+                    const quests = requirement['quests'];
                     Dispatcher.messageStream.subscribe('quest-completed', subscription);
 
                     function subscription(quest) {
                         if (quests.includes(quest.key)) {
                             const newProgress = questStatus.progress + 1;
                             if (quests[newProgress]) {
-                                setTimeout(() => pushDisplayQuest(quests[newProgress]), newQuestDelay);
+                                setTimeout(() => displayQuest(quests[newProgress]), newQuestDelay);
                             }
-                            updateQuestStatusProgress(newProgress, completeQuest);
+                            updateQuestStatusProgress(newProgress, unsubscribe);
                         }
                     }
 
                     function unsubscribe() {
-                        Dispatcher.messageStream.unsubscribe(message, subscription)
+                        Dispatcher.messageStream.unsubscribe('quest-completed', subscription)
                     }
                 })();
                 break;
@@ -56,10 +112,6 @@ define(function (require, exports, module) {
                         console.error('Quest had undefined event type', requirement);
                         return
                     }
-                    if (requirement['repetition']) {
-                        questStatus.progress = 0;
-                        questStatus.goal = requirement['repetition']
-                    }
 
                     Dispatcher[stream].subscribe(eventType, subscription);
 
@@ -71,7 +123,7 @@ define(function (require, exports, module) {
                             updateQuestStatusProgress(questStatus.progress + 1, unsubscribe);
                         } else {
                             unsubscribe();
-                            completeQuest(questKey);
+                            completeQuest(questStatus.key);
                         }
                     }
 
@@ -92,7 +144,6 @@ define(function (require, exports, module) {
             }
             case 'items-count':
                 (function () {
-                    questStatus.goal = requirement['quantity'];
                     Item.itemsChange.subscribe(subscription);
                     deffer(() => updateQuestStatusProgress(Item.numberOfItem(requirement['item']), unsubscribe));
 
@@ -108,8 +159,6 @@ define(function (require, exports, module) {
                 })();
                 break;
         }
-        activeQuests.push(questStatus);
-        pushUpdateActiveQuests(activeQuests.slice());
 
         function updateQuestStatusProgress(progress, onComplete) {
             questStatus.progress = progress;
@@ -123,18 +172,21 @@ define(function (require, exports, module) {
         }
     }
 
+
     function completeQuest(questKey) {
         // remove from active quest
         const index = activeQuests.findIndex(questStatus => questStatus.key == questKey);
         activeQuests.splice(index, 1);
+        localStorage.setItem('active-quests', JSON.stringify(activeQuests));
         pushUpdateActiveQuests(activeQuests.slice());
+        Analytics.sendDataEvent("quest.complete", {key: questKey});
 
         pushDisplayCompletedQuest(questKey);
     }
 
     Dispatcher.userEventStream.subscribe('quest-started', (questKey) => {
         if (!activeQuests.includes(questKey)) {
-            trackQuest(questKey);
+            initQuest(questKey);
         }
     });
 
@@ -144,21 +196,30 @@ define(function (require, exports, module) {
             return;
         }
         const nextQuest = quest['rewards']['quest'];
-        setTimeout(() => pushDisplayQuest(nextQuest), newQuestDelay);
+        setTimeout(() => displayQuest(nextQuest), newQuestDelay);
     });
 
+    function displayQuest(questKey) {
+        lastDisplayedQuest = questKey;
+        localStorage.setItem('last-displayed-quests', JSON.stringify(lastDisplayedQuest));
+        pushDisplayQuest(questKey);
+    }
+
     module.exports = {
+        init() {
+            activeQuests.forEach(trackQuest);
+        },
         activeQuests: new Publisher.StatePublisher(activeQuests, (push) => {
             pushUpdateActiveQuests = push
         }),
-        questToDisplay: new Publisher.StatePublisher(initialQuest, (push) => {
+        questToDisplay: new Publisher.StatePublisher(lastDisplayedQuest, (push) => {
             pushDisplayQuest = push
         }),
-        displayQuest: pushDisplayQuest,
+        displayQuest,
         completeQuestToDisplay: new Publisher.StatePublisher(null, (push) => {
             pushDisplayCompletedQuest = push
         }),
-        questProgress: new Publisher.StatePublisher(initialQuest, (push) => {
+        questProgress: new Publisher.StatePublisher(lastDisplayedQuest, (push) => {
             pushUpdateQuestProgress = push
         }),
         questByKey

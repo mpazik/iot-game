@@ -3,7 +3,18 @@ define(function (require, exports, module) {
     const Dispatcher = require('../component/dispatcher');
     const CharacterNotification = require('./character-notification');
 
-    const recipes = [8];
+    const recipes = (() => {
+        const data = localStorage.getItem('building-recipes');
+        if (data) {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                return [];
+            }
+        } else {
+            return []
+        }
+    })();
 
     Dispatcher.messageStream.subscribe('quest-completed', quest => {
         const rewards = quest['rewards'];
@@ -11,9 +22,13 @@ define(function (require, exports, module) {
             return
         }
         rewards['building_recipes'].forEach((buildingId) => {
+            if (recipes.includes(buildingId)) {
+                return;
+            }
             recipes.push(buildingId);
+            localStorage.setItem('building-recipes', JSON.stringify(recipes));
             const objectKind = objectKindById(buildingId);
-            CharacterNotification.notify(`learnt building: ${objectKind['name']}`)
+            CharacterNotification.notify(`learnt building: ${objectKind['name']}`);
         });
     });
 

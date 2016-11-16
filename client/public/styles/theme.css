@@ -54,6 +54,10 @@ a:hover {
     border-radius: 5px;
 }
 
+.area b {
+    color: var(--highlight-color);
+}
+
 /* Form */
 
 button, .button, input[type=submit] {
@@ -75,6 +79,7 @@ button:hover, .button:hover, input[type=submit]:hover {
 
 button.large, input[type=submit].large {
     font-size: 18px;
+    margin-top: 12px;
 }
 
 select {

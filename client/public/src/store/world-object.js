@@ -31,7 +31,7 @@ define(function (require, exports, module) {
             objectData.step = currentStep;
             if (currentStep < growingSteps) {
                 const timeToNextStep = createdAgo - (stepsAgo * growingSteps);
-                for (let i = 0; i < growingSteps - currentStep; i++) {
+                for (let i = 1; i <= growingSteps - currentStep; i++) {
                     setTimeout(() => {
                         objectData.step += 1;
                         growObject(objectData)

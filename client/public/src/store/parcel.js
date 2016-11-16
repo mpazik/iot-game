@@ -69,7 +69,8 @@ define(function (require, exports, module) {
             setCurrentParcel(parcelForPosition);
         } else {
             if (lastParcel.x == currentParcelPosition.x &&
-                lastParcel.y == currentParcelPosition.y && !lastParcel.parcelName) {
+                lastParcel.y == currentParcelPosition.y &&
+                lastParcel.parcelName == 'No one\'s land') {
                 return;
             }
             setCurrentParcel({x: currentParcelPosition.x, y: currentParcelPosition.y, parcelName: 'No one\'s land'});

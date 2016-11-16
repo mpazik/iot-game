@@ -49,7 +49,7 @@ define(function (require) {
     }
 
     function renderRewards(rewards) {
-        if (!rewards) {
+        if (!rewards || (Object.keys(rewards).length == 1 && Object.keys(rewards)[0] == 'quest')) {
             return ''
         }
 
