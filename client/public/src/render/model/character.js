@@ -22,7 +22,7 @@ define(function (require, exports, module) {
         this.sprite.setState('lookDown');
         this.sprite.scale = {x: tileZoom, y: tileZoom};
         this.sprite.position.x = (-tileImageSize * tileZoom) / 2;
-        this.sprite.position.y = 0;
+        // this.sprite.position.y = (-tileImageSize * tileZoom);
         this.rotatable.addChild(this.sprite);
 
         this.mousedown = function () {

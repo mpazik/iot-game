@@ -148,10 +148,11 @@ define(function (require, exports, module) {
                 characterModel.position = newPosition;
             });
             if (mainPlayerModel) {
+                const y = mainPlayerModel.position.y + 80;
                 MainPlayer.positionInPixels.x = mainPlayerModel.position.x;
-                MainPlayer.positionInPixels.y = mainPlayerModel.position.y;
+                MainPlayer.positionInPixels.y = y;
                 MainPlayer.position.x = mainPlayerModel.position.x / TileSize;
-                MainPlayer.position.y = mainPlayerModel.position.y / TileSize;
+                MainPlayer.position.y = y / TileSize;
                 Parcel.checkCurrentParcel();
             }
             WorldBoard.sortDisplayOrder();

@@ -52,7 +52,7 @@ define(function (require, exports, module) {
         const currentParcelPosition = {
             // -1 because to y is the top of the player and we want it middle
             x: Math.floor(position.x / parcelSize),
-            y: Math.floor((position.y + 1) / parcelSize)
+            y: Math.floor(position.y / parcelSize)
         };
         const lastParcel = currentParcel.value;
         if (!lastParcel) {

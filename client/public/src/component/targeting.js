@@ -63,33 +63,51 @@ define(function (require, exports, module) {
             return
         }
 
-        const userPos = MainPlayer.position;
-        if (userPos.isInRange(target, target.action.range)) {
+        if (isInRange(MainPlayer.position, target)) {
             Dispatcher.messageStream.publish('action-started-on-world-object', {
                 action: target.action,
                 worldObjectId: target.worldObjectId,
                 worldObjectKind: target.worldObjectKind
             });
+            stopGoing();
         } else {
             // move is expensive so it's done every x huntTarget operation
             if (target.attemptToMove == null || target.attemptToMove == 0) {
                 target.attemptToMove = 20;
-                Dispatcher.userEventStream.publish('move-to', {x: target.x, y: target.y});
+                Dispatcher.userEventStream.publish('move-to', getDestination(target));
             } else {
                 target.attemptToMove -= 1;
             }
             setTimeout(goToPosition, 100);
         }
+
+        function getDestination(target) {
+            if (target.width && target.height) {
+                return {x: target.x + target.width / 2, y: target.y + target.height + 0.5}
+            } else {
+                return {x: target.x, y: target.y};
+            }
+        }
+
+        function isInRange(point, target) {
+            if (target.width && target.height) {
+                const cx = Math.max(Math.min(point.x, target.x + target.width), target.x);
+                const cy = Math.max(Math.min(point.y, target.y + target.height), target.y);
+                return point.isInRange({x: cx, y: cy}, target.action.range);
+            }
+            return point.isInRange(target, target.action.range)
+        }
     }
 
     function stopGoing() {
         target = null;
+        Dispatcher.userEventStream.unsubscribe('left-click', stopGoing)
     }
 
     Dispatcher.userEventStream.subscribe('world-object-targeted', function (data) {
         target = data;
         goToPosition();
-        deffer(() => Dispatcher.userEventStream.subscribeOnce('left-click', stopGoing));
+        deffer(() => Dispatcher.userEventStream.subscribe('left-click', stopGoing));
     });
 
     module.exports = {

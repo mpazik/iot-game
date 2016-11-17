@@ -37,24 +37,26 @@ define(function (require, exports, module) {
 
         const action = getObjectAction();
         if (action) {
+            const groundRectangle = WorldObjectStore.getGroundRectangle(objectData.x, objectData.y, objectKind);
             worldObject.mousedown = function () {
                 Dispatcher.userEventStream.publish({
                     type: 'world-object-targeted',
                     action: {
                         key: action,
-                        range: 3,
+                        range: 1,
                         casting: 2000
                     },
                     worldObjectId: worldObject.id,
                     worldObjectKind: objectKind,
-                    x: objectData.x + (objectKind['width'] / 2),
-                    y: objectData.y + objectKind['height'],
+                    x: groundRectangle.x,
+                    y: groundRectangle.y,
+                    width: groundRectangle.width,
+                    height: groundRectangle.height
                 });
             };
-            const groundRectangle = WorldObjectStore.getGroundRectangle(0, 0, objectKind);
             worldObject.hitArea = new Pixi.Rectangle(
-                groundRectangle.x * tileSize / zoom,
-                groundRectangle.y * tileSize / zoom,
+                (groundRectangle.x - objectData.x) * tileSize / zoom,
+                (groundRectangle.y - objectData.y) * tileSize / zoom,
                 groundRectangle.width * tileSize / zoom,
                 groundRectangle.height * tileSize / zoom
             );
