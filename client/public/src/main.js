@@ -7,16 +7,11 @@ require.config({
 });
 
 define([], () => {
-    function isArrowFunctionSupported() {
-        try {
-            eval('()=>{}');
-            return true;
-        } catch (e) {
-            return false;
-        }
+    function isChromeBrowser() {
+        return !!window.chrome && !!window.chrome.webstore;
     }
 
-    if (!(isArrowFunctionSupported())) {
+    if (!isChromeBrowser()) {
         document.body.innerHTML = '<div id="not-supported-browser" style="' +
             'background: rgba(0, 0, 0, 0.7); border: #777 solid 1px; border-radius: 5px;' +
             'width: 400px; margin: 120px auto 0 auto; padding: 20px;' +
