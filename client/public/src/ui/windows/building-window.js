@@ -17,7 +17,7 @@ define(function (require) {
             const liClass = (numberOfItem < itemCost) ? 'class="not-enough"' : '';
             return `<li ${liClass}>${itemName}: ${itemCost}</li>`
         }).join('');
-        return `Cost: <ul class="cost">${list}</ul>`
+        return `<ul class="cost">${list}</ul>`
     }
 
     function isEnoughItems(objectKind) {
