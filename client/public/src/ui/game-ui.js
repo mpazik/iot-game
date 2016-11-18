@@ -34,33 +34,6 @@ define(function (require) {
         require('./windows/complete-quest-window')
     ].concat(extraComponents.windows);
 
-    var gameUiTag = Object.create(HTMLElement.prototype, {
-        createdCallback: {
-            value: function () {
-                this.innerHTML = `<div class="ui-fragments"></div><div class="window area"></div>`;
-            }
-        },
-        attachedCallback: {
-            value: function () {
-                // because element is created asynchronously due to use requireJs we need to emit event when it's has been propertly created.
-                this.dispatchEvent(new CustomEvent('element-attached'))
-            }
-        },
-        init: {
-            value: function () {
-                const gameUi = initUi(this);
-                fragments.forEach(function (tag) {
-                    gameUi.registerUiFragment(tag.name, tag.prototype.properties);
-                });
-                windows.forEach(function (tag) {
-                    gameUi.registerWindow(tag.name, tag.prototype.properties);
-                });
-                gameUi.updateUi();
-            }
-        }
-    });
-    document.registerElement('game-ui', {prototype: gameUiTag});
-
     const supportableRequirements = ['playerAlive', 'applicationState', 'instanceState', 'cooldown', 'gameMessage',
         'serverError', 'chatState', 'friendshipRequest', 'friendsConnectionState',
         'customCursor', 'casting', 'questToDisplay', 'activeQuests', 'completeQuestToDisplay',
@@ -71,7 +44,8 @@ define(function (require) {
         const uiFragmentsRegister = new Map();
         const windowActivateKeyBinds = new Map();
 
-        const windowElement = gameUiElement.getElementsByClassName("window")[0];
+        const windowParentElement = gameUiElement.getElementsByClassName("window")[0];
+        var windowElement = null;
         const uiFragmentsElement = gameUiElement.getElementsByClassName("ui-fragments")[0];
 
         const currentKeyBinds = new Map();
@@ -89,7 +63,7 @@ define(function (require) {
         })();
 
 
-        windowElement.style.display = 'none';
+        windowParentElement.style.display = 'none';
         document.addEventListener('keydown', keyListener);
         supportableRequirements.forEach(requirements => {
             uiState[requirements].subscribe(updateUi);
@@ -105,8 +79,12 @@ define(function (require) {
         }
 
         function cleanWindow() {
-            windowElement.style.display = 'none';
-            windowElement.innerHTML = '';
+            if (windowElement.detached) {
+                windowElement.detached();
+            }
+            windowElement = null;
+            windowParentElement.style.display = 'none';
+            windowParentElement.innerHTML = '';
             activeWindow = null;
             activeWindowElement = null;
         }
@@ -121,7 +99,7 @@ define(function (require) {
                 return;
             }
             if (activeWindow) {
-                if (windowRegister.get(activeWindow).closeable) {
+                if (windowRegister.get(activeWindow).properties.closeable) {
                     cleanWindow();
                 } else {
                     return;
@@ -134,14 +112,27 @@ define(function (require) {
 
             activeWindow = key;
 
-            const windowInstance = document.createElement(window.tagName);
-            if (window.closeable) {
-                windowElement.appendChild(closeWindowButton);
+            windowElement = createWindowElement(window);
+            if (window.properties.closeable) {
+                windowParentElement.appendChild(closeWindowButton);
             }
-            windowElement.appendChild(windowInstance);
-            windowElement.style.display = 'block';
-            activeWindowElement = windowInstance;
+
+            if (windowElement.created) {
+                windowElement.created();
+            }
+            windowParentElement.appendChild(windowElement);
+            if (windowElement.attached) {
+                windowElement.attached();
+            }
+            windowParentElement.style.display = 'block';
+            activeWindowElement = windowParentElement;
             setKeyBindings();
+        }
+
+        function createWindowElement(window) {
+            const windowElement = document.createElement('div');
+            windowElement.setAttribute('id', window.key);
+            return Object.assign(windowElement, window);
         }
 
         function toggleWindow(key) {
@@ -155,13 +146,13 @@ define(function (require) {
         function setKeyBindings() {
             currentKeyBinds.clear();
             windowActivateKeyBinds.forEach((windowKey, shortCut) => {
-                if (shouldDisplay(windowRegister.get(windowKey).requirements)) {
+                if (shouldDisplay(windowRegister.get(windowKey).properties.requirements)) {
                     currentKeyBinds.set(shortCut, () => showWindow(windowKey))
                 }
             });
 
             if (activeWindow != null) {
-                const uiWindow = windowRegister.get(activeWindow);
+                const uiWindow = windowRegister.get(activeWindow).properties;
 
                 if (uiWindow.closeable) {
                     //noinspection AmdModulesDependencies
@@ -181,7 +172,9 @@ define(function (require) {
         }
 
         function createUiFragmentElement(uiFragment) {
-            return document.createElement(uiFragment.tagName);
+            const element = document.createElement('div');
+            element.setAttribute('id', uiFragment.key);
+            return Object.assign(element, uiFragment);
         }
 
         function displayUiFragment(fragmentKey) {
@@ -193,8 +186,14 @@ define(function (require) {
 
             const uiFragment = uiFragmentsRegister.get(fragmentKey);
             const uiFragmentElement = createUiFragmentElement(uiFragment);
+            if (uiFragmentElement.created) {
+                uiFragmentElement.created();
+            }
 
             uiFragmentsElement.appendChild(uiFragmentElement);
+            if (uiFragmentElement.attached) {
+                uiFragmentElement.attached();
+            }
             activeUiFragmentElements.set(fragmentKey, uiFragmentElement);
         }
 
@@ -212,6 +211,9 @@ define(function (require) {
             });
             removedUiFragments.forEach(fragmentKey => {
                 const element = activeUiFragmentElements.get(fragmentKey);
+                if (element.detached) {
+                    element.detached();
+                }
                 uiFragmentsElement.removeChild(element);
                 activeUiFragmentElements.delete(fragmentKey)
             });
@@ -220,7 +222,7 @@ define(function (require) {
         function renderUiFragments() {
             activeUiFragments.length = 0;
             const uiFragmentsToDisplay = [...uiFragmentsRegister.keys()].filter((key) => {
-                const requirements = uiFragmentsRegister.get(key).requirements;
+                const requirements = uiFragmentsRegister.get(key).properties.requirements;
                 return shouldDisplay(requirements)
             });
             uiFragmentsToDisplay.forEach(displayUiFragment);
@@ -229,7 +231,7 @@ define(function (require) {
 
         function renderWindow() {
             const autoDisplayWindow = Array.from(windowRegister.values())
-                .filter(uiWindow => uiWindow.autoDisplay == true && shouldDisplay(uiWindow.requirements));
+                .filter(uiWindow => uiWindow.properties.autoDisplay == true && shouldDisplay(uiWindow.properties.requirements));
             if (autoDisplayWindow.length > 1) {
                 throw "can not display two auto displayable windows at the same time:" + JSON.stringify(autoDisplayWindow);
             }
@@ -237,7 +239,7 @@ define(function (require) {
             // first check if window is displayed and hide it if it is.
             // displaying of new window won't close  the previous one in case it was not closable
             if (activeWindow != null) {
-                const uiWindow = windowRegister.get(activeWindow);
+                const uiWindow = windowRegister.get(activeWindow).properties;
                 if (!shouldDisplay(uiWindow.requirements)) {
                     hideWindow();
                 }
@@ -270,38 +272,34 @@ define(function (require) {
         }
 
         return {
-            registerWindow: function (key, params) {
-                if (typeof params == 'undefined') {
-                    params = {};
+            registerWindow: function (definition) {
+                if (typeof definition.properties.closeable === 'undefined') {
+                    definition.properties.closeable = true
                 }
-                params.key = key;
+                validateRequirements(definition.properties.requirements, definition.key);
 
-                if (typeof params.tagName === 'undefined') {
-                    params.tagName = key
-                }
-                if (typeof params.closeable === 'undefined') {
-                    params.closeable = true
-                }
-                validateRequirements(params.requirements, key);
+                windowRegister.set(definition.key, definition);
 
-                windowRegister.set(key, params);
-
-                if (params.activateKeyBind) {
-                    windowActivateKeyBinds.set(params.activateKeyBind, key);
+                if (definition.properties.activateKeyBind) {
+                    windowActivateKeyBinds.set(definition.properties.activateKeyBind, definition.key);
                 }
             },
-            registerUiFragment: function (key, params) {
-                if (typeof params == 'undefined') {
-                    params = {};
-                }
-                if (!params.tagName) {
-                    params.tagName = key
-                }
-                validateRequirements(params.requirements, key);
+            registerUiFragment: function (definition) {
+                validateRequirements(definition.properties.requirements, definition.key);
 
-                uiFragmentsRegister.set(key, params);
+                uiFragmentsRegister.set(definition.key, definition);
             },
             updateUi
+        }
+    }
+
+    return {
+        init(uiElement) {
+            uiElement.innerHTML = `<div class="ui-fragments"></div><div class="window area"></div>`;
+            const gameUi = initUi(uiElement);
+            fragments.forEach(gameUi.registerUiFragment);
+            windows.forEach(gameUi.registerWindow);
+            gameUi.updateUi();
         }
     }
 });

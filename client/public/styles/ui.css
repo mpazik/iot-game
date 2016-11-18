@@ -9,7 +9,7 @@ body {
     margin: 0 auto;
 }
 
-game-ui .window {
+#game-ui .window {
     top: 35%;
     padding: 20px;
     left: 50%;
@@ -19,12 +19,12 @@ game-ui .window {
     overflow-y: auto;
 }
 
-game-ui .window > * {
+#game-ui .window > div {
     padding: 10px;
     display: block;
 }
 
-game-ui .window .window-actions {
+#game-ui .window .window-actions {
     margin-top: 45px;
 }
 
@@ -38,19 +38,19 @@ game-ui .window .window-actions {
     content: "✕";
 }
 
-game-ui {
+#game-ui {
     position: absolute;
     top: 0;
 }
 
-game-ui .ui-fragments {
+#game-ui .ui-fragments {
 }
 
 .ui-fragments > * {
     position: fixed;
 }
 
-profiling-display {
+#profiling-display {
     width: 262px;
     padding: 2px;
     top: 0;
@@ -58,21 +58,16 @@ profiling-display {
     font-size: 0.75em;
 }
 
-profiling-display div {
+#profiling-display div {
     float: left;
     margin: 3px;
 }
 
-profiling-display div > span {
+#profiling-display div > span {
     display: block;
     float: right;
     width: 34px;
     padding-left: 2px;
-}
-
-skill-bar {
-    float: left;
-    margin-right: 10px;
 }
 
 @keyframes progress-bar-anim {
@@ -84,7 +79,7 @@ skill-bar {
     }
 }
 
-cooldown-bar {
+#cooldown-bar {
     left: 50%;
     transform: translateX(-50%);
     width: 300px;
@@ -95,7 +90,7 @@ cooldown-bar {
     border-radius: 4px;
 }
 
-cooldown-bar .progress-bar {
+#cooldown-bar .progress-bar {
     height: 100%;
     width: 0;
     background: rgba(0, 40, 255, 0.2);
@@ -103,7 +98,7 @@ cooldown-bar .progress-bar {
     border-radius: 4px;
 }
 
-casting-bar {
+#casting-bar {
     left: 50%;
     transform: translateX(-50%);
     width: 300px;
@@ -114,7 +109,7 @@ casting-bar {
     border-radius: 4px;
 }
 
-casting-bar .progress-bar {
+#casting-bar .progress-bar {
     height: 100%;
     width: 0;
     background: rgba(0, 40, 255, 0.2);
@@ -142,13 +137,13 @@ casting-bar .progress-bar {
     font-size: 16px;
 }
 
-current-parcel {
+#current-parcel {
     display: inline-block;
     left: 50%;
     transform: translateX(-50%);
 }
 
-game-message {
+#game-message {
     top: 30%;
     font-weight: bold;
     color: #c20101;
@@ -159,7 +154,7 @@ game-message {
     width: 100%;
 }
 
-server-error {
+#server-error {
     top: 30%;
     font-weight: bold;
     color: #c20101;
@@ -179,10 +174,6 @@ server-error {
     text-shadow: 0 0 4px #fff;
 }
 
-dzida-game canvas {
-    position: absolute;
-}
-
 @keyframes fade {
     from {
         opacity: 1;
@@ -193,7 +184,7 @@ dzida-game canvas {
 }
 
 /* GAME CHAT */
-game-chat {
+#game-chat {
     position: absolute;
     width: 400px;
     left: 1px;
@@ -203,7 +194,7 @@ game-chat {
     display: none;
 }
 
-game-chat .chat-messages {
+#game-chat .chat-messages {
     /* display: none; */
     width: 100%;
     height: 200px;
@@ -215,25 +206,25 @@ game-chat .chat-messages {
     border-radius: 3px;
 }
 
-game-chat .chat-messages li {
+#game-chat .chat-messages li {
     margin: 1px 2px;
     color: white;
     text-shadow: 0 0 2px black;
 }
 
-game-chat .message-type-command {
+#game-chat .message-type-command {
     color: #aaaaaa;
 }
 
-game-chat .message-type-error {
+#game-chat .message-type-error {
     color: #ff2c2c;
 }
 
-game-chat .message-type-whisper {
+#game-chat .message-type-whisper {
     color: #f56eff;
 }
 
-game-chat .chat-input {
+#game-chat .chat-input {
     color: white;
     width: 100%;
     padding: 2px 5px;
@@ -245,7 +236,7 @@ game-chat .chat-input {
     box-shadow: none;
 }
 
-player-inventory {
+#player-inventory {
     top: 40px;
     right: 1px;
     padding: 10px;
@@ -294,7 +285,7 @@ player-inventory {
     color: var(--highlight-color);
 }
 
-objective-tracker {
+#objective-tracker {
     top: 245px;
     right: 1px;
     padding: 10px;
@@ -302,26 +293,26 @@ objective-tracker {
     font-size: 0.8em;
 }
 
-objective-tracker ul {
+#objective-tracker ul {
     margin: 0;
     padding: 0;
     list-style-type: none;
 }
 
-objective-tracker li span {
+#objective-tracker li span {
     float: right;
     color: var(--highlight-color);
 }
 
-feedback-window {
+#feedback-window {
     width: 300px;
 }
 
-feedback-window label {
+#feedback-window label {
     width: 120px;
 }
 
-feedback-window textarea {
+#feedback-window textarea {
     width: 100%;
     min-height: 60px;
 }
@@ -352,28 +343,28 @@ feedback-window textarea {
     padding: 10px 0
 }
 
-building-window .element {
+#building-window .element {
     width: 200px;
 }
 
-building-window .object-icon {
+#building-window .object-icon {
     float: left;
     margin-right: 20px;
 }
 
-building-window .object-description {
+#building-window .object-description {
     float: left;
 }
 
-building-window h3 {
+#building-window h3 {
     margin: 0;
 }
 
-cooking-window h3 {
+#cooking-window h3 {
     margin: 0;
 }
 
-cooking-window .element {
+#cooking-window .element {
     width: 150px;
 }
 
@@ -405,6 +396,6 @@ cooking-window .element {
     padding: 0
 }
 
-feedback-button {
+#feedback-button {
     left: 2px;
 }

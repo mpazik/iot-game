@@ -16,11 +16,7 @@ define([], () => {
         }
     }
 
-    function isCustomElementsSupported() {
-        return document.registerElement && typeof document.registerElement === 'function';
-    }
-
-    if (!(isArrowFunctionSupported() && isCustomElementsSupported())) {
+    if (!(isArrowFunctionSupported())) {
         document.body.innerHTML = '<div id="not-supported-browser" style="' +
             'background: rgba(0, 0, 0, 0.7); border: #777 solid 1px; border-radius: 5px;' +
             'width: 400px; margin: 120px auto 0 auto; padding: 20px;' +
@@ -30,15 +26,14 @@ define([], () => {
         return;
     }
 
-    require(['ui/game', 'ui/game-ui'], function () {
-        const game = document.createElement("dzida-game");
-        document.body.appendChild(game);
+    require(['ui/game', 'ui/game-ui'], function (game, gameUi) {
+        document.body.appendChild(game.create());
+        game.start();
 
-        const ui = document.createElement("game-ui");
-        ui.addEventListener('element-attached', function () {
-            ui.init();
-        });
-        document.body.appendChild(ui);
+        const uiElement = document.createElement('div');
+        uiElement.setAttribute('id', 'game-ui');
+        document.body.appendChild(uiElement);
+        gameUi.init(uiElement);
     });
 });
 

@@ -1,5 +1,4 @@
 define(require => {
-    require('../elements/action-socket');
     const uiState = require('../../store/ui-state');
     const itemById = require('../../store/resources').item;
     const Item = require('../../store/item');

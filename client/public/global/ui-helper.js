@@ -29,8 +29,12 @@ const UiElement = Object.create(HTMLElement.prototype, {
     }
 });
 
-function createUiElement(key, prototype) {
-    const fragmentPrototype = Object.create(UiElement);
-    Object.assign(fragmentPrototype, prototype);
-    return document.registerElement(key, {prototype: fragmentPrototype});
+function createUiElement(key, definition) {
+    // const fragmentPrototype = Object.create(UiElement);
+    // const element = document.createElement('div');
+    // element.definition = definition;
+    // element.key = key;
+    // element.setAttribute('id', key);
+    definition.key = key;
+    return definition;
 }
