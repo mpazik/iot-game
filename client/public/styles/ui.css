@@ -4,6 +4,10 @@ body {
     font-size: 16px;
 }
 
+#game-render canvas {
+    position: absolute
+}
+
 .area {
     max-width: 600px;
     margin: 0 auto;
