@@ -1,18 +1,35 @@
-define(function (require) {
+define((require) => {
     const Parcel = require('../../store/parcel');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
-    return createUiElement('parcel-window', {
-        type: 'window',
-        properties: {
-            activateKeyBind: KEY_CODES.fromLetter('I'),
-            requirements: {
-                playerAlive: Predicates.is(true),
+    function showClaimLand(element) {
+        element.innerHTML = `<form id="claim-land-form">
+    <div><label>Name:</label><input type="text" maxlength="20" minlength="5" required pattern="[a-zA-Z0-9]+" id="claim-land-name"></div>
+    <input type="submit" value="Claim land">
+</form>`;
+        const parcelName = document.getElementById('claim-land-name');
+        parcelName.addEventListener('keydown', event => {
+            if (event.keyCode != KEY_CODES.ESC) {
+                event.stopPropagation();
             }
+        });
+        document.getElementById('claim-land-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            userEventStream.publish('claim-land', parcelName.value);
+            userEventStream.publish('toggle-window', 'parcel-window');
+        });
+    }
+
+    return {
+        key: 'parcel-window',
+        type: 'window',
+        activateKeyBind: KEY_CODES.fromLetter('I'),
+        requirements: {
+            playerAlive: Predicates.is(true),
         },
-        created () {
+        attached(element) {
             const parcel = Parcel.currentParcel.value;
-            this.innerHTML = `<div>
+            element.innerHTML = `<div>
 <div class="form-group">
     <div><label>Name:</label><span>${parcel.parcelName}</span></div>
 </div>
@@ -27,35 +44,16 @@ define(function (require) {
     ${Parcel.canClaimCurrentLand() ? `<button id="claim-land-button">Claim land</button>` : ''}
                     
 </div>`;
-        },
-        attached () {
             const claimLandButton = document.getElementById('claim-land-button');
             if (claimLandButton) {
                 claimLandButton.addEventListener('click', () => {
-                    this._showClaimLand();
+                    showClaimLand(element);
                 });
             }
             Parcel.highlightCurrentParcel(true);
         },
         detached () {
             Parcel.highlightCurrentParcel(false);
-        },
-        _showClaimLand() {
-            this.innerHTML = `<form id="claim-land-form">
-    <div><label>Name:</label><input type="text" maxlength="20" minlength="5" required pattern="[a-zA-Z0-9]+" id="claim-land-name"></div>
-    <input type="submit" value="Claim land">
-</form>`;
-            const parcelName = document.getElementById('claim-land-name');
-            parcelName.addEventListener('keydown', event => {
-                if (event.keyCode != KEY_CODES.ESC) {
-                    event.stopPropagation();
-                }
-            });
-            document.getElementById('claim-land-form').addEventListener('submit', (event) => {
-                event.preventDefault();
-                userEventStream.publish('claim-land', parcelName.value);
-                userEventStream.publish('toggle-window', 'parcel-window');
-            });
         }
-    });
+    };
 });

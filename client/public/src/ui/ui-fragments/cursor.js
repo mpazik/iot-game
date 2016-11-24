@@ -1,38 +1,30 @@
-define(function (require) {
+define((require) => {
     const customCursor = require('../../store/ui-state').customCursor;
 
-    let wasInitiated = false;
-    let element;
-
     function updateCursorPosition(event) {
-        if (!wasInitiated) {
-            element.setAttribute('class', 'icon-' + customCursor.value);
+        if (!this.wasInitiated) {
+            this.setAttribute('class', 'icon-' + customCursor.value);
             document.body.style.cursor = 'none';
-            wasInitiated = true;
+            this.wasInitiated = true;
         }
         const cursor = document.getElementById('custom-cursor');
         cursor.style.left = (event.clientX - 24) + 'px';
         cursor.style.top = (event.clientY - 24) + 'px';
     }
 
-    return createUiElement('custom-cursor', {
+    return {
+        key: 'custom-cursor',
         type: 'fragment',
-        properties: {
-            requirements: {
-                customCursor: Predicates.isSet()
-            }
+        requirements: {
+            customCursor: Predicates.isSet()
         },
-        created: function () {
+        attached(element) {
+            element.updateCursorPosition = updateCursorPosition.bind(element);
+            document.addEventListener("mousemove", element.updateCursorPosition);
         },
-        attached: function () {
-            element = this;
-            wasInitiated = false;
-            this.setAttribute('id', 'custom-cursor');
-            document.addEventListener("mousemove", updateCursorPosition);
-        },
-        detached: function () {
+        detached(element) {
             document.body.style.cursor = 'default';
-            document.removeEventListener("mousemove", updateCursorPosition);
+            document.removeEventListener("mousemove", element.updateCursorPosition);
         },
-    });
+    };
 });

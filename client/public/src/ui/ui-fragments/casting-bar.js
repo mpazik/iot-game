@@ -1,19 +1,16 @@
-define(function (require) {
+define((require) => {
     const uiState = require('../../store/ui-state');
 
-    return createUiElement('casting-bar', {
+    return {
+        key: 'casting-bar',
         type: 'fragment',
-        properties: {
-            requirements: {
-                casting: Predicates.isSet()
-            }
+        requirements: {
+            casting: Predicates.isSet()
         },
-        created: function () {
-            this.innerHTML = '<div class="progress-bar"></div>';
-        },
-        attached: function () {
+        template: '<div class="progress-bar"></div>',
+        attached(element) {
             const casting = uiState.casting.value;
-            this.getElementsByClassName('progress-bar')[0].style.animationDuration = casting + 'ms';
+            element.getElementsByClassName('progress-bar')[0].style.animationDuration = casting + 'ms';
         }
-    });
+    };
 });

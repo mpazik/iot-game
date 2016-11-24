@@ -1,20 +1,17 @@
-define(function (require) {
+define((require) => {
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
-    return createUiElement('feedback-button', {
+    return {
+        key: 'feedback-button',
         type: 'fragment',
-        properties: {
-            requirements: {
-                playerAlive: Predicates.is(true)
-            }
+        requirements: {
+            playerAlive: Predicates.is(true)
         },
-        created: function () {
-            this.innerHTML = `<button id="give-feedback-button"><span class="action-key-shortcut">G</span>ive feedback</button>`;
-        },
-        attached: function () {
+        template: `<button id="give-feedback-button"><span class="action-key-shortcut">G</span>ive feedback</button>`,
+        attached() {
             document.getElementById('give-feedback-button').addEventListener('click', () => {
                 userEventStream.publish('toggle-window', 'feedback-window');
             });
         }
-    });
+    };
 });

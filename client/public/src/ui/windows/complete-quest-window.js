@@ -1,4 +1,4 @@
-define(function (require) {
+define((require) => {
     const Quest = require('../../store/quest');
     const Item = require('../../store/item');
     const Dispatcher = require('../../component/dispatcher');
@@ -54,36 +54,33 @@ define(function (require) {
 
     }
 
-    return createUiElement('complete-quest-window', {
+    return {
+        key: 'complete-quest-window',
         type: 'window',
-        properties: {
-            autoDisplay: true,
-            requirements: {
-                playerAlive: Predicates.is(true),
-                completeQuestToDisplay: Predicates.isSet()
-            }
+        autoDisplay: true,
+        requirements: {
+            playerAlive: Predicates.is(true),
+            completeQuestToDisplay: Predicates.isSet()
         },
-        created() {
-        },
-        attached() {
+        attached(element) {
             const questKey = Quest.completeQuestToDisplay.value;
             const quest = Quest.questByKey(questKey);
             lootItems(quest);
-            this.quest = quest;
-            this.innerHTML = `
+            element.quest = quest;
+            element.innerHTML = `
 <h1>Quest completed</h1>
 <div>Well done. You have done your quest: <b>${quest['title']}</b>.</div>
 ${renderRewards(quest['rewards'])}
 <button class="large">Complete quest</button>
 `;
-            this.currentQuest = quest.key;
-            const continueButton = this.getElementsByTagName('button')[0];
+            element.currentQuest = quest.key;
+            const continueButton = element.getElementsByTagName('button')[0];
             continueButton.addEventListener('click', () => {
                 Dispatcher.userEventStream.publish('toggle-window', 'complete-quest-window');
             })
         },
-        detached (){
-            deffer(() => Dispatcher.messageStream.publish('quest-completed', this.quest));
+        detached(element){
+            deffer(() => Dispatcher.messageStream.publish('quest-completed', element.quest));
         }
-    });
+    }
 });

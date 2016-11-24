@@ -1,4 +1,4 @@
-define(function (require) {
+define((require) => {
     const Quest = require('../../store/quest');
     const Item = require('../../store/item');
     const userEventStream = require('../../component/dispatcher').userEventStream;
@@ -59,37 +59,34 @@ define(function (require) {
 </div>`
     }
 
-    return createUiElement('start-quest-window', {
+    return {
+        key: 'start-quest-window',
         type: 'window',
-        properties: {
-            autoDisplay: true,
-            requirements: {
-                playerAlive: Predicates.is(true),
-                questToDisplay: Predicates.isSet()
-            }
+        autoDisplay: true,
+        requirements: {
+            playerAlive: Predicates.is(true),
+            questToDisplay: Predicates.isSet()
         },
-        created() {
-        },
-        attached() {
+        attached(element) {
             const questKey = Quest.questToDisplay.value;
             const quest = Quest.questByKey(questKey);
-            this.innerHTML = `
+            element.innerHTML = `
 <h1>${quest['title']}</h1>
 <div>${quest['content']}</div>
 ${renderRewards(quest['rewards'])}
 <button class="large">Continue</button>
 `;
-            this.currentQuest = quest.key;
-            const continueButton = this.getElementsByTagName('button')[0];
+            element.currentQuest = quest.key;
+            const continueButton = element.getElementsByTagName('button')[0];
             continueButton.addEventListener('click', () => {
                 userEventStream.publish('toggle-window', 'start-quest-window');
             })
         },
-        detached (){
+        detached(element) {
             Quest.displayQuest(null);
-            if (!Quest.activeQuests.value.some(quest => quest.key == this.currentQuest)) {
-                deffer(() => userEventStream.publish('quest-started', this.currentQuest));
+            if (!Quest.activeQuests.value.some(quest => quest.key == element.currentQuest)) {
+                deffer(() => userEventStream.publish('quest-started', element.currentQuest));
             }
         }
-    });
+    };
 });

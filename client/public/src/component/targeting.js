@@ -106,8 +106,10 @@ define(function (require, exports, module) {
 
     Dispatcher.userEventStream.subscribe('world-object-targeted', function (data) {
         target = data;
-        goToPosition();
-        deffer(() => Dispatcher.userEventStream.subscribe('left-click', stopGoing));
+        deffer(() => {
+            Dispatcher.userEventStream.subscribe('left-click', stopGoing);
+            goToPosition();
+        });
     });
 
     module.exports = {

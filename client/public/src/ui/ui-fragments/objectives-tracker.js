@@ -1,4 +1,4 @@
-define(function (require) {
+define((require) => {
     const Quest = require('../../store/quest');
 
     function renderQuestProgress(status) {
@@ -25,50 +25,50 @@ define(function (require) {
         return array.length > 0;
     }
 
-    return createUiElement('objective-tracker', {
-        type: 'fragment',
-        properties: {
-            requirements: {
-                activeQuests: isNonEmpty,
-                playerAlive: Predicates.is(true)
-            }
-        },
-        created: function () {
-            this.classList.add('area');
-            this.innerHTML = `
-<h3 style="margin-top: 0">Objectives</h3>
-<ul></ul>
-`;
-        },
-        attached: function () {
-            this._updateQuests(Quest.activeQuests.value);
-            Quest.activeQuests.subscribe(this._updateQuests.bind(this));
-            Quest.questProgress.subscribe(this._updateQuestProgress.bind(this));
-        },
-        detached: function () {
-            Quest.activeQuests.unsubscribe(this._updateQuests.bind(this));
-            Quest.questProgress.unsubscribe(this._updateQuestProgress.bind(this));
-        },
-        _updateQuestProgress(questStatus) {
-            const questElement = document.getElementById(questId(questStatus.key));
-            questElement.innerHTML = renderQuestContent(Quest.questByKey(questStatus.key), questStatus);
-            const anchor = questElement.getElementsByTagName('a')[0];
+    function updateQuestProgress(questStatus) {
+        const questElement = document.getElementById(questId(questStatus.key));
+        questElement.innerHTML = renderQuestContent(Quest.questByKey(questStatus.key), questStatus);
+        const anchor = questElement.getElementsByTagName('a')[0];
+        anchor.addEventListener('click', () => {
+            const questKey = anchor.getAttribute('data-quest-key');
+            Quest.displayQuest(questKey);
+        });
+    }
+
+    function updateQuests(activeQuests) {
+        const list = this.getElementsByTagName('ul')[0];
+        list.innerHTML = activeQuests.map(questStatus => {
+            return renderQuest(Quest.questByKey(questStatus.key), questStatus)
+        }).join('');
+        for (let anchor of this.getElementsByTagName('a')) {
             anchor.addEventListener('click', () => {
                 const questKey = anchor.getAttribute('data-quest-key');
                 Quest.displayQuest(questKey);
-            });
-        },
-        _updateQuests(activeQuests) {
-            const list = this.getElementsByTagName('ul')[0];
-            list.innerHTML = activeQuests.map(questStatus => {
-                return renderQuest(Quest.questByKey(questStatus.key), questStatus)
-            }).join('');
-            for (let anchor of this.getElementsByTagName('a')) {
-                anchor.addEventListener('click', () => {
-                    const questKey = anchor.getAttribute('data-quest-key');
-                    Quest.displayQuest(questKey);
-                })
-            }
+            })
         }
-    });
+    }
+
+    return {
+        key: 'objective-tracker',
+        type: 'fragment',
+        requirements: {
+            activeQuests: isNonEmpty,
+            playerAlive: Predicates.is(true)
+        },
+        template: `
+<h3 style="margin-top: 0">Objectives</h3>
+<ul></ul>
+`,
+        classes: ['area'],
+        attached(element) {
+            element.updateQuests = updateQuests.bind(element);
+            element.updateQuestProgress = updateQuestProgress.bind(element);
+            Quest.activeQuests.subscribeAndTrigger(element.updateQuests);
+            Quest.questProgress.subscribe(element.updateQuestProgress);
+        },
+        detached(element) {
+            Quest.activeQuests.unsubscribe(element.updateQuests);
+            Quest.questProgress.unsubscribe(element.updateQuestProgress);
+        }
+    };
 });

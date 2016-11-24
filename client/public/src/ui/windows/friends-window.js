@@ -1,32 +1,30 @@
-define(function (require) {
+define((require) => {
     const Friends = require('../../component/friends');
 
-    return createUiElement('friends-window', {
+    function updateWindow() {
+        const list = this.getElementsByTagName('div')[0];
+        const friendList = Array.from(Friends.friends.values());
+        list.innerHTML = friendList.join('\n');
+    }
+
+    return {
+        key: 'friends-window',
         type: 'window',
-        properties: {
-            requirements: {
-                friendsConnectionState: Predicates.is('connected')
-            }
+        requirements: {
+            friendsConnectionState: Predicates.is('connected')
         },
-        created: function () {
-            this.innerHTML = `
+        template: `
 <h1>Friends</h1> 
 <div>
     
 </div>
-`;
+`,
+        attached(element) {
+            element.updateWindow = updateWindow.bind(element);
+            Friends.friendshipPublisher.subscribeAndTrigger(element.updateWindow);
         },
-        attached: function () {
-            this._update();
-            Friends.friendshipPublisher.subscribe(this._update.bind(this));
-        },
-        detached: function () {
-            Friends.friendshipPublisher.subscribe(this._update.bind(this));
-        },
-        _update: function () {
-            const list = this.getElementsByTagName('div')[0];
-            const friendList = Array.from(Friends.friends.values());
-            list.innerHTML = friendList.join('\n');
+        detached(element) {
+            Friends.friendshipPublisher.subscribe(element.updateWindow);
         }
-    });
+    };
 });

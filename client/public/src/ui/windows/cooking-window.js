@@ -1,4 +1,4 @@
-define(function (require) {
+define((require) => {
     const userEventStream = require('../../component/dispatcher').userEventStream;
     const ItemStore = require('../../store/item');
     const CookingStore = require('../../store/cooking');
@@ -32,26 +32,17 @@ define(function (require) {
 `;
     }
 
-    return createUiElement('cooking-window', {
+    return {
+        key: 'cooking-window',
         type: 'window',
-        properties: {
-            requirements: {
-                playerAlive: Predicates.is(true),
-            }
+        requirements: {
+            playerAlive: Predicates.is(true),
         },
-        created: function () {
-            //noinspection JSUnusedGlobalSymbols
-            this.className += 'list-window';
-        },
-        attached: function () {
-            this._update();
-        },
-        detached: function () {
-        },
-        _update: function () {
+        classes: ['list-window'],
+        attached(element) {
             const recipes = CookingStore.recipes;
-            this.innerHTML = Object.keys(recipes).map(recipeKey => renderRecipe(recipeKey, recipes[recipeKey])).join('\n');
-            const buildButtons = this.getElementsByClassName('cook-button');
+            element.innerHTML = Object.keys(recipes).map(recipeKey => renderRecipe(recipeKey, recipes[recipeKey])).join('\n');
+            const buildButtons = element.getElementsByClassName('cook-button');
             for (const buildButton of buildButtons) {
                 buildButton.addEventListener('click', function () {
                     const recipeKey = this.getAttribute('data-recipe-key');
@@ -60,5 +51,5 @@ define(function (require) {
                 });
             }
         }
-    });
+    };
 });

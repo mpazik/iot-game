@@ -1,7 +1,6 @@
-define((require) => {
-    const debugWindow = require('../dev/windows/debug-window');
+define(() => {
     return {
         fragments: [],
-        windows: [debugWindow]
+        windows: []
     }
 });

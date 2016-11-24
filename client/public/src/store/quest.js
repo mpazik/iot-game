@@ -185,7 +185,7 @@ define(function (require, exports, module) {
     }
 
     Dispatcher.userEventStream.subscribe('quest-started', (questKey) => {
-        if (!activeQuests.includes(questKey)) {
+        if (activeQuests.findIndex(questStatus => questStatus.key == questKey) < 0) {
             initQuest(questKey);
         }
     });

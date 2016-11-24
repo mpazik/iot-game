@@ -1,41 +1,38 @@
-define(function (require) {
+define((require) => {
     const uiState = require('../../store/ui-state');
-    
-    return createUiElement('profiling-display', {
+
+    function updateStats(stats) {
+        const element = this;
+
+        function setStat(property, value) {
+            element.querySelector(`.${property}>span`).innerHTML = value.toFixed(2);
+        }
+
+        setStat('fps', stats.fps);
+        setStat('ping', stats.ping);
+        setStat('x', stats.position.x);
+        setStat('y', stats.position.y);
+    }
+
+    return {
+        key: 'profiling-display',
         type: 'fragment',
-        properties: {
-            requirements: {
-                instanceState: Predicates.is('running')
-            }
+        requirements: {
+            instanceState: Predicates.is('running')
         },
-        created: function () {
-            this.innerHTML =  `
+        template: `
 <div class="fps">FPS: <span></span></div>
 <div class="ping">PING: <span></span></div>
 <div class="x">x: <span></span></div>
 <div class="y">y: <span></span></div>
-`;
+`,
+        classes: ['area'],
+        attached(element) {
+            element.profilingUpdate = updateStats.bind(element);
+            uiState.profilingStats.subscribeAndTrigger(element.profilingUpdate);
         },
-        attached: function () {
-            const stats = uiState.profilingStats.value;
-            this._updateStats(stats);
-            uiState.profilingStats.subscribe(this._updateStats.bind(this));
-            this.classList.add('area');
-        },
-        detached: function () {
-            uiState.profilingStats.unsubscribe(this._updateStats.bind(this));
-        },
-        _updateStats: function (stats) {
-            const element = this;
-
-            function setStat(property, value) {
-                element.querySelector(`.${property}>span`).innerHTML = value.toFixed(2);
-            }
-
-            setStat('fps', stats.fps);
-            setStat('ping', stats.ping);
-            setStat('x', stats.position.x);
-            setStat('y', stats.position.y);
+        detached(element) {
+            uiState.profilingStats.unsubscribe(element.profilingUpdate);
         }
-    });
+    }
 });

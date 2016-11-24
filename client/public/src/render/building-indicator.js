@@ -1,4 +1,4 @@
-define(function (require) {
+define((require) => {
     const Pixi = require('pixi');
     const TileSize = require('configuration').tileSize;
     const parcelSize = require('configuration').parcelSize;

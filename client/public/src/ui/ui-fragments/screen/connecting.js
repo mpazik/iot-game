@@ -1,14 +1,11 @@
-define(function () {
-    return createUiElement('connecting-screen', {
+define(() => {
+    return {
+        key: 'connecting-screen',
         type: 'fragment',
-        properties: {
-            requirements: {
-                applicationState: Predicates.is('connecting')
-            }
+        requirements: {
+            applicationState: Predicates.is('connecting')
         },
-        created: function () {
-            this.innerHTML = 'Connecting...';
-            this.classList.add('game-state')
-        }
-    });
+        template: 'Connecting...',
+        classes: ['game-state']
+    }
 });

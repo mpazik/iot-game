@@ -60,7 +60,10 @@ define(function (require, exports, module) {
         var index = this.stateListeners[type].indexOf(listener);
         this.stateListeners[type].splice(index, 1);
     };
-
+    StatePublisher.prototype.subscribeAndTrigger = function (listener) {
+        this.subscribe(listener);
+        listener(this._value);
+    };
 
     Object.defineProperty(StatePublisher.prototype, "value", {
         get: function () {

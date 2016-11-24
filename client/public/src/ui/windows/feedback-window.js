@@ -1,4 +1,4 @@
-define(function (require) {
+define((require) => {
     const Analytics = require('../../component/analytics');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
@@ -30,16 +30,14 @@ define(function (require) {
         foundAnyBug: false, bugDescription: "", age: null, gender: "", comment: ""
     };
 
-    return createUiElement('feedback-window', {
+    return {
+        key: 'feedback-window',
         type: 'window',
-        properties: {
-            activateKeyBind: KEY_CODES.fromLetter('G'),
-            requirements: {
-                playerAlive: Predicates.is(true)
-            }
+        activateKeyBind: KEY_CODES.fromLetter('G'),
+        requirements: {
+            playerAlive: Predicates.is(true)
         },
-        created: function () {
-            this.innerHTML = `
+        template: `
 <h2>Give me feedback :)</h2>
 <form>
     <h4>Tell me how do you like the game?</h4>
@@ -116,16 +114,15 @@ define(function (require) {
         <input class="large" type="submit" value="Send">
     </div>
 </form>
-`;
-        },
-        attached: function () {
-            const textareas = Array.prototype.slice.call(this.getElementsByTagName('textarea'));
+`,
+        attached(element) {
+            const textareas = Array.prototype.slice.call(element.getElementsByTagName('textarea'));
             textareas.forEach((textarea) => textarea.addEventListener('keydown', (event) => {
                 if (event.keyCode != KEY_CODES.ESC) {
                     event.stopPropagation();
                 }
             }));
-            const inputs = Array.prototype.slice.call(this.getElementsByTagName('input'));
+            const inputs = Array.prototype.slice.call(element.getElementsByTagName('input'));
             inputs.forEach((input) => input.addEventListener('keydown', (event) => {
                 if (event.keyCode != KEY_CODES.ESC) {
                     event.stopPropagation();
@@ -137,10 +134,11 @@ define(function (require) {
                 bugDescriptionBox.style.display = this.checked ? 'block' : 'none'
             });
 
-            const form = this.getElementsByTagName('form')[0];
+            const form = element.getElementsByTagName('form')[0];
             form.onsubmit = function () {
                 localStorage.setItem('feedback-sent', true);
 
+                //noinspection JSUnresolvedVariable
                 const feedbackData = {
                     gameScore: document.getElementById('score-game').valueAsNumber,
                     graphicScore: document.getElementById('score-graphic').valueAsNumber,
@@ -176,5 +174,5 @@ define(function (require) {
                 return false;
             }.bind(this)
         }
-    });
+    };
 });

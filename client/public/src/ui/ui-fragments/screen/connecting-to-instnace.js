@@ -1,14 +1,11 @@
-define(function () {
-    return createUiElement('connecting-to-instance-screen', {
+define(() => {
+    return {
+        key: 'connecting-to-instance-screen',
         type: 'fragment',
-        properties: {
-            requirements: {
-                instanceState: Predicates.is('connecting')
-            }
+        requirements: {
+            instanceState: Predicates.is('connecting')
         },
-        created: function () {
-            this.innerHTML = 'Connecting...';
-            this.classList.add('game-state')
-        }
-    });
+        template: 'Connecting...',
+        classes: ['game-state']
+    }
 });

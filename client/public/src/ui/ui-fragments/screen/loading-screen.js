@@ -1,14 +1,11 @@
-define(function () {
-    return createUiElement('loading-screen', {
+define(() => {
+    return {
+        key: 'loading-screen',
         type: 'fragment',
-        properties: {
-            requirements: {
-                instanceState: Predicates.is('loading-game-assets')
-            }
+        requirements: {
+            instanceState: Predicates.is('loading-game-assets')
         },
-        created: function () {
-            this.innerHTML = 'Loading...';
-            this.classList.add('game-state')
-        }
-    });
+        template: 'Loading...',
+        classes: ['game-state']
+    }
 });
