@@ -1,4 +1,5 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
     const customCursor = require('../../store/ui-state').customCursor;
 
     function updateCursorPosition(event) {

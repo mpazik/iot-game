@@ -1,4 +1,5 @@
 define(require => {
+    const Predicates = require('../../common/predicates');
     const itemById = require('../../store/resources').item;
     const Item = require('../../store/item');
 

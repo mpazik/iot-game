@@ -1,4 +1,6 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
+    const KeyCodes = require('../../common/key-codes');
     const chat = require('../../component/chat');
 
     function showChat(element) {
@@ -42,7 +44,7 @@ define((require) => {
                     return ['button', 'a', 'input'].includes(tag)
                 }
 
-                if (event.keyCode == KEY_CODES.ENTER) {
+                if (event.keyCode == KeyCodes.ENTER) {
                     if (canElementBeClicked(document.activeElement)) {
                         return;
                     }
@@ -51,11 +53,11 @@ define((require) => {
                 }
             });
             input.addEventListener('keydown', function (event) {
-                if (event.keyCode == KEY_CODES.ESC) {
+                if (event.keyCode == KeyCodes.ESC) {
                     input.blur();
                     event.stopPropagation()
                 }
-                if (event.keyCode == KEY_CODES.ENTER) {
+                if (event.keyCode == KeyCodes.ENTER) {
                     if (input.value.length > 0) {
                         chat.send(input.value);
                     }

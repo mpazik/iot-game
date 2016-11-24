@@ -1,5 +1,6 @@
 define((require) => {
     const uiState = require('../../store/ui-state');
+    const Predicates = require('../../common/predicates');
 
     return {
         key: 'casting-bar',

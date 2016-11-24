@@ -1,6 +1,7 @@
 define((require) => {
     const uiState = require('../store/ui-state');
     const userEventStream = require('../component/dispatcher').userEventStream;
+    const KeyCodes = require('../common/key-codes');
 
     const extraComponents = require('extra-ui');
     const fragments = [
@@ -141,7 +142,7 @@ define((require) => {
 
                 if (uiWindow.closeable) {
                     //noinspection AmdModulesDependencies
-                    currentKeyBinds.set(KEY_CODES.ESC, hideWindow);
+                    currentKeyBinds.set(KeyCodes.ESC, hideWindow);
                 }
                 if (uiWindow.activateKeyBind) {
                     currentKeyBinds.set(uiWindow.activateKeyBind, hideWindow);

@@ -1,4 +1,5 @@
-define(() => {
+define((require) => {
+    const Predicates = require('../../../common/predicates');
     return {
         key: 'loading-screen',
         type: 'fragment',

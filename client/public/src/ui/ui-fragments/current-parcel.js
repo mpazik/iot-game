@@ -1,4 +1,5 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
     const Parcel = require('../../store/parcel');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 

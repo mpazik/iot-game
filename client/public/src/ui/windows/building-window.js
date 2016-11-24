@@ -1,4 +1,6 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
+    const KeyCodes = require('../../common/key-codes');
     const objectKindById = require('../../store/resources').objectKind;
     const userEventStream = require('../../component/dispatcher').userEventStream;
     const Skills = require('../../common/model/skills');
@@ -62,7 +64,7 @@ define((require) => {
     return {
         key: 'building-window',
         type: 'window',
-        activateKeyBind: KEY_CODES.fromLetter('B'),
+        activateKeyBind: KeyCodes.fromLetter('B'),
         requirements: {
             isPlayerOnOwnParcel: Predicates.is(true),
             playerAlive: Predicates.is(true),

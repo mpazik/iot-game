@@ -1,4 +1,6 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
+    const KeyCodes = require('../../common/key-codes');
     const Parcel = require('../../store/parcel');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
@@ -9,7 +11,7 @@ define((require) => {
 </form>`;
         const parcelName = document.getElementById('claim-land-name');
         parcelName.addEventListener('keydown', event => {
-            if (event.keyCode != KEY_CODES.ESC) {
+            if (event.keyCode != KeyCodes.ESC) {
                 event.stopPropagation();
             }
         });
@@ -23,7 +25,7 @@ define((require) => {
     return {
         key: 'parcel-window',
         type: 'window',
-        activateKeyBind: KEY_CODES.fromLetter('I'),
+        activateKeyBind: KeyCodes.fromLetter('I'),
         requirements: {
             playerAlive: Predicates.is(true),
         },

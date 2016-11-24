@@ -1,4 +1,5 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
     const Quest = require('../../store/quest');
 
     function renderQuestProgress(status) {

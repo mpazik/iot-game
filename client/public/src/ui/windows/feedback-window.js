@@ -1,4 +1,6 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
+    const KeyCodes = require('../../common/key-codes');
     const Analytics = require('../../component/analytics');
     const userEventStream = require('../../component/dispatcher').userEventStream;
 
@@ -33,7 +35,7 @@ define((require) => {
     return {
         key: 'feedback-window',
         type: 'window',
-        activateKeyBind: KEY_CODES.fromLetter('G'),
+        activateKeyBind: KeyCodes.fromLetter('G'),
         requirements: {
             playerAlive: Predicates.is(true)
         },
@@ -118,13 +120,13 @@ define((require) => {
         attached(element) {
             const textareas = Array.prototype.slice.call(element.getElementsByTagName('textarea'));
             textareas.forEach((textarea) => textarea.addEventListener('keydown', (event) => {
-                if (event.keyCode != KEY_CODES.ESC) {
+                if (event.keyCode != KeyCodes.ESC) {
                     event.stopPropagation();
                 }
             }));
             const inputs = Array.prototype.slice.call(element.getElementsByTagName('input'));
             inputs.forEach((input) => input.addEventListener('keydown', (event) => {
-                if (event.keyCode != KEY_CODES.ESC) {
+                if (event.keyCode != KeyCodes.ESC) {
                     event.stopPropagation();
                 }
             }));

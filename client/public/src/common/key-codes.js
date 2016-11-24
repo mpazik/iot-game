@@ -1,4 +1,4 @@
-KEY_CODES = {
+define(() => ({
     fromLetter: function (key) {
         if (typeof key == "string" && key.length == 1) {
             return key.charCodeAt(0);
@@ -103,6 +103,6 @@ KEY_CODES = {
     GRAVE_ACCENT: 192,
     OPEN_BRACKET: 219,
     BACK_SLASH: 220,
-    CLOSE_BRAKET: 221,
+    CLOSE_BRACKET: 221,
     SINGLE_QUOTE: 222
-};
+}));

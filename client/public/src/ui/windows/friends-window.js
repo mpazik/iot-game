@@ -1,4 +1,5 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
     const Friends = require('../../component/friends');
 
     function updateWindow() {

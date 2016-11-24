@@ -1,4 +1,5 @@
 define((require) => {
+    const Predicates = require('../../common/predicates');
     const uiState = require('../../store/ui-state');
 
     return {

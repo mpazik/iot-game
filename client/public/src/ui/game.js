@@ -1,6 +1,7 @@
 define((require) => {
     const App = require('../component/application');
     const Dispatcher = require('../component/dispatcher');
+    const KeyCodes = require('../common/key-codes');
 
     return {
         create() {
@@ -22,7 +23,7 @@ define((require) => {
             });
 
             window.addEventListener('keydown', function (event) {
-                if (event.keyCode == KEY_CODES.ESC) {
+                if (event.keyCode == KeyCodes.ESC) {
                     Dispatcher.userEventStream.publish('esc-down', event);
                 }
             });
