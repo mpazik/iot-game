@@ -8,9 +8,6 @@ define(function (require, exports, module) {
         this.id = character.id;
         Pixi.Container.call(this);
 
-        this.rotatable = new Pixi.Container();
-        this.addChild(this.rotatable);
-
         const characterTexture = Pixi.Texture.fromFrame('sprites/character.png');
 
         this.sprite = new AnimatedSprite(
@@ -19,11 +16,10 @@ define(function (require, exports, module) {
             tileImageSize * 2,
             characterAnimation
         );
-        this.sprite.setState('lookDown');
+        this.sprite.setState('moveDown');
         this.sprite.scale = {x: tileZoom, y: tileZoom};
         this.sprite.position.x = (-tileImageSize * tileZoom) / 2;
-        // this.sprite.position.y = (-tileImageSize * tileZoom);
-        this.rotatable.addChild(this.sprite);
+        this.addChild(this.sprite);
 
         this.mousedown = function () {
             Dispatcher.userEventStream.publish({
@@ -35,14 +31,6 @@ define(function (require, exports, module) {
         //noinspection JSUnusedGlobalSymbols
         this.hitArea = new Pixi.Circle(0, 0, 40);
 
-        //noinspection JSUnusedGlobalSymbols
-        this.mouseover = function () {
-        };
-
-        //noinspection JSUnusedGlobalSymbols
-        this.mouseout = function () {
-        };
-
         if (character.nick) {
             this.createNick(character.nick);
         }
@@ -52,7 +40,6 @@ define(function (require, exports, module) {
 
     CharacterModel.prototype.makeInteractive = function () {
         this.interactive = true;
-        this.filters = [interactiveFilter];
     };
 
     CharacterModel.prototype.makeNonInteractive = function () {
@@ -115,7 +102,7 @@ define(function (require, exports, module) {
             throw `Animation state ${name} is undefined`
         }
         this.state = name;
-        this.texture = this.frames[this.animations[this.state][0]]
+        this.texture = this.frames[this.animations[this.state][0]];
     };
     AnimatedSprite.prototype.getState = function () {
         return this.state;
@@ -126,11 +113,11 @@ define(function (require, exports, module) {
         }
         const animationFrames = this.animations[this.state];
         const frameIndex = this._getCurrentFrame(time);
-        if (frameIndex >= animationFrames.length) {
+        if (frameIndex >= animationFrames.length || frameIndex < 0) {
             this.texture = this.frames[animationFrames[0]];
             return;
         }
-        this.texture = this.frames[animationFrames[frameIndex]]
+        this.texture = this.frames[animationFrames[frameIndex]];
     };
 
     module.exports = CharacterModel;

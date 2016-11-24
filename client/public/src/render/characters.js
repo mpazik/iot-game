@@ -62,7 +62,6 @@ define(function (require, exports, module) {
         }
         const time = Timer.currentTimeOnServer();
         model.position = characterPosition(model, time);
-        model.rotatable.rotation = MoveStore.angleAtTime(model.id, time);
         characterModels.push(model);
         WorldBoard.addObject(model);
         if (character.id === MainPlayer.characterId()) {
@@ -85,35 +84,12 @@ define(function (require, exports, module) {
         return Point.multiplyInPlace(MoveStore.positionAtTime(characterModel.id, time), TileSize);
     }
 
-    function findCharacterModel(characterId) {
-        return characterModels.find(function (characterModel) {
-            return characterId === characterModel.id;
-        });
-    }
-
     CharacterStore.characterSpawnedStream.subscribe(function (character) {
         createCharacterModel(character);
     });
 
     CharacterStore.characterDiedStream.subscribe(function (characterToRemove) {
         removeCharacterModel(characterToRemove);
-    });
-
-    SkillStore.characterHealthChangeStream.subscribe(function (event) {
-        const characterModel = findCharacterModel(event.characterId);
-        characterModel.updateHpBar(SkillStore.percentHealth(event.characterId));
-    });
-
-    SkillStore.characterUsedSkillOnCharacter.subscribe(function (event) {
-        const characterModel = findCharacterModel(event.characterId);
-        if (event.skill.target == Skills.Targets.ENEMIES) {
-            const enemyPosition = findCharacterModel(event.targetId).position;
-            characterModel.rotatable.rotation = Point.angleFromTo(enemyPosition, characterModel.position)
-        }
-        const animation = SkillStore.characterAnimation(event.skill.id);
-        if (animation) {
-            characterModel.sprite.setState(animation, Timer.currentTimeOnServer());
-        }
     });
 
     module.exports = {
