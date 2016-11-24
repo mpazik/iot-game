@@ -147,9 +147,9 @@ define(function (require, exports, module) {
                 return new AnimatedSprite(objectKind['sprite'], objectKind['animationSteps'], objectData.created)
             }
             if (objectKind['growingSteps']) {
-                return Pixi.Sprite.fromImage(objectKind['sprite'] + objectData.step + '.png');
+                return Pixi.Sprite.fromFrame(objectKind['sprite'] + objectData.step + '.png');
             }
-            return Pixi.Sprite.fromImage(objectKind['sprite'] + '.png');
+            return Pixi.Sprite.fromFrame(objectKind['sprite'] + '.png');
         }
     }
 

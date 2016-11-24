@@ -46,7 +46,7 @@ define(function (require, exports, module) {
         if (skill.projectile) {
             const currentTime = Timer.currentTimeOnServer();
             const position = MoveStore.positionAtTime(event.casterId, currentTime);
-            const projectile = new Pixi.Sprite.fromImage(skill.projectile);
+            const projectile = new Pixi.Sprite.fromFrame(skill.projectile);
             const targetPosition = MoveStore.positionAtTime(event.targetId, currentTime);
             animations.push({projectile, target: event.targetId, position, targetPosition});
             layer.addChild(projectile);

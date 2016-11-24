@@ -111,7 +111,7 @@ define((require) => {
         if (skill.type === Skills.Types.BUILD) {
             Parcel.highlightPlayerParcel(true);
             const objectKind = Resources.objectKind(skill.objectKind);
-            const sprite = Pixi.Sprite.fromImage(getSprite());
+            const sprite = Pixi.Sprite.fromFrame(getSprite());
             sprite.scale = {x: zoom, y: zoom};
             const spriteOffset = {x: (objectKind.width - 1) * 0.5, y: (objectKind.height - 1) * 0.5};
             targetingData = {objectKind, spriteOffset, sprite, skill};
