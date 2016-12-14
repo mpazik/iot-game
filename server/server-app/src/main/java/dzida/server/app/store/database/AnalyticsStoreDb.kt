@@ -1,12 +1,12 @@
 package dzida.server.app.store.database
 
 import dzida.server.app.analytics.AnalyticsStore
+import dzida.server.app.basic.entity.Id
 import dzida.server.app.database.ConnectionProvider
 import dzida.server.app.querydsl.QAnalyticsEvent.analyticsEvent
 import dzida.server.app.querydsl.QAnalyticsEventData.analyticsEventData
 import dzida.server.app.serialization.BasicJsonSerializer
 import dzida.server.app.user.User
-import dzida.server.core.basic.entity.Id
 
 class AnalyticsStoreDb(private val connectionProvider: ConnectionProvider) : AnalyticsStore {
     override fun saveEvent(userId: Id<User>, type: String) {

@@ -1,9 +1,9 @@
 package dzida.server.app.store.memory;
 
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.model.Character;
-import dzida.server.core.position.PositionStore;
-import dzida.server.core.basic.unit.Point;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.basic.unit.Point;
+import dzida.server.app.instance.character.model.Character;
+import dzida.server.app.instance.position.PositionStore;
 
 import java.util.HashMap;
 import java.util.Map;

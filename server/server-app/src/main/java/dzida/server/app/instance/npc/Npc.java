@@ -1,7 +1,7 @@
 package dzida.server.app.instance.npc;
 
 import dzida.server.app.instance.command.InstanceCommand;
-import dzida.server.core.event.GameEvent;
+import dzida.server.app.instance.event.GameEvent;
 
 import java.util.Collections;
 import java.util.List;

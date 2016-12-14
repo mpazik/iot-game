@@ -1,9 +1,9 @@
 package dzida.server.app.dispatcher;
 
-import dzida.server.core.basic.Result;
-import dzida.server.core.basic.connection.Connector;
-import dzida.server.core.basic.connection.ServerConnection;
-import dzida.server.core.basic.connection.VerifyingConnectionServer;
+import dzida.server.app.basic.Result;
+import dzida.server.app.basic.connection.Connector;
+import dzida.server.app.basic.connection.ServerConnection;
+import dzida.server.app.basic.connection.VerifyingConnectionServer;
 import org.assertj.core.api.AbstractAssert;
 import org.junit.Before;
 import org.junit.Test;

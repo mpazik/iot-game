@@ -1,6 +1,12 @@
 package dzida.server.app.friend
 
 import com.google.common.collect.ImmutableSet
+import dzida.server.app.basic.Publisher
+import dzida.server.app.basic.Result
+import dzida.server.app.basic.connection.Connector
+import dzida.server.app.basic.connection.ServerConnection
+import dzida.server.app.basic.connection.VerifyingConnectionServer
+import dzida.server.app.basic.entity.Id
 import dzida.server.app.friend.FriendServer.ClientCommand.AcceptRequest
 import dzida.server.app.friend.FriendServer.ClientCommand.RequestForFriendShip
 import dzida.server.app.friend.FriendServer.ServerMessage.FriendshipEstablished
@@ -11,12 +17,6 @@ import dzida.server.app.user.EncryptedLoginToken
 import dzida.server.app.user.User
 import dzida.server.app.user.UserStore
 import dzida.server.app.user.UserTokenVerifier
-import dzida.server.core.basic.Publisher
-import dzida.server.core.basic.Result
-import dzida.server.core.basic.connection.Connector
-import dzida.server.core.basic.connection.ServerConnection
-import dzida.server.core.basic.connection.VerifyingConnectionServer
-import dzida.server.core.basic.entity.Id
 
 
 class FriendServer(
@@ -58,7 +58,7 @@ class FriendServer(
     override fun onConnection(connector: Connector<String>, userToken: String): Result {
         val loginToken = userTokenVerifier.verifyToken(EncryptedLoginToken(userToken))
         if (!loginToken.isPresent) {
-            return Result.error("Login to is invalid")
+            return dzida.server.app.basic.Result.error("Login to is invalid")
         }
 
         val userId = loginToken.get().userId
@@ -82,7 +82,7 @@ class FriendServer(
             }
         })
 
-        return Result.ok()
+        return dzida.server.app.basic.Result.ok()
     }
 
 

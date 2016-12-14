@@ -1,8 +1,8 @@
 package dzida.server.app.network;
 
-import dzida.server.core.basic.connection.Connector;
-import dzida.server.core.basic.connection.Server;
-import dzida.server.core.basic.connection.ServerConnection;
+import dzida.server.app.basic.connection.Connector;
+import dzida.server.app.basic.connection.Server;
+import dzida.server.app.basic.connection.ServerConnection;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

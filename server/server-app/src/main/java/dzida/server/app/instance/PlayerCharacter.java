@@ -1,8 +1,8 @@
 package dzida.server.app.instance;
 
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.instance.character.model.Character;
 import dzida.server.app.user.User;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.model.Character;
 
 public class PlayerCharacter implements Character {
     private final Id<Character> id;

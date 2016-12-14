@@ -1,10 +1,10 @@
 package dzida.server.app.timesync;
 
-import dzida.server.core.basic.Result;
-import dzida.server.core.basic.connection.Connector;
-import dzida.server.core.basic.connection.ServerConnection;
-import dzida.server.core.basic.connection.VerifyingConnectionServer;
-import dzida.server.core.time.TimeService;
+import dzida.server.app.basic.Result;
+import dzida.server.app.basic.connection.Connector;
+import dzida.server.app.basic.connection.ServerConnection;
+import dzida.server.app.basic.connection.VerifyingConnectionServer;
+import dzida.server.app.time.TimeService;
 
 public class TimeSynchroniser implements VerifyingConnectionServer<String, String> {
 

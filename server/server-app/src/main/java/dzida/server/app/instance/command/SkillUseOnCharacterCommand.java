@@ -1,8 +1,8 @@
 package dzida.server.app.instance.command;
 
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.model.Character;
-import dzida.server.core.skill.Skill;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.instance.character.model.Character;
+import dzida.server.app.instance.skill.Skill;
 
 public class SkillUseOnCharacterCommand implements InstanceCommand {
     public final Id<Skill> skillId;

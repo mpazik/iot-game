@@ -1,12 +1,12 @@
 package dzida.server.app.store.database
 
 import com.querydsl.sql.SQLExpressions
+import dzida.server.app.basic.entity.Id
 import dzida.server.app.database.ConnectionProvider
 import dzida.server.app.friend.FriendServer
 import dzida.server.app.friend.FriendsStore
 import dzida.server.app.querydsl.QFriendship.friendship
 import dzida.server.app.user.User
-import dzida.server.core.basic.entity.Id
 
 class FriendsStoreDb : FriendsStore {
     val connectionProvider: ConnectionProvider

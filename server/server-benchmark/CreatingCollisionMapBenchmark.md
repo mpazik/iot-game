@@ -6,12 +6,12 @@ Bellow are results of first naive implementation of path finding algorithm.
 #### Results
 ```
 ....[Thread state: RUNNABLE]........................................................................
- 77.1%  77.2% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
- 16.5%  16.6% dzida.server.core.world.pathfinding.Polygon.isLineInside
-  2.3%   2.3% dzida.server.core.basic.unit.Graph$Builder.put
-  1.2%   1.2% dzida.server.core.world.pathfinding.CollisionMapFactory.lambda$null$2
-  1.2%   1.2% dzida.server.core.world.pathfinding.BitMapTracker.lambda$null$0
-  0.6%   0.6% dzida.server.core.basic.unit.BitMap.isSet
+ 77.1%  77.2% Polygon.isLineInPolygon
+ 16.5%  16.6% Polygon.isLineInside
+  2.3%   2.3% Graph$Builder.put
+  1.2%   1.2% CollisionMapFactory.lambda$null$2
+  1.2%   1.2% BitMapTracker.lambda$null$0
+  0.6%   0.6% BitMap.isSet
   0.2%   0.2% java.util.ArrayList.forEach
   0.2%   0.2% java.util.ArrayList$ArrayListSpliterator.forEachRemaining
   0.1%   0.1% sun.misc.Unsafe.park
@@ -35,10 +35,10 @@ CreatingCollisionMapBenchmark.createPathFinder:·gc.time                        
 CreatingCollisionMapBenchmark.createPathFinder:·stack                            sample               NaN                    ---
 ```
 ```
- 72.1%  72.1% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
-              dzida.server.core.world.pathfinding.Polygon.isLineInside
-              dzida.server.core.world.pathfinding.CollisionMapFactory.lambda$findPointsInLineOfSight$3
-              dzida.server.core.world.pathfinding.CollisionMapFactory$$Lambda$15/617435921.test
+ 72.1%  72.1% Polygon.isLineInPolygon
+              Polygon.isLineInside
+              CollisionMapFactory.lambda$findPointsInLineOfSight$3
+              CollisionMapFactory$$Lambda$15/617435921.test
               java.util.stream.ReferencePipeline$2$1.accept
               java.util.ArrayList$ArrayListSpliterator.forEachRemaining
               java.util.stream.AbstractPipeline.copyInto
@@ -46,9 +46,9 @@ CreatingCollisionMapBenchmark.createPathFinder:·stack                          
               java.util.stream.ReduceOps$ReduceOp.evaluateSequential
               java.util.stream.AbstractPipeline.evaluate
 
- 16.4%  16.4% dzida.server.core.world.pathfinding.Polygon.isLineInside
-              dzida.server.core.world.pathfinding.CollisionMapFactory.lambda$findPointsInLineOfSight$3
-              dzida.server.core.world.pathfinding.CollisionMapFactory$$Lambda$15/617435921.test
+ 16.4%  16.4% Polygon.isLineInside
+              CollisionMapFactory.lambda$findPointsInLineOfSight$3
+              CollisionMapFactory$$Lambda$15/617435921.test
               java.util.stream.ReferencePipeline$2$1.accept
               java.util.ArrayList$ArrayListSpliterator.forEachRemaining
               java.util.stream.AbstractPipeline.copyInto
@@ -57,10 +57,10 @@ CreatingCollisionMapBenchmark.createPathFinder:·stack                          
               java.util.stream.AbstractPipeline.evaluate
               java.util.stream.ReferencePipeline.collect
 
-  4.0%   4.0% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
-              dzida.server.core.world.pathfinding.Polygon.isLineOutside
-              dzida.server.core.world.pathfinding.CollisionMapFactory.lambda$null$2
-              dzida.server.core.world.pathfinding.CollisionMapFactory$$Lambda$16/18502331.test
+  4.0%   4.0% Polygon.isLineInPolygon
+              Polygon.isLineOutside
+              CollisionMapFactory.lambda$null$2
+              CollisionMapFactory$$Lambda$16/18502331.test
               java.util.stream.MatchOps$1MatchSink.accept
               java.util.ArrayList$ArrayListSpliterator.tryAdvance
               java.util.stream.ReferencePipeline.forEachWithCancel
@@ -129,12 +129,12 @@ Event it's not relevant but maybe there is some quick win there.
 ```
 ....[Thread state: RUNNABLE]........................................................................
  61.5%  61.5% java.util.ArrayList$ArrayListSpliterator.tryAdvance
- 32.9%  32.9% dzida.server.core.basic.unit.BitMap.isSet
+ 32.9%  32.9% BitMap.isSet
   3.3%   3.3% java.util.ArrayList$ArrayListSpliterator.estimateSize
-  1.0%   1.0% dzida.server.core.basic.unit.BitMap.forEach
+  1.0%   1.0% BitMap.forEach
   0.8%   0.8% java.util.stream.ReferencePipeline.forEachWithCancel
   0.2%   0.2% sun.misc.Unsafe.unpark
-  0.1%   0.1% dzida.server.core.basic.unit.BitMap$InverseBitMap.isSetUnsafe
+  0.1%   0.1% BitMap$InverseBitMap.isSetUnsafe
   0.1%   0.1% java.util.stream.StreamSupport.stream
   0.1%   0.1% java.util.ArrayList.spliterator
   0.1%   0.1% sun.reflect.Reflection.getClassAccessFlags
@@ -161,16 +161,16 @@ It seams that streams are very expensive
 #### Results after replacing streams by foreach
 ```
 ....[Thread state: RUNNABLE]........................................................................
- 64.2%  64.2% dzida.server.core.basic.unit.BitMap.forEach
- 33.5%  33.5% dzida.server.core.basic.unit.BitMap.isSet
+ 64.2%  64.2% BitMap.forEach
+ 33.5%  33.5% BitMap.isSet
   1.2%   1.2% java.util.ArrayList.iterator
-  0.4%   0.4% dzida.server.core.world.pathfinding.BitMapTracker.trackPath
-  0.2%   0.2% dzida.server.core.basic.unit.BitMap$InverseBitMap.isSetUnsafe
+  0.4%   0.4% BitMapTracker.trackPath
+  0.2%   0.2% BitMap$InverseBitMap.isSetUnsafe
   0.1%   0.1% sun.misc.Unsafe.putObject
   0.1%   0.1% sun.reflect.NativeMethodAccessorImpl.invoke0
   0.1%   0.1% java.lang.System.nanoTime
   0.1%   0.1% java.util.concurrent.locks.AbstractQueuedSynchronizer.acquire
-  0.1%   0.1% dzida.server.core.basic.unit.PointList.builder
+  0.1%   0.1% PointList.builder
 
 
 
@@ -193,15 +193,15 @@ Replacing them didn't give much benefits. They just mislead stacktrace profiler.
 #### Results of using unsafe isSet
 ```
 ....[Thread state: RUNNABLE]........................................................................
- 98.5%  98.6% dzida.server.core.basic.unit.BitMap.forEach
-  0.9%   0.9% dzida.server.core.basic.unit.BitMap.isSet
-  0.1%   0.1% dzida.server.core.world.pathfinding.BitMapTracker.lambda$track$0
+ 98.5%  98.6% BitMap.forEach
+  0.9%   0.9% BitMap.isSet
+  0.1%   0.1% BitMapTracker.lambda$track$0
   0.1%   0.1% java.util.concurrent.locks.AbstractQueuedSynchronizer.compareAndSetState
   0.1%   0.1% java.lang.System.nanoTime
   0.1%   0.1% org.sample.generated.CreatingCollisionMapBenchmark_createPathFinder_jmhTest.createPathFinder_sample_jmhStub
   0.1%   0.1% org.openjdk.jmh.infra.BenchmarkParamsL2.getOpsPerInvocation
-  0.1%   0.1% dzida.server.core.world.pathfinding.BitMapTracker.trackPath
-  0.1%   0.1% dzida.server.core.basic.unit.PointList.builder
+  0.1%   0.1% BitMapTracker.trackPath
+  0.1%   0.1% PointList.builder
 
 
 
@@ -224,14 +224,14 @@ Probably lambda in forEach is consuming most of the time.
 #### Results after in-lining forEach with lambda 
 ```
 ....[Thread state: RUNNABLE]........................................................................
- 97.3%  97.3% dzida.server.core.world.pathfinding.BitMapTracker.track
-  1.5%   1.5% dzida.server.core.basic.unit.BitMap.isSet
-  0.4%   0.4% dzida.server.core.world.pathfinding.BitMapTracker.trackPath
-  0.2%   0.2% dzida.server.core.basic.unit.PointList.builder
+ 97.3%  97.3% BitMapTracker.track
+  1.5%   1.5% BitMap.isSet
+  0.4%   0.4% BitMapTracker.trackPath
+  0.2%   0.2% PointList.builder
   0.2%   0.2% org.sample.generated.CreatingCollisionMapBenchmark_createPathFinder_jmhTest.createPathFinder_sample_jmhStub
-  0.1%   0.1% dzida.server.core.basic.unit.BitMap$InverseBitMap.isSetUnsafe
+  0.1%   0.1% BitMap$InverseBitMap.isSetUnsafe
   0.1%   0.1% org.openjdk.jmh.runner.BenchmarkHandler$BenchmarkTask.call
-  0.1%   0.1% dzida.server.core.basic.unit.PointList$Builder.build
+  0.1%   0.1% PointList$Builder.build
   0.1%   0.1% java.lang.Thread.isInterrupted
   0.1%   0.1% sun.misc.Unsafe.compareAndSwapInt
 
@@ -256,9 +256,9 @@ Now we see that tracking actually take all the time. Lets try to optimize it.
 #### Results after removing unnecessary point allocation
 ```
 ....[Thread state: RUNNABLE]........................................................................
- 97.9%  98.0% dzida.server.core.world.pathfinding.BitMapTracker.track
-  1.7%   1.7% dzida.server.core.basic.unit.BitMap.isSet
-  0.2%   0.2% dzida.server.core.world.pathfinding.BitMapTracker.trackPath
+ 97.9%  98.0% BitMapTracker.track
+  1.7%   1.7% BitMap.isSet
+  0.2%   0.2% BitMapTracker.trackPath
   0.1%   0.1% java.lang.Thread.currentThread
   0.1%   0.1% sun.misc.Unsafe.compareAndSwapInt
 

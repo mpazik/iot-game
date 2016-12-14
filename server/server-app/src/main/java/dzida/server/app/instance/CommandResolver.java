@@ -1,6 +1,8 @@
 package dzida.server.app.instance;
 
 import dzida.server.app.Configuration;
+import dzida.server.app.basic.Outcome;
+import dzida.server.app.instance.character.CharacterCommandHandler;
 import dzida.server.app.instance.command.BuildObjectCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.KillCharacterCommand;
@@ -8,14 +10,12 @@ import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
 import dzida.server.app.instance.command.SkillUseOnWorldObjectCommand;
 import dzida.server.app.instance.command.SpawnCharacterCommand;
+import dzida.server.app.instance.event.GameEvent;
+import dzida.server.app.instance.position.PositionCommandHandler;
+import dzida.server.app.instance.position.PositionService;
+import dzida.server.app.instance.skill.SkillCommandHandler;
 import dzida.server.app.parcel.ParcelCommand;
 import dzida.server.app.parcel.ParcelCommandHandler;
-import dzida.server.core.basic.Outcome;
-import dzida.server.core.character.CharacterCommandHandler;
-import dzida.server.core.event.GameEvent;
-import dzida.server.core.position.PositionCommandHandler;
-import dzida.server.core.position.PositionService;
-import dzida.server.core.skill.SkillCommandHandler;
 
 import java.util.List;
 

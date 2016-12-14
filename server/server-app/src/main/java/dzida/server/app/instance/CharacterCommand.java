@@ -1,17 +1,17 @@
 package dzida.server.app.instance;
 
 import com.google.common.collect.ImmutableSet;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.instance.character.model.Character;
 import dzida.server.app.instance.command.BuildObjectCommand;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
 import dzida.server.app.instance.command.SkillUseOnWorldObjectCommand;
+import dzida.server.app.instance.skill.Skill;
+import dzida.server.app.instance.world.object.WorldObject;
+import dzida.server.app.instance.world.object.WorldObjectKind;
 import dzida.server.app.parcel.ParcelCommand;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.model.Character;
-import dzida.server.core.skill.Skill;
-import dzida.server.core.world.object.WorldObject;
-import dzida.server.core.world.object.WorldObjectKind;
 
 public interface CharacterCommand {
     ImmutableSet<Class<?>> classes = ImmutableSet.of(

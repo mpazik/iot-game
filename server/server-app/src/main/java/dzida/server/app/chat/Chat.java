@@ -1,17 +1,17 @@
 package dzida.server.app.chat;
 
 import com.google.common.base.Strings;
+import dzida.server.app.basic.Result;
+import dzida.server.app.basic.connection.Connector;
+import dzida.server.app.basic.connection.ServerConnection;
+import dzida.server.app.basic.connection.VerifyingConnectionServer;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.basic.entity.Key;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
 import dzida.server.app.user.User;
 import dzida.server.app.user.UserTokenVerifier;
-import dzida.server.core.basic.Result;
-import dzida.server.core.basic.connection.Connector;
-import dzida.server.core.basic.connection.ServerConnection;
-import dzida.server.core.basic.connection.VerifyingConnectionServer;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.entity.Key;
 
 import java.util.ArrayList;
 import java.util.HashMap;

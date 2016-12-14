@@ -1,8 +1,8 @@
 package dzida.server.app.store.memory;
 
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.skill.Skill;
-import dzida.server.core.skill.SkillStore;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.instance.skill.Skill;
+import dzida.server.app.instance.skill.SkillStore;
 
 import java.util.Map;
 

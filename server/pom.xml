@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>server-core</module>
         <module>server-app</module>
         <module>server-benchmark</module>
   </modules>

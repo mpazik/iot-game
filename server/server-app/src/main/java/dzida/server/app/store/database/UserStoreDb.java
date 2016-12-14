@@ -1,10 +1,10 @@
 package dzida.server.app.store.database;
 
+import dzida.server.app.basic.Outcome;
+import dzida.server.app.basic.entity.Id;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.user.User;
 import dzida.server.app.user.UserStore;
-import dzida.server.core.basic.Outcome;
-import dzida.server.core.basic.entity.Id;
 
 import java.util.Optional;
 

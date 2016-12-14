@@ -1,7 +1,7 @@
 package dzida.server.app.instance.command;
 
-import dzida.server.core.basic.unit.Point;
-import dzida.server.core.character.model.Character;
+import dzida.server.app.basic.unit.Point;
+import dzida.server.app.instance.character.model.Character;
 
 import javax.annotation.Nullable;
 

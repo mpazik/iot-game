@@ -1,9 +1,9 @@
 package dzida.server.app.arbiter;
 
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.basic.entity.Key;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.user.User;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.entity.Key;
 
 public interface ArbiterStore {
 

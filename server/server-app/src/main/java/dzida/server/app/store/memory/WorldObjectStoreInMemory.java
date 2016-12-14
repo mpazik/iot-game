@@ -1,12 +1,12 @@
 package dzida.server.app.store.memory;
 
 import com.google.common.collect.ImmutableList;
-import dzida.server.core.basic.entity.GeneralEntity;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.time.TimeService;
-import dzida.server.core.world.object.WorldObject;
-import dzida.server.core.world.object.WorldObjectKind;
-import dzida.server.core.world.object.WorldObjectStore;
+import dzida.server.app.basic.entity.GeneralEntity;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.instance.world.object.WorldObject;
+import dzida.server.app.instance.world.object.WorldObjectKind;
+import dzida.server.app.instance.world.object.WorldObjectStore;
+import dzida.server.app.time.TimeService;
 
 import java.util.HashMap;
 import java.util.List;

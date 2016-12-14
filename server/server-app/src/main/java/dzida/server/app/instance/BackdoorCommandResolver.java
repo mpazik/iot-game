@@ -2,12 +2,12 @@ package dzida.server.app.instance;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import dzida.server.app.basic.Outcome;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.instance.character.event.CharacterDied;
+import dzida.server.app.instance.character.model.Character;
 import dzida.server.app.instance.command.InstanceCommand;
-import dzida.server.core.basic.Outcome;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.event.CharacterDied;
-import dzida.server.core.character.model.Character;
-import dzida.server.core.event.GameEvent;
+import dzida.server.app.instance.event.GameEvent;
 
 import java.util.Collections;
 import java.util.List;

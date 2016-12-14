@@ -28,7 +28,6 @@ import dzida.server.app.timesync.TimeServiceImpl;
 import dzida.server.app.timesync.TimeSynchroniser;
 import dzida.server.app.user.UserService;
 import dzida.server.app.user.UserStore;
-import dzida.server.core.profiling.Profilings;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,19 +1,19 @@
 package dzida.server.app.instance.npc;
 
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.basic.unit.Point;
 import dzida.server.app.instance.InstanceStateManager;
 import dzida.server.app.instance.NpcCharacter;
 import dzida.server.app.instance.PlayerCharacter;
+import dzida.server.app.instance.character.model.Character;
 import dzida.server.app.instance.command.InstanceCommand;
 import dzida.server.app.instance.command.MoveCommand;
 import dzida.server.app.instance.command.SkillUseOnCharacterCommand;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.unit.Point;
-import dzida.server.core.character.model.Character;
-import dzida.server.core.event.GameEvent;
-import dzida.server.core.position.PositionService;
-import dzida.server.core.skill.Skill;
-import dzida.server.core.skill.Skills;
-import dzida.server.core.time.TimeService;
+import dzida.server.app.instance.event.GameEvent;
+import dzida.server.app.instance.position.PositionService;
+import dzida.server.app.instance.skill.Skill;
+import dzida.server.app.instance.skill.Skills;
+import dzida.server.app.time.TimeService;
 
 import java.util.Collections;
 import java.util.List;

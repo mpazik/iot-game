@@ -1,10 +1,10 @@
 package dzida.server.app.analytics
 
 import com.google.common.collect.ImmutableSet
+import dzida.server.app.basic.entity.Id
 import dzida.server.app.dispatcher.ClientServer
 import dzida.server.app.protocol.json.JsonProtocol
 import dzida.server.app.user.User
-import dzida.server.core.basic.entity.Id
 
 
 class AnalyticsServer(

@@ -1,6 +1,5 @@
 package dzida.server.app;
 
-import dzida.server.core.Scheduler;
 import io.netty.channel.EventLoop;
 
 import java.time.Duration;

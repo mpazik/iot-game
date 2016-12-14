@@ -1,8 +1,8 @@
 package dzida.server.app.arbiter;
 
 import com.google.common.collect.ImmutableSet;
+import dzida.server.app.basic.entity.Key;
 import dzida.server.app.instance.Instance;
-import dzida.server.core.basic.entity.Key;
 
 public interface ArbiterCommand {
     ImmutableSet<Class<?>> clientCommandClasses = ImmutableSet.of(

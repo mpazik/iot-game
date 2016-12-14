@@ -6,10 +6,10 @@ Bellow are results of first naive implementation of path finding algorithm.
 #### Results
 ```
 ....[Thread state: RUNNABLE]........................................................................
- 37.8%  37.8% dzida.server.core.world.pathfinding.Polygon.intersectionWithPolygonLines
- 12.4%  12.4% dzida.server.core.world.pathfinding.Polygon.isOnBorder
- 10.9%  10.9% dzida.server.core.world.pathfinding.AStar.findShortestPath
-  6.2%   6.2% dzida.server.core.world.pathfinding.Polygon.intersectInside
+ 37.8%  37.8% Polygon.intersectionWithPolygonLines
+ 12.4%  12.4% Polygon.isOnBorder
+ 10.9%  10.9% AStar.findShortestPath
+  6.2%   6.2% Polygon.intersectInside
   4.7%   4.7% java.util.HashMap.hash
   4.4%   4.4% com.google.common.collect.ImmutableMultimap$Builder.putAll
   3.7%   3.7% java.util.PriorityQueue.siftDownUsingComparator
@@ -45,9 +45,9 @@ List object has been replaced by static function that calculates on primitives.
 
 #### Results
 ```
- 29.5%  29.5% dzida.server.core.world.pathfinding.Polygon.isLineInside
- 23.7%  23.7% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
- 16.3%  16.3% dzida.server.core.world.pathfinding.AStar.findShortestPath
+ 29.5%  29.5% Polygon.isLineInside
+ 23.7%  23.7% Polygon.isLineInPolygon
+ 16.3%  16.3% AStar.findShortestPath
   6.5%   6.5% com.google.common.collect.ImmutableMultimap$Builder.putAll
   3.9%   3.9% java.util.PriorityQueue.siftDownUsingComparator
   3.2%   3.2% java.util.PriorityQueue.siftUpUsingComparator
@@ -91,16 +91,16 @@ PathFindingBenchmark.lineIntersection:·gc.alloc.rate.norm               sample 
 #### Results
 ```
 ....[Thread state: RUNNABLE]........................................................................
- 43.1%  43.1% dzida.server.core.world.pathfinding.Polygon.isLineInside
- 37.5%  37.5% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
-  3.4%   3.4% dzida.server.core.basic.unit.Graph.builder
-  3.2%   3.2% dzida.server.core.basic.unit.Graph$Builder.put
-  2.8%   2.8% dzida.server.core.world.pathfinding.AStar.findShortestPath
+ 43.1%  43.1% Polygon.isLineInside
+ 37.5%  37.5% Polygon.isLineInPolygon
+  3.4%   3.4% Graph.builder
+  3.2%   3.2% Graph$Builder.put
+  2.8%   2.8% AStar.findShortestPath
   2.8%   2.8% java.util.PriorityQueue.siftDown
   2.1%   2.1% java.util.PriorityQueue.siftUpUsingComparator
-  1.3%   1.3% dzida.server.core.basic.unit.Graph$Builder.build
+  1.3%   1.3% Graph$Builder.build
   1.0%   1.0% java.util.PriorityQueue.siftDownUsingComparator
-  0.6%   0.6% dzida.server.core.world.pathfinding.Polygon.isLineOutside
+  0.6%   0.6% Polygon.isLineOutside
   2.2%   2.2% <other>
 
 
@@ -127,14 +127,14 @@ WoW!. That was that. Memory usage dropped more than 10 times. Execution time is 
 
 ```
 ....[Thread state: RUNNABLE]........................................................................
- 47.2%  47.2% dzida.server.core.world.pathfinding.Polygon.isLineInPolygon
- 27.8%  27.8% dzida.server.core.world.pathfinding.Polygon.isLineInside
+ 47.2%  47.2% Polygon.isLineInPolygon
+ 27.8%  27.8% Polygon.isLineInside
   4.3%   4.3% java.util.PriorityQueue.siftDown
-  4.2%   4.2% dzida.server.core.basic.unit.Graph.builder
-  3.9%   3.9% dzida.server.core.world.pathfinding.AStar.findShortestPath
-  3.4%   3.4% dzida.server.core.basic.unit.Graph$Builder.put
+  4.2%   4.2% Graph.builder
+  3.9%   3.9% AStar.findShortestPath
+  3.4%   3.4% Graph$Builder.put
   2.8%   2.8% java.util.PriorityQueue.siftUpUsingComparator
-  1.7%   1.7% dzida.server.core.basic.unit.Graph$Builder.build
+  1.7%   1.7% Graph$Builder.build
   1.5%   1.5% java.util.PriorityQueue.siftDownUsingComparator
   0.4%   0.4% java.util.stream.MatchOps$BooleanTerminalSink.<init>
   2.7%   2.7% <other>

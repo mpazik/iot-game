@@ -1,11 +1,11 @@
 package dzida.server.app.instance;
 
-import dzida.server.core.Scheduler;
-import dzida.server.core.basic.entity.GeneralEntity;
-import dzida.server.core.world.event.WorldObjectCreated;
-import dzida.server.core.world.event.WorldObjectRemoved;
-import dzida.server.core.world.object.WorldObject;
-import dzida.server.core.world.object.WorldObjectKind;
+import dzida.server.app.Scheduler;
+import dzida.server.app.basic.entity.GeneralEntity;
+import dzida.server.app.instance.world.event.WorldObjectCreated;
+import dzida.server.app.instance.world.event.WorldObjectRemoved;
+import dzida.server.app.instance.world.object.WorldObject;
+import dzida.server.app.instance.world.object.WorldObjectKind;
 
 import java.time.Duration;
 

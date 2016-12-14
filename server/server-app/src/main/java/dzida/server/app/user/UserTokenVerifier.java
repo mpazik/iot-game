@@ -3,7 +3,7 @@ package dzida.server.app.user;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
 import dzida.server.app.Configuration;
-import dzida.server.core.basic.entity.Id;
+import dzida.server.app.basic.entity.Id;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

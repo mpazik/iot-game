@@ -1,9 +1,9 @@
 package dzida.server.app.parcel
 
 import com.google.common.collect.ImmutableSet
+import dzida.server.app.basic.entity.Id
 import dzida.server.app.instance.command.InstanceCommand
 import dzida.server.app.user.User
-import dzida.server.core.basic.entity.Id
 
 interface ParcelCommand : InstanceCommand {
     companion object {

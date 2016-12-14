@@ -1,7 +1,7 @@
 package dzida.server.app.store.http.loader;
 
 import com.google.common.reflect.TypeToken;
-import dzida.server.core.world.object.WorldObjectKind;
+import dzida.server.app.instance.world.object.WorldObjectKind;
 
 import java.util.List;
 

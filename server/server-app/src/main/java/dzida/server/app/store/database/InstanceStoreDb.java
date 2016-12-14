@@ -1,12 +1,12 @@
 package dzida.server.app.store.database;
 
+import dzida.server.app.basic.entity.Key;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceEvent;
 import dzida.server.app.instance.InstanceStore;
+import dzida.server.app.instance.event.GameEvent;
 import dzida.server.app.serialization.MessageSerializer;
-import dzida.server.core.basic.entity.Key;
-import dzida.server.core.event.GameEvent;
 
 import static dzida.server.app.querydsl.QInstanceEvent.instanceEvent;
 

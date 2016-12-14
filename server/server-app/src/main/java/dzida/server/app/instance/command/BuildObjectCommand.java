@@ -1,8 +1,8 @@
 package dzida.server.app.instance.command;
 
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.character.model.Character;
-import dzida.server.core.world.object.WorldObjectKind;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.instance.character.model.Character;
+import dzida.server.app.instance.world.object.WorldObjectKind;
 
 public class BuildObjectCommand implements InstanceCommand {
     public final Id<WorldObjectKind> objectKindId;

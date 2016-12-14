@@ -4,7 +4,7 @@ import com.querydsl.sql.Configuration;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
-import dzida.server.core.basic.Outcome;
+import dzida.server.app.basic.Outcome;
 
 import java.sql.Connection;
 import java.util.function.Consumer;

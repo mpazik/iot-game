@@ -1,6 +1,6 @@
 package dzida.server.app.user;
 
-import dzida.server.core.basic.entity.Id;
+import dzida.server.app.basic.entity.Id;
 
 public class LoginToken {
     public final Id<User> userId;

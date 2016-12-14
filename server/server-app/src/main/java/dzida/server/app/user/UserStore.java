@@ -1,7 +1,7 @@
 package dzida.server.app.user;
 
-import dzida.server.core.basic.Outcome;
-import dzida.server.core.basic.entity.Id;
+import dzida.server.app.basic.Outcome;
+import dzida.server.app.basic.entity.Id;
 
 import java.util.Optional;
 

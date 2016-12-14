@@ -1,14 +1,14 @@
 package dzida.server.app.instance;
 
 import com.google.common.collect.ImmutableMap;
+import dzida.server.app.basic.Publisher;
+import dzida.server.app.instance.character.CharacterService;
+import dzida.server.app.instance.event.GameEvent;
+import dzida.server.app.instance.position.PositionService;
+import dzida.server.app.instance.skill.SkillService;
+import dzida.server.app.instance.world.map.WorldMapService;
+import dzida.server.app.instance.world.object.WorldObjectService;
 import dzida.server.app.parcel.ParcelService;
-import dzida.server.core.basic.Publisher;
-import dzida.server.core.character.CharacterService;
-import dzida.server.core.event.GameEvent;
-import dzida.server.core.position.PositionService;
-import dzida.server.core.skill.SkillService;
-import dzida.server.core.world.map.WorldMapService;
-import dzida.server.core.world.object.WorldObjectService;
 
 import java.util.List;
 import java.util.Map;

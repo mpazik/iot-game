@@ -2,12 +2,12 @@ package dzida.server.app.store.database;
 
 import dzida.server.app.arbiter.ArbiterEvent;
 import dzida.server.app.arbiter.ArbiterStore;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.basic.entity.Key;
 import dzida.server.app.database.ConnectionProvider;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.serialization.MessageSerializer;
 import dzida.server.app.user.User;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.entity.Key;
 
 import static dzida.server.app.querydsl.QArbiterEvent.arbiterEvent;
 

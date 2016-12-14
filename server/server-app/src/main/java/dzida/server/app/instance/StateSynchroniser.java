@@ -1,9 +1,9 @@
 package dzida.server.app.instance;
 
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.instance.event.GameEvent;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.user.User;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.event.GameEvent;
 
 import java.util.HashMap;
 import java.util.Map;

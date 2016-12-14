@@ -1,11 +1,11 @@
 package dzida.server.app.rest;
 
 import co.cask.http.HttpResponder;
+import dzida.server.app.basic.Outcome;
+import dzida.server.app.basic.Result;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.EncryptedReissueToken;
 import dzida.server.app.user.UserService;
-import dzida.server.core.basic.Outcome;
-import dzida.server.core.basic.Result;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

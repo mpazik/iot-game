@@ -4,9 +4,9 @@ import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
 import dzida.server.app.Configuration;
-import dzida.server.core.basic.Outcome;
-import dzida.server.core.basic.Result;
-import dzida.server.core.basic.entity.Id;
+import dzida.server.app.basic.Outcome;
+import dzida.server.app.basic.Result;
+import dzida.server.app.basic.entity.Id;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

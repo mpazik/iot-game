@@ -1,10 +1,10 @@
 package dzida.server.app.store.http.loader;
 
+import dzida.server.app.basic.entity.Key;
+import dzida.server.app.instance.world.map.Tileset;
+import dzida.server.app.instance.world.map.WorldMap;
 import dzida.server.app.world.map.TilesetData;
 import dzida.server.app.world.map.WorldMapData;
-import dzida.server.core.basic.entity.Key;
-import dzida.server.core.world.map.Tileset;
-import dzida.server.core.world.map.WorldMap;
 
 public class WorldMapLoader {
     private final StaticDataLoader staticDataLoader;

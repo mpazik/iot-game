@@ -7,12 +7,12 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import dzida.server.app.basic.Result;
+import dzida.server.app.basic.connection.Connector;
+import dzida.server.app.basic.connection.Server;
+import dzida.server.app.basic.connection.ServerConnection;
+import dzida.server.app.basic.connection.VerifyingConnectionServer;
 import dzida.server.app.protocol.json.JsonProtocol;
-import dzida.server.core.basic.Result;
-import dzida.server.core.basic.connection.Connector;
-import dzida.server.core.basic.connection.Server;
-import dzida.server.core.basic.connection.ServerConnection;
-import dzida.server.core.basic.connection.VerifyingConnectionServer;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

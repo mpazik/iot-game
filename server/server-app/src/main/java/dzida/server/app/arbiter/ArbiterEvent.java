@@ -1,10 +1,10 @@
 package dzida.server.app.arbiter;
 
 import com.google.common.collect.ImmutableSet;
+import dzida.server.app.basic.entity.Id;
+import dzida.server.app.basic.entity.Key;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.user.User;
-import dzida.server.core.basic.entity.Id;
-import dzida.server.core.basic.entity.Key;
 
 public interface ArbiterEvent {
     ImmutableSet<Class<?>> classes = ImmutableSet.of(

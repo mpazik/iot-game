@@ -1,8 +1,8 @@
 package dzida.server.app.instance
 
+import dzida.server.app.basic.entity.Id
+import dzida.server.app.instance.event.CharacterEvent
 import dzida.server.app.user.User
-import dzida.server.core.basic.entity.Id
-import dzida.server.core.event.CharacterEvent
 
 interface UserMessage<out T> {
     val userId: Id<User>
