@@ -11,7 +11,7 @@
     <modules>
         <module>server-app</module>
         <module>server-benchmark</module>
-  </modules>
+    </modules>
 
     <prerequisites>
         <maven>3.0.5</maven>
@@ -30,6 +30,12 @@
                         <goals>
                             <goal>compile</goal>
                         </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <source>src/main/java</source>
+                                <source>target/generated-sources/java</source>
+                            </sourceDirs>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>test-compile</id>
@@ -122,6 +128,6 @@
 
     <properties>
         <javac.target>1.8</javac.target>
-        <kotlin.version>1.0.3</kotlin.version>
+        <kotlin.version>1.0.6</kotlin.version>
     </properties>
 </project>
