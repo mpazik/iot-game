@@ -7,6 +7,7 @@ import dzida.server.app.basic.unit.TreeNode;
 import dzida.server.app.instance.world.pathfinding.CollisionMap.CollisionBlock;
 import dzida.server.app.instance.world.pathfinding.CollisionMap.MovableArea;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ public class CollisionMapFactory {
         this.lineOfSightRange = lineOfSightRange;
     }
 
+    @Nonnull
     public CollisionMap createCollisionMap(BitMap collisionBitMap) {
         BitMapTracker bitMapTracker = new BitMapTracker();
         BitMap movableBitMap = BitMap.InverseBitMap.of(collisionBitMap);

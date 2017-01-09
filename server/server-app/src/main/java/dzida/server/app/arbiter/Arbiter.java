@@ -12,11 +12,17 @@ import dzida.server.app.basic.connection.VerifyingConnectionServer;
 import dzida.server.app.basic.entity.Id;
 import dzida.server.app.basic.entity.Key;
 import dzida.server.app.dispatcher.ServerDispatcher;
+import dzida.server.app.instance.GameDefinitions;
 import dzida.server.app.instance.Instance;
 import dzida.server.app.instance.InstanceServer;
 import dzida.server.app.instance.InstanceStore;
+import dzida.server.app.instance.skill.Skill;
+import dzida.server.app.instance.world.object.WorldObjectKind;
 import dzida.server.app.map.descriptor.Scenario;
 import dzida.server.app.protocol.json.JsonProtocol;
+import dzida.server.app.store.http.loader.SkillLoader;
+import dzida.server.app.store.http.loader.StaticDataLoader;
+import dzida.server.app.store.http.loader.WorldObjectKindLoader;
 import dzida.server.app.user.EncryptedLoginToken;
 import dzida.server.app.user.LoginToken;
 import dzida.server.app.user.User;
@@ -42,6 +48,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     private final UserTokenVerifier userTokenVerifier;
     private final ArbiterStore arbiterStore;
     private final InstanceStore instanceStore;
+    private final GameDefinitions gameDefinitions;
 
     private final Map<Id<User>, Key<Instance>> usersInstances;
     private final Map<Key<Instance>, InstanceServer> instances;
@@ -69,6 +76,17 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
         connectedUsers = new HashSet<>();
         instanceStartedPublisher = new Publisher<>();
         instanceClosedPublisher = new Publisher<>();
+        gameDefinitions = createGameDefinitions();
+    }
+
+    private GameDefinitions createGameDefinitions() {
+        StaticDataLoader staticDataLoader = new StaticDataLoader();
+        Map<Id<Skill>, Skill> skills = new SkillLoader(staticDataLoader).loadSkills();
+        WorldObjectKindLoader worldObjectKindLoader = new WorldObjectKindLoader(staticDataLoader);
+        Map<Id<WorldObjectKind>, WorldObjectKind> worldObjectKinds = worldObjectKindLoader.loadWorldObjectKinds()
+                .stream()
+                .collect(Collectors.toMap(WorldObjectKind::getId, Function.identity()));
+        return new GameDefinitions(skills, worldObjectKinds);
     }
 
     public void start() {
@@ -87,7 +105,7 @@ public class Arbiter implements VerifyingConnectionServer<String, String> {
     public void startInstance(Key<Instance> instanceKey, Scenario scenario) {
         arbiterStore.instanceStarted(instanceKey);
         String instanceKeyValue = instanceKey.getValue();
-        InstanceServer instanceServer = new InstanceServer(scheduler, instanceStore, this, instanceKey, scenario);
+        InstanceServer instanceServer = new InstanceServer(scheduler, instanceStore, this, instanceKey, scenario, gameDefinitions);
         instanceServer.start();
 
         serverDispatcher.addServer(instanceKeyValue, instanceServer);

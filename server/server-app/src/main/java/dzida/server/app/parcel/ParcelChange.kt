@@ -2,6 +2,8 @@ package dzida.server.app.parcel
 
 import com.google.common.collect.ImmutableSet
 import dzida.server.app.basic.entity.Id
+import dzida.server.app.instance.GameDefinitions
+import dzida.server.app.instance.GameState
 import dzida.server.app.instance.event.GameEvent
 import dzida.server.app.user.User
 
@@ -17,5 +19,10 @@ interface ParcelChange : GameEvent {
             val owner: Id<User>,
             val ownerName: String,
             val parcelName: String
-    ) : ParcelChange
+    ) : ParcelChange {
+
+        override fun updateState(state: GameState, definitions: GameDefinitions): GameState {
+            return state.updateParcels { addChange(this@ParcelClaimed) }
+        }
+    }
 }

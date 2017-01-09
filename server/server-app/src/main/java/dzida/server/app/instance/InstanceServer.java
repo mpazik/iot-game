@@ -51,13 +51,13 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     private final Map<Id<User>, ContainerConnection> connections = new HashMap<>();
     private final Map<Id<Character>, Id<User>> userIds = new HashMap<>();
 
-    public InstanceServer(Scheduler scheduler, InstanceStore instanceStore, Arbiter arbiter, Key<Instance> instanceKey, Scenario scenario) {
+    public InstanceServer(Scheduler scheduler, InstanceStore instanceStore, Arbiter arbiter, Key<Instance> instanceKey, Scenario scenario, GameDefinitions gameDefinitions) {
         this.instanceStore = instanceStore;
         this.arbiter = arbiter;
         userTokenVerifier = new UserTokenVerifier();
 
         serializer = JsonProtocol.create(CharacterCommand.classes, InstanceEvent.classes);
-        instance = new Instance(instanceKey.getValue(), scenario, scheduler);
+        instance = new Instance(instanceKey.getValue(), scenario, scheduler, gameDefinitions);
         stateSynchroniser = new StateSynchroniser(instance, scenario);
 
         this.instanceKey = instanceKey;
@@ -127,9 +127,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
     public void closeInstance() {
     }
 
-    public void disconnectPlayer(Id<User> userId) {
-        connections.get(userId).serverClose();
-    }
+//    public void disconnectPlayer(Id<User> userId) {
+//        connections.get(userId).serverClose();
+//    }
 
     public Key<Instance> getKey() {
         return instanceKey;
@@ -180,9 +180,9 @@ public class InstanceServer implements VerifyingConnectionServer<String, String>
             connector.onMessage(data);
         }
 
-        public void serverClose() {
-            close();
-            connector.onClose();
-        }
+//        public void serverClose() {
+//            close();
+//            connector.onClose();
+//        }
     }
 }

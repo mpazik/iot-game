@@ -12,7 +12,6 @@ import dzida.server.app.basic.unit.Point;
 import dzida.server.app.instance.world.map.Tileset;
 import dzida.server.app.instance.world.map.Tileset.TerrainType;
 import dzida.server.app.instance.world.map.WorldMap;
-import dzida.server.app.instance.world.map.WorldMapStore;
 import dzida.server.app.instance.world.object.WorldObject;
 import dzida.server.app.store.http.loader.WorldMapLoader;
 import dzida.server.app.time.TimeService;
@@ -29,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-public class WorldMapStoreHttp implements WorldMapStore {
+public class WorldMapStoreHttp {
     private final WorldMapLoader worldMapLoader;
     private final TimeService timeService;
 
@@ -76,7 +75,6 @@ public class WorldMapStoreHttp implements WorldMapStore {
         return filename.substring(0, extensionIndex);
     }
 
-    @Override
     public WorldMap getMap(Key<WorldMap> worldMapKey) {
         try {
             return transformMap(worldMaps.get(worldMapKey));
@@ -85,7 +83,6 @@ public class WorldMapStoreHttp implements WorldMapStore {
         }
     }
 
-    @Override
     public List<WorldObject> getInitialMapObjects(Key<WorldMap> worldMapKey) {
         try {
             return getObjects(worldMaps.get(worldMapKey));
@@ -119,7 +116,6 @@ public class WorldMapStoreHttp implements WorldMapStore {
         return builder.build();
     }
 
-    @Override
     public Tileset getTileset(Key<Tileset> tilesetKey) {
         try {
             return transformTileset(tilesets.get(tilesetKey));
