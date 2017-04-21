@@ -46,7 +46,7 @@ public class ConnectionProvider {
         try {
             return Outcome.ok(sqlQueryFactoryConsumer.apply(queryFactory));
         } catch (RuntimeException e) {
-            return Outcome.error(e.getMessage());
+            return Outcome.error(e.getCause().getMessage());
         }
     }
 }
