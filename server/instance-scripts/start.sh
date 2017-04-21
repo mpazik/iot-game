@@ -17,7 +17,7 @@ source ${DB_CREDENTIAL_PATH}
 [ -z ${DB_PASSWORD} ] && die "Data-base credential file should export DB_PASSWORD variable"
 
 nohup java -DassetsAddress=http://assets.islesoftales.com \
--DcontainerHost=ec2-52-59-242-56.eu-central-1.compute.amazonaws.com \
+-DcontainerHost=ec2-54-93-37-232.eu-central-1.compute.amazonaws.com \
 -Ddatabase.host=iot-inst1.c16tsjrk308r.eu-central-1.rds.amazonaws.com:5432 \
 -Ddatabase.name=${DB_NAME} \
 -Ddatabase.user=${DB_USER} \
