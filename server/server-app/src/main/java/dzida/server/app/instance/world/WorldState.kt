@@ -37,6 +37,6 @@ class WorldState private constructor(
     }
 
     private fun newId(): Long {
-        return (worldObjects.keys.map { it.value }.max() ?: 0) + 1
+        return Random().nextLong()
     }
 }
