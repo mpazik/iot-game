@@ -49,12 +49,9 @@ gulp.task('optimize-sources', function () {
 });
 
 gulp.task('publish', ['build-prod'], function () {
-    process.env['AWS_PROFILE'] = 's3_deploy';
-
     const publisher = AwsPublish.create({
-        region: 'eu-central-1',
         params: {
-            Bucket: 'game.islesoftales.com'
+            Bucket: 'game.islesoftales'
         }
     });
 
